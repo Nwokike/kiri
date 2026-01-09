@@ -19,6 +19,10 @@
     <meta property="og:type" content="website">
     <meta property="og:url" content="https://kiri.ng">
 
+    <!-- PWA -->
+    <link rel="manifest" href="{% static 'manifest.json' %}">
+    <meta name="theme-color" content="#3B82F6">
+
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -179,6 +183,13 @@
             const overlay = document.getElementById('sidebar-overlay');
             sidebar.classList.toggle('-translate-x-full');
             overlay.classList.toggle('hidden');
+        }
+
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('{% static "serviceworker.js" %}')
+                .then(reg => console.log('SW registered'))
+                .catch(err => console.log('SW registration failed'));
         }
     </script>
 

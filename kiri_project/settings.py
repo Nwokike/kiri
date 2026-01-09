@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "allauth.socialaccount",
     "allauth.socialaccount.providers.github",
     "django_htmx",
+    "pwa",
     # Local
     "core",
     "users",

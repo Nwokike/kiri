@@ -1,0 +1,129 @@
+{% extends "base.html" %}
+
+{% block title %}About{% endblock %}
+{% block page_title %}About{% endblock %}
+
+{% block content %}
+<!-- Mission Statement -->
+<section class="mb-8">
+    <div class="card bg-gradient-to-br from-blue-500 to-cyan-500 border-0 text-white">
+        <h1 class="text-2xl lg:text-3xl font-bold mb-4">Building the Future of African AI</h1>
+        <p class="text-blue-100 leading-relaxed">
+            Kiri Research Labs is a technology and research enterprise focused on developing software platforms,
+            AI-driven solutions, and digital research tools designed for African communities and beyond.
+        </p>
+    </div>
+</section>
+
+<!-- What We Do -->
+<section class="mb-8">
+    <h2 class="text-xl font-semibold text-slate-900 dark:text-white mb-4">What We Do</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div class="card">
+            <div
+                class="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 mb-4">
+                <i class="fas fa-microchip text-xl"></i>
+            </div>
+            <h3 class="font-semibold text-slate-900 dark:text-white mb-2">Edge AI Research</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400">
+                Optimizing AI models to run on low-resource devices and unstable networks across Africa.
+            </p>
+        </div>
+        <div class="card">
+            <div
+                class="w-12 h-12 rounded-xl bg-green-100 dark:bg-green-900/30 flex items-center justify-center text-green-600 dark:text-green-400 mb-4">
+                <i class="fas fa-language text-xl"></i>
+            </div>
+            <h3 class="font-semibold text-slate-900 dark:text-white mb-2">NLP for African Languages</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400">
+                Building language models for Igbo, Yoruba, Pidgin and other underrepresented languages.
+            </p>
+        </div>
+        <div class="card">
+            <div
+                class="w-12 h-12 rounded-xl bg-purple-100 dark:bg-purple-900/30 flex items-center justify-center text-purple-600 dark:text-purple-400 mb-4">
+                <i class="fas fa-shield-alt text-xl"></i>
+            </div>
+            <h3 class="font-semibold text-slate-900 dark:text-white mb-2">AI Safety</h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400">
+                Developing ethical AI systems with guardrails designed for African contexts.
+            </p>
+        </div>
+    </div>
+</section>
+
+<!-- Our Approach -->
+<section class="mb-8">
+    <h2 class="text-xl font-semibold text-slate-900 dark:text-white mb-4">Our Approach</h2>
+    <div class="card">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <h3 class="font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+                    <i class="fas fa-bullseye text-blue-500"></i> Mission
+                </h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400">
+                    To democratize AI by building systems that run everywhere—from enterprise servers to budget
+                    smartphones.
+                    The next billion users deserve AI that works for them, regardless of hardware constraints.
+                </p>
+            </div>
+            <div>
+                <h3 class="font-semibold text-slate-900 dark:text-white mb-2 flex items-center gap-2">
+                    <i class="fas fa-eye text-green-500"></i> Vision
+                </h3>
+                <p class="text-sm text-slate-500 dark:text-slate-400">
+                    A future where Africa leads in frugal AI innovation—where constraints breed creativity,
+                    and local solutions scale globally. We're not catching up; we're building a new path forward.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Tech Stack -->
+<section class="mb-8">
+    <h2 class="text-xl font-semibold text-slate-900 dark:text-white mb-4">Technology Stack</h2>
+    <div class="flex flex-wrap gap-2">
+        <span
+            class="px-3 py-1.5 bg-slate-100 dark:bg-slate-700 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300">Python</span>
+        <span
+            class="px-3 py-1.5 bg-slate-100 dark:bg-slate-700 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300">Django</span>
+        <span
+            class="px-3 py-1.5 bg-slate-100 dark:bg-slate-700 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300">HTMX</span>
+        <span
+            class="px-3 py-1.5 bg-slate-100 dark:bg-slate-700 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300">PostgreSQL</span>
+        <span
+            class="px-3 py-1.5 bg-slate-100 dark:bg-slate-700 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300">Tailwind
+            CSS</span>
+        <span
+            class="px-3 py-1.5 bg-slate-100 dark:bg-slate-700 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300">Hugging
+            Face</span>
+        <span
+            class="px-3 py-1.5 bg-slate-100 dark:bg-slate-700 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300">PyTorch</span>
+        <span
+            class="px-3 py-1.5 bg-slate-100 dark:bg-slate-700 rounded-lg text-sm font-medium text-slate-700 dark:text-slate-300">Scikit-learn</span>
+    </div>
+</section>
+
+<!-- Contact -->
+<section>
+    <h2 class="text-xl font-semibold text-slate-900 dark:text-white mb-4">Get in Touch</h2>
+    <div class="card">
+        <div class="flex flex-wrap gap-4">
+            <a href="mailto:nwokikeonyeka@gmail.com" class="btn-secondary text-sm py-2 px-4">
+                <i class="fas fa-envelope"></i> Email
+            </a>
+            <a href="https://github.com/Nwokike" target="_blank" class="btn-secondary text-sm py-2 px-4">
+                <i class="fab fa-github"></i> GitHub
+            </a>
+            <a href="https://www.linkedin.com/in/onyeka-nwokike" target="_blank"
+                class="btn-secondary text-sm py-2 px-4">
+                <i class="fab fa-linkedin"></i> LinkedIn
+            </a>
+            <a href="https://huggingface.co/nwokikeonyeka" target="_blank" class="btn-secondary text-sm py-2 px-4">
+                <i class="fas fa-robot"></i> HuggingFace
+            </a>
+        </div>
+    </div>
+</section>
+{% endblock %}

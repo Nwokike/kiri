@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+
+{% block title %}Research{% endblock %}
+{% block page_title %}Research{% endblock %}
+
+{% block content %}
+<!-- Header -->
+<section class="mb-8">
+    <h1 class="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white mb-2">Research Papers</h1>
+    <p class="text-slate-500 dark:text-slate-400">
+        Our research focuses on making AI accessible, efficient, and impactful for African communities.
+    </p>
+</section>
+
+<!-- Papers List -->
+<section class="mb-12">
+    <div class="space-y-4">
+        {% for paper in papers %}
+        <div class="card group cursor-pointer hover:border-blue-300 dark:hover:border-blue-600">
+            <div class="flex items-start justify-between gap-4">
+                <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-2">
+                        <span class="px-2.5 py-0.5 rounded-full text-xs font-medium 
+                            {% if paper.status == 'Published' %}
+                                bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400
+                            {% elif paper.status == 'In Progress' %}
+                                bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400
+                            {% else %}
+                                bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-400
+                            {% endif %}
+                        ">
+                            {{ paper.status }}
+                        </span>
+                    </div>
+                    <h3
+                        class="font-semibold text-slate-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                        {{ paper.title }}
+                    </h3>
+                    <p class="text-sm text-slate-500 dark:text-slate-400">
+                        {{ paper.abstract }}
+                    </p>
+                </div>
+                <div class="text-slate-400 group-hover:text-blue-500 transition-colors">
+                    <i class="fas fa-arrow-right"></i>
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="card text-center py-12">
+            <div
+                class="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-700 flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-flask text-2xl text-slate-400"></i>
+            </div>
+            <h3 class="font-semibold text-slate-900 dark:text-white mb-2">Coming Soon</h3>
+            <p class="text-slate-500 dark:text-slate-400">Our research papers are currently being prepared for
+                publication.</p>
+        </div>
+        {% endfor %}
+    </div>
+</section>
+
+<!-- NLP Contributions -->
+<section>
+    <h2 class="text-xl font-semibold text-slate-900 dark:text-white mb-4">NLP & Research Contributions</h2>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <a href="https://huggingface.co/nwokikeonyeka/Igbo-Phi3-Bilingual-Chat-v1-merged" target="_blank"
+            class="card group hover:border-blue-300 dark:hover:border-blue-600">
+            <h3
+                class="font-semibold text-slate-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                Igbo Bilingual Chat
+            </h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">
+                Fine-tuned Phi-3-mini to understand, translate, and converse in Igbo while retaining English
+                capabilities.
+            </p>
+            <span class="text-blue-600 dark:text-blue-400 text-sm font-medium">
+                <i class="fas fa-external-link-alt mr-1"></i> View on HuggingFace
+            </span>
+        </a>
+
+        <a href="https://huggingface.co/nwokikeonyeka/igbo-phi3-translator" target="_blank"
+            class="card group hover:border-blue-300 dark:hover:border-blue-600">
+            <h3
+                class="font-semibold text-slate-900 dark:text-white mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+                Igbo Translator
+            </h3>
+            <p class="text-sm text-slate-500 dark:text-slate-400 mb-3">
+                Specialized English-to-Igbo translator fine-tuned from Microsoft's Phi-3-mini.
+            </p>
+            <span class="text-blue-600 dark:text-blue-400 text-sm font-medium">
+                <i class="fas fa-external-link-alt mr-1"></i> View on HuggingFace
+            </span>
+        </a>
+    </div>
+</section>
+{% endblock %}

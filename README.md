@@ -2,16 +2,11 @@
 
 **The Post-Compute Research Lab** | [kiri.ng](https://kiri.ng)
 
-A technology and research-focused enterprise developing software platforms, AI-driven solutions, and digital research tools for Africa.
-
 ---
 
 ## 🔬 About
 
-Kiri Research Labs focuses on:
-- **Edge AI Research** - Optimizing AI models for low-resource devices
-- **NLP for African Languages** - Building models for Igbo, Yoruba, Pidgin
-- **AI Safety** - Developing ethical AI systems for African contexts
+Kiri Research Labs is a technology and research-focused enterprise developing software platforms, AI-driven solutions, and digital research tools. The business works on data analytics, artificial intelligence, and web-based platforms for research, education, and social-impact initiatives.
 
 ## 🚀 Tech Stack
 

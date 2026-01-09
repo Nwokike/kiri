@@ -37,3 +37,6 @@ logs/
 
 # Local development
 *.local
+
+# Node modules
+node_modules/

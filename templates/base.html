@@ -40,7 +40,8 @@
     {% block extra_head %}{% endblock %}
 </head>
 
-<body class="page-container">
+<body
+    class="page-container bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
     <!-- Desktop Sidebar (hidden on mobile) -->
     <aside id="sidebar"
         class="fixed inset-y-0 left-0 z-40 w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
@@ -108,7 +109,10 @@
                 <i class="fas fa-bars text-xl"></i>
             </button>
 
-            <img src="{% static 'images/logos/logo.png' %}" alt="Kiri" class="h-14 w-auto">
+            <!-- Logo (Mobile only) -->
+            <a href="{% url 'core:home' %}" class="lg:hidden flex items-center justify-center flex-1">
+                <img src="{% static 'images/logos/logo.png' %}" alt="Kiri" class="h-12 w-auto">
+            </a>
 
             <!-- Desktop: Page Title -->
             <h1 class="hidden lg:block text-lg font-semibold text-slate-900 dark:text-white">
@@ -126,7 +130,7 @@
     </header>
 
     <!-- Main Content -->
-    <main class="main-content pt-16">
+    <main class="main-content pt-16 min-h-screen bg-slate-50 dark:bg-slate-950">
         <div class="p-4 lg:p-8">
             {% block content %}{% endblock %}
         </div>

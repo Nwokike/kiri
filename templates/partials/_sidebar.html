@@ -1,0 +1,84 @@
+<aside class="hidden md:flex flex-col w-64 h-screen sticky top-0 bg-gray-950 border-r border-gray-800 shrink-0">
+    <!-- Logo Area -->
+    <div class="p-6 border-b border-gray-800">
+        <a href="/" class="flex items-center gap-3 group">
+            <div
+                class="w-10 h-10 rounded-lg bg-green-600 flex items-center justify-center text-white font-mono font-bold text-xl shadow-lg shadow-green-900/20 group-hover:scale-105 transition-transform">
+                K</div>
+            <div class="flex flex-col">
+                <span
+                    class="font-mono font-bold text-lg tracking-tight text-white group-hover:text-green-400 transition-colors">KIRI.NG</span>
+                <span class="text-[10px] text-gray-500 uppercase tracking-widest">Research Institute</span>
+            </div>
+        </a>
+    </div>
+
+    <!-- Main Navigation -->
+    <nav class="flex-1 overflow-y-auto py-6 px-4 space-y-1">
+        <div class="text-xs font-mono font-medium text-gray-500 uppercase tracking-wider mb-3 px-2">District 0: Core
+        </div>
+
+        <a href="/"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-300 hover:bg-gray-900 hover:text-green-400 transition-all group {% if request.path == '/' %}bg-gray-900 text-green-400 border-l-2 border-green-500{% endif %}">
+            <i class="fas fa-flask w-5 text-center group-hover:animate-pulse"></i>
+            <span>The Institute</span>
+        </a>
+
+        <div class="mt-8 text-xs font-mono font-medium text-gray-500 uppercase tracking-wider mb-3 px-2">District 1:
+            Library</div>
+
+        <a href="{% url 'publications:list' %}"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-300 hover:bg-gray-900 hover:text-cyan-400 transition-all group {% if 'publications' in request.path %}bg-gray-900 text-cyan-400 border-l-2 border-cyan-500{% endif %}">
+            <i class="fas fa-book-journal-whills w-5 text-center"></i>
+            <span>Publications</span>
+        </a>
+
+        <div class="mt-8 text-xs font-mono font-medium text-gray-500 uppercase tracking-wider mb-3 px-2">District 2:
+            Colosseum</div>
+
+        <a href="{% url 'projects:list' %}"
+            class="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-gray-300 hover:bg-gray-900 hover:text-yellow-400 transition-all group {% if 'projects' in request.path %}bg-gray-900 text-yellow-400 border-l-2 border-yellow-500{% endif %}">
+            <i class="fas fa-trophy w-5 text-center"></i>
+            <span>Projects</span>
+        </a>
+
+        <!-- Featured Section (Auto-populated eventually) -->
+        <div class="mt-8 p-4 bg-gray-900/50 rounded-xl border border-gray-800">
+            <div class="flex items-center justify-between mb-3">
+                <span class="text-xs font-mono text-green-500 font-bold">FEATURED</span>
+                <span class="relative flex h-2 w-2">
+                    <span
+                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                    <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                </span>
+            </div>
+            <a href="#" class="block group">
+                <h4 class="text-sm font-semibold text-gray-200 group-hover:text-white transition-colors">Project 0:
+                    Voice</h4>
+                <p class="text-xs text-gray-500 mt-1 line-clamp-2">Real-time local translation running in-browser.</p>
+            </a>
+        </div>
+    </nav>
+
+    <!-- User Profile / Footer -->
+    <div class="p-4 border-t border-gray-800 bg-gray-950">
+        {% if user.is_authenticated %}
+        <a href="{% url 'users:profile' user.username %}"
+            class="flex items-center gap-3 px-2 py-2 rounded-lg hover:bg-gray-900 transition-colors">
+            <div
+                class="w-8 h-8 rounded-full bg-gray-800 border border-gray-700 flex items-center justify-center text-xs font-mono">
+                {{ user.username|slice:":2"|upper }}
+            </div>
+            <div class="flex flex-col overflow-hidden">
+                <span class="text-xs font-medium text-white truncate">{{ user.username }}</span>
+                <span class="text-[10px] text-gray-500 truncate">Researcher Lvl. 1</span>
+            </div>
+        </a>
+        {% else %}
+        <a href="{% url 'account_login' %}"
+            class="block w-full text-center py-2 px-4 rounded bg-gray-800 hover:bg-gray-700 text-xs font-mono text-gray-300 transition-colors">
+            Initialize Session
+        </a>
+        {% endif %}
+    </div>
+</aside>

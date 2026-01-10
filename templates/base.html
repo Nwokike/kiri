@@ -1,200 +1,71 @@
-<!DOCTYPE html>
 {% load static %}
-<html lang="en">
+{% load pwa %}
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
-    <title>{% block title %}Kiri Research Labs{% endblock %} | kiri.ng</title>
-
-    <!-- SEO Meta Tags -->
-    <meta name="description"
-        content="{% block meta_description %}Kiri Research Labs - A technology and research-focused enterprise developing software platforms, AI-driven solutions, and digital research tools for Africa.{% endblock %}">
-    <meta name="keywords"
-        content="AI research, NLP, African languages, machine learning, Nigeria, Igbo, software development">
-    <meta name="author" content="Onyeka Nwokike">
-
-    <!-- Open Graph -->
-    <meta property="og:title" content="{% block og_title %}Kiri Research Labs{% endblock %}">
-    <meta property="og:description" content="Decentralizing Intelligence. The Post-Compute Research Lab.">
-    <meta property="og:type" content="website">
-    <meta property="og:url" content="https://kiri.ng">
-
-    <!-- PWA -->
-    <link rel="manifest" href="{% static 'manifest.json' %}">
-    <meta name="theme-color" content="#3B82F6">
+    <title>{% block title %}Kiri Research Labs - Post-Compute Era{% endblock %}</title>
 
     <!-- Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap"
+        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap"
         rel="stylesheet">
 
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Icons (Font Awesome 6) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
-    <!-- Tailwind CSS -->
+    <!-- CSS -->
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
 
-    {% block extra_head %}{% endblock %}
+    {% progressive_web_app_meta %}
+    {% block extra_css %}{% endblock %}
 </head>
 
 <body
-    class="page-container bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
-    <!-- Desktop Sidebar (hidden on mobile) -->
-    <aside id="sidebar"
-        class="fixed top-16 bottom-0 left-0 z-40 w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
-        <!-- Navigation Links -->
-        <nav class="flex-1 overflow-y-auto p-4 space-y-2 mt-4">
-            <div class="px-6 py-4">
-                <h2 class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
-                    {% block page_title %}Welcome{% endblock %}
-                </h2>
-            </div>
-            <a href="{% url 'core:home' %}"
-                class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
-                <i class="fas fa-home w-5 text-center"></i>
-                <span>Home</span>
-            </a>
-            <a href="{% url 'core:research' %}"
-                class="nav-link {% if request.resolver_match.url_name == 'research' %}active{% endif %}">
-                <i class="fas fa-flask w-5 text-center"></i>
-                <span>Research</span>
-            </a>
-            <a href="{% url 'core:about' %}"
-                class="nav-link {% if request.resolver_match.url_name == 'about' %}active{% endif %}">
-                <i class="fas fa-info-circle w-5 text-center"></i>
-                <span>About</span>
-            </a>
+    class="bg-gray-900 text-gray-100 font-sans antialiased min-h-screen flex flex-col md:flex-row selection:bg-green-500 selection:text-white">
 
-            <div class="pt-4 border-t border-slate-200 dark:border-slate-700 mt-4">
-                <p class="text-xs font-medium text-slate-400 dark:text-slate-500 uppercase tracking-wider mb-3 px-4">
-                    Projects</p>
-                <a href="https://spaninsight.com" target="_blank" class="nav-link">
-                    <i class="fas fa-chart-line w-5 text-center text-blue-500"></i>
-                    <span>SpanInsight</span>
-                </a>
-                <a href="https://igboarchives.com.ng" target="_blank" class="nav-link">
-                    <i class="fas fa-archive w-5 text-center text-amber-600"></i>
-                    <span>Igbo Archives</span>
-                </a>
-                <a href="https://imara.africa" target="_blank" class="nav-link">
-                    <i class="fas fa-shield-heart w-5 text-center text-purple-600"></i>
-                    <span>Imara</span>
-                </a>
-            </div>
-        </nav>
-
-        <!-- Sidebar Footer -->
-        <div class="absolute bottom-0 left-0 right-0 p-4 border-t border-slate-200 dark:border-slate-700">
-            <div class="text-xs text-slate-500 dark:text-slate-400 text-center">
-                <p>© {% now "Y" %} Kiri Research Labs</p>
-            </div>
-        </div>
-    </aside>
-
-    <!-- Mobile Overlay -->
-    <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden" onclick="toggleSidebar()"></div>
-
-    <!-- Top Header (Full Width) -->
+    <!-- Mobile Header (Visible only on mobile) -->
     <header
-        class="fixed top-0 left-0 right-0 z-50 h-16 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700">
-        <div class="flex items-center justify-between h-full px-4">
-            <div class="flex items-center gap-4">
-                <!-- Hamburger Menu (Mobile) -->
-                <button onclick="toggleSidebar()"
-                    class="lg:hidden p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700">
-                    <i class="fas fa-bars text-xl"></i>
-                </button>
-
-                <!-- Logo -->
-                <a href="{% url 'core:home' %}" class="flex items-center">
-                    <img src="{% static 'images/logos/logo.webp' %}" alt="Kiri"
-                        class="h-10 lg:h-12 w-auto object-contain">
-                </a>
+        class="md:hidden sticky top-0 z-50 bg-gray-900/90 backdrop-blur-md border-b border-gray-800 px-4 py-3 flex items-center justify-between">
+        <a href="/" class="flex items-center gap-2">
+            <div class="w-8 h-8 rounded bg-green-600 flex items-center justify-center text-white font-mono font-bold">K
             </div>
-
-            <!-- Desktop: Spacer -->
-            <div class="hidden lg:block flex-1"></div>
-
-            <!-- Right: Theme Toggle -->
-            <div class="flex items-center gap-2">
-                <button onclick="toggleTheme()"
-                    class="p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 focus:outline-none"
-                    aria-label="Toggle theme">
-                    <i id="theme-icon-sun" class="fas fa-sun text-xl block dark:hidden text-brand-gold"></i>
-                    <i id="theme-icon-moon" class="fas fa-moon text-xl hidden dark:block text-brand-gold"></i>
-                </button>
-            </div>
-        </div>
+            <span class="font-mono font-bold text-lg tracking-tight">KIRI.NG</span>
+        </a>
+        <button id="mobile-menu-btn" class="text-gray-400 hover:text-white">
+            <i class="fas fa-bars text-xl"></i>
+        </button>
     </header>
 
-    <!-- Main Content -->
-    <main class="main-content pt-16 min-h-screen bg-slate-50 dark:bg-slate-950">
-        <div class="p-4 lg:p-8">
+    {% include "partials/_sidebar.html" %}
+
+    <!-- Main Content Area -->
+    <main class="flex-1 flex flex-col min-w-0 bg-gray-900 relative">
+        <!-- Content Wrapper -->
+        <div class="flex-1 overflow-y-auto p-4 md:p-8 lg:p-12 pb-24 md:pb-12">
+            {% if messages %}
+            <div class="max-w-4xl mx-auto mb-6 space-y-2">
+                {% for message in messages %}
+                <div
+                    class="p-4 rounded-lg border text-sm font-mono {% if message.tags == 'error' %}bg-red-950/30 border-red-900 text-red-400{% else %}bg-green-950/30 border-green-900 text-green-400{% endif %}">
+                    {{ message }}
+                </div>
+                {% endfor %}
+            </div>
+            {% endif %}
+
             {% block content %}{% endblock %}
         </div>
     </main>
 
-    <!-- Bottom Navigation (Mobile only) -->
-    <nav
-        class="fixed bottom-0 left-0 right-0 z-20 bg-white dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700 lg:hidden">
-        <div class="flex items-center justify-around h-16 px-2">
-            <a href="{% url 'core:home' %}"
-                class="bottom-nav-item {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
-                <i class="fas fa-home text-xl"></i>
-                <span class="text-xs">Home</span>
-            </a>
-            <a href="{% url 'core:research' %}"
-                class="bottom-nav-item {% if request.resolver_match.url_name == 'research' %}active{% endif %}">
-                <i class="fas fa-flask text-xl"></i>
-                <span class="text-xs">Research</span>
-            </a>
-            <a href="{% url 'core:about' %}"
-                class="bottom-nav-item {% if request.resolver_match.url_name == 'about' %}active{% endif %}">
-                <i class="fas fa-info-circle text-xl"></i>
-                <span class="text-xs">About</span>
-            </a>
-            <a href="https://github.com/Nwokike" target="_blank" class="bottom-nav-item">
-                <i class="fab fa-github text-xl"></i>
-                <span class="text-xs">GitHub</span>
-            </a>
-        </div>
-    </nav>
+    {% include "partials/_mobile_nav.html" %}
 
     <!-- Scripts -->
-    <script>
-        // Theme Toggle
-        function toggleTheme() {
-            document.documentElement.classList.toggle('dark');
-            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
-        }
-
-        // Load saved theme
-        if (localStorage.getItem('theme') === 'dark' ||
-            (!localStorage.getItem('theme') && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
-            document.documentElement.classList.add('dark');
-        }
-
-        // Sidebar Toggle (Mobile)
-        function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebar-overlay');
-            sidebar.classList.toggle('-translate-x-full');
-            overlay.classList.toggle('hidden');
-        }
-
-        // Register Service Worker
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('{% static "serviceworker.js" %}')
-                .then(reg => console.log('SW registered'))
-                .catch(err => console.log('SW registration failed'));
-        }
-    </script>
-
-    {% block extra_scripts %}{% endblock %}
+    <script src="{% static 'js/htmx.min.js' %}" defer></script>
 </body>
 
 </html>

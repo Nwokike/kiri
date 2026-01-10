@@ -111,7 +111,8 @@
 
                 <!-- Logo -->
                 <a href="{% url 'core:home' %}" class="flex items-center">
-                    <img src="{% static 'images/logos/logo.webp' %}" alt="Kiri" class="h-10 lg:h-12 w-auto">
+                    <img src="{% static 'images/logos/logo.webp' %}" alt="Kiri"
+                        class="h-10 lg:h-12 w-auto object-contain">
                 </a>
             </div>
 
@@ -119,12 +120,14 @@
             <div class="hidden lg:block flex-1"></div>
 
             <!-- Right: Theme Toggle -->
-            <button onclick="toggleTheme()"
-                class="p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700"
-                aria-label="Toggle theme">
-                <i class="fas fa-sun dark:hidden text-xl"></i>
-                <i class="fas fa-moon hidden dark:block text-xl"></i>
-            </button>
+            <div class="flex items-center gap-2">
+                <button onclick="toggleTheme()"
+                    class="p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 focus:outline-none"
+                    aria-label="Toggle theme">
+                    <i id="theme-icon-sun" class="fas fa-sun text-xl block dark:hidden text-brand-gold"></i>
+                    <i id="theme-icon-moon" class="fas fa-moon text-xl hidden dark:block text-brand-gold"></i>
+                </button>
+            </div>
         </div>
     </header>
 

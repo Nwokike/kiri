@@ -4,8 +4,8 @@
     "description": "The Post-Compute Research Lab",
     "start_url": "/",
     "display": "standalone",
-    "background_color": "#0F172A",
-    "theme_color": "#3B82F6",
+    "background_color": "#0F2F1B",
+    "theme_color": "#2E9A4F",
     "icons": [
         {
             "src": "/static/images/icons/icon-192x192.png",

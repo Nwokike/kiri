@@ -15,20 +15,26 @@ module.exports = {
           dark: '#0F172A',
         },
         primary: {
-          50: '#EFF6FF',
-          100: '#DBEAFE',
-          200: '#BFDBFE',
-          300: '#93C5FD',
-          400: '#60A5FA',
-          500: '#3B82F6',
-          600: '#2563EB',
-          700: '#1D4ED8',
-          800: '#1E40AF',
-          900: '#1E3A8A',
+          50: '#F0F9F1',
+          100: '#DDF1E2',
+          200: '#BBE3C5',
+          300: '#89CE9C',
+          400: '#56B370',
+          500: '#2E9A4F', // Brand Green
+          600: '#237B3F',
+          700: '#1B5D31',
+          800: '#144224',
+          900: '#0F2F1B',
+        },
+        brand: {
+          green: '#2E9A4F',
+          gold: '#EAB308', // Adjusting to a nice gold matching the logo
+          "gold-light": '#FDE047',
         },
         accent: {
           cyan: '#06B6D4',
           green: '#10B981',
+          gold: '#EAB308',
         },
       },
       fontFamily: {

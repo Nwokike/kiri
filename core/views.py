@@ -86,3 +86,8 @@ def research(request):
         },
     ]
     return render(request, "research.html", {"papers": papers})
+
+
+def universal_translator(request):
+    """Project 0: Universal Translator - Client-side ML translation with Transformers.js."""
+    return render(request, "core/universal_translator.html")

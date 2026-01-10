@@ -3,8 +3,8 @@
   "version": "1.0.0",
   "description": "Kiri Research Labs - The Post-Compute Research Lab",
   "scripts": {
-    "build:css": "npx @tailwindcss/cli -i ./static/css/input.css -o ./static/css/styles.css --minify",
-    "watch:css": "npx @tailwindcss/cli -i ./static/css/input.css -o ./static/css/styles.css --watch"
+    "build:css": "npx @tailwindcss/cli -i ./assets/css/input.css -o ./static/css/styles.css --minify",
+    "watch:css": "npx @tailwindcss/cli -i ./assets/css/input.css -o ./static/css/styles.css --watch"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.1.18",

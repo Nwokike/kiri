@@ -1,0 +1,143 @@
+{% extends "base.html" %}
+
+{% block title %}{{ profile_user.username }} | Nexus{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto space-y-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+
+    <!-- Profile Header -->
+    <header class="glass-panel p-8 rounded-2xl border border-zinc-800 relative overflow-hidden">
+        <!-- Background Glow -->
+        <div class="absolute top-0 right-0 w-64 h-64 bg-primary-500/10 blur-[100px] rounded-full pointer-events-none">
+        </div>
+
+        <div class="flex flex-col md:flex-row gap-8 items-start relative z-10">
+            <!-- Avatar -->
+            <div class="relative group">
+                <div
+                    class="w-32 h-32 rounded-full bg-zinc-900 border-2 border-zinc-700 flex items-center justify-center overflow-hidden shadow-2xl shadow-black/50 group-hover:border-primary-500/50 transition-colors">
+                    {% if profile_user.avatar %}
+                    <img src="{{ profile_user.avatar.url }}" alt="{{ profile_user.username }}"
+                        class="w-full h-full object-cover">
+                    {% else %}
+                    <span class="text-4xl font-bold text-zinc-600 group-hover:text-primary-500 transition-colors">{{
+                        profile_user.username|slice:":1"|upper }}</span>
+                    {% endif %}
+                </div>
+                <!-- Status Dot -->
+                <div
+                    class="absolute bottom-2 right-2 w-5 h-5 bg-zinc-900 rounded-full flex items-center justify-center">
+                    <div class="w-3 h-3 bg-primary-500 rounded-full animate-pulse"></div>
+                </div>
+            </div>
+
+            <!-- Info -->
+            <div class="flex-1 space-y-4">
+                <div>
+                    <h1 class="text-3xl font-bold text-white tracking-tight flex items-center gap-3">
+                        {{ profile_user.username }}
+                        {% if profile_user.is_staff %}
+                        <span
+                            class="px-2 py-0.5 rounded text-[10px] bg-primary-900/50 text-primary-400 border border-primary-800 font-mono tracking-wider">CORE_TEAM</span>
+                        {% endif %}
+                    </h1>
+                    <p class="text-zinc-400 font-mono text-xs mt-1 uppercase tracking-widest">Researcher / contributor
+                    </p>
+                </div>
+
+                <div class="prose prose-invert prose-sm max-w-2xl text-zinc-400">
+                    {% if profile_user.bio %}
+                    {{ profile_user.bio }}
+                    {% else %}
+                    <span class="italic opacity-50">Transmission pending... (No bio set)</span>
+                    {% endif %}
+                </div>
+
+                <div class="flex items-center gap-4 pt-2">
+                    {% if profile_user.github_username %}
+                    <a href="https://github.com/{{ profile_user.github_username }}" target="_blank"
+                        rel="noopener noreferrer" class="text-zinc-500 hover:text-white transition-colors">
+                        <i class="fab fa-github text-xl"></i>
+                    </a>
+                    {% endif %}
+                    {% if profile_user.website %}
+                    <a href="{{ profile_user.website }}" target="_blank" rel="noopener noreferrer"
+                        class="text-zinc-500 hover:text-white transition-colors">
+                        <i class="fas fa-globe text-xl"></i>
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            <!-- Stats / Badges Scaffolding -->
+            <div class="w-full md:w-auto flex md:flex-col gap-4">
+                <div class="bg-zinc-900/50 rounded-lg p-3 border border-zinc-800 text-center min-w-[100px]">
+                    <span class="block text-2xl font-bold text-primary-400 font-mono">{{ projects.count }}</span>
+                    <span class="text-[10px] uppercase text-zinc-500 tracking-wider">Projects</span>
+                </div>
+                <div class="bg-zinc-900/50 rounded-lg p-3 border border-zinc-800 text-center min-w-[100px]">
+                    <span class="block text-2xl font-bold text-secondary-400 font-mono">{{ publications.count }}</span>
+                    <span class="text-[10px] uppercase text-zinc-500 tracking-wider">Papers</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Submissions Grid -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+
+        <!-- Projects Column -->
+        <section>
+            <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                <i class="fas fa-code-branch text-zinc-600"></i> Contributions
+            </h2>
+            <div class="space-y-4">
+                {% for project in projects %}
+                <a href="{{ project.github_repo_url }}" target="_blank"
+                    class="block glass-panel p-4 rounded-lg hover:border-primary-500/30 transition-all group">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-zinc-200 group-hover:text-primary-400 transition-colors">{{
+                            project.name }}</h3>
+                        <span class="text-xs text-zinc-500 font-mono">{{ project.stars_count }} <i
+                                class="fas fa-star text-yellow-500/50"></i></span>
+                    </div>
+                    <p class="text-xs text-zinc-500 line-clamp-2">{{ project.description }}</p>
+                </a>
+                {% empty %}
+                <div class="text-center py-8 border border-dashed border-zinc-800 rounded-lg">
+                    <span class="text-zinc-600 text-sm">No projects deployed yet.</span>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+
+        <!-- Publications Column -->
+        <section>
+            <h2 class="text-xl font-bold text-white mb-6 flex items-center gap-2">
+                <i class="fas fa-file-alt text-zinc-600"></i> Research
+            </h2>
+            <div class="space-y-4">
+                {% for pub in publications %}
+                <a href="{% url 'publications:detail' pub.slug %}"
+                    class="block glass-panel p-4 rounded-lg hover:border-secondary-500/30 transition-all group">
+                    <div class="flex justify-between items-start mb-2">
+                        <h3 class="font-bold text-zinc-200 group-hover:text-secondary-400 transition-colors">{{
+                            pub.title }}</h3>
+                    </div>
+                    <div class="flex items-center gap-2 mt-2">
+                        <span
+                            class="px-1.5 py-0.5 rounded text-[10px] bg-secondary-900/30 text-secondary-400 border border-secondary-800/50 font-mono">PAPER-{{
+                            pub.id|stringformat:"03d" }}</span>
+                        <span class="text-xs text-zinc-600">{{ pub.created_at|date:"M Y" }}</span>
+                    </div>
+                </a>
+                {% empty %}
+                <div class="text-center py-8 border border-dashed border-zinc-800 rounded-lg">
+                    <span class="text-zinc-600 text-sm">No papers published yet.</span>
+                </div>
+                {% endfor %}
+            </div>
+        </section>
+    </div>
+</div>
+{% endblock %}

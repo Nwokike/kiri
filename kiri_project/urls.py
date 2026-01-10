@@ -11,6 +11,7 @@ urlpatterns = [
     # Districts
     path("library/", include("publications.urls", namespace="publications")),
     path("colosseum/", include("projects.urls", namespace="projects")),
+    path("nexus/", include("users.urls", namespace="users")),
     
     # Core (Home, About, etc.) - Must be last to catch catch-all paths if any
     path("", include("core.urls", namespace="core")),

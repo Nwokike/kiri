@@ -190,3 +190,16 @@ LOGGING = {
     },
     "root": {"handlers": ["console"], "level": "INFO"},
 }
+
+# PWA Settings
+PWA_APP_NAME = 'Kiri Research Labs'
+PWA_APP_SHORT_NAME = 'Kiri'
+PWA_APP_DESCRIPTION = 'The Post-Compute Research Lab'
+PWA_APP_THEME_COLOR = '#2E9A4F'
+PWA_APP_BACKGROUND_COLOR = '#0F2F1B'
+PWA_APP_DISPLAY = 'standalone'
+PWA_APP_SCOPE = '/'
+PWA_APP_ORIENTATION = 'any'
+PWA_APP_START_URL = '/'
+PWA_APP_ICONS = [{ 'src': '/static/images/icons/icon-192x192.png', 'sizes': '192x192' }, { 'src': '/static/images/icons/icon-512x512.png', 'sizes': '512x512' }]
+PWA_SERVICE_WORKER_PATH = os.path.join(BASE_DIR, 'static', 'serviceworker.js')

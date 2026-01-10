@@ -5,6 +5,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
     <title>{% block title %}Kiri Research Labs{% endblock %} | kiri.ng</title>
 
     <!-- SEO Meta Tags -->
@@ -44,16 +45,14 @@
     class="page-container bg-slate-50 dark:bg-slate-950 text-slate-900 dark:text-slate-100 transition-colors duration-300">
     <!-- Desktop Sidebar (hidden on mobile) -->
     <aside id="sidebar"
-        class="fixed inset-y-0 left-0 z-40 w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
-        <!-- Sidebar Header with Page Title -->
-        <div class="flex items-center justify-center h-16 border-b border-slate-200 dark:border-slate-700 px-4">
-            <h2 class="text-lg font-bold text-slate-900 dark:text-white uppercase tracking-tight">
-                {% block sidebar_title %}{% block page_title %}Welcome{% endblock %}{% endblock %}
-            </h2>
-        </div>
-
+        class="fixed top-16 bottom-0 left-0 z-40 w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
         <!-- Navigation Links -->
-        <nav class="p-4 space-y-2">
+        <nav class="flex-1 overflow-y-auto p-4 space-y-2 mt-4">
+            <div class="px-6 py-4">
+                <h2 class="text-sm font-bold text-slate-500 dark:text-slate-400 uppercase tracking-widest">
+                    {% block page_title %}Welcome{% endblock %}
+                </h2>
+            </div>
             <a href="{% url 'core:home' %}"
                 class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}">
                 <i class="fas fa-home w-5 text-center"></i>
@@ -99,26 +98,25 @@
     <!-- Mobile Overlay -->
     <div id="sidebar-overlay" class="fixed inset-0 bg-black/50 z-30 hidden lg:hidden" onclick="toggleSidebar()"></div>
 
-    <!-- Top Header (Mobile + Desktop) -->
+    <!-- Top Header (Full Width) -->
     <header
-        class="fixed top-0 left-0 right-0 z-20 h-16 bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 lg:pl-64">
+        class="fixed top-0 left-0 right-0 z-50 h-16 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md border-b border-slate-200 dark:border-slate-700">
         <div class="flex items-center justify-between h-full px-4">
-            <!-- Hamburger Menu (Mobile) -->
-            <button onclick="toggleSidebar()"
-                class="lg:hidden p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700">
-                <i class="fas fa-bars text-xl"></i>
-            </button>
+            <div class="flex items-center gap-4">
+                <!-- Hamburger Menu (Mobile) -->
+                <button onclick="toggleSidebar()"
+                    class="lg:hidden p-2 rounded-lg text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700">
+                    <i class="fas fa-bars text-xl"></i>
+                </button>
 
-            <!-- Logo (Centered on mobile, left-aligned on desktop) -->
-            <a href="{% url 'core:home' %}"
-                class="flex items-center justify-center lg:justify-start flex-1 lg:flex-none">
-                <img src="{% static 'images/logos/logo.png' %}" alt="Kiri" class="h-10 lg:h-12 w-auto">
-            </a>
-
-            <!-- Desktop: Spacer or Breadcrumbs could go here if needed -->
-            <div class="hidden lg:block flex-1 px-4">
-                <!-- Empty spacer to maintain right-alignment of theme toggle -->
+                <!-- Logo -->
+                <a href="{% url 'core:home' %}" class="flex items-center">
+                    <img src="{% static 'images/logos/logo.webp' %}" alt="Kiri" class="h-10 lg:h-12 w-auto">
+                </a>
             </div>
+
+            <!-- Desktop: Spacer -->
+            <div class="hidden lg:block flex-1"></div>
 
             <!-- Right: Theme Toggle -->
             <button onclick="toggleTheme()"

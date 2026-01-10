@@ -1,0 +1,106 @@
+{% extends "base.html" %}
+
+{% block title %}{{ publication.title }} | Living Library{% endblock %}
+
+{% block content %}
+<article class="max-w-4xl mx-auto">
+    <!-- Header -->
+    <header class="mb-8 pb-8 border-b border-zinc-800">
+        <div class="flex items-center gap-3 mb-4">
+            <a href="{% url 'publications:list' %}"
+                class="text-xs text-primary-500 hover:text-primary-400 font-mono flex items-center gap-1">
+                <i class="fas fa-arrow-left"></i> LIBRARY
+            </a>
+            <span class="text-zinc-600 text-xs">/</span>
+            <span class="text-zinc-500 text-xs font-mono">PAPER-{{ publication.id|stringformat:"03d" }}</span>
+        </div>
+
+        <h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight mb-4 leading-tight">{{ publication.title }}
+        </h1>
+
+        <div class="flex flex-wrap items-center gap-6 text-sm text-zinc-400">
+            <div class="flex items-center gap-2">
+                <div
+                    class="w-6 h-6 rounded-full bg-zinc-800 flex items-center justify-center text-xs border border-zinc-700">
+                    {{ publication.author.username|slice:":1"|upper }}
+                </div>
+                <span>{{ publication.author.username }}</span>
+            </div>
+            <div class="flex items-center gap-2">
+                <i class="far fa-calendar text-zinc-600"></i>
+                <time datetime="{{ publication.created_at|date:'c' }}">{{ publication.created_at|date:"F j, Y" }}</time>
+            </div>
+            {% if publication.executable_script %}
+            <span
+                class="px-2 py-0.5 rounded-full bg-primary-900/30 text-primary-400 border border-primary-800/50 text-xs flex items-center gap-1">
+                <i class="fas fa-bolt"></i> Executable
+            </span>
+            {% endif %}
+        </div>
+    </header>
+
+    <!-- Executable Container (The "Live" part) -->
+    {% if publication.executable_script %}
+    <section class="mb-12 rounded-xl bg-zinc-950 border border-zinc-800 overflow-hidden shadow-2xl shadow-black/50">
+        <div class="bg-zinc-900/50 px-4 py-2 border-b border-zinc-800 flex items-center justify-between">
+            <span class="text-xs font-mono text-zinc-500">LIVE DEMO ENVIRONMENT</span>
+            <div class="flex gap-1.5">
+                <div class="w-2.5 h-2.5 rounded-full bg-zinc-700"></div>
+                <div class="w-2.5 h-2.5 rounded-full bg-zinc-700"></div>
+                <div class="w-2.5 h-2.5 rounded-full bg-zinc-700"></div>
+            </div>
+        </div>
+        <div id="demo-container" class="p-6 md:p-8 min-h-[300px] relative">
+            <!-- The script will render content here -->
+            <div id="demo-placeholder" class="absolute inset-0 flex items-center justify-center flex-col text-zinc-600">
+                <i class="fas fa-circle-notch fa-spin text-2xl mb-2"></i>
+                <span class="text-sm font-mono">Initializing Runtime...</span>
+            </div>
+        </div>
+    </section>
+    {% endif %}
+
+    <!-- Main Content -->
+    <div class="prose prose-invert prose-zinc max-w-none">
+        <div class="p-6 rounded-lg bg-zinc-900/30 border border-zinc-800/50 mb-8 italic text-zinc-300">
+            {{ publication.abstract }}
+        </div>
+
+        <!-- Render Markdown Content Here (Assuming it's safe or pre-rendered) -->
+        <div class="markdown-body">
+            {{ publication.content|linebreaks }}
+        </div>
+    </div>
+</article>
+
+{% if publication.executable_script %}
+<script>
+    // Executable Paper Integration
+    document.addEventListener('DOMContentLoaded', function () {
+        const container = document.getElementById('demo-container');
+        const placeholder = document.getElementById('demo-placeholder');
+
+        try {
+            // Safe execution sandbox (basic)
+            (function () {
+                { { publication.executable_script | safe } }
+            })();
+
+            // Remove placeholder if script ran successfully
+            if (placeholder) placeholder.remove();
+        } catch (e) {
+            console.error("Runtime Error:", e);
+            if (placeholder) {
+                placeholder.innerHTML = `
+                    <div class="text-red-500 flex flex-col items-center">
+                        <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
+                        <span class="text-sm font-mono">Runtime Error</span>
+                        <span class="text-xs mt-1 bg-red-950/30 px-2 py-1 rounded">${e.message}</span>
+                    </div>
+                `;
+            }
+        }
+    });
+</script>
+{% endif %}
+{% endblock %}

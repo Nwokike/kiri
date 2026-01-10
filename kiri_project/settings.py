@@ -49,6 +49,8 @@ INSTALLED_APPS = [
     # Local
     "core",
     "users",
+    "publications",
+    "projects",
 ]
 
 SITE_ID = 1

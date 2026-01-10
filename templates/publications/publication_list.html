@@ -1,0 +1,90 @@
+{% extends "base.html" %}
+
+{% block title %}Living Library | Kiri Research Labs{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <header class="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-zinc-800">
+        <div>
+            <h1 class="text-3xl font-bold text-white tracking-tight mb-2">The Living Library</h1>
+            <p class="text-zinc-400 max-w-2xl">
+                A collection of <span class="text-primary-400 font-medium">executable research papers</span>.
+                Code is not an artifact; it is the argument itself.
+            </p>
+        </div>
+        <div class="flex items-center gap-3">
+            <input type="text" placeholder="Search archives..."
+                class="bg-zinc-900 border border-zinc-700 text-sm rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none w-full md:w-64">
+        </div>
+    </header>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for publication in publications %}
+        <article
+            class="glass-panel rounded-xl overflow-hidden hover:border-primary-500/50 transition-colors group flex flex-col h-full">
+            <div class="p-6 flex-1 flex flex-col">
+                <div class="flex items-center gap-2 mb-3">
+                    <span
+                        class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-primary-900/50 text-primary-400 border border-primary-800">
+                        PAPER-{{ publication.id|stringformat:"03d" }}
+                    </span>
+                    <span class="text-zinc-500 text-xs">{{ publication.created_at|date:"M Y" }}</span>
+                </div>
+
+                <h3 class="text-lg font-bold text-zinc-100 group-hover:text-primary-400 transition-colors mb-2">
+                    <a href="{% url 'publications:detail' publication.slug %}" class="focus:outline-none">
+                        <span class="absolute inset-0" aria-hidden="true"></span>
+                        {{ publication.title }}
+                    </a>
+                </h3>
+
+                <p class="text-sm text-zinc-400 line-clamp-3 mb-4 flex-1">
+                    {{ publication.abstract }}
+                </p>
+
+                <div class="flex items-center justify-between pt-4 border-t border-zinc-800/50 mt-auto">
+                    <div class="flex items-center gap-2">
+                        <div
+                            class="w-5 h-5 rounded-full bg-zinc-800 flex items-center justify-center text-[10px] text-zinc-400">
+                            {{ publication.author.username|slice:":1"|upper }}
+                        </div>
+                        <span class="text-xs text-zinc-500">{{ publication.author.username }}</span>
+                    </div>
+                    {% if publication.executable_script %}
+                    <i class="fas fa-microchip text-primary-500 text-xs" title="Executable"></i>
+                    {% endif %}
+                </div>
+            </div>
+        </article>
+        {% empty %}
+        <div class="col-span-full py-12 text-center">
+            <div
+                class="w-16 h-16 rounded-full bg-zinc-900 flex items-center justify-center mx-auto mb-4 border border-zinc-800">
+                <i class="fas fa-book-open text-zinc-600 text-xl"></i>
+            </div>
+            <h3 class="text-zinc-300 font-medium mb-1">Library Empty</h3>
+            <p class="text-zinc-500 text-sm">No capabilities have been published yet.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if is_paginated %}
+    <div class="flex justify-center mt-8">
+        <div class="flex gap-2">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}"
+                class="px-3 py-1.5 rounded-lg border border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-500 text-sm transition-colors">Previous</a>
+            {% endif %}
+
+            <span class="px-3 py-1.5 text-sm text-zinc-500">Page {{ page_obj.number }} of {{
+                page_obj.paginator.num_pages }}</span>
+
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}"
+                class="px-3 py-1.5 rounded-lg border border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-500 text-sm transition-colors">Next</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

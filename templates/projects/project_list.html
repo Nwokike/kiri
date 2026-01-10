@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}The Colosseum | Kiri Research Labs{% endblock %}
+
+{% block content %}
+<div class="space-y-8">
+    <header class="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-zinc-800">
+        <div>
+            <h1 class="text-3xl font-bold text-white tracking-tight mb-2">The Colosseum</h1>
+            <p class="text-zinc-400 max-w-2xl">
+                A showcase of <span class="text-secondary-400 font-medium">experimental chaos</span>.
+                Submit your projects for the world to see.
+            </p>
+        </div>
+        <div class="flex items-center gap-3">
+            {% if user.is_authenticated %}
+            <button hx-get="{% url 'projects:submit' %}" hx-target="#submission-area" hx-swap="innerHTML"
+                class="px-4 py-2 bg-zinc-100 text-zinc-900 rounded-lg text-sm font-bold hover:bg-white transition-colors flex items-center gap-2">
+                <i class="fas fa-plus"></i> Submit Project
+            </button>
+            {% else %}
+            <a href="{% url 'account_login' %}?next={{ request.path }}"
+                class="px-4 py-2 bg-zinc-800 text-zinc-300 rounded-lg text-sm font-medium hover:bg-zinc-700 transition-colors">
+                Login to Submit
+            </a>
+            {% endif %}
+        </div>
+    </header>
+
+    <!-- Submission Area (Hidden by default, populated by HTMX) -->
+    <div id="submission-area" class="empty:hidden mb-8"></div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {% for project in projects %}
+        <article
+            class="glass-panel rounded-xl overflow-hidden hover:border-secondary-500/50 transition-colors group flex flex-col h-full bg-zinc-900/40">
+            <!-- Image placeholder / Screenshot -->
+            <div
+                class="h-40 bg-zinc-950 border-b border-zinc-800/50 flex items-center justify-center relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-t from-zinc-900 to-transparent opacity-60"></div>
+                <i
+                    class="fas fa-terminal text-4xl text-zinc-800 group-hover:text-secondary-900/50 transition-colors"></i>
+            </div>
+
+            <div class="p-6 flex-1 flex flex-col">
+                <div class="flex items-center justify-between mb-3">
+                    <span
+                        class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-secondary-900/30 text-secondary-400 border border-secondary-800/50">
+                        {{ project.language|default:"Unknown" }}
+                    </span>
+                    <div class="flex items-center gap-1 text-xs text-zinc-500">
+                        <i class="fas fa-star text-yellow-500/80"></i>
+                        <span>{{ project.stars_count }}</span>
+                    </div>
+                </div>
+
+                <h3 class="text-lg font-bold text-zinc-100 group-hover:text-secondary-400 transition-colors mb-2">
+                    {% if project.demo_url %}
+                    <a href="{{ project.demo_url }}" target="_blank" rel="noopener noreferrer"
+                        class="focus:outline-none flex items-center gap-2">
+                        {{ project.name }}
+                        <i class="fas fa-external-link-alt text-xs opacity-50"></i>
+                    </a>
+                    {% else %}
+                    <a href="{{ project.github_repo_url }}" target="_blank" rel="noopener noreferrer"
+                        class="focus:outline-none flex items-center gap-2">
+                        {{ project.name }}
+                    </a>
+                    {% endif %}
+                </h3>
+
+                <p class="text-sm text-zinc-400 line-clamp-3 mb-4 flex-1">
+                    {{ project.description }}
+                </p>
+
+                <div class="flex items-center justify-between pt-4 border-t border-zinc-800/50 mt-auto">
+                    <div class="flex items-center gap-2">
+                        <div
+                            class="w-5 h-5 rounded-full bg-zinc-800 flex items-center justify-center text-[10px] text-zinc-400">
+                            {{ project.submitted_by.username|slice:":1"|upper }}
+                        </div>
+                        <span class="text-xs text-zinc-500">{{ project.submitted_by.username }}</span>
+                    </div>
+
+                    <div class="flex gap-3">
+                        <a href="{{ project.github_repo_url }}" target="_blank" rel="noopener noreferrer"
+                            class="text-zinc-500 hover:text-white transition-colors" title="GitHub Repo">
+                            <i class="fab fa-github"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </article>
+        {% empty %}
+        <div class="col-span-full py-12 text-center border border-dashed border-zinc-800 rounded-xl">
+            <div
+                class="w-16 h-16 rounded-full bg-zinc-900 flex items-center justify-center mx-auto mb-4 border border-zinc-800">
+                <i class="fas fa-trophy text-zinc-600 text-xl"></i>
+            </div>
+            <h3 class="text-zinc-300 font-medium mb-1">The Arena is Empty</h3>
+            <p class="text-zinc-500 text-sm">Be the first gladiator to enter.</p>
+        </div>
+        {% endfor %}
+    </div>
+
+    {% if is_paginated %}
+    <div class="flex justify-center mt-8">
+        <div class="flex gap-2">
+            {% if page_obj.has_previous %}
+            <a href="?page={{ page_obj.previous_page_number }}"
+                class="px-3 py-1.5 rounded-lg border border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-500 text-sm transition-colors">Previous</a>
+            {% endif %}
+
+            <span class="px-3 py-1.5 text-sm text-zinc-500">Page {{ page_obj.number }} of {{
+                page_obj.paginator.num_pages }}</span>
+
+            {% if page_obj.has_next %}
+            <a href="?page={{ page_obj.next_page_number }}"
+                class="px-3 py-1.5 rounded-lg border border-zinc-700 text-zinc-400 hover:text-white hover:border-zinc-500 text-sm transition-colors">Next</a>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

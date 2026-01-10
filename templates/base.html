@@ -45,10 +45,10 @@
     <!-- Desktop Sidebar (hidden on mobile) -->
     <aside id="sidebar"
         class="fixed inset-y-0 left-0 z-40 w-64 bg-white dark:bg-slate-800 border-r border-slate-200 dark:border-slate-700 transform -translate-x-full lg:translate-x-0 transition-transform duration-300">
-        <!-- Sidebar Header with Page Context -->
-        <div class="flex items-center justify-center py-6 border-b border-slate-200 dark:border-slate-700 px-4">
-            <h2 class="text-xl font-bold text-slate-900 dark:text-white uppercase tracking-widest">
-                {% block page_title %}{% endblock %}
+        <!-- Sidebar Header with Page Title -->
+        <div class="flex items-center justify-center h-16 border-b border-slate-200 dark:border-slate-700 px-4">
+            <h2 class="text-lg font-bold text-slate-900 dark:text-white uppercase tracking-tight">
+                {% block sidebar_title %}{% block page_title %}Welcome{% endblock %}{% endblock %}
             </h2>
         </div>
 
@@ -109,15 +109,16 @@
                 <i class="fas fa-bars text-xl"></i>
             </button>
 
-            <!-- Desktop: Logo -->
-            <a href="{% url 'core:home' %}" class="hidden lg:flex items-center">
-                <img src="{% static 'images/logos/logo.png' %}" alt="Kiri Research Labs" class="h-12 w-auto">
+            <!-- Logo (Centered on mobile, left-aligned on desktop) -->
+            <a href="{% url 'core:home' %}"
+                class="flex items-center justify-center lg:justify-start flex-1 lg:flex-none">
+                <img src="{% static 'images/logos/logo.png' %}" alt="Kiri" class="h-10 lg:h-12 w-auto">
             </a>
 
-            <!-- Mobile: Logo (Centered) -->
-            <a href="{% url 'core:home' %}" class="lg:hidden flex items-center justify-center flex-1">
-                <img src="{% static 'images/logos/logo.png' %}" alt="Kiri" class="h-10 w-auto">
-            </a>
+            <!-- Desktop: Spacer or Breadcrumbs could go here if needed -->
+            <div class="hidden lg:block flex-1 px-4">
+                <!-- Empty spacer to maintain right-alignment of theme toggle -->
+            </div>
 
             <!-- Right: Theme Toggle -->
             <button onclick="toggleTheme()"

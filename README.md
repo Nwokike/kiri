@@ -52,6 +52,6 @@ sudo systemctl restart kiri
 
 ## 📄 License
 
-Copyright © 2025–2026 Kiri Research Labs. All rights reserved.
+Copyright © 2024–2026 Kiri Research Labs. All rights reserved.
 
 This software is proprietary. See [LICENSE](LICENSE) for details.

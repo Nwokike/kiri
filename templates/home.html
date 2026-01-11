@@ -1,99 +1,137 @@
 {% extends "base.html" %}
 
-{% block title %}Home{% endblock %}
-{% block page_title %}Welcome{% endblock %}
+{% block title %}Kiri Research Labs{% endblock %}
 
 {% block content %}
-<!-- Hero Section -->
-<section class="mb-12">
-    <div class="card bg-gradient-to-br from-blue-500 to-cyan-500 border-0 text-white">
-        <div class="max-w-2xl">
-            <span class="inline-block px-3 py-1 bg-white/20 rounded-full text-sm font-medium mb-4">
-                <i class="fas fa-flask mr-2"></i>Research Lab
-            </span>
-            <h1 class="text-3xl lg:text-4xl font-bold mb-4">
-                Decentralizing Intelligence
-            </h1>
-            <p class="text-lg text-blue-100 mb-6">
-                Building AI systems that run everywhere—from cloud servers to $50 smartphones.
-                Research for the next billion users.
-            </p>
-            <div class="flex flex-wrap gap-3">
-                <a href="{% url 'core:research' %}"
-                    class="inline-flex items-center gap-2 px-5 py-2.5 bg-white text-blue-600 font-medium rounded-xl hover:bg-blue-50 transition-colors">
-                    <i class="fas fa-arrow-right"></i>
-                    Explore Research
-                </a>
-                <a href="https://github.com/Nwokike" target="_blank"
-                    class="inline-flex items-center gap-2 px-5 py-2.5 bg-white/20 text-white font-medium rounded-xl hover:bg-white/30 transition-colors">
-                    <i class="fab fa-github"></i>
-                    GitHub
-                </a>
-            </div>
+<div class="space-y-12">
+
+    <!-- Welcome Section (Clean, no hero) -->
+    <section class="text-center py-8">
+        <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+            Kiri Research Labs
+        </h1>
+        <p class="text-lg text-gray-600 max-w-2xl mx-auto">
+            A technology and research-focused enterprise developing software platforms, AI-driven solutions, and digital
+            research tools.
+        </p>
+    </section>
+
+    <!-- Featured Projects Section -->
+    <section>
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-semibold text-gray-900">Featured Projects</h2>
+            <a href="{% url 'projects:list' %}"
+                class="text-sm text-brand-green hover:text-brand-green-dark font-medium transition-colors">
+                View all <i class="fas fa-arrow-right ml-1 text-xs"></i>
+            </a>
         </div>
-    </div>
-</section>
 
-<!-- Stats -->
-<section class="grid grid-cols-3 gap-4 mb-12">
-    <div class="card text-center">
-        <div class="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-1">10+</div>
-        <div class="text-sm text-slate-500 dark:text-slate-400">Projects</div>
-    </div>
-    <div class="card text-center">
-        <div class="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-1">5+</div>
-        <div class="text-sm text-slate-500 dark:text-slate-400">AI Models</div>
-    </div>
-    <div class="card text-center">
-        <div class="text-3xl font-bold text-blue-600 dark:text-blue-400 mb-1">3</div>
-        <div class="text-sm text-slate-500 dark:text-slate-400">Languages</div>
-    </div>
-</section>
+        {% if featured_projects %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for project in featured_projects %}
+            <article class="card p-6 hover:border-brand-green/30 transition-all group">
+                <div class="flex items-center justify-between mb-3">
+                    <span class="px-2.5 py-1 rounded-md text-xs font-medium bg-brand-green/10 text-brand-green">
+                        {{ project.language|default:"Project" }}
+                    </span>
+                    {% if project.stars_count %}
+                    <div class="flex items-center gap-1 text-xs text-gray-400">
+                        <i class="fas fa-star text-brand-gold"></i>
+                        <span>{{ project.stars_count }}</span>
+                    </div>
+                    {% endif %}
+                </div>
 
-<!-- Research Areas -->
-<section class="mb-12">
-    <h2 class="text-xl font-semibold text-slate-900 dark:text-white mb-4">Research Focus</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {% for area in research_areas %}
-        <div class="card group hover:border-blue-300 dark:hover:border-blue-600">
-            <div class="flex items-start gap-4">
-                <div
-                    class="w-12 h-12 rounded-xl bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
-                    <i class="{{ area.icon }} text-xl"></i>
-                </div>
-                <div>
-                    <h3 class="font-semibold text-slate-900 dark:text-white mb-1">{{ area.name }}</h3>
-                    <p class="text-sm text-slate-500 dark:text-slate-400">{{ area.description }}</p>
-                </div>
-            </div>
-        </div>
-        {% endfor %}
-    </div>
-</section>
-
-<!-- Featured Projects -->
-<section>
-    <h2 class="text-xl font-semibold text-slate-900 dark:text-white mb-4">Live Projects</h2>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {% for project in projects %}
-        <a href="{{ project.url }}" target="_blank" class="card group hover:border-blue-300 dark:hover:border-blue-600">
-            <div class="flex items-center gap-3 mb-3">
-                <div class="w-10 h-10 rounded-lg flex items-center justify-center font-bold text-white text-sm"
-                    style="background: {{ project.color }}">
-                    {{ project.name.0 }}
-                </div>
-                <h3
-                    class="font-semibold text-slate-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                    {{ project.name }}
+                <h3 class="font-semibold text-gray-900 group-hover:text-brand-green transition-colors mb-2">
+                    <a href="{{ project.demo_url|default:project.github_repo_url }}" target="_blank"
+                        rel="noopener noreferrer" class="focus:outline-none">
+                        {{ project.name }}
+                    </a>
                 </h3>
+
+                <p class="text-sm text-gray-600 line-clamp-2 mb-4">
+                    {{ project.description }}
+                </p>
+
+                <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+                    <div class="flex items-center gap-2">
+                        <span
+                            class="w-6 h-6 rounded-full bg-brand-green/10 text-brand-green flex items-center justify-center text-xs font-medium">
+                            {{ project.submitted_by.username|slice:":1"|upper }}
+                        </span>
+                        <span class="text-xs text-gray-400">{{ project.submitted_by.username }}</span>
+                    </div>
+                    <a href="{{ project.github_repo_url }}" target="_blank" rel="noopener noreferrer"
+                        class="text-gray-400 hover:text-gray-900 transition-colors" title="View on GitHub">
+                        <i class="fab fa-github"></i>
+                    </a>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="card p-12 text-center">
+            <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-folder-open text-gray-400 text-2xl"></i>
             </div>
-            <p class="text-sm text-slate-500 dark:text-slate-400 line-clamp-2">{{ project.description }}</p>
-            <div class="flex items-center gap-2 mt-3 text-sm text-blue-600 dark:text-blue-400">
-                <i class="fas fa-external-link-alt"></i>
-                <span>View Demo</span>
+            <h3 class="text-gray-900 font-medium mb-2">No projects yet</h3>
+            <p class="text-gray-600 text-sm mb-6">Be the first to submit a project to the platform.</p>
+            {% if user.is_authenticated %}
+            <a href="{% url 'projects:list' %}" class="btn-primary">
+                Submit a Project
+            </a>
+            {% else %}
+            <a href="{% url 'account_login' %}" class="btn-primary">
+                Sign in to Submit
+            </a>
+            {% endif %}
+        </div>
+        {% endif %}
+    </section>
+
+    <!-- Latest Publications Section -->
+    <section>
+        <div class="flex items-center justify-between mb-6">
+            <h2 class="text-xl font-semibold text-gray-900">Latest Publications</h2>
+            <a href="{% url 'publications:list' %}"
+                class="text-sm text-brand-green hover:text-brand-green-dark font-medium transition-colors">
+                View all <i class="fas fa-arrow-right ml-1 text-xs"></i>
+            </a>
+        </div>
+
+        {% if latest_publications %}
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {% for pub in latest_publications %}
+            <article class="card p-6 hover:border-brand-gold/30 transition-all group">
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="px-2.5 py-1 rounded-md text-xs font-mono font-medium bg-brand-gold/10 text-brand-gold">
+                        PAPER
+                    </span>
+                    <span class="text-xs text-gray-400">{{ pub.created_at|date:"M Y" }}</span>
+                </div>
+
+                <h3 class="font-semibold text-gray-900 group-hover:text-brand-gold transition-colors mb-2">
+                    <a href="{% url 'publications:detail' pub.slug %}" class="focus:outline-none">
+                        {{ pub.title }}
+                    </a>
+                </h3>
+
+                <p class="text-sm text-gray-600 line-clamp-3">
+                    {{ pub.abstract }}
+                </p>
+            </article>
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="card p-12 text-center">
+            <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-book-open text-gray-400 text-2xl"></i>
             </div>
-        </a>
-        {% endfor %}
-    </div>
-</section>
+            <h3 class="text-gray-900 font-medium mb-2">No publications yet</h3>
+            <p class="text-gray-600 text-sm">Research papers and publications will appear here.</p>
+        </div>
+        {% endif %}
+    </section>
+
+</div>
 {% endblock %}

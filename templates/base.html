@@ -6,52 +6,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Kiri Research Labs - Post-Compute Era{% endblock %}</title>
+    <title>{% block title %}Kiri Research Labs{% endblock %}</title>
+    <meta name="description"
+        content="{% block meta_description %}Kiri Research Labs develops software platforms, AI-driven solutions, and digital research tools for data analytics, education, and social-impact initiatives.{% endblock %}">
 
-    <!-- Fonts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Inter:wght@400;500;600;700&display=swap"
-        rel="stylesheet">
+    <!-- Local Fonts -->
+    <link rel="preload" href="{% static 'fonts/inter-regular.woff2' %}" as="font" type="font/woff2" crossorigin>
+    <link rel="preload" href="{% static 'fonts/inter-medium.woff2' %}" as="font" type="font/woff2" crossorigin>
 
-    <!-- Icons (Font Awesome 6) -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- Font Awesome (Local) -->
+    <link rel="stylesheet" href="{% static 'fontawesome/all.min.css' %}">
 
-    <!-- CSS -->
+    <!-- Main Styles -->
     <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+
+    <!-- Theme initialization (prevent flash) -->
+    <script>
+        (function () {
+            const theme = localStorage.getItem('theme') || 'light';
+            if (theme === 'dark') {
+                document.documentElement.setAttribute('data-theme', 'dark');
+                document.documentElement.classList.add('dark');
+            }
+        })();
+    </script>
 
     {% progressive_web_app_meta %}
     {% block extra_css %}{% endblock %}
 </head>
 
-<body
-    class="bg-gray-900 text-gray-100 font-sans antialiased min-h-screen flex flex-col md:flex-row selection:bg-green-500 selection:text-white">
+<body class="min-h-screen flex flex-col bg-white text-gray-900 antialiased theme-transition">
 
-    <!-- Mobile Header (Visible only on mobile) -->
-    <header
-        class="md:hidden sticky top-0 z-50 bg-gray-900/90 backdrop-blur-md border-b border-gray-800 px-4 py-3 flex items-center justify-between">
-        <a href="/" class="flex items-center gap-2">
-            <div class="w-8 h-8 rounded bg-green-600 flex items-center justify-center text-white font-mono font-bold">K
-            </div>
-            <span class="font-mono font-bold text-lg tracking-tight">KIRI.NG</span>
-        </a>
-        <button id="mobile-menu-btn" class="text-gray-400 hover:text-white">
-            <i class="fas fa-bars text-xl"></i>
-        </button>
-    </header>
+    {% include "partials/_header.html" %}
 
-    {% include "partials/_sidebar.html" %}
-
-    <!-- Main Content Area -->
-    <main class="flex-1 flex flex-col min-w-0 bg-gray-900 relative">
-        <!-- Content Wrapper -->
-        <div class="flex-1 overflow-y-auto p-4 md:p-8 lg:p-12 pb-24 md:pb-12">
+    <!-- Main Content -->
+    <main class="flex-1">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
             {% if messages %}
-            <div class="max-w-4xl mx-auto mb-6 space-y-2">
+            <div class="mb-6 space-y-2">
                 {% for message in messages %}
                 <div
-                    class="p-4 rounded-lg border text-sm font-mono {% if message.tags == 'error' %}bg-red-950/30 border-red-900 text-red-400{% else %}bg-green-950/30 border-green-900 text-green-400{% endif %}">
+                    class="p-4 rounded-lg border text-sm
+                    {% if message.tags == 'error' %}bg-red-50 border-red-200 text-red-700{% elif message.tags == 'success' %}bg-green-50 border-green-200 text-green-700{% else %}bg-blue-50 border-blue-200 text-blue-700{% endif %}">
                     {{ message }}
                 </div>
                 {% endfor %}
@@ -62,10 +58,13 @@
         </div>
     </main>
 
+    {% include "partials/_footer.html" %}
     {% include "partials/_mobile_nav.html" %}
 
     <!-- Scripts -->
     <script src="{% static 'js/htmx.min.js' %}" defer></script>
+    <script src="{% static 'js/theme.js' %}" defer></script>
+    {% block extra_js %}{% endblock %}
 </body>
 
 </html>

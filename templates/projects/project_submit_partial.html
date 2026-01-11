@@ -1,58 +1,62 @@
-<div
-    class="glass-panel p-6 rounded-xl border border-secondary-900/30 shadow-lg shadow-black/50 animate-in fade-in slide-in-from-top-4">
-    <div class="flex items-center justify-between mb-4">
-        <h3 class="text-lg font-bold text-white flex items-center gap-2">
-            <i class="fas fa-code-branch text-secondary-500"></i> Submit Project
-        </h3>
-        <button onclick="document.getElementById('submission-area').innerHTML = ''"
-            class="text-zinc-500 hover:text-white transition-colors">
-            <i class="fas fa-times"></i>
-        </button>
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Submit Project | Kiri Research Labs{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="card p-8">
+        <h2 class="text-xl font-semibold text-gray-900 mb-6">Submit a Project</h2>
+
+        <form method="post" action="{% url 'projects:submit' %}" class="space-y-6">
+            {% csrf_token %}
+
+            <div>
+                <label for="id_name" class="block text-sm font-medium text-gray-900 mb-2">
+                    Project Name
+                </label>
+                <input type="text" name="name" id="id_name" required
+                    class="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-brand-green focus:border-transparent outline-none"
+                    placeholder="e.g., MyAwesomeProject">
+            </div>
+
+            <div>
+                <label for="id_description" class="block text-sm font-medium text-gray-900 mb-2">
+                    Description
+                </label>
+                <textarea name="description" id="id_description" rows="3" required
+                    class="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-brand-green focus:border-transparent outline-none resize-none"
+                    placeholder="Brief description of your project..."></textarea>
+            </div>
+
+            <div>
+                <label for="id_github_repo_url" class="block text-sm font-medium text-gray-900 mb-2">
+                    GitHub Repository URL
+                </label>
+                <input type="url" name="github_repo_url" id="id_github_repo_url" required
+                    class="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-brand-green focus:border-transparent outline-none"
+                    placeholder="https://github.com/username/repo">
+            </div>
+
+            <div>
+                <label for="id_demo_url" class="block text-sm font-medium text-gray-900 mb-2">
+                    Live Demo URL <span class="text-gray-400">(optional)</span>
+                </label>
+                <input type="url" name="demo_url" id="id_demo_url"
+                    class="w-full px-4 py-2.5 rounded-lg border border-gray-200 bg-white text-gray-900 placeholder-gray-400 focus:ring-2 focus:ring-brand-green focus:border-transparent outline-none"
+                    placeholder="https://yourdemo.com">
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-4">
+                <button type="button" onclick="document.getElementById('submission-area').innerHTML = ''"
+                    class="btn-secondary">
+                    Cancel
+                </button>
+                <button type="submit" class="btn-primary">
+                    <i class="fas fa-paper-plane"></i> Submit
+                </button>
+            </div>
+        </form>
     </div>
-
-    <form method="post" action="{% url 'projects:submit' %}">
-        {% csrf_token %}
-
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-            <div class="space-y-1">
-                <label class="text-xs font-mono text-zinc-400 uppercase">Project Name</label>
-                {{ form.name }}
-                {% if form.name.errors %}
-                <span class="text-red-500 text-xs">{{ form.name.errors.0 }}</span>
-                {% endif %}
-            </div>
-
-            <div class="space-y-1">
-                <label class="text-xs font-mono text-zinc-400 uppercase">GitHub URL</label>
-                {{ form.github_repo_url }}
-                {% if form.github_repo_url.errors %}
-                <span class="text-red-500 text-xs">{{ form.github_repo_url.errors.0 }}</span>
-                {% endif %}
-            </div>
-        </div>
-
-        <div class="mb-4 space-y-1">
-            <label class="text-xs font-mono text-zinc-400 uppercase">Description</label>
-            {{ form.description }}
-            {% if form.description.errors %}
-            <span class="text-red-500 text-xs">{{ form.description.errors.0 }}</span>
-            {% endif %}
-        </div>
-
-        <div class="mb-6 space-y-1">
-            <label class="text-xs font-mono text-zinc-400 uppercase">Demo URL (Optional)</label>
-            {{ form.demo_url }}
-        </div>
-
-        <div class="flex justify-end gap-3">
-            <button type="button" onclick="document.getElementById('submission-area').innerHTML = ''"
-                class="px-4 py-2 rounded-lg text-sm font-medium text-zinc-400 hover:text-white transition-colors">
-                Cancel
-            </button>
-            <button type="submit"
-                class="px-6 py-2 bg-secondary-600 hover:bg-secondary-500 text-white rounded-lg text-sm font-bold transition-all shadow-lg shadow-secondary-900/20">
-                Submit for Review
-            </button>
-        </div>
-    </form>
 </div>
+{% endblock %}

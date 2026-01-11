@@ -8,55 +8,49 @@ module.exports = {
     './projects/**/*.py',
     './users/**/*.py',
   ],
-  darkMode: 'class',
+  darkMode: ['class', '[data-theme="dark"]'],
   theme: {
     extend: {
       colors: {
-        // Base backgrounds (Zinc)
-        background: {
-          light: '#F8FAFC', // Slate-50
-          DEFAULT: '#09090B', // Zinc-950
-          dark: '#020202', // Zinc-950 (darker)
-          surface: '#18181B', // Zinc-900
-        },
-        // Primary Brand (Emerald/Cyber Green)
-        primary: {
-          50: '#ECFDF5',
-          100: '#D1FAE5',
-          200: '#A7F3D0',
-          300: '#6EE7B7',
-          400: '#34D399',
-          500: '#10B981', // Emerald-500
-          600: '#059669',
-          700: '#047857',
-          800: '#065F46',
-          900: '#064E3B',
-          glow: '#10B981', // For box-shadows
-        },
-        // Secondary/Accent (Cyan/Science Blue)
-        secondary: {
-          400: '#22D3EE',
-          500: '#06B6D4',
-          glow: '#06B6D4',
-        },
-        // Text Colors
-        paper: {
-          DEFAULT: '#E4E4E7', // Zinc-200
-          dim: '#A1A1AA', // Zinc-400
-        }
+        // Brand Colors from Logo
+        'brand-green': '#2E9A4F',
+        'brand-green-light': '#4CB86B',
+        'brand-green-dark': '#1E7A3A',
+        'brand-gold': '#D4A537',
+        'brand-gold-light': '#E8C05A',
+        'brand-gold-dark': '#B8922D',
+        // Light mode surfaces
+        'surface': '#FFFFFF',
+        'surface-secondary': '#F9FAFB',
+        'surface-tertiary': '#F3F4F6',
+        // Dark mode surfaces  
+        'dark': '#0F172A',
+        'dark-secondary': '#1E293B',
+        'dark-tertiary': '#334155',
+        // Text colors (light mode)
+        'content': '#111827',
+        'content-secondary': '#4B5563',
+        'content-muted': '#9CA3AF',
+        // Text colors (dark mode)
+        'content-light': '#F9FAFB',
+        'content-light-secondary': '#D1D5DB',
+        // Border colors
+        'border': '#E5E7EB',
+        'border-dark': '#374151',
       },
       fontFamily: {
-        sans: ['Inter', 'system-ui', 'sans-serif'],
-        mono: ['JetBrains Mono', 'monospace'],
+        sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
+        mono: ['JetBrains Mono', 'Monaco', 'monospace'],
       },
       boxShadow: {
-        'glow-green': '0 0 10px rgba(16, 185, 129, 0.5)',
-        'glow-cyan': '0 0 10px rgba(6, 182, 212, 0.5)',
-        'glass': '0 8px 32px 0 rgba(0, 0, 0, 0.37)',
+        'soft': '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)',
+        'medium': '0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1)',
+        'card': '0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1)',
       },
-      animation: {
-        'pulse-slow': 'pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite',
-      }
+      borderRadius: {
+        'xl': '1rem',
+        '2xl': '1.5rem',
+      },
     },
   },
   plugins: [],

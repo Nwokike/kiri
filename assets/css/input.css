@@ -1,16 +1,123 @@
 @import "tailwindcss";
 
+/* Brand Colors from Kiri Logo */
 @theme {
-  --color-primary-500: #10B981;
-  --color-background-DEFAULT: #09090B;
+  --color-brand-green: #2E9A4F;
+  --color-brand-gold: #D4A537;
+}
+
+/* Local Fonts */
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/static/fonts/inter-regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/static/fonts/inter-medium.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/static/fonts/inter-semibold.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Inter';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/static/fonts/inter-bold.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/static/fonts/jetbrainsmono-regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'JetBrains Mono';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/static/fonts/jetbrainsmono-medium.woff2') format('woff2');
+}
+
+@layer base {
+  html {
+    font-family: 'Inter', system-ui, sans-serif;
+  }
+
+  body {
+    @apply bg-white text-gray-900;
+    @apply antialiased;
+  }
+
+  /* Dark mode body */
+  [data-theme="dark"] body,
+  .dark body {
+    @apply bg-slate-900 text-gray-100;
+  }
+}
+
+@layer components {
+
+  /* Card component */
+  .card {
+    @apply bg-white rounded-xl border border-gray-200 shadow-sm;
+    @apply transition-shadow duration-200;
+  }
+
+  .card:hover {
+    @apply shadow-md;
+  }
+
+  [data-theme="dark"] .card,
+  .dark .card {
+    @apply bg-slate-800 border-slate-700;
+  }
+
+  /* Button components */
+  .btn-primary {
+    @apply inline-flex items-center justify-center gap-2;
+    @apply px-4 py-2.5 rounded-lg font-medium text-sm;
+    @apply bg-brand-green text-white;
+    @apply hover:bg-brand-green/90;
+    @apply transition-colors duration-200;
+    @apply focus:outline-none focus:ring-2 focus:ring-brand-green focus:ring-offset-2;
+  }
+
+  .btn-secondary {
+    @apply inline-flex items-center justify-center gap-2;
+    @apply px-4 py-2.5 rounded-lg font-medium text-sm;
+    @apply bg-gray-100 text-gray-900 border border-gray-200;
+    @apply hover:bg-gray-200;
+    @apply transition-colors duration-200;
+  }
+
+  [data-theme="dark"] .btn-secondary,
+  .dark .btn-secondary {
+    @apply bg-slate-800 text-gray-100 border-slate-700;
+    @apply hover:bg-slate-700;
+  }
 }
 
 @layer utilities {
-  .glass-panel {
-    @apply bg-zinc-900/70 backdrop-blur-md border border-zinc-800;
-  }
 
-  .text-glow {
-    text-shadow: 0 0 10px rgba(16, 185, 129, 0.5);
+  /* Smooth transitions for theme switching */
+  .theme-transition {
+    @apply transition-colors duration-300;
   }
 }

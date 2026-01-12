@@ -124,14 +124,11 @@ class ProjectFormTests(TestCase):
             'description': 'Desc',
             'category': 'other',
             'github_repo_url': 'https://github.com/foo/bar',
-            'topics': 'nlp,  cv, , transformers '
+            'topics': '["nlp", "cv", "transformers"]',  # Expected JSON format
+            'turnstile': 'passed' # Mock value
         })
         # Mock turnstile passed
         form.fields['turnstile'].required = False 
         
-        if form.is_valid():
-            self.assertEqual(form.cleaned_data['topics'], ['nlp', 'cv', 'transformers'])
-        else:
-            # If invalid due to other fields, just check logic directly
-            cleaned = form.clean_topics() # Fails if cleaned_data not set, so relying on valid form setup usually better
-            pass
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertEqual(form.cleaned_data['topics'], ['nlp', 'cv', 'transformers'])

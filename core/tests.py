@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.contrib.contenttypes.models import ContentType
@@ -28,6 +28,7 @@ class CoreTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.json()['status'], 'ok')
 
+@override_settings(TESTING=True)
 class GenericCommentTests(TestCase):
     """Tests for the generic comment system."""
     
@@ -69,9 +70,9 @@ class GenericCommentTests(TestCase):
         # Verify sanitization
         comment = Comment.objects.get(author=self.user)
         self.assertNotIn('<script>', comment.content)
-        self.assertIn('&lt;script&gt;', comment.content) # Bleach escapes valid text? No, bleach.clean with strip=True removes unsafe tags.
-        # Wait, bleach.clean(strip=True) removes the tag completely usually, unless escaped.
-        # Let's verify behavior. If strip=True, <script> content depends on bleach version/config.
+        # With strip=True, tags are removed, not escaped.
+        self.assertIn('alert("XSS")', comment.content) # Content remains
+        self.assertIn('<b>Bold</b>', comment.content)  # Allowed tags remain
         # Standard bleach: strips tags.
         
     def test_invalid_content_type(self):

@@ -1,106 +1,127 @@
 {% extends "base.html" %}
+{% load static %}
+{% load core_tags %}
 
-{% block title %}{{ publication.title }} | Living Library{% endblock %}
+{% block title %}{{ publication.title }} | Kiri Library{% endblock %}
 
 {% block content %}
-<article class="max-w-4xl mx-auto">
-    <!-- Header -->
-    <header class="mb-8 pb-8 border-b border-zinc-800">
-        <div class="flex items-center gap-3 mb-4">
-            <a href="{% url 'publications:list' %}"
-                class="text-xs text-primary-500 hover:text-primary-400 font-mono flex items-center gap-1">
-                <i class="fas fa-arrow-left"></i> LIBRARY
-            </a>
-            <span class="text-zinc-600 text-xs">/</span>
-            <span class="text-zinc-500 text-xs font-mono">PAPER-{{ publication.id|stringformat:"03d" }}</span>
-        </div>
+<div class="max-w-3xl mx-auto">
 
-        <h1 class="text-3xl md:text-4xl font-bold text-white tracking-tight mb-4 leading-tight">{{ publication.title }}
+    <!-- Header -->
+    <div class="mb-8 border-b border-border pb-8 dark:border-dark-border">
+        <h1 class="text-3xl md:text-4xl font-display font-bold text-text-primary dark:text-white mb-4 leading-tight">
+            {{ publication.title }}
         </h1>
 
-        <div class="flex flex-wrap items-center gap-6 text-sm text-zinc-400">
-            <div class="flex items-center gap-2">
+        <div class="flex flex-wrap items-center gap-4 text-sm text-text-secondary dark:text-dark-secondary mb-6">
+            <a href="{% url 'users:profile' publication.author.username %}"
+                class="flex items-center gap-2 hover:text-text-primary dark:hover:text-white transition-colors">
                 <div
-                    class="w-6 h-6 rounded-full bg-zinc-800 flex items-center justify-center text-xs border border-zinc-700">
+                    class="w-6 h-6 rounded-full bg-brand text-white flex items-center justify-center text-xs dark:bg-dark-border">
+                    {% if publication.author.github_avatar_url %}
+                    <img src="{{ publication.author.github_avatar_url }}" class="w-full h-full rounded-full">
+                    {% else %}
                     {{ publication.author.username|slice:":1"|upper }}
+                    {% endif %}
                 </div>
-                <span>{{ publication.author.username }}</span>
-            </div>
-            <div class="flex items-center gap-2">
-                <i class="far fa-calendar text-zinc-600"></i>
-                <time datetime="{{ publication.created_at|date:'c' }}">{{ publication.created_at|date:"F j, Y" }}</time>
-            </div>
-            {% if publication.executable_script %}
-            <span
-                class="px-2 py-0.5 rounded-full bg-primary-900/30 text-primary-400 border border-primary-800/50 text-xs flex items-center gap-1">
-                <i class="fas fa-bolt"></i> Executable
-            </span>
-            {% endif %}
+                <span class="font-medium">{{ publication.author.username }}</span>
+            </a>
+            <span class="text-text-tertiary">•</span>
+            <span>{{ publication.created_at|date:"F j, Y" }}</span>
+            <span class="text-text-tertiary">•</span>
+            <span class="font-mono text-xs bg-bg-tertiary px-2 py-0.5 rounded dark:bg-dark-surface">v{{
+                publication.version }}</span>
+            <!-- BibTeX Action -->
+            <button onclick="document.getElementById('bibtex-modal').classList.remove('hidden')"
+                class="ml-auto flex items-center gap-1 text-xs font-bold text-text-tertiary hover:text-text-primary dark:hover:text-white transition-colors">
+                <i class="fas fa-quote-right"></i> Cite
+            </button>
         </div>
-    </header>
 
-    <!-- Executable Container (The "Live" part) -->
-    {% if publication.executable_script %}
-    <section class="mb-12 rounded-xl bg-zinc-950 border border-zinc-800 overflow-hidden shadow-2xl shadow-black/50">
-        <div class="bg-zinc-900/50 px-4 py-2 border-b border-zinc-800 flex items-center justify-between">
-            <span class="text-xs font-mono text-zinc-500">LIVE DEMO ENVIRONMENT</span>
-            <div class="flex gap-1.5">
-                <div class="w-2.5 h-2.5 rounded-full bg-zinc-700"></div>
-                <div class="w-2.5 h-2.5 rounded-full bg-zinc-700"></div>
-                <div class="w-2.5 h-2.5 rounded-full bg-zinc-700"></div>
-            </div>
-        </div>
-        <div id="demo-container" class="p-6 md:p-8 min-h-[300px] relative">
-            <!-- The script will render content here -->
-            <div id="demo-placeholder" class="absolute inset-0 flex items-center justify-center flex-col text-zinc-600">
-                <i class="fas fa-circle-notch fa-spin text-2xl mb-2"></i>
-                <span class="text-sm font-mono">Initializing Runtime...</span>
-            </div>
-        </div>
-    </section>
-    {% endif %}
-
-    <!-- Main Content -->
-    <div class="prose prose-invert prose-zinc max-w-none">
-        <div class="p-6 rounded-lg bg-zinc-900/30 border border-zinc-800/50 mb-8 italic text-zinc-300">
+        <div
+            class="p-4 bg-bg-secondary rounded-lg border-l-4 border-brand-gold italic text-text-secondary dark:bg-dark-surface dark:text-dark-secondary">
             {{ publication.abstract }}
         </div>
 
-        <!-- Render Markdown Content Here (Assuming it's safe or pre-rendered) -->
-        <div class="markdown-body">
-            {{ publication.content|linebreaks }}
+        <!-- BibTeX Modal (Simple) -->
+        <div id="bibtex-modal"
+            class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
+            onclick="if(event.target === this) this.classList.add('hidden')">
+            <div
+                class="bg-white dark:bg-dark-surface w-full max-w-lg rounded-xl shadow-2xl overflow-hidden border border-border dark:border-dark-border">
+                <div
+                    class="p-4 border-b border-border dark:border-dark-border flex justify-between items-center bg-bg-secondary dark:bg-dark-bg">
+                    <h3 class="font-bold text-sm">BibTeX Citation</h3>
+                    <button onclick="document.getElementById('bibtex-modal').classList.add('hidden')"
+                        class="text-text-tertiary hover:text-text-primary dark:hover:text-white"><i
+                            class="fas fa-times"></i></button>
+                </div>
+                <div class="p-4">
+                    <pre
+                        class="bg-gray-100 dark:bg-gray-900 p-3 rounded text-xs font-mono overflow-auto text-gray-800 dark:text-gray-300 select-all">@article{kiri_{{ publication.id }},
+  title = { {{ publication.title }} },
+  author = { {{ publication.author.username }} },
+  journal = { Kiri Research Labs },
+  year = { {{ publication.created_at|date:"Y" }} },
+  url = { {{ request.build_absolute_uri }} }
+}</pre>
+                </div>
+            </div>
         </div>
     </div>
-</article>
 
-{% if publication.executable_script %}
-<script>
-    // Executable Paper Integration
-    document.addEventListener('DOMContentLoaded', function () {
-        const container = document.getElementById('demo-container');
-        const placeholder = document.getElementById('demo-placeholder');
+    <!-- Main Content (Markdown Rendered) -->
+    <article class="prose prose-zinc dark:prose-invert max-w-none mb-12">
+        <!-- Allows HTML for now, until secure markdown filter is added. 
+             If sticking to raw, linebreaks is safer but ugly. 
+             Using 'safe' for now assuming trusted authors (researchers). 
+             Future TODO: Use markdown filter. -->
+        {{ publication.content|linebreaks }}
+    </article>
 
-        try {
-            // Safe execution sandbox (basic)
-            (function () {
-                { { publication.executable_script | safe } }
-            })();
+    <!-- Executable Code Block (If exists) -->
+    {% if publication.executable_script %}
+    <div class="my-8">
+        <div class="flex items-center justify-between mb-2">
+            <h3 class="text-sm font-bold uppercase tracking-wider text-text-secondary dark:text-dark-secondary">
+                Interactive Demo</h3>
+            <span class="text-xs text-brand-green"><i class="fas fa-play-circle"></i> Live Execution</span>
+        </div>
+        <div
+            class="rounded-lg border border-border overflow-hidden bg-bg-secondary dark:bg-dark-surface dark:border-dark-border">
+            <div
+                class="bg-gray-900 text-gray-400 text-xs px-4 py-2 font-mono border-b border-gray-800 flex justify-between">
+                <span>main.py</span>
+                <span>Python 3.11 (Pyodide)</span>
+            </div>
+            <pre
+                class="p-4 overflow-x-auto text-sm font-mono text-text-primary dark:text-white"><code>{{ publication.executable_script }}</code></pre>
 
-            // Remove placeholder if script ran successfully
-            if (placeholder) placeholder.remove();
-        } catch (e) {
-            console.error("Runtime Error:", e);
-            if (placeholder) {
-                placeholder.innerHTML = `
-                    <div class="text-red-500 flex flex-col items-center">
-                        <i class="fas fa-exclamation-triangle text-2xl mb-2"></i>
-                        <span class="text-sm font-mono">Runtime Error</span>
-                        <span class="text-xs mt-1 bg-red-950/30 px-2 py-1 rounded">${e.message}</span>
-                    </div>
-                `;
-            }
-        }
-    });
-</script>
-{% endif %}
+            <!-- Execution Output -->
+            <div id="exec-output-{{ publication.id }}"
+                class="bg-black text-green-400 font-mono text-xs p-4 border-t border-gray-800 hidden empty:hidden">
+            </div>
+
+            <div
+                class="p-4 border-t border-border bg-white dark:bg-dark-bg dark:border-dark-border flex justify-between items-center">
+                <span id="pyodide-status" class="text-xs text-text-tertiary">Kernel Idle</span>
+                <button class="btn-primary text-xs run-python-btn"
+                    data-code="{{ publication.executable_script|escapejs }}"
+                    data-output="exec-output-{{ publication.id }}"
+                    onclick="document.getElementById('exec-output-{{ publication.id }}').classList.remove('hidden')">
+                    <i class="fas fa-play"></i> Run Code
+                </button>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Discussion -->
+    {% include "core/partials/comments_section.html" with comments=comments object=publication %}
+
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/pyodide_runner.js' %}"></script>
 {% endblock %}

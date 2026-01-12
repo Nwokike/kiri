@@ -1,0 +1,45 @@
+{% load static %}
+<div id="comments-section" class="mt-12 border-t border-border pt-8 dark:border-dark-border">
+    <h3 class="text-xl font-display font-bold mb-6 dark:text-white">Discussion</h3>
+
+    <!-- New Comment Form -->
+    {% if user.is_authenticated %}
+    <div class="mb-8 flex gap-4">
+        <div class="shrink-0">
+            {% if user.github_avatar_url %}
+            <img src="{{ user.github_avatar_url }}"
+                class="w-10 h-10 rounded-sm border border-border dark:border-dark-border">
+            {% else %}
+            <div
+                class="w-10 h-10 rounded-sm bg-brand text-white flex items-center justify-center font-bold text-xs dark:bg-dark-border">
+                {{ user.username|slice:":2"|upper }}</div>
+            {% endif %}
+        </div>
+        <form hx-post="{% url 'core:add_comment' object.get_content_type_id object.id %}" hx-target="#comments-list"
+            hx-swap="beforeend" hx-on::after-request="this.reset()" class="flex-1">
+            {% csrf_token %}
+            {{ comment_form.content }}
+            <div class="mt-2 flex justify-end">
+                <button type="submit" class="btn-primary text-xs py-2">Post Comment</button>
+            </div>
+        </form>
+    </div>
+    {% else %}
+    <div class="mb-8 p-4 bg-bg-tertiary rounded-lg text-center dark:bg-dark-surface">
+        <p class="text-text-secondary dark:text-dark-secondary text-sm">
+            <a href="{% url 'account_login' %}?next={{ request.path }}"
+                class="font-bold underline hover:text-brand-green">Log in</a> to join the discussion.
+        </p>
+    </div>
+    {% endif %}
+
+    <!-- Comments List -->
+    <div id="comments-list" class="space-y-6">
+        {% for comment in comments %}
+        {% include "core/partials/comment_item.html" with comment=comment %}
+        {% empty %}
+        <p class="text-text-tertiary text-sm italic text-center dark:text-dark-secondary" id="no-comments-msg">No
+            comments yet. Be the first to start the conversation.</p>
+        {% endfor %}
+    </div>
+</div>

@@ -1,0 +1,33 @@
+# Django Core
+Django>=5.0,<6.0
+python-dotenv>=1.0.0
+
+# Database
+# SQLite is built-in, no extra driver needed
+
+# Static Files & Media
+whitenoise>=6.6.0
+Pillow>=10.0.0
+
+# Authentication
+django-allauth>=65.0.0
+
+# HTMX Integration
+django-htmx>=1.17.0
+
+# PWA Support
+django-pwa>=1.1.0
+
+# Task Queue (lightweight, SQLite backend)
+huey>=2.5.0
+
+# Cloudflare Integration
+boto3>=1.34.0           # R2 storage (S3 compatible)
+django-storages>=1.14.0 # Storage backend
+django-turnstile>=0.2.0 # Captcha
+
+# GitHub API
+requests>=2.31.0
+
+# Production
+gunicorn>=21.0.0

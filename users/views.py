@@ -19,5 +19,6 @@ class UserProfileDetailView(DetailView):
         user = self.get_object()
         # Fetch related data
         context['projects'] = user.projects.filter(is_approved=True)
-        context['publications'] = user.publications.filter(is_published=True)
+        context['publications'] = user.authored_publications.filter(is_published=True)
+        context['contributions'] = user.contributed_publications.filter(is_published=True)
         return context

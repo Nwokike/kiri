@@ -1,25 +1,34 @@
 from django import forms
 from .models import Project
+from turnstile.fields import TurnstileField
 
 class ProjectSubmissionForm(forms.ModelForm):
+    turnstile = TurnstileField(theme='auto')
+
     class Meta:
         model = Project
-        fields = ['name', 'description', 'github_repo_url', 'demo_url']
+        fields = [
+            'name', 
+            'description', 
+            'category', 
+            'github_repo_url', 
+            'demo_url', 
+            'huggingface_url', 
+            'language', 
+            'topics'
+        ]
         widgets = {
-            'name': forms.TextInput(attrs={
-                'class': 'w-full bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none placeholder-zinc-500',
-                'placeholder': 'Project Name'
-            }),
-            'description': forms.Textarea(attrs={
-                'class': 'w-full bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none placeholder-zinc-500 h-32',
-                'placeholder': 'What does your project do?'
-            }),
-            'github_repo_url': forms.URLInput(attrs={
-                'class': 'w-full bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none placeholder-zinc-500',
-                'placeholder': 'https://github.com/username/repo'
-            }),
-            'demo_url': forms.URLInput(attrs={
-                'class': 'w-full bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-2 text-white focus:ring-2 focus:ring-primary-500 focus:border-transparent outline-none placeholder-zinc-500',
-                'placeholder': 'https://kiri.ng/demo (Optional)'
-            }),
+            'description': forms.Textarea(attrs={'rows': 4}),
+            'topics': forms.TextInput(attrs={'placeholder': 'e.g. transformers, cv, nlp (comma separated)'}),
         }
+        help_texts = {
+            'github_repo_url': 'Public GitHub repository URL (required for stats sync).',
+            'topics': 'Tags will be auto-synced from GitHub if left empty.',
+        }
+
+    def clean_topics(self):
+        # Convert comma separated string to list if entered manually
+        data = self.cleaned_data['topics']
+        if isinstance(data, str):
+            return [t.strip() for t in data.split(',') if t.strip()]
+        return data

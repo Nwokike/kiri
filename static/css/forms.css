@@ -1,0 +1,37 @@
+/* Minimal Form Styles override - Extracted from project_form.html */
+input[type="text"],
+input[type="url"],
+textarea,
+select {
+    width: 100%;
+    padding: 0.5rem 0.75rem;
+    border-radius: 0.25rem;
+    border: 1px solid var(--color-border);
+    background-color: var(--color-bg-primary);
+    color: var(--color-text-primary);
+    font-size: 0.875rem;
+    transition: border-color 0.15s ease;
+}
+
+input:focus,
+textarea:focus,
+select:focus {
+    outline: none;
+    border-color: var(--color-brand-green);
+    box-shadow: 0 0 0 1px var(--color-brand-green);
+}
+
+[data-theme="dark"] input,
+[data-theme="dark"] textarea,
+[data-theme="dark"] select {
+    background-color: var(--color-dark-surface);
+    border-color: var(--color-dark-border);
+    color: var(--color-dark-text);
+}
+
+[data-theme="dark"] input:focus,
+[data-theme="dark"] textarea:focus,
+[data-theme="dark"] select:focus {
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 1px var(--color-accent);
+}

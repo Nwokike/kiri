@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load static %}
+{% load core_tags %}
+
+{% block title %}{{ project.name }} | Kiri Colosseum{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto space-y-8">
+
+    <!-- Hero Section -->
+    <div class="space-y-4">
+        <div class="flex items-start justify-between">
+            <div>
+                <div class="flex items-center gap-2 mb-2">
+                    <span class="text-xs font-mono font-bold uppercase text-brand-green">{{ project.get_category_display
+                        }}</span>
+                    {% if project.is_hot %}
+                    <span
+                        class="text-[10px] font-bold text-orange-500 bg-orange-50 px-1.5 py-0.5 rounded border border-orange-100 dark:bg-orange-900/20 dark:border-orange-900/50">HOT</span>
+                    {% endif %}
+                </div>
+                <h1 class="text-3xl md:text-4xl font-display font-bold text-text-primary dark:text-white mb-2">{{
+                    project.name }}</h1>
+                <p class="text-lg text-text-secondary dark:text-dark-secondary">{{ project.description }}</p>
+            </div>
+
+            <!-- Actions -->
+            <div class="flex flex-col gap-2 shrink-0">
+                <a href="{{ project.github_repo_url }}" target="_blank" class="btn-primary">
+                    <i class="fab fa-github"></i> Star <span class="bg-black/10 px-1.5 rounded text-xs ml-1">{{
+                        project.stars_count }}</span>
+                </a>
+                {% if project.demo_url %}
+                <a href="{{ project.demo_url }}" target="_blank" class="btn-secondary">
+                    <i class="fas fa-external-link-alt"></i> Live Demo
+                </a>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Meta -->
+        <div
+            class="flex items-center gap-6 text-sm text-text-tertiary border-b border-border pb-6 dark:border-dark-border dark:text-dark-secondary">
+            <div class="flex items-center gap-2">
+                {% if project.submitted_by.github_avatar_url %}
+                <img src="{{ project.submitted_by.github_avatar_url }}" class="w-6 h-6 rounded-sm">
+                {% else %}
+                <i class="fas fa-user-circle"></i>
+                {% endif %}
+                <a href="{% url 'users:profile' project.submitted_by.username %}"
+                    class="hover:text-text-primary dark:hover:text-white">{{ project.submitted_by.username }}</a>
+            </div>
+            <div class="flex items-center gap-1" title="Forks">
+                <i class="fas fa-code-branch"></i> {{ project.forks_count }}
+            </div>
+            <div class="flex items-center gap-1" title="Language">
+                <span class="w-2 h-2 rounded-full bg-brand-gold"></span> {{ project.language }}
+            </div>
+            <div class="flex items-center gap-1 ml-auto">
+                <span><i class="far fa-eye"></i> {{ project.view_count }}</span>
+            </div>
+            {% if project.huggingface_url %}
+            <a href="{{ project.huggingface_url }}" target="_blank" class="hover:text-brand-gold transition-colors ml-4"
+                title="Hugging Face">
+                <img src="https://huggingface.co/front/assets/huggingface_logo-noborder.svg"
+                    class="w-5 h-5 inline opacity-70 hover:opacity-100">
+            </a>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Topics -->
+    {% if project.topics %}
+    <div class="flex flex-wrap gap-2">
+        {% for topic in project.topics %}
+        <span
+            class="text-xs px-2 py-1 rounded bg-bg-tertiary text-text-secondary dark:bg-dark-surface dark:text-dark-secondary">#{{
+            topic }}</span>
+        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Discussion -->
+    {% include "core/partials/comments_section.html" with comments=comments object=project %}
+
+</div>
+{% endblock %}

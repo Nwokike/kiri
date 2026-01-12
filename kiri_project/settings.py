@@ -46,6 +46,9 @@ INSTALLED_APPS = [
     "allauth.socialaccount.providers.github",
     "django_htmx",
     "pwa",
+    "huey.contrib.djhuey",  # Task Queue
+    "storages",             # S3/R2 Storage
+    "turnstile",            # Cloudflare Captcha
     # Local
     "core",
     "users",
@@ -115,10 +118,31 @@ USE_TZ = True
 STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
+
+# Storage Configuration (Cloudflare R2 for Prod / Media)
 STORAGES = {
-    "default": {"BACKEND": "django.core.files.storage.FileSystemStorage"},
+    "default": {
+        "BACKEND": "storages.backends.s3.S3Storage",
+        "OPTIONS": {
+            "bucket_name": os.environ.get("R2_BUCKET_NAME"),
+            "access_key": os.environ.get("R2_ACCESS_KEY_ID"),
+            "secret_key": os.environ.get("R2_SECRET_ACCESS_KEY"),
+            "endpoint_url": os.environ.get("R2_ENDPOINT_URL"),
+            "region_name": "auto",
+            "default_acl": "public-read",
+            "querystring_auth": False,
+        }
+    } if not DEBUG else {
+        "BACKEND": "django.core.files.storage.FileSystemStorage"
+    },
     "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
 }
+
+# AWS / R2 Settings for Boto3 (Backups)
+AWS_ACCESS_KEY_ID = os.environ.get("R2_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.environ.get("R2_SECRET_ACCESS_KEY")
+AWS_STORAGE_BUCKET_NAME = os.environ.get("R2_BUCKET_NAME")
+AWS_S3_ENDPOINT_URL = os.environ.get("R2_ENDPOINT_URL")
 
 # Media files
 MEDIA_URL = "/media/"
@@ -134,9 +158,9 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # Allauth settings
-ACCOUNT_AUTHENTICATION_METHOD = "email"
-ACCOUNT_EMAIL_REQUIRED = True
-ACCOUNT_USERNAME_REQUIRED = False
+# ACCOUNT_AUTHENTICATION_METHOD = "email"  # Deprecated
+# ACCOUNT_EMAIL_REQUIRED = True            # Deprecated (use SIGNUP_FIELDS)
+# ACCOUNT_USERNAME_REQUIRED = False        # Deprecated (use SIGNUP_FIELDS)
 ACCOUNT_LOGIN_METHODS = {"email"}
 ACCOUNT_SIGNUP_FIELDS = ["email*"]
 ACCOUNT_EMAIL_VERIFICATION = "optional" if DEBUG else "mandatory"
@@ -157,6 +181,22 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 SOCIALACCOUNT_LOGIN_ON_GET = True
 SOCIALACCOUNT_STORE_TOKENS = True
+SOCIALACCOUNT_ADAPTER = 'users.adapter.GithubAdapter'
+
+# Cloudflare Turnstile Settings
+TURNSTILE_SITEKEY = os.environ.get("TURNSTILE_SITEKEY", "1x00000000000000000000AA") # Test key
+TURNSTILE_SECRET = os.environ.get("TURNSTILE_SECRET", "1x0000000000000000000000000000000AA") # Test key
+
+# Huey Configuration (Lightweight SQLite Task Queue)
+HUEY = {
+    'huey_class': 'huey.SqliteHuey',
+    'name': DATABASES['default']['NAME'],
+    'results': True,
+    'store_none': False,
+    'immediate': False,
+    'utc': True,
+    'filename': BASE_DIR / 'db.sqlite3',
+}
 
 # Email
 if os.environ.get("EMAIL_HOST"):

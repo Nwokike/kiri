@@ -1,53 +1,74 @@
 {% load static %}
 {% load pwa %}
 <!DOCTYPE html>
-<html lang="en" class="scroll-smooth">
+<html lang="en" class="h-full">
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Kiri Research Labs{% endblock %}</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>{% block title %}Kiri Research Board{% endblock %}</title>
     <meta name="description"
-        content="{% block meta_description %}Kiri Research Labs develops software platforms, AI-driven solutions, and digital research tools for data analytics, education, and social-impact initiatives.{% endblock %}">
+        content="{% block meta_description %}The operating system for modern research. Join the Colosseum.{% endblock %}">
 
-    <!-- Local Fonts -->
-    <link rel="preload" href="{% static 'fonts/inter-regular.woff2' %}" as="font" type="font/woff2" crossorigin>
-    <link rel="preload" href="{% static 'fonts/inter-medium.woff2' %}" as="font" type="font/woff2" crossorigin>
+    <!-- Fonts: Inter + JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@500;700&display=swap"
+        rel="stylesheet">
 
-    <!-- Font Awesome (Local) -->
-    <link rel="stylesheet" href="{% static 'fontawesome/all.min.css' %}">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Main Styles -->
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}">
+    <!-- Cloudflare Turnstile -->
+    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
-    <!-- Theme initialization (prevent flash) -->
-    <script>
-        (function () {
-            const theme = localStorage.getItem('theme') || 'light';
-            if (theme === 'dark') {
-                document.documentElement.setAttribute('data-theme', 'dark');
-                document.documentElement.classList.add('dark');
-            }
-        })();
-    </script>
+    <!-- Pyodide (WASM Python) -->
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+
+    <!-- Tailwind (Output) -->
+    <link rel="stylesheet" href="{% static 'css/output.css' %}">
+
+    <!-- Theme Init -->
+    <script src="{% static 'js/theme_init.js' %}"></script>
 
     {% progressive_web_app_meta %}
     {% block extra_css %}{% endblock %}
 </head>
 
-<body class="min-h-screen flex flex-col bg-white text-gray-900 antialiased theme-transition">
+<body
+    class="h-full bg-bg-primary text-text-primary font-sans antialiased selection:bg-brand selection:text-white dark:bg-dark-bg dark:text-dark-text overflow-hidden flex">
 
-    {% include "partials/_header.html" %}
+    <!-- Desktop Sidebar -->
+    {% include "partials/_sidebar.html" %}
 
-    <!-- Main Content -->
-    <main class="flex-1">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <!-- Main Content Area -->
+    <div class="flex-1 flex flex-col h-screen overflow-hidden relative">
+
+        <!-- Mobile Header (Visible only on mobile) -->
+        <header
+            class="md:hidden h-14 border-b border-border bg-white/80 backdrop-blur z-30 flex items-center justify-between px-4 sticky top-0 dark:bg-dark-surface/80 dark:border-dark-border">
+            <a href="/" class="font-display font-bold text-lg tracking-tight">KIRI</a>
+            <div class="flex items-center gap-3">
+                <button id="mobile-theme-toggle" class="text-text-tertiary">
+                    <i class="fas fa-adjust"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- Scrollable Content -->
+        <main class="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-8 scroll-smooth" id="main-content">
+            <!-- Messages -->
             {% if messages %}
-            <div class="mb-6 space-y-2">
+            <div class="max-w-4xl mx-auto mb-6 space-y-2">
                 {% for message in messages %}
                 <div
-                    class="p-4 rounded-lg border text-sm
-                    {% if message.tags == 'error' %}bg-red-50 border-red-200 text-red-700{% elif message.tags == 'success' %}bg-green-50 border-green-200 text-green-700{% else %}bg-blue-50 border-blue-200 text-blue-700{% endif %}">
+                    class="p-3 rounded-sm text-sm border flex items-center gap-3
+                    {% if message.tags == 'error' %}bg-red-50 border-red-200 text-red-700 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400
+                    {% elif message.tags == 'success' %}bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-900/20 dark:border-emerald-800 dark:text-emerald-400
+                    {% else %}bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-400{% endif %}">
+                    <i
+                        class="fas {% if message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'success' %}fa-check-circle{% else %}fa-info-circle{% endif %}"></i>
                     {{ message }}
                 </div>
                 {% endfor %}
@@ -55,15 +76,23 @@
             {% endif %}
 
             {% block content %}{% endblock %}
-        </div>
-    </main>
 
-    {% include "partials/_footer.html" %}
+            <!-- Bottom Spacer for Mobile Nav -->
+            <div class="h-20 md:hidden"></div>
+        </main>
+
+    </div>
+
+    <!-- Mobile Bottom Nav -->
     {% include "partials/_mobile_nav.html" %}
+
+    <!-- Install Button -->
+    {% include "partials/_install_button.html" %}
 
     <!-- Scripts -->
     <script src="{% static 'js/htmx.min.js' %}" defer></script>
-    <script src="{% static 'js/theme.js' %}" defer></script>
+    <script src="{% static 'js/theme_toggle.js' %}" defer></script>
+    <script src="{% static 'js/pwa_install.js' %}" defer></script>
     {% block extra_js %}{% endblock %}
 </body>
 

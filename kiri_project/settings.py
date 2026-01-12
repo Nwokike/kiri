@@ -141,7 +141,7 @@ STORAGES = {
 # AWS / R2 Settings for Boto3 (Backups)
 AWS_ACCESS_KEY_ID = os.environ.get("R2_ACCESS_KEY_ID")
 AWS_SECRET_ACCESS_KEY = os.environ.get("R2_SECRET_ACCESS_KEY")
-AWS_STORAGE_BUCKET_NAME = os.environ.get("R2_BUCKET_NAME")
+AWS_STORAGE_BUCKET_NAME = os.environ.get("R2_BACKUP_BUCKET_NAME") or os.environ.get("R2_BUCKET_NAME")
 AWS_S3_ENDPOINT_URL = os.environ.get("R2_ENDPOINT_URL")
 
 # Media files

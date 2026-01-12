@@ -1,4 +1,5 @@
 {% load static %}
+{% load core_tags %}
 <div id="comments-section" class="mt-12 border-t border-border pt-8 dark:border-dark-border">
     <h3 class="text-xl font-display font-bold mb-6 dark:text-white">Discussion</h3>
 
@@ -15,7 +16,7 @@
                 {{ user.username|slice:":2"|upper }}</div>
             {% endif %}
         </div>
-        <form hx-post="{% url 'core:add_comment' object.get_content_type_id object.id %}" hx-target="#comments-list"
+        <form hx-post="{% url 'core:add_comment' object|get_content_type_id object.id %}" hx-target="#comments-list"
             hx-swap="beforeend" hx-on::after-request="this.reset()" class="flex-1">
             {% csrf_token %}
             {{ comment_form.content }}

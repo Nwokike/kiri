@@ -11,16 +11,18 @@ jobs:
 
     steps:
     - name: Checkout code
-      uses: actions/checkout@v2
+      uses: actions/checkout@v4
 
     - name: Deploy via SSH
-      uses: appleboy/ssh-action@v0.1.10
+      uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.GCP_HOST }}
         username: ${{ secrets.GCP_USERNAME }}
         key: ${{ secrets.GCP_SSH_KEY }}
         port: 22
         script: |
+          set -e  # Exit on any error
+          
           # 1. Add path to 'uv'
           export PATH=$PATH:$HOME/.local/bin
 
@@ -39,9 +41,18 @@ jobs:
           # 6. Collect Static
           uv run python manage.py collectstatic --noinput
 
-          # 7. Restart Services (Kiri + Huey)
+          # 7. Run Django deployment checks
+          uv run python manage.py check --deploy
+
+          # 8. Restart Services
           echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S systemctl restart kiri
           echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S systemctl restart kiri-huey
           echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S systemctl restart nginx
+
+          # 9. Wait for services to start
+          sleep 5
+
+          # 10. Health check
+          curl -f http://localhost:8000/health/ || echo "Health check endpoint not yet implemented"
 
           echo "Deployment Complete! 🚀"

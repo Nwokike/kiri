@@ -1,5 +1,6 @@
 {% load static %}
-const CACHE_NAME = 'kiri';
+const CACHE_VERSION = 'v1';
+const CACHE_NAME = `kiri-${CACHE_VERSION}`;
 const urlsToCache = [
     '/',
     '{% static "css/output.css" %}',

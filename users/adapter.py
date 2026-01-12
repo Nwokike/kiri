@@ -1,7 +1,5 @@
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from django.contrib.auth import get_user_model
-from django.core.files.base import ContentFile
-import requests
 
 User = get_user_model()
 
@@ -32,8 +30,30 @@ class GithubAdapter(DefaultSocialAccountAdapter):
 
     def save_user(self, request, sociallogin, form=None):
         """
-        Custom save method to ensure username uniqueness if collision exists (rare with GitHub login as username).
+        Custom save method to ensure username uniqueness and update profile on login.
         """
+        # Handle username collision
+        user = sociallogin.user
+        base_username = user.username
+        counter = 1
+        
+        # If user PK is None, it's a new user. If exists, we skip collision check (it's them).
+        if not user.pk:
+            while User.objects.filter(username=user.username).exists():
+                user.username = f"{base_username}_{counter}"
+                counter += 1
+        
         user = super().save_user(request, sociallogin, form)
-        # Additional post-save logic if needed (e.g. fetching private repos if scope allows)
+        
+        # Update profile data on every login
+        extra_data = sociallogin.account.extra_data
+        
+        user.github_avatar_url = extra_data.get('avatar_url', '') or user.github_avatar_url
+        user.bio = extra_data.get('bio') or user.bio
+        user.website = extra_data.get('blog') or user.website
+        user.github_public_repos = extra_data.get('public_repos', 0)
+        
+        # Save specific fields to avoid overwriting unrelated data
+        user.save(update_fields=['github_avatar_url', 'bio', 'website', 'github_public_repos'])
+        
         return user

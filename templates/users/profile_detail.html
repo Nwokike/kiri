@@ -95,7 +95,7 @@
             {% if projects %}
             <div class="space-y-3">
                 {% for project in projects %}
-                <a href="#"
+                <a href="{% url 'projects:detail' project.slug %}"
                     class="block p-4 border border-border rounded-lg bg-white hover:border-brand-green/50 transition-colors group dark:bg-dark-surface dark:border-dark-border dark:hover:border-brand-green/30">
                     <div class="flex justify-between items-start mb-1">
                         <h3 class="font-medium group-hover:text-brand-green transition-colors dark:text-white">{{
@@ -138,7 +138,7 @@
             {% if publications %}
             <div class="space-y-3">
                 {% for pub in publications %}
-                <a href="#"
+                <a href="{% url 'publications:detail' pub.slug %}"
                     class="block p-4 border border-border rounded-lg bg-white hover:border-brand-green/50 transition-colors group dark:bg-dark-surface dark:border-dark-border dark:hover:border-brand-green/30">
                     <h3 class="font-medium group-hover:text-brand-green transition-colors mb-1 dark:text-white">{{
                         pub.title }}</h3>
@@ -155,6 +155,29 @@
             <div
                 class="text-center py-8 border border-dashed border-border rounded-lg dark:border-dark-border text-text-tertiary">
                 <p class="text-sm">No publications yet.</p>
+            </div>
+            {% endif %}
+        </section>
+
+        <!-- Contributions -->
+        <section class="space-y-4 md:col-span-2">
+            <div class="flex items-center justify-between border-b border-border pb-2 dark:border-dark-border">
+                <h2 class="text-lg font-bold font-display dark:text-white">Contributions</h2>
+                <span class="text-xs font-mono bg-bg-tertiary px-2 py-1 rounded-full dark:bg-dark-border">{{
+                    contributions|length }}</span>
+            </div>
+
+            {% if contributions %}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                {% for pub in contributions %}
+                <a href="{% url 'publications:detail' pub.slug %}"
+                    class="block p-4 border border-border rounded-lg bg-white hover:border-purple-500/50 transition-colors group dark:bg-dark-surface dark:border-dark-border dark:hover:border-purple-500/30">
+                    <h3
+                        class="font-medium group-hover:text-purple-600 transition-colors mb-1 dark:text-white dark:group-hover:text-purple-400">
+                        {{ pub.title }}</h3>
+                    <p class="text-xs text-text-tertiary">Contributed to Research • {{ pub.created_at|date:"M Y" }}</p>
+                </a>
+                {% endfor %}
             </div>
             {% endif %}
         </section>

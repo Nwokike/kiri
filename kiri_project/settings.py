@@ -6,8 +6,17 @@ Optimized for Google Cloud 1GB RAM VM deployment.
 import os
 from pathlib import Path
 from dotenv import load_dotenv
+import sentry_sdk
 
 load_dotenv()
+
+# Initialize Sentry for error monitoring
+if os.environ.get("SENTRY_DSN"):
+    sentry_sdk.init(
+        dsn=os.environ.get("SENTRY_DSN"),
+        traces_sample_rate=0.1,  # Capture 10% of transactions for performance monitoring
+        profiles_sample_rate=0.1,  # Capture 10% of profiles
+    )
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
@@ -91,12 +100,22 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "kiri_project.wsgi.application"
 
-# Database - SQLite optimized for 1GB RAM
+# Database - SQLite optimized for 1GB RAM production
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
-        "OPTIONS": {"timeout": 20},
+        "OPTIONS": {
+            "timeout": 20,
+            "init_command": (
+                "PRAGMA journal_mode=WAL;"
+                "PRAGMA busy_timeout=5000;"
+                "PRAGMA synchronous=NORMAL;"
+                "PRAGMA cache_size=2000;"
+                "PRAGMA temp_store=MEMORY;"
+                "PRAGMA mmap_size=134217728;"
+            ),
+        },
     }
 }
 
@@ -110,7 +129,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 LANGUAGE_CODE = "en-us"
-TIME_ZONE = "Africa/Lagos"
+TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
@@ -158,9 +177,6 @@ AUTHENTICATION_BACKENDS = [
 ]
 
 # Allauth settings
-# ACCOUNT_AUTHENTICATION_METHOD = "email"  # Deprecated
-# ACCOUNT_EMAIL_REQUIRED = True            # Deprecated (use SIGNUP_FIELDS)
-# ACCOUNT_USERNAME_REQUIRED = False        # Deprecated (use SIGNUP_FIELDS)
 ACCOUNT_LOGIN_METHODS = {"email"}
 ACCOUNT_SIGNUP_FIELDS = ["email*"]
 ACCOUNT_EMAIL_VERIFICATION = "optional" if DEBUG else "mandatory"
@@ -187,15 +203,15 @@ SOCIALACCOUNT_ADAPTER = 'users.adapter.GithubAdapter'
 TURNSTILE_SITEKEY = os.environ.get("TURNSTILE_SITEKEY", "1x00000000000000000000AA") # Test key
 TURNSTILE_SECRET = os.environ.get("TURNSTILE_SECRET", "1x0000000000000000000000000000000AA") # Test key
 
-# Huey Configuration (Lightweight SQLite Task Queue)
+# Huey Configuration (Separate SQLite for task queue - reduces lock contention)
 HUEY = {
     'huey_class': 'huey.SqliteHuey',
-    'name': DATABASES['default']['NAME'],
+    'name': 'kiri_tasks',
     'results': True,
     'store_none': False,
-    'immediate': False,
+    'immediate': DEBUG,
     'utc': True,
-    'filename': BASE_DIR / 'db.sqlite3',
+    'filename': str(BASE_DIR / 'huey.sqlite3'),
 }
 
 # Email
@@ -214,7 +230,9 @@ SITE_URL = os.environ.get("SITE_URL", "https://kiri.ng")
 
 # Security settings for production
 if not DEBUG:
+    SECURE_SSL_REDIRECT = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
+    SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
     X_FRAME_OPTIONS = "DENY"
     SECURE_HSTS_SECONDS = 31536000
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
@@ -222,6 +240,43 @@ if not DEBUG:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+    
+    # Content Security Policy
+    CSP_DEFAULT_SRC = ("'self'",)
+    CSP_SCRIPT_SRC = (
+        "'self'",
+        "'unsafe-inline'",
+        "https://cdn.jsdelivr.net",
+        "https://challenges.cloudflare.com",
+        "https://cdnjs.cloudflare.com",
+    )
+    CSP_STYLE_SRC = (
+        "'self'",
+        "'unsafe-inline'",
+        "https://fonts.googleapis.com",
+        "https://cdnjs.cloudflare.com",
+    )
+    CSP_FONT_SRC = (
+        "'self'",
+        "https://fonts.gstatic.com",
+        "https://cdnjs.cloudflare.com",
+    )
+    CSP_IMG_SRC = ("'self'", "data:", "https:")
+    CSP_CONNECT_SRC = ("'self'", "https://cdn.jsdelivr.net", "https://huggingface.co")
+    
+    # Performance
+    CONN_MAX_AGE = 60
+    DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
+    FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
+    
+    # Simple in-memory cache for 1GB RAM constraint
+    CACHES = {
+        "default": {
+            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+            "LOCATION": "kiri-cache",
+            "OPTIONS": {"MAX_ENTRIES": 1000},
+        }
+    }
 
 # Logging
 LOGGING = {
@@ -243,5 +298,9 @@ PWA_APP_DISPLAY = 'standalone'
 PWA_APP_SCOPE = '/'
 PWA_APP_ORIENTATION = 'any'
 PWA_APP_START_URL = '/'
-PWA_APP_ICONS = [{ 'src': '/static/images/icons/icon-192x192.png', 'sizes': '192x192' }, { 'src': '/static/images/icons/icon-512x512.png', 'sizes': '512x512' }]
-PWA_SERVICE_WORKER_PATH = os.path.join(BASE_DIR, 'static', 'serviceworker.js')
+PWA_APP_ICONS = [
+    {'src': '/static/images/icons/icon-192x192.png', 'sizes': '192x192'},
+    {'src': '/static/images/icons/icon-512x512.png', 'sizes': '512x512'}
+]
+# Note: Service worker served via core.views.serviceworker, not static file
+# PWA_SERVICE_WORKER_PATH setting is not used with our template-based approach

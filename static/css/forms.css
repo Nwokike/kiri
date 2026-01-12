@@ -1,4 +1,15 @@
 /* Minimal Form Styles override - Extracted from project_form.html */
+:root {
+    --color-border: #E4E4E7;
+    --color-bg-primary: #FFFFFF;
+    --color-text-primary: #18181B;
+    --color-brand-green: #10B981;
+    --color-dark-surface: #18181B;
+    --color-dark-border: #27272A;
+    --color-dark-text: #FAFAFA;
+    --color-accent: #3B82F6;
+}
+
 input[type="text"],
 input[type="url"],
 textarea,

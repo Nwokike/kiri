@@ -1,6 +1,9 @@
 import os
 import datetime
 import requests
+import hashlib
+import time
+import logging
 from huey import SqliteHuey
 from huey.contrib.djhuey import periodic_task, task
 import boto3
@@ -8,8 +11,19 @@ from django.conf import settings
 from django.utils import timezone
 import shutil
 
+# Configure logging
+logger = logging.getLogger(__name__)
+
 # Configure Huey with SQLite backend
-huey = SqliteHuey(filename=str(settings.BASE_DIR / 'db.sqlite3'))
+huey = SqliteHuey(filename=settings.HUEY['filename'])
+
+def calculate_file_md5(filepath):
+    """Calculates MD5 hash of a file efficiently."""
+    hash_md5 = hashlib.md5()
+    with open(filepath, "rb") as f:
+        for chunk in iter(lambda: f.read(4096), b""):
+            hash_md5.update(chunk)
+    return hash_md5.hexdigest()
 
 @task()
 def update_project_hot_status():
@@ -20,39 +34,46 @@ def update_project_hot_status():
     from projects.models import Project
     from django.db.models import F
     
+    logger.info("Starting HOT projects update...")
+    
     # Reset all
     Project.objects.update(is_hot=False)
     
     # Calculate score = views + (stars * 10)
-    # This is a naive implementation, can be complexified later
     projects = Project.objects.annotate(
         score=F('view_count') + (F('stars_count') * 10)
     ).order_by('-score')
     
     # Mark top 5 as HOT
+    updated_count = 0
     top_projects = projects[:5]
     for p in top_projects:
         p.is_hot = True
         p.save()
+        updated_count += 1
     
-    print(f"Updated HOT projects at {timezone.now()}")
+    logger.info(f"Updated {updated_count} projects to HOT at {timezone.now()}")
 
 @periodic_task(huey.crontab(hour=3, minute=0)) # Run at 3 AM daily
 def backup_db_to_r2():
     """
-    Backups the SQLite database to Cloudflare R2 daily.
+    Backups the SQLite database to Cloudflare R2 daily with verification.
     Keeps only the last 3 backups to save space.
     """
-    print("Starting daily database backup...")
+    logger.info("Starting daily database backup...")
     
     db_path = settings.BASE_DIR / 'db.sqlite3'
     if not db_path.exists():
-        print("Database file not found!")
+        logger.error("Database file not found!")
         return
 
-    # 1. Upload new backup
+    # 1. Prepare backup
     timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
     backup_name = f"backup_{timestamp}.sqlite3"
+    
+    # Calculate checksum before upload
+    local_md5 = calculate_file_md5(db_path)
+    logger.info(f"Local database MD5: {local_md5}")
     
     s3 = boto3.client(
         's3',
@@ -63,14 +84,31 @@ def backup_db_to_r2():
     )
     
     try:
+        # Upload with standard S3/R2 put_object behavior
         with open(db_path, 'rb') as f:
-            s3.upload_fileobj(f, settings.AWS_STORAGE_BUCKET_NAME, f"backups/{backup_name}")
-        print(f"Uploaded {backup_name} to R2.")
+            s3.upload_fileobj(
+                f, 
+                settings.AWS_STORAGE_BUCKET_NAME, 
+                f"backups/{backup_name}",
+                ExtraArgs={'ContentType': 'application/x-sqlite3'}
+            )
+        
+        # 2. Verify Upload
+        metadata = s3.head_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=f"backups/{backup_name}")
+        remote_etag = metadata.get('ETag', '').strip('"')
+        
+        if remote_etag == local_md5:
+            logger.info(f"Backup {backup_name} verified successfully (ETag match).")
+        else:
+            logger.error(f"Backup verification FAILED for {backup_name}. Local: {local_md5}, Remote: {remote_etag}")
+            # Optional: Delete corrupted backup or alert admin
+            return
+
     except Exception as e:
-        print(f"Failed to upload backup: {e}")
+        logger.error(f"Failed to upload backup: {e}")
         return
 
-    # 2. Cleanup old backups (Keep last 3)
+    # 3. Cleanup old backups (Keep last 3)
     try:
         response = s3.list_objects_v2(
             Bucket=settings.AWS_STORAGE_BUCKET_NAME,
@@ -95,56 +133,35 @@ def backup_db_to_r2():
                         'Quiet': True
                     }
                 )
-                print(f"Deleted {num_to_delete} old backups.")
+                logger.info(f"Deleted {num_to_delete} old backups.")
             
     except Exception as e:
-        print(f"Failed to cleanup old backups: {e}")
+        logger.error(f"Failed to cleanup old backups: {e}")
 
 @periodic_task(huey.crontab(minute='*/30')) # Run every 30 mins
 def sync_github_stats():
     """
     Syncs stars, forks, and description from GitHub for all projects.
+    Uses centralized GitHubService.
     """
     from projects.models import Project
-    print("Starting GitHub stats sync...")
+    from projects.utils import sync_project_metadata
+    
+    logger.info("Starting GitHub stats sync...")
     projects = Project.objects.all()
     
-    headers = {}
-    if settings.SOCIALACCOUNT_PROVIDERS['github']['APP']['client_id']:
-         # In a real scenario, use an installation token or Oauth token if available. 
-         # For public repos, unauthenticated is fine but rate limited (60/hr).
-         pass
-
+    updated_count = 0
+    errors = 0
+    
     for project in projects:
-        if not project.github_repo_url or 'github.com' not in project.github_repo_url:
-            continue
-            
         try:
-            # Extract owner/repo
-            parts = project.github_repo_url.rstrip('/').split('/')
-            owner, repo = parts[-2], parts[-1]
-            api_url = f"https://api.github.com/repos/{owner}/{repo}"
-            
-            response = requests.get(api_url, headers=headers, timeout=10)
-            if response.status_code == 200:
-                data = response.json()
-                
-                project.stars_count = data.get('stargazers_count', 0)
-                project.forks_count = data.get('forks_count', 0)
-                project.language = data.get('language') or ''
-                # Only update description if it was previously empty (assume manual edits are preferred)
-                if not project.description: 
-                    project.description = data.get('description') or ''
-                
-                # Sync topics
-                if not project.topics:
-                    project.topics = data.get('topics', [])
-                
-                project.last_synced_at = timezone.now()
-                project.save(update_fields=['stars_count', 'forks_count', 'language', 'description', 'topics', 'last_synced_at'])
-                print(f"Synced {project.name}: {project.stars_count} stars")
-            else:
-                print(f"Failed to sync {project.name}: {response.status_code}")
-                
+            # Reuses the logic we just refactored in utils.py which uses GitHubService
+            # This handles caching, parsing, rate limits, and field updates uniformly.
+            if sync_project_metadata(project):
+                logger.info(f"Synced {project.name}")
+                updated_count += 1
         except Exception as e:
-            print(f"Error syncing {project.name}: {e}")
+            logger.error(f"Error syncing {project.name}: {e}")
+            errors += 1
+            
+    logger.info(f"GitHub Sync Complete. Updated: {updated_count}, Errors: {errors}")

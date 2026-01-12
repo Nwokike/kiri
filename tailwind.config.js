@@ -12,10 +12,27 @@ module.exports = {
   theme: {
     extend: {
       colors: {
+        border: "hsl(var(--border))",
+        input: "hsl(var(--input))",
+        ring: "hsl(var(--ring))",
+        background: "hsl(var(--background))",
+        foreground: "hsl(var(--foreground))",
         // Brand Colors
         'brand': {
           DEFAULT: '#18181B', // Zinc 900
           hover: '#27272A',   // Zinc 800
+          foreground: "#FAFAFA",
+          green: "#10B981",
+          "green-dark": "#059669",
+          gold: "#F59E0B",
+        },
+        'brand-green': {
+          DEFAULT: '#10B981', // Emerald 500
+          dark: '#059669',    // Emerald 600
+        },
+        'brand-gold': {
+          DEFAULT: '#F59E0B', // Amber 500
+          dark: '#D97706',    // Amber 600
         },
         'accent': {
           DEFAULT: '#3B82F6', // Blue 500 (Subtle accents)

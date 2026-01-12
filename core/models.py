@@ -8,7 +8,7 @@ class Comment(models.Model):
     Threaded comments for any content type (Projects, Publications).
     """
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
-    content = models.TextField()
+    content = models.TextField(max_length=10000)  # 10KB limit
     
     # Generic Relation
     content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
@@ -23,6 +23,13 @@ class Comment(models.Model):
 
     class Meta:
         ordering = ['created_at']
+        indexes = [
+            models.Index(fields=['content_type', 'object_id']),
+            models.Index(fields=['author']),
+            models.Index(fields=['created_at']),
+            models.Index(fields=['parent']),
+        ]
 
     def __str__(self):
-        return f"Comment by {self.author} on {self.content_object}"
+        preview = self.content[:50] + "..." if len(self.content) > 50 else self.content
+        return f"{self.author}: {preview}"

@@ -26,6 +26,8 @@ window.runPythonCode = async function (code, outputElementId) {
     const outputEl = document.getElementById(outputElementId);
     if (!outputEl) return;
 
+    // Clear previous output
+    outputEl.innerText = '';
     outputEl.innerHTML = '<span class="text-text-tertiary">Running...</span>';
 
     try {

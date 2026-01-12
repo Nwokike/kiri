@@ -5,62 +5,72 @@
 {% block content %}
 <div class="space-y-8">
     <!-- Header -->
-    <header class="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-gray-200">
+    <header
+        class="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-border dark:border-dark-border">
         <div>
-            <h1 class="text-2xl font-bold text-gray-900 mb-2">Publications</h1>
-            <p class="text-gray-600">
-                Research papers, articles, and technical documentation.
+            <h1 class="text-3xl font-bold font-display text-text-primary dark:text-white mb-2">The Library</h1>
+            <p class="text-text-secondary dark:text-dark-secondary">
+                Curated research papers and interactive technical demonstrations.
             </p>
         </div>
-        <div class="flex items-center gap-3">
-            <div class="relative">
-                <input type="text" placeholder="Search publications..."
-                    class="w-full md:w-64 bg-gray-100 border border-gray-200 text-sm rounded-lg px-4 py-2.5 focus:ring-2 focus:ring-brand-green focus:border-transparent outline-none placeholder-gray-400">
-            </div>
-        </div>
+
+        <!-- Search -->
+        <form method="get" action="" class="relative">
+            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary"></i>
+            <input type="text" name="q" placeholder="Search publications..." value="{{ request.GET.q|default:'' }}"
+                class="w-full md:w-72 pl-10 pr-4 py-2 bg-bg-secondary border border-border rounded-lg text-sm focus:ring-1 focus:ring-brand-green focus:border-brand-green dark:bg-dark-surface dark:border-dark-border dark:text-white placeholder-text-tertiary">
+        </form>
     </header>
 
-    <!-- Publications Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+    <!-- Content Grid -->
+    <div class="grid gap-8">
         {% for publication in publications %}
-        <article class="card p-6 hover:border-brand-gold/30 transition-all group flex flex-col h-full">
-            <div class="flex items-center gap-2 mb-3">
-                <span class="px-2.5 py-1 rounded-md text-xs font-mono font-medium bg-brand-gold/10 text-brand-gold">
-                    PAPER-{{ publication.id|stringformat:"03d" }}
-                </span>
-                <span class="text-xs text-gray-400">{{ publication.created_at|date:"M Y" }}</span>
-            </div>
-
-            <h3 class="text-lg font-semibold text-gray-900 group-hover:text-brand-gold transition-colors mb-2 flex-1">
-                <a href="{% url 'publications:detail' publication.slug %}" class="focus:outline-none">
-                    {{ publication.title }}
-                </a>
-            </h3>
-
-            <p class="text-sm text-gray-600 line-clamp-3 mb-4">
-                {{ publication.abstract }}
-            </p>
-
-            <div class="flex items-center justify-between pt-4 border-t border-gray-200 mt-auto">
+        <article
+            class="group flex flex-col md:flex-row gap-6 md:items-start p-6 rounded-xl border border-transparent hover:border-border hover:bg-bg-secondary dark:hover:bg-dark-surface/50 dark:hover:border-dark-border transition-all">
+            <!-- Meta (Left on desktop) -->
+            <div class="md:w-48 shrink-0 flex flex-col gap-2 text-sm text-text-tertiary dark:text-dark-secondary">
+                <span class="font-mono text-brand-green">{{ publication.created_at|date:"F j, Y" }}</span>
                 <div class="flex items-center gap-2">
-                    <span
-                        class="w-6 h-6 rounded-full bg-brand-gold/10 text-brand-gold flex items-center justify-center text-xs font-medium">
-                        {{ publication.author.username|slice:":1"|upper }}
-                    </span>
-                    <span class="text-xs text-gray-400">{{ publication.author.username }}</span>
+                    <i class="fas fa-user-circle"></i>
+                    <span>{{ publication.author.username }}</span>
                 </div>
                 {% if publication.executable_script %}
-                <i class="fas fa-microchip text-brand-green text-sm" title="Executable Demo"></i>
+                <div class="flex items-center gap-2 text-brand-gold mt-1">
+                    <i class="fab fa-python"></i>
+                    <span>Interactive</span>
+                </div>
                 {% endif %}
             </div>
-        </article>
-        {% empty %}
-        <div class="col-span-full card p-12 text-center">
-            <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
-                <i class="fas fa-book-open text-gray-400 text-2xl"></i>
+
+            <!-- Main Content -->
+            <div class="flex-1 min-w-0">
+                <h2
+                    class="text-xl font-bold font-display text-text-primary dark:text-white mb-2 group-hover:text-brand-green transition-colors">
+                    <a href="{% url 'publications:detail' publication.slug %}" class="focus:outline-none">
+                        {{ publication.title }}
+                    </a>
+                </h2>
+                <p class="text-text-secondary dark:text-dark-secondary mb-4 line-clamp-2">
+                    {{ publication.abstract }}
+                </p>
+                <div class="flex items-center gap-4 text-xs font-medium">
+                    <a href="{% url 'publications:detail' publication.slug %}" class="btn-secondary py-1.5 px-3">
+                        Read Paper
+                    </a>
+                    {% if publication.executable_script %}
+                    <a href="{% url 'publications:detail' publication.slug %}#run-code-btn"
+                        class="text-brand-gold hover:underline">
+                        <i class="fas fa-play mr-1"></i> Try Demo
+                    </a>
+                    {% endif %}
+                </div>
             </div>
-            <h3 class="text-gray-900 font-medium mb-2">No publications yet</h3>
-            <p class="text-gray-600 text-sm">Research papers will appear here.</p>
+        </article>
+
+        {% empty %}
+        <div class="py-12 text-center text-text-tertiary">
+            <i class="fas fa-book-open text-4xl mb-4 opacity-50"></i>
+            <p>No publications found matching your criteria.</p>
         </div>
         {% endfor %}
     </div>

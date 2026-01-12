@@ -1,9 +1,18 @@
 [project]
 name = "kiri"
 version = "0.1.0"
-description = "Add your description here"
+description = "Kiri Research Labs - The Post-Compute Research Platform for AI/ML projects and publications"
 readme = "README.md"
+license = {text = "Proprietary"}
 requires-python = ">=3.12"
+keywords = ["research", "ai", "machine-learning", "publications", "django"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Framework :: Django :: 6.0",
+    "Intended Audience :: Science/Research",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Scientific/Engineering :: Artificial Intelligence",
+]
 dependencies = [
     "boto3>=1.42.25",
     "django>=6.0.1",
@@ -14,9 +23,11 @@ dependencies = [
     "django-turnstile>=0.1.2",
     "gunicorn>=23.0.0",
     "huey>=2.6.0",
-    "paramiko>=4.0.0",
     "pillow>=12.1.0",
     "python-dotenv>=1.2.1",
     "requests>=2.32.5",
     "whitenoise>=6.11.0",
+    "bleach>=6.1.0",
+    "sentry-sdk>=2.0.0",
+    "markdown>=3.5.0",
 ]

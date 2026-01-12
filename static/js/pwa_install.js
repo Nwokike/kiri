@@ -14,20 +14,26 @@ window.addEventListener('beforeinstallprompt', (e) => {
 });
 
 if (installBtn) {
-    installBtn.addEventListener('click', (e) => {
+    installBtn.addEventListener('click', async (e) => {
+        if (!deferredPrompt) {
+            console.log('Install prompt not available');
+            return;
+        }
+
         // Hide the app provided install promotion
         installBtn.classList.add('hidden');
         installBtn.classList.remove('flex');
-        // Show the prompt
-        deferredPrompt.prompt();
-        // Wait for the user to respond to the prompt
-        deferredPrompt.userChoice.then((choiceResult) => {
-            if (choiceResult.outcome === 'accepted') {
-                console.log('User accepted the A2HS prompt');
-            } else {
-                console.log('User dismissed the A2HS prompt');
-            }
+
+        try {
+            // Show the prompt
+            deferredPrompt.prompt();
+            // Wait for the user to respond to the prompt
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`User ${outcome === 'accepted' ? 'accepted' : 'dismissed'} the install prompt`);
+        } catch (err) {
+            console.error('Install prompt error:', err);
+        } finally {
             deferredPrompt = null;
-        });
+        }
     });
 }

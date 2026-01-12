@@ -11,11 +11,15 @@ class Project(models.Model):
         AI_VISION = 'ai_vision', 'AI / Computer Vision'
         DATA_SCIENCE = 'data_science', 'Data Science'
         WEB_TOOLS = 'web_tools', 'Web Tools'
+        AI_AUDIO = 'ai_audio', 'AI / Audio & Speech'
+        ML_OPS = 'ml_ops', 'MLOps / Infra'
+        ROBOTICS = 'robotics', 'Robotics'
+        RESEARCH = 'research', 'Research'
         OTHER = 'other', 'Other'
 
     name = models.CharField(max_length=255)
     slug = models.SlugField(unique=True, blank=True)
-    description = models.TextField()
+    description = models.TextField(max_length=5000)
     category = models.CharField(
         max_length=50, 
         choices=Category.choices, 
@@ -25,7 +29,7 @@ class Project(models.Model):
     # Links
     github_repo_url = models.URLField(help_text="URL to the GitHub repository")
     demo_url = models.URLField(blank=True, null=True, help_text="Live demo URL")
-    huggingface_url = models.URLField(blank=True, default='', help_text="Link to Hugging Face model/dataset")
+    huggingface_url = models.URLField(blank=True, help_text="Link to Hugging Face model/dataset")
 
     # Metrics (Synced from GitHub + Internal)
     stars_count = models.IntegerField(default=0)
@@ -43,9 +47,28 @@ class Project(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     last_synced_at = models.DateTimeField(null=True, blank=True)
 
+    class Meta:
+        ordering = ['-created_at']
+        indexes = [
+            models.Index(fields=['is_approved', 'is_hot']),
+            models.Index(fields=['is_approved', '-stars_count']),
+            models.Index(fields=['is_approved', '-created_at']),
+            models.Index(fields=['submitted_by']),
+            models.Index(fields=['slug']),
+            models.Index(fields=['category']),
+        ]
+
     def save(self, *args, **kwargs):
         if not self.slug:
-            self.slug = slugify(self.name)
+            base_slug = slugify(self.name)
+            slug = base_slug
+            counter = 1
+            # Check for collision (excluding self if updating, though rare to change slug on update)
+            # Actually, standard pattern for create is enough.
+            while Project.objects.filter(slug=slug).exclude(pk=self.pk).exists():
+                slug = f"{base_slug}-{counter}"
+                counter += 1
+            self.slug = slug
         super().save(*args, **kwargs)
 
     def __str__(self):

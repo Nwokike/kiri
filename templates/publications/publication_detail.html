@@ -1,85 +1,157 @@
 {% extends "base.html" %}
 {% load static %}
 {% load core_tags %}
+{% load markdown_tags %}
+{% load bibtex_tags %}
 
 {% block title %}{{ publication.title }} | Kiri Library{% endblock %}
 
-{% block content %}
-<div class="max-w-3xl mx-auto">
+{% block extra_head %}
+{% if publication.executable_script %}
+<!-- Pyodide only loaded if script exists -->
+<script src="https://cdn.jsdelivr.net/pyodide/v0.27.0/full/pyodide.js"></script>
+{% endif %}
+<!-- MathJax for LaTeX support -->
+<script>
+    MathJax = {
+        tex: {
+            inlineMath: [['$', '$'], ['\\(', '\\)']]
+        },
+        svg: {
+            fontCache: 'global'
+        }
+    };
+</script>
+<script type="text/javascript" id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
+</script>
+{% endblock %}
 
-    <!-- Header -->
-    <div class="mb-8 border-b border-border pb-8 dark:border-dark-border">
-        <h1 class="text-3xl md:text-4xl font-display font-bold text-text-primary dark:text-white mb-4 leading-tight">
+{% block content %}
+<div class="max-w-4xl mx-auto">
+
+    <header class="mb-8">
+        <div class="flex items-center gap-2 mb-4 text-sm text-text-tertiary dark:text-dark-secondary">
+            <a href="{% url 'publications:list' %}" class="hover:text-brand-green transition-colors">
+                <i class="fas fa-arrow-left mr-1"></i> Library
+            </a>
+            <span>/</span>
+            <span>{{ publication.created_at|date:"Y" }}</span>
+        </div>
+
+        <h1 class="text-4xl md:text-5xl font-display font-bold text-text-primary dark:text-white mb-6 leading-tight">
             {{ publication.title }}
         </h1>
 
-        <div class="flex flex-wrap items-center gap-4 text-sm text-text-secondary dark:text-dark-secondary mb-6">
-            <a href="{% url 'users:profile' publication.author.username %}"
-                class="flex items-center gap-2 hover:text-text-primary dark:hover:text-white transition-colors">
+        <div class="flex flex-wrap items-center gap-6 text-sm">
+            <div class="flex items-center gap-2">
+                {% if publication.author.github_avatar_url %}
+                <img src="{{ publication.author.github_avatar_url }}" class="w-8 h-8 rounded-full">
+                {% else %}
                 <div
-                    class="w-6 h-6 rounded-full bg-brand text-white flex items-center justify-center text-xs dark:bg-dark-border">
-                    {% if publication.author.github_avatar_url %}
-                    <img src="{{ publication.author.github_avatar_url }}" class="w-full h-full rounded-full">
-                    {% else %}
-                    {{ publication.author.username|slice:":1"|upper }}
-                    {% endif %}
+                    class="w-8 h-8 rounded-full bg-brand-gold/20 text-brand-gold flex items-center justify-center font-bold">
+                    {{ publication.author.username|slice:":1" }}
                 </div>
-                <span class="font-medium">{{ publication.author.username }}</span>
+                {% endif %}
+                <div>
+                    <span class="block text-text-primary dark:text-white font-medium">{{ publication.author.username
+                        }}</span>
+                    <span class="text-text-tertiary dark:text-dark-secondary">Author</span>
+                </div>
+            </div>
+
+            <div class="border-l border-border h-8 dark:border-dark-border"></div>
+
+            <div class="flex flex-col">
+                <span class="text-text-primary dark:text-white font-medium">{{ publication.created_at|date:"F j, Y"
+                    }}</span>
+                <span class="text-text-tertiary dark:text-dark-secondary">Version {{ publication.version }}</span>
+            </div>
+
+            {% if publication.arxiv_id %}
+            <div class="border-l border-border h-8 dark:border-dark-border"></div>
+            <a href="https://arxiv.org/abs/{{ publication.arxiv_id }}" target="_blank"
+                class="flex items-center gap-1 text-brand-green hover:underline">
+                <i class="fas fa-external-link-alt"></i> arXiv:{{ publication.arxiv_id }}
             </a>
-            <span class="text-text-tertiary">•</span>
-            <span>{{ publication.created_at|date:"F j, Y" }}</span>
-            <span class="text-text-tertiary">•</span>
-            <span class="font-mono text-xs bg-bg-tertiary px-2 py-0.5 rounded dark:bg-dark-surface">v{{
-                publication.version }}</span>
-            <!-- BibTeX Action -->
-            <button onclick="document.getElementById('bibtex-modal').classList.remove('hidden')"
-                class="ml-auto flex items-center gap-1 text-xs font-bold text-text-tertiary hover:text-text-primary dark:hover:text-white transition-colors">
-                <i class="fas fa-quote-right"></i> Cite
+            {% endif %}
+        </div>
+
+        {% if publication.contributors.exists %}
+        <div class="mt-4 flex flex-wrap gap-2 items-center text-sm">
+            <span class="text-text-secondary dark:text-dark-secondary">With:</span>
+            {% for contributor in publication.contributors.all %}
+            <a href="{% url 'users:profile' contributor.username %}"
+                class="px-2 py-1 rounded bg-bg-tertiary text-text-primary hover:bg-brand-green/10 transition-colors dark:bg-dark-surface dark:text-dark-text">
+                {{ contributor.username }}
+            </a>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </header>
+
+    <!-- Content -->
+    <article class="prose prose-zinc dark:prose-invert max-w-none mb-12">
+        {{ publication.content|render_markdown }}
+    </article>
+
+    <!-- Executable Code -->
+    {% if publication.executable_script %}
+    <div
+        class="mb-12 rounded-xl border border-border bg-bg-secondary overflow-hidden dark:border-dark-border dark:bg-dark-surface">
+        <div
+            class="flex items-center justify-between px-4 py-3 border-b border-border bg-bg-tertiary dark:border-dark-border dark:bg-black/20">
+            <h3 class="font-mono text-sm font-bold text-text-primary dark:text-white">
+                <i class="fab fa-python mr-2 text-brand-gold"></i> Live Demo
+            </h3>
+            <button id="run-code-btn" class="btn-primary py-1 px-3 text-xs">
+                <i class="fas fa-play mr-1"></i> Run Code
             </button>
         </div>
-
-        <div
-            class="p-4 bg-bg-secondary rounded-lg border-l-4 border-brand-gold italic text-text-secondary dark:bg-dark-surface dark:text-dark-secondary">
-            {{ publication.abstract }}
+        <div class="relative group">
+            <pre
+                class="p-4 bg-[#1e1e1e] text-gray-300 text-sm overflow-x-auto"><code>{{ publication.executable_script }}</code></pre>
+            <div id="code-overlay"
+                class="absolute inset-0 bg-black/50 hidden items-center justify-center backdrop-blur-sm">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
+            </div>
         </div>
+        <div id="output-area"
+            class="p-4 bg-black font-mono text-xs text-brand-green border-t border-border dark:border-dark-border min-h-[100px] hidden">
+            <div class="text-gray-500 mb-2">Reference output:</div>
+            <pre id="output-content"></pre>
+        </div>
+    </div>
 
-        <!-- BibTeX Modal (Simple) -->
-        <div id="bibtex-modal"
-            class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm p-4"
-            onclick="if(event.target === this) this.classList.add('hidden')">
-            <div
-                class="bg-white dark:bg-dark-surface w-full max-w-lg rounded-xl shadow-2xl overflow-hidden border border-border dark:border-dark-border">
-                <div
-                    class="p-4 border-b border-border dark:border-dark-border flex justify-between items-center bg-bg-secondary dark:bg-dark-bg">
-                    <h3 class="font-bold text-sm">BibTeX Citation</h3>
-                    <button onclick="document.getElementById('bibtex-modal').classList.add('hidden')"
-                        class="text-text-tertiary hover:text-text-primary dark:hover:text-white"><i
-                            class="fas fa-times"></i></button>
-                </div>
-                <div class="p-4">
-                    <pre
-                        class="bg-gray-100 dark:bg-gray-900 p-3 rounded text-xs font-mono overflow-auto text-gray-800 dark:text-gray-300 select-all">@article{kiri_{{ publication.id }},
-  title = { {{ publication.title }} },
-  author = { {{ publication.author.username }} },
+    <!-- Data for JS -->
+    <div id="script-data" data-code="{{ publication.executable_script|escapejs }}"></div>
+    {% endif %}
+
+    <!-- BibTeX -->
+    <div
+        class="bg-bg-secondary p-6 rounded-xl border border-border dark:bg-dark-surface dark:border-dark-border mb-12 print:hidden">
+        <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+            <i class="fas fa-quote-right text-brand-gold"></i> Cite this work
+        </h3>
+        <pre
+            class="bg-bg-primary p-4 rounded-lg text-xs font-mono overflow-x-auto text-text-secondary select-all dark:bg-black/30 dark:text-dark-secondary border border-border dark:border-dark-border">@article{kiri_{{ publication.id }},
+  title = { {{ publication.title|bibtex_escape }} },
+  author = { {{ publication.author.username|bibtex_escape }} },
   journal = { Kiri Research Labs },
   year = { {{ publication.created_at|date:"Y" }} },
   url = { {{ request.build_absolute_uri }} }
 }</pre>
-                </div>
-            </div>
-        </div>
     </div>
 
-    <!-- Main Content (Markdown Rendered) -->
-    <article class="prose prose-zinc dark:prose-invert max-w-none mb-12">
-        <!-- Allows HTML for now, until secure markdown filter is added. 
-             If sticking to raw, linebreaks is safer but ugly. 
-             Using 'safe' for now assuming trusted authors (researchers). 
-             Future TODO: Use markdown filter. -->
-        {{ publication.content|linebreaks }}
-    </article>
+    <!-- Print-only footer -->
+    <div class="hidden print:block mt-8 pt-4 border-t border-gray-300 text-xs text-gray-500">
+        <p>Printed from Kiri Research Labs - {{ request.build_absolute_uri }}</p>
+        <p>&copy; {% now "Y" %} {{ publication.author.username }}</p>
+    </div>
 
-    <!-- Executable Code Block (If exists) -->
+    <!-- Discussion -->
+    <div class="print:hidden">
+        {% include "core/partials/comments_section.html" with comments=comments object=publication %}
+    </div>
     {% if publication.executable_script %}
     <div class="my-8">
         <div class="flex items-center justify-between mb-2">

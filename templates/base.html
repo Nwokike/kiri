@@ -5,10 +5,18 @@
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Kiri Research Board{% endblock %}</title>
     <meta name="description"
         content="{% block meta_description %}The operating system for modern research. Join the Colosseum.{% endblock %}">
+
+    <!-- Open Graph / Social -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="{% block og_title %}Kiri Research Labs{% endblock %}">
+    <meta property="og:description"
+        content="{% block og_description %}The operating system for modern research.{% endblock %}">
+    <meta property="og:image" content="{% static 'images/logos/logo.png' %}">
+    <meta name="twitter:card" content="summary_large_image">
 
     <!-- Fonts: Inter + JetBrains Mono -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -23,8 +31,12 @@
     <!-- Cloudflare Turnstile -->
     <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
 
-    <!-- Pyodide (WASM Python) -->
-    <script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+    <!-- HTMX -->
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@2.0.0"></script>
+    <script src="https://unpkg.com/htmx.org/dist/ext/ws.js"></script>
+
+    {% block extra_head %}{% endblock %}
 
     <!-- Tailwind (Output) -->
     <link rel="stylesheet" href="{% static 'css/output.css' %}">

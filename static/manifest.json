@@ -1,11 +1,19 @@
 {
     "name": "Kiri Research Labs",
     "short_name": "Kiri",
-    "description": "The Post-Compute Research Lab",
+    "description": "The operating system for modern research.",
     "start_url": "/",
+    "scope": "/",
+    "id": "/",
     "display": "standalone",
     "background_color": "#0F2F1B",
     "theme_color": "#2E9A4F",
+    "orientation": "any",
+    "categories": [
+        "productivity",
+        "research"
+    ],
+    "prefer_related_applications": false,
     "icons": [
         {
             "src": "/static/images/icons/icon-192x192.png",

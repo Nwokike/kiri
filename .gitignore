@@ -40,3 +40,19 @@ logs/
 
 # Node modules
 node_modules/
+
+# Huey task queue database
+huey.sqlite3
+
+# SQLite WAL files
+*.sqlite3-shm
+*.sqlite3-wal
+
+# Test artifacts
+test_output.txt
+.coverage
+htmlcov/
+.pytest_cache/
+
+# Audit reports (generated, not source)
+AUDIT_*.md

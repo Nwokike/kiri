@@ -9,7 +9,7 @@ from django.utils import timezone
 import shutil
 
 # Configure Huey with SQLite backend
-huey = SqliteHuey(filename=settings.BASE_DIR / 'db.sqlite3')
+huey = SqliteHuey(filename=str(settings.BASE_DIR / 'db.sqlite3'))
 
 @task()
 def update_project_hot_status():

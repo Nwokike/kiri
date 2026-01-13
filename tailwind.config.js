@@ -12,78 +12,69 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        border: "hsl(var(--border))",
-        input: "hsl(var(--input))",
-        ring: "hsl(var(--ring))",
-        background: "hsl(var(--background))",
-        foreground: "hsl(var(--foreground))",
-        // Brand Colors
-        'brand': {
-          DEFAULT: '#18181B', // Zinc 900
-          hover: '#27272A',   // Zinc 800
-          foreground: "#FAFAFA",
-          green: "#10B981",
-          "green-dark": "#059669",
-          gold: "#F59E0B",
+        // Kiri Brand Colors (from logo)
+        'kiri': {
+          green: '#0D7C3D',
+          'green-dark': '#0A5C2C',
+          'green-light': '#E8F5ED',
+          'green-hover': '#0B6A34',
+          gold: '#C4992E',
+          'gold-dark': '#A67D1F',
+          'gold-light': '#FDF5E6',
+          'gold-hover': '#B38A28',
         },
-        'brand-green': {
-          DEFAULT: '#10B981', // Emerald 500
-          dark: '#059669',    // Emerald 600
-        },
-        'brand-gold': {
-          DEFAULT: '#F59E0B', // Amber 500
-          dark: '#D97706',    // Amber 600
-        },
-        'accent': {
-          DEFAULT: '#3B82F6', // Blue 500 (Subtle accents)
-          hover: '#2563EB',   // Blue 600
-        },
-        // Semantic Colors
-        'success': '#10B981', // Emerald 500
-        'warning': '#F59E0B', // Amber 500
-        'error': '#EF4444',   // Red 500
 
         // Structure Colors (Light Mode)
         'bg': {
           primary: '#FFFFFF',
-          secondary: '#FAFAFA', // Zinc 50
-          tertiary: '#F4F4F5',  // Zinc 100
+          secondary: '#F8F9FA',
+          tertiary: '#E9ECEF',
         },
         'border': {
-          DEFAULT: '#E4E4E7',   // Zinc 200
-          strong: '#D4D4D8',    // Zinc 300
+          DEFAULT: '#DEE2E6',
+          strong: '#ADB5BD',
         },
         'text': {
-          primary: '#18181B',   // Zinc 900
-          secondary: '#52525B', // Zinc 600
-          tertiary: '#71717A',  // Zinc 500
+          primary: '#212529',
+          secondary: '#495057',
+          tertiary: '#6C757D',
+          muted: '#ADB5BD',
         },
 
-        // Dark Mode (Cyberpunk Research)
+        // Dark Mode
         'dark': {
-          bg: '#09090B',        // Zinc 950
-          surface: '#18181B',   // Zinc 900
-          border: '#27272A',    // Zinc 800
-          text: '#FAFAFA',      // Zinc 50
-          secondary: '#A1A1AA', // Zinc 400
-        }
+          bg: '#121212',
+          surface: '#1E1E1E',
+          'surface-elevated': '#2D2D2D',
+          border: '#3D3D3D',
+          text: '#E4E4E7',
+          secondary: '#A1A1AA',
+        },
+
+        // Semantic Colors
+        'success': '#0D7C3D',
+        'warning': '#C4992E',
+        'error': '#DC3545',
+        'info': '#0D6EFD',
       },
       fontFamily: {
         sans: ['Inter', 'system-ui', '-apple-system', 'sans-serif'],
         mono: ['JetBrains Mono', 'Monaco', 'monospace'],
-        display: ['Outfit', 'Inter', 'sans-serif'],
       },
       borderRadius: {
         'none': '0',
-        'sm': '0.125rem',
-        DEFAULT: '0.25rem',
-        'md': '0.375rem',
-        'lg': '0.5rem',
+        'sm': '4px',
+        DEFAULT: '6px',
+        'md': '8px',
+        'lg': '12px',
+        'xl': '16px',
       },
       boxShadow: {
         'subtle': '0 1px 2px 0 rgba(0, 0, 0, 0.05)',
-        'card': '0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03)',
-      }
+        'card': '0 2px 8px rgba(0, 0, 0, 0.08)',
+        'dropdown': '0 4px 16px rgba(0, 0, 0, 0.12)',
+        'elevated': '0 8px 24px rgba(0, 0, 0, 0.15)',
+      },
     },
   },
   plugins: [],

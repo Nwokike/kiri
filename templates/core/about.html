@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+
+{% block title %}About | Kiri{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-6 py-12">
+    <!-- Hero -->
+    <header class="mb-12">
+        <h1 class="text-4xl font-bold text-[#212529] dark:text-white mb-4">About Kiri</h1>
+        <p class="text-xl text-[#6C757D] dark:text-[#A1A1AA]">The operating system for modern research.</p>
+    </header>
+
+    <!-- Mission -->
+    <section class="mb-12">
+        <h2 class="text-2xl font-semibold text-[#212529] dark:text-white mb-4 flex items-center gap-3">
+            <span class="w-10 h-10 bg-[#E8F5ED] dark:bg-[#0D7C3D]/20 rounded-lg flex items-center justify-center">
+                <i class="fas fa-bullseye text-[#0D7C3D]"></i>
+            </span>
+            Our Mission
+        </h2>
+        <p class="text-[#495057] dark:text-[#A1A1AA] leading-relaxed">
+            Kiri exists to democratize access to research tools and knowledge. We believe that great ideas
+            should be shared freely, and that collaboration accelerates innovation. Our platform brings together
+            researchers, developers, and enthusiasts from around the world to share their work, learn from each
+            other, and build the future together.
+        </p>
+    </section>
+
+    <!-- What We Offer -->
+    <section class="mb-12">
+        <h2 class="text-2xl font-semibold text-[#212529] dark:text-white mb-6 flex items-center gap-3">
+            <span class="w-10 h-10 bg-[#FDF5E6] dark:bg-[#C4992E]/20 rounded-lg flex items-center justify-center">
+                <i class="fas fa-cubes text-[#C4992E]"></i>
+            </span>
+            What We Offer
+        </h2>
+        <div class="grid md:grid-cols-2 gap-6">
+            <div class="p-6 bg-white rounded-xl border border-[#DEE2E6] dark:bg-[#1E1E1E] dark:border-[#3D3D3D]">
+                <i class="fas fa-book text-2xl text-[#0D7C3D] mb-4"></i>
+                <h3 class="text-lg font-semibold text-[#212529] dark:text-white mb-2">Library</h3>
+                <p class="text-sm text-[#6C757D] dark:text-[#A1A1AA]">
+                    A curated collection of research papers, tutorials, and technical write-ups from our community.
+                </p>
+            </div>
+            <div class="p-6 bg-white rounded-xl border border-[#DEE2E6] dark:bg-[#1E1E1E] dark:border-[#3D3D3D]">
+                <i class="fas fa-rocket text-2xl text-[#C4992E] mb-4"></i>
+                <h3 class="text-lg font-semibold text-[#212529] dark:text-white mb-2">Projects</h3>
+                <p class="text-sm text-[#6C757D] dark:text-[#A1A1AA]">
+                    Open-source projects and tools showcased by developers from the Kiri community.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Company -->
+    <section class="mb-12">
+        <h2 class="text-2xl font-semibold text-[#212529] dark:text-white mb-4 flex items-center gap-3">
+            <span class="w-10 h-10 bg-[#E8F5ED] dark:bg-[#0D7C3D]/20 rounded-lg flex items-center justify-center">
+                <i class="fas fa-building text-[#0D7C3D]"></i>
+            </span>
+            Kiri Research Labs
+        </h2>
+        <p class="text-[#495057] dark:text-[#A1A1AA] leading-relaxed">
+            Kiri is developed and maintained by <strong>Kiri Research Labs</strong>, a company dedicated to
+            building tools that empower researchers and developers worldwide. Founded with the vision of
+            making research more accessible, we continue to grow and evolve with input from our community.
+        </p>
+    </section>
+
+    <!-- Contact -->
+    <section class="p-8 bg-gradient-to-r from-[#0D7C3D] to-[#0A5C2C] rounded-xl text-white">
+        <h2 class="text-2xl font-semibold mb-4">Get In Touch</h2>
+        <p class="mb-6 opacity-90">Have questions, feedback, or want to collaborate? We'd love to hear from you.</p>
+        <a href="mailto:hello@kiri.ng"
+            class="inline-flex items-center gap-2 px-6 py-3 bg-white text-[#0D7C3D] font-semibold rounded-lg hover:bg-[#F8F9FA] transition-colors">
+            <i class="fas fa-envelope"></i>
+            Contact Us
+        </a>
+    </section>
+</div>
+{% endblock %}

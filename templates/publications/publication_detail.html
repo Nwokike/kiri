@@ -25,61 +25,64 @@
 {% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto">
+<div class="p-4 max-w-4xl mx-auto">
 
-    <header class="mb-8">
-        <div class="flex items-center gap-2 mb-4 text-sm text-text-tertiary dark:text-dark-secondary">
-            <a href="{% url 'publications:list' %}" class="hover:text-brand-green transition-colors">
-                <i class="fas fa-arrow-left mr-1"></i> Publications
-            </a>
-            <span>/</span>
-            <span>{{ publication.created_at|date:"Y" }}</span>
-        </div>
+    <!-- Breadcrumb -->
+    <nav class="mb-6 text-sm">
+        <a href="{% url 'publications:list' %}" class="text-[#0f62fe] hover:underline">
+            <i class="fas fa-arrow-left mr-1"></i> Publications
+        </a>
+        <span class="text-[#a8a8a8] mx-2">/</span>
+        <span class="text-[#525252] dark:text-[#a8a8a8]">{{ publication.created_at|date:"Y" }}</span>
+    </nav>
 
-        <h1 class="text-4xl md:text-5xl font-display font-bold text-text-primary dark:text-white mb-6 leading-tight">
+    <!-- Article Header -->
+    <header class="mb-8 pb-8 border-b border-[#e0e0e0] dark:border-[#393939]">
+        <h1 class="text-3xl font-semibold text-[#161616] dark:text-white mb-6 leading-tight">
             {{ publication.title }}
         </h1>
 
+        <!-- Meta Info -->
         <div class="flex flex-wrap items-center gap-6 text-sm">
-            <div class="flex items-center gap-2">
+            <div class="flex items-center gap-3">
                 {% if publication.author.github_avatar_url %}
-                <img src="{{ publication.author.github_avatar_url }}" class="w-8 h-8 rounded-full">
+                <img src="{{ publication.author.github_avatar_url }}" class="w-10 h-10 rounded-full">
                 {% else %}
                 <div
-                    class="w-8 h-8 rounded-full bg-brand-gold/20 text-brand-gold flex items-center justify-center font-bold">
-                    {{ publication.author.username|slice:":1" }}
+                    class="w-10 h-10 rounded-full bg-[#0f62fe] text-white flex items-center justify-center font-semibold">
+                    {{ publication.author.username|slice:":2"|upper }}
                 </div>
                 {% endif %}
                 <div>
-                    <span class="block text-text-primary dark:text-white font-medium">{{ publication.author.username
+                    <span class="block font-medium text-[#161616] dark:text-white">{{ publication.author.username
                         }}</span>
-                    <span class="text-text-tertiary dark:text-dark-secondary">Author</span>
+                    <span class="text-[#525252] dark:text-[#a8a8a8]">Author</span>
                 </div>
             </div>
 
-            <div class="border-l border-border h-8 dark:border-dark-border"></div>
+            <div class="h-8 w-px bg-[#e0e0e0] dark:bg-[#393939]"></div>
 
-            <div class="flex flex-col">
-                <span class="text-text-primary dark:text-white font-medium">{{ publication.created_at|date:"F j, Y"
+            <div>
+                <span class="block font-medium text-[#161616] dark:text-white">{{ publication.created_at|date:"F j, Y"
                     }}</span>
-                <span class="text-text-tertiary dark:text-dark-secondary">Version {{ publication.version }}</span>
+                <span class="text-[#525252] dark:text-[#a8a8a8]">Version {{ publication.version }}</span>
             </div>
 
             {% if publication.arxiv_id %}
-            <div class="border-l border-border h-8 dark:border-dark-border"></div>
+            <div class="h-8 w-px bg-[#e0e0e0] dark:bg-[#393939]"></div>
             <a href="https://arxiv.org/abs/{{ publication.arxiv_id }}" target="_blank"
-                class="flex items-center gap-1 text-brand-green hover:underline">
-                <i class="fas fa-external-link-alt"></i> arXiv:{{ publication.arxiv_id }}
+                class="text-[#0f62fe] hover:underline">
+                <i class="fas fa-external-link-alt mr-1"></i> arXiv:{{ publication.arxiv_id }}
             </a>
             {% endif %}
         </div>
 
         {% if publication.contributors.exists %}
         <div class="mt-4 flex flex-wrap gap-2 items-center text-sm">
-            <span class="text-text-secondary dark:text-dark-secondary">With:</span>
+            <span class="text-[#525252] dark:text-[#a8a8a8]">Contributors:</span>
             {% for contributor in publication.contributors.all %}
             <a href="{% url 'users:profile' contributor.username %}"
-                class="px-2 py-1 rounded bg-bg-tertiary text-text-primary hover:bg-brand-green/10 transition-colors dark:bg-dark-surface dark:text-dark-text">
+                class="px-2 py-1 bg-[#f4f4f4] text-[#161616] hover:bg-[#edf5ff] hover:text-[#0f62fe] transition-colors dark:bg-[#393939] dark:text-white">
                 {{ contributor.username }}
             </a>
             {% endfor %}
@@ -87,57 +90,58 @@
         {% endif %}
     </header>
 
+    <!-- Article Content -->
     <article class="prose prose-zinc dark:prose-invert max-w-none mb-12">
         {{ publication.content|render_markdown }}
     </article>
 
+    <!-- Executable Code Section -->
     {% if publication.executable_script %}
-    <div
-        class="mb-12 rounded-xl border border-border bg-bg-secondary overflow-hidden dark:border-dark-border dark:bg-dark-surface">
+    <div class="mb-12 border border-[#e0e0e0] dark:border-[#393939]">
         <div
-            class="flex items-center justify-between px-4 py-3 border-b border-border bg-bg-tertiary dark:border-dark-border dark:bg-black/20">
-            <h3 class="font-mono text-sm font-bold text-text-primary dark:text-white">
-                <i class="fab fa-python mr-2 text-brand-gold"></i> Live Demo
+            class="flex items-center justify-between px-4 py-3 bg-[#f4f4f4] dark:bg-[#393939] border-b border-[#e0e0e0] dark:border-[#525252]">
+            <h3 class="font-mono text-sm font-semibold text-[#161616] dark:text-white">
+                <i class="fab fa-python mr-2 text-[#f1c21b]"></i> Live Demo
             </h3>
-            <button id="run-code-btn" class="btn-primary py-1 px-3 text-xs">
+            <button id="run-code-btn"
+                class="px-4 py-1.5 bg-[#0f62fe] text-white text-xs font-medium hover:bg-[#0353e9] transition-colors">
                 <i class="fas fa-play mr-1"></i> Run Code
             </button>
         </div>
-        <div class="relative group">
+        <div class="relative">
             <pre
-                class="p-4 bg-[#1e1e1e] text-gray-300 text-sm overflow-x-auto"><code>{{ publication.executable_script }}</code></pre>
+                class="p-4 bg-[#161616] text-[#f4f4f4] text-sm overflow-x-auto font-mono"><code>{{ publication.executable_script }}</code></pre>
             <div id="code-overlay"
                 class="absolute inset-0 bg-black/50 hidden items-center justify-center backdrop-blur-sm">
                 <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
             </div>
         </div>
-        <!-- Reference Output area for the runner script -->
         <div id="output-area"
-            class="p-4 bg-black font-mono text-xs text-brand-green border-t border-border dark:border-dark-border min-h-[100px] hidden">
-            <div class="text-gray-500 mb-2">Reference output:</div>
+            class="hidden p-4 bg-[#161616] font-mono text-xs text-[#198038] border-t border-[#393939]">
+            <div class="text-[#a8a8a8] mb-2">Output:</div>
             <pre id="output-content"></pre>
         </div>
-
         <div
-            class="p-4 border-t border-border bg-white dark:bg-dark-bg dark:border-dark-border flex justify-between items-center">
-            <span id="pyodide-status" class="text-xs text-text-tertiary">Kernel Idle</span>
-            <button class="btn-primary text-xs run-python-btn" data-code="{{ publication.executable_script|escapejs }}"
-                data-output="output-content"
+            class="px-4 py-3 bg-[#f4f4f4] dark:bg-[#393939] border-t border-[#e0e0e0] dark:border-[#525252] flex justify-between items-center">
+            <span id="pyodide-status" class="text-xs text-[#a8a8a8]">Kernel Idle</span>
+            <button class="px-3 py-1 text-xs text-[#0f62fe] hover:bg-[#edf5ff] transition-colors run-python-btn"
+                data-code="{{ publication.executable_script|escapejs }}" data-output="output-content"
                 onclick="document.getElementById('output-area').classList.remove('hidden')">
-                <i class="fas fa-play"></i> Run Code
+                <i class="fas fa-terminal mr-1"></i> Show Output
             </button>
         </div>
     </div>
     <div id="script-data" data-code="{{ publication.executable_script|escapejs }}"></div>
     {% endif %}
 
-    <div
-        class="bg-bg-secondary p-6 rounded-xl border border-border dark:bg-dark-surface dark:border-dark-border mb-12 print:hidden">
-        <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
-            <i class="fas fa-quote-right text-brand-gold"></i> Cite this work
-        </h3>
-        <pre
-            class="bg-bg-primary p-4 rounded-lg text-xs font-mono overflow-x-auto text-text-secondary select-all dark:bg-black/30 dark:text-dark-secondary border border-border dark:border-dark-border">@article{kiri_{{ publication.id }},
+    <!-- Citation Block -->
+    <div class="mb-12 border border-[#e0e0e0] dark:border-[#393939]">
+        <div class="px-4 py-3 bg-[#f4f4f4] dark:bg-[#393939] border-b border-[#e0e0e0] dark:border-[#525252]">
+            <h3 class="text-sm font-semibold text-[#161616] dark:text-white">
+                <i class="fas fa-quote-right mr-2 text-[#f1c21b]"></i> Cite this work
+            </h3>
+        </div>
+        <pre class="p-4 text-xs font-mono text-[#525252] dark:text-[#a8a8a8] overflow-x-auto select-all">@article{kiri_{{ publication.id }},
   title = { {{ publication.title|bibtex_escape }} },
   author = { {{ publication.author.username|bibtex_escape }} },
   journal = { Kiri Research Labs },
@@ -146,15 +150,19 @@
 }</pre>
     </div>
 
+    <!-- Print Footer -->
     <div class="hidden print:block mt-8 pt-4 border-t border-gray-300 text-xs text-gray-500">
         <p>Printed from Kiri Research Labs - {{ request.build_absolute_uri }}</p>
         <p>&copy; {% now "Y" %} {{ publication.author.username }}</p>
     </div>
 
+    <!-- Comments -->
     <div class="print:hidden">
         {% include "core/partials/comments_section.html" with comments=comments object=publication %}
     </div>
 </div>
+
+<div class="h-16 md:hidden"></div>
 {% endblock %}
 
 {% block extra_js %}

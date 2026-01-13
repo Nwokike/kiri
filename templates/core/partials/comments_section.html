@@ -1,18 +1,17 @@
 {% load static %}
 {% load core_tags %}
-<div id="comments-section" class="mt-12 border-t border-border pt-8 dark:border-dark-border">
-    <h3 class="text-xl font-display font-bold mb-6 dark:text-white">Discussion</h3>
+
+<div id="comments-section" class="mt-12 border-t border-[#e0e0e0] pt-8 dark:border-[#393939]">
+    <h3 class="text-xl font-semibold mb-6 text-[#161616] dark:text-white">Discussion</h3>
 
     <!-- New Comment Form -->
     {% if user.is_authenticated %}
     <div class="mb-8 flex gap-4">
         <div class="shrink-0">
             {% if user.github_avatar_url %}
-            <img src="{{ user.github_avatar_url }}"
-                class="w-10 h-10 rounded-sm border border-border dark:border-dark-border">
+            <img src="{{ user.github_avatar_url }}" class="w-10 h-10 border border-[#e0e0e0] dark:border-[#393939]">
             {% else %}
-            <div
-                class="w-10 h-10 rounded-sm bg-brand text-white flex items-center justify-center font-bold text-xs dark:bg-dark-border">
+            <div class="w-10 h-10 bg-[#0f62fe] text-white flex items-center justify-center font-bold text-xs">
                 {{ user.username|slice:":2"|upper }}</div>
             {% endif %}
         </div>
@@ -21,15 +20,17 @@
             {% csrf_token %}
             {{ comment_form.content }}
             <div class="mt-2 flex justify-end">
-                <button type="submit" class="btn-primary text-xs py-2">Post Comment</button>
+                <button type="submit"
+                    class="px-4 py-2 bg-[#0f62fe] text-white text-xs font-medium hover:bg-[#0353e9] transition-colors">Post
+                    Comment</button>
             </div>
         </form>
     </div>
     {% else %}
-    <div class="mb-8 p-4 bg-bg-tertiary rounded-lg text-center dark:bg-dark-surface">
-        <p class="text-text-secondary dark:text-dark-secondary text-sm">
+    <div class="mb-8 p-4 bg-[#f4f4f4] text-center dark:bg-[#393939]">
+        <p class="text-[#525252] dark:text-[#a8a8a8] text-sm">
             <a href="{% url 'account_login' %}?next={{ request.path }}"
-                class="font-bold underline hover:text-brand-green">Log in</a> to join the discussion.
+                class="font-bold underline hover:text-[#0f62fe]">Log in</a> to join the discussion.
         </p>
     </div>
     {% endif %}
@@ -39,8 +40,8 @@
         {% for comment in comments %}
         {% include "core/partials/comment_item.html" with comment=comment %}
         {% empty %}
-        <p class="text-text-tertiary text-sm italic text-center dark:text-dark-secondary" id="no-comments-msg">No
-            comments yet. Be the first to start the conversation.</p>
+        <p class="text-[#a8a8a8] text-sm italic text-center" id="no-comments-msg">No comments yet. Be the first to start
+            the conversation.</p>
         {% endfor %}
     </div>
 </div>

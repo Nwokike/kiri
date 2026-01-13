@@ -1,99 +1,112 @@
 {% extends "base.html" %}
 
-{% block title %}Publications | Kiri Research Labs{% endblock %}
+{% block title %}Library | Kiri{% endblock %}
 
 {% block content %}
-<div class="space-y-8">
-    <!-- Header -->
-    <header
-        class="flex flex-col md:flex-row md:items-center justify-between gap-6 pb-8 border-b border-border dark:border-dark-border">
-        <div>
-            <h1 class="text-3xl font-bold font-display text-text-primary dark:text-white mb-2">Publications</h1>
-            <p class="text-text-secondary dark:text-dark-secondary">
-                Curated research papers and technical demonstrations.
-            </p>
+<div class="max-w-7xl mx-auto px-6 py-8">
+    <!-- Page Header -->
+    <header class="mb-8">
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+            <div>
+                <h1 class="text-2xl font-bold text-[#212529] dark:text-white">Library</h1>
+                <p class="text-[#6C757D] dark:text-[#A1A1AA] mt-1">
+                    Research papers, tutorials, and technical publications from the community.
+                </p>
+            </div>
+
+            {% if user.is_authenticated %}
+            <a href="#"
+                class="px-5 py-2.5 bg-[#0D7C3D] text-white text-sm font-semibold rounded-lg hover:bg-[#0A5C2C] transition-colors">
+                <i class="fas fa-plus mr-2"></i>New Publication
+            </a>
+            {% endif %}
         </div>
 
         <!-- Search -->
-        <form method="get" action="" class="relative">
-            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-text-tertiary"></i>
-            <input type="text" name="q" placeholder="Search publications..." value="{{ request.GET.q|default:'' }}"
-                class="w-full md:w-72 pl-10 pr-4 py-2 bg-bg-secondary border border-border rounded-lg text-sm focus:ring-1 focus:ring-brand-green focus:border-brand-green dark:bg-dark-surface dark:border-dark-border dark:text-white placeholder-text-tertiary">
-        </form>
+        <div class="mt-6">
+            <div class="relative max-w-md">
+                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-[#ADB5BD]"></i>
+                <input type="text" placeholder="Search publications..."
+                    class="w-full h-12 pl-12 pr-4 bg-white border border-[#DEE2E6] rounded-lg text-sm focus:border-[#0D7C3D] focus:ring-2 focus:ring-[#0D7C3D]/20 outline-none transition-all dark:bg-[#1E1E1E] dark:border-[#3D3D3D] dark:text-white">
+            </div>
+        </div>
     </header>
 
-    <!-- Content Grid -->
-    <div class="grid gap-8">
+    <!-- Publications List -->
+    <div class="space-y-4">
         {% for publication in publications %}
         <article
-            class="group flex flex-col md:flex-row gap-6 md:items-start p-6 rounded-xl border border-transparent hover:border-border hover:bg-bg-secondary dark:hover:bg-dark-surface/50 dark:hover:border-dark-border transition-all">
-            <div class="md:w-48 shrink-0 flex flex-col gap-2 text-sm text-text-tertiary dark:text-dark-secondary">
-                <span class="font-mono text-brand-green">{{ publication.created_at|date:"F j, Y" }}</span>
-                <div class="flex items-center gap-2">
-                    <i class="fas fa-user-circle"></i>
-                    <span>{{ publication.author.username }}</span>
+            class="bg-white rounded-xl border border-[#DEE2E6] p-6 hover:shadow-lg hover:border-[#0D7C3D] transition-all dark:bg-[#1E1E1E] dark:border-[#3D3D3D] dark:hover:border-[#0D7C3D] group">
+            <div class="flex gap-5">
+                <!-- Icon -->
+                <div
+                    class="w-14 h-14 shrink-0 bg-gradient-to-br from-[#0D7C3D] to-[#0A5C2C] rounded-lg flex items-center justify-center text-white">
+                    <i class="fas fa-file-alt text-xl"></i>
                 </div>
-                {% if publication.executable_script %}
-                <div class="flex items-center gap-2 text-brand-gold mt-1">
-                    <i class="fab fa-python"></i>
-                    <span>Interactive</span>
-                </div>
-                {% endif %}
-            </div>
 
-            <div class="flex-1 min-w-0">
-                <h2
-                    class="text-xl font-bold font-display text-text-primary dark:text-white mb-2 group-hover:text-brand-green transition-colors">
-                    <a href="{% url 'publications:detail' publication.slug %}" class="focus:outline-none">
-                        {{ publication.title }}
-                    </a>
-                </h2>
-                <p class="text-text-secondary dark:text-dark-secondary mb-4 line-clamp-2">
-                    {{ publication.abstract }}
-                </p>
-                <div class="flex items-center gap-4 text-xs font-medium">
-                    <a href="{% url 'publications:detail' publication.slug %}" class="btn-secondary py-1.5 px-3">
-                        Read Paper
-                    </a>
-                    {% if publication.executable_script %}
-                    <a href="{% url 'publications:detail' publication.slug %}#run-code-btn"
-                        class="text-brand-gold hover:underline">
-                        <i class="fas fa-play mr-1"></i> Try Demo
-                    </a>
-                    {% endif %}
+                <!-- Content -->
+                <div class="flex-1 min-w-0">
+                    <h3
+                        class="text-lg font-semibold text-[#212529] dark:text-white mb-1 group-hover:text-[#0D7C3D] transition-colors">
+                        <a href="{% url 'publications:detail' publication.slug %}">{{ publication.title }}</a>
+                    </h3>
+                    <p class="text-sm text-[#6C757D] dark:text-[#A1A1AA] mb-3">
+                        {{ publication.author.username }} · {{ publication.created_at|date:"M d, Y" }}
+                    </p>
+
+                    <!-- Tags -->
+                    <div class="flex flex-wrap gap-2">
+                        <span class="px-2 py-1 text-[10px] font-semibold bg-[#E8F5ED] text-[#0D7C3D] rounded">
+                            v{{ publication.version }}
+                        </span>
+                        {% if publication.arxiv_id %}
+                        <span class="px-2 py-1 text-[10px] font-semibold bg-[#FDF5E6] text-[#C4992E] rounded">
+                            arXiv
+                        </span>
+                        {% endif %}
+                    </div>
                 </div>
+
+                <!-- Arrow -->
+                <i
+                    class="fas fa-chevron-right text-[#DEE2E6] group-hover:text-[#0D7C3D] self-center transition-colors"></i>
             </div>
         </article>
-
         {% empty %}
-        <div class="py-12 text-center text-text-tertiary">
-            <i class="fas fa-book-open text-4xl mb-4 opacity-50"></i>
-            <p>No publications found.</p>
+        <div class="py-16 text-center">
+            <div
+                class="w-20 h-20 mx-auto mb-6 bg-[#F8F9FA] dark:bg-[#2D2D2D] rounded-full flex items-center justify-center">
+                <i class="fas fa-book-open text-3xl text-[#DEE2E6] dark:text-[#3D3D3D]"></i>
+            </div>
+            <h3 class="text-lg font-semibold text-[#212529] dark:text-white mb-2">No publications yet</h3>
+            <p class="text-[#6C757D] dark:text-[#A1A1AA]">Be the first to share your research!</p>
         </div>
         {% endfor %}
     </div>
 
     <!-- Pagination -->
     {% if is_paginated %}
-    <div class="flex justify-center pt-8">
+    <div class="flex items-center justify-between mt-8 pt-6 border-t border-[#DEE2E6] dark:border-[#3D3D3D]">
+        <span class="text-sm text-[#6C757D] dark:text-[#A1A1AA]">
+            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+        </span>
         <div class="flex items-center gap-2">
             {% if page_obj.has_previous %}
             <a href="?page={{ page_obj.previous_page_number }}"
-                class="px-4 py-2 rounded-lg border border-border text-text-secondary hover:text-text-primary hover:border-text-tertiary text-sm transition-colors dark:border-dark-border dark:text-dark-secondary dark:hover:text-white">
-                Previous
+                class="px-4 py-2 text-sm text-[#0D7C3D] hover:bg-[#E8F5ED] rounded-lg transition-colors">
+                <i class="fas fa-chevron-left mr-1"></i> Previous
             </a>
             {% endif %}
-            <span class="px-4 py-2 text-sm text-text-tertiary dark:text-dark-secondary">
-                Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-            </span>
             {% if page_obj.has_next %}
             <a href="?page={{ page_obj.next_page_number }}"
-                class="px-4 py-2 rounded-lg border border-border text-text-secondary hover:text-text-primary hover:border-text-tertiary text-sm transition-colors dark:border-dark-border dark:text-dark-secondary dark:hover:text-white">
-                Next
+                class="px-4 py-2 text-sm text-[#0D7C3D] hover:bg-[#E8F5ED] rounded-lg transition-colors">
+                Next <i class="fas fa-chevron-right ml-1"></i>
             </a>
             {% endif %}
         </div>
     </div>
     {% endif %}
 </div>
+
+<div class="h-20 md:hidden"></div>
 {% endblock %}

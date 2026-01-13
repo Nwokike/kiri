@@ -5,80 +5,116 @@
 {% block title %}{{ project.name }} | Kiri Projects{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto space-y-8">
+<div class="p-4 max-w-4xl mx-auto">
 
-    <!-- Hero Section -->
-    <div class="space-y-4">
-        <div class="flex items-start justify-between">
-            <div>
-                <div class="flex items-center gap-2 mb-2">
-                    <span class="text-xs font-mono font-bold uppercase text-brand-green">{{ project.get_category_display
-                        }}</span>
+    <!-- Breadcrumb -->
+    <nav class="mb-6 text-sm">
+        <a href="{% url 'projects:list' %}" class="text-[#0f62fe] hover:underline">
+            <i class="fas fa-arrow-left mr-1"></i> Projects
+        </a>
+        <span class="text-[#a8a8a8] mx-2">/</span>
+        <span class="text-[#525252] dark:text-[#a8a8a8]">{{ project.get_category_display }}</span>
+    </nav>
+
+    <!-- Project Header -->
+    <header class="mb-8 pb-8 border-b border-[#e0e0e0] dark:border-[#393939]">
+        <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-6">
+            <div class="flex-1">
+                <!-- Badges -->
+                <div class="flex items-center gap-2 mb-3">
+                    <span class="px-2 py-1 text-xs font-medium bg-[#edf5ff] text-[#0f62fe] uppercase">
+                        {{ project.get_category_display }}
+                    </span>
                     {% if project.is_hot %}
-                    <span
-                        class="text-[10px] font-bold text-brand-gold bg-brand-gold/10 px-1.5 py-0.5 rounded border border-brand-gold/20">Trending</span>
+                    <span class="px-2 py-1 text-xs font-medium bg-[#f1c21b]/10 text-[#8e6a00] uppercase">
+                        <i class="fas fa-fire mr-1"></i> Trending
+                    </span>
                     {% endif %}
                 </div>
-                <h1 class="text-3xl md:text-4xl font-display font-bold text-text-primary dark:text-white mb-2">{{
-                    project.name }}</h1>
-                <p class="text-lg text-text-secondary dark:text-dark-secondary">{{ project.description }}</p>
+
+                <h1 class="text-3xl font-semibold text-[#161616] dark:text-white mb-3">
+                    {{ project.name }}
+                </h1>
+                <p class="text-[#525252] dark:text-[#a8a8a8]">
+                    {{ project.description }}
+                </p>
             </div>
 
+            <!-- Actions -->
             <div class="flex flex-col gap-2 shrink-0">
-                <a href="{{ project.github_repo_url }}" target="_blank" class="btn-primary">
-                    <i class="fab fa-github"></i> Star <span class="bg-black/10 px-1.5 rounded text-xs ml-1">{{
-                        project.stars_count }}</span>
+                <a href="{{ project.github_repo_url }}" target="_blank"
+                    class="px-4 py-2 bg-[#0f62fe] text-white text-sm font-medium hover:bg-[#0353e9] transition-colors inline-flex items-center gap-2">
+                    <i class="fab fa-github"></i>
+                    Star on GitHub
+                    <span class="px-2 py-0.5 bg-white/20 text-xs">{{ project.stars_count }}</span>
                 </a>
                 {% if project.demo_url %}
-                <a href="{{ project.demo_url }}" target="_blank" class="btn-secondary">
+                <a href="{{ project.demo_url }}" target="_blank"
+                    class="px-4 py-2 border border-[#0f62fe] text-[#0f62fe] text-sm font-medium hover:bg-[#edf5ff] transition-colors inline-flex items-center gap-2">
                     <i class="fas fa-external-link-alt"></i> Live Demo
                 </a>
                 {% endif %}
             </div>
         </div>
 
+        <!-- Meta Stats -->
         <div
-            class="flex items-center gap-6 text-sm text-text-tertiary border-b border-border pb-6 dark:border-dark-border dark:text-dark-secondary">
+            class="flex flex-wrap items-center gap-6 mt-6 pt-6 border-t border-[#e0e0e0] dark:border-[#393939] text-sm text-[#525252] dark:text-[#a8a8a8]">
             <div class="flex items-center gap-2">
                 {% if project.submitted_by.github_avatar_url %}
-                <img src="{{ project.submitted_by.github_avatar_url }}" class="w-6 h-6 rounded-sm">
+                <img src="{{ project.submitted_by.github_avatar_url }}" class="w-6 h-6 rounded-full">
                 {% else %}
-                <i class="fas fa-user-circle"></i>
+                <div
+                    class="w-6 h-6 rounded-full bg-[#0f62fe] text-white flex items-center justify-center text-[10px] font-medium">
+                    {{ project.submitted_by.username|slice:":1"|upper }}
+                </div>
                 {% endif %}
                 <a href="{% url 'users:profile' project.submitted_by.username %}"
-                    class="hover:text-text-primary dark:hover:text-white">{{ project.submitted_by.username }}</a>
+                    class="hover:text-[#0f62fe] transition-colors">
+                    {{ project.submitted_by.username }}
+                </a>
             </div>
+
             <div class="flex items-center gap-1" title="Forks">
-                <i class="fas fa-code-branch"></i> {{ project.forks_count }}
+                <i class="fas fa-code-branch"></i>
+                <span>{{ project.forks_count }} forks</span>
             </div>
-            <div class="flex items-center gap-1" title="Language">
-                <span class="w-2 h-2 rounded-full bg-brand-gold"></span> {{ project.language }}
+
+            <div class="flex items-center gap-2" title="Language">
+                <span class="w-3 h-3 rounded-full bg-[#f1c21b]"></span>
+                <span>{{ project.language }}</span>
             </div>
-            <div class="flex items-center gap-1 ml-auto">
-                <span><i class="far fa-eye"></i> {{ project.view_count }}</span>
+
+            <div class="flex items-center gap-1 ml-auto" title="Views">
+                <i class="far fa-eye"></i>
+                <span>{{ project.view_count }} views</span>
             </div>
+
             {% if project.huggingface_url %}
-            <a href="{{ project.huggingface_url }}" target="_blank"
-                class="hover:text-brand-gold transition-colors ml-4">
-                <img src="https://huggingface.co/front/assets/huggingface_logo-noborder.svg"
-                    class="w-5 h-5 inline opacity-70 hover:opacity-100">
+            <a href="{{ project.huggingface_url }}" target="_blank" class="hover:opacity-75 transition-opacity"
+                title="Hugging Face">
+                <img src="https://huggingface.co/front/assets/huggingface_logo-noborder.svg" class="w-5 h-5">
             </a>
             {% endif %}
         </div>
-    </div>
+    </header>
 
+    <!-- Topics -->
     {% if project.topics %}
-    <div class="flex flex-wrap gap-2">
+    <div class="flex flex-wrap gap-2 mb-8">
         {% for topic in project.topics %}
         <span
-            class="text-xs px-2 py-1 rounded-full bg-bg-tertiary text-text-secondary border border-border dark:bg-dark-surface dark:border-dark-border dark:text-dark-secondary">
+            class="px-3 py-1 text-xs bg-[#f4f4f4] text-[#525252] border border-[#e0e0e0] dark:bg-[#393939] dark:border-[#525252] dark:text-[#a8a8a8]">
             #{{ topic }}
         </span>
         {% endfor %}
     </div>
     {% endif %}
 
+    <!-- Comments -->
     {% include "core/partials/comments_section.html" with comments=comments object=project %}
 
 </div>
+
+<div class="h-16 md:hidden"></div>
 {% endblock %}

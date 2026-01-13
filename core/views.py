@@ -15,7 +15,7 @@ def home(request):
     from projects.models import Project
     from publications.models import Publication
 
-    # Get featured projects - prioritize HOT, then sort by stars (single optimized query)
+    # Get featured projects - prioritize HOT, then sort by stars
     featured_projects = Project.objects.filter(
         is_approved=True
     ).annotate(
@@ -37,6 +37,26 @@ def home(request):
     })
 
 
+def about(request):
+    """About page."""
+    return render(request, "core/about.html")
+
+
+def privacy(request):
+    """Privacy policy page."""
+    return render(request, "core/privacy.html")
+
+
+def terms(request):
+    """Terms of service page."""
+    return render(request, "core/terms.html")
+
+
+def offline(request):
+    """Offline page for PWA."""
+    return render(request, "offline.html")
+
+
 def health(request):
     """Health check endpoint for deployment verification."""
     return JsonResponse({
@@ -44,9 +64,6 @@ def health(request):
         "service": "kiri",
     })
 
-
-def universal_translator(request):
-    return render(request, "demos/universal_translator.html")
 
 def serviceworker(request):
     response = render(request, "serviceworker.js")
@@ -57,9 +74,7 @@ def serviceworker(request):
 @login_required
 @require_POST
 def add_comment(request, content_type_id, object_id):
-    """
-    HTMX View to add a comment.
-    """
+    """HTMX View to add a comment."""
     content_type = get_object_or_404(ContentType, id=content_type_id)
     obj = get_object_or_404(content_type.model_class(), id=object_id)
     
@@ -98,7 +113,7 @@ def add_comment(request, content_type_id, object_id):
         if not is_testing:
             cache.set(cache_key, True, 30)
         
-        # Return the new comment rendered as HTML (for appending)
+        # Return the new comment rendered as HTML
         return render(request, 'core/partials/comment_item.html', {'comment': comment})
     
     # Return errors for HTMX to display

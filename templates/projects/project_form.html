@@ -1,22 +1,22 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Submit Project | Colosseum{% endblock %}
+{% block title %}Submit Project | Kiri Research Labs{% endblock %}
 
 {% block content %}
-<div class="max-w-2xl mx-auto">
+<div class="p-4 max-w-2xl mx-auto">
     <div class="mb-8">
-        <h1 class="text-3xl font-display font-bold text-text-primary dark:text-white mb-2">Submit to the Colosseum</h1>
-        <p class="text-text-secondary dark:text-dark-secondary">Showcase your AI research, tools, or experiments.
-            Projects are synced with GitHub.</p>
+        <h1 class="text-2xl font-semibold text-[#161616] dark:text-white mb-2">Submit to the Colosseum</h1>
+        <p class="text-[#525252] dark:text-[#a8a8a8]">Showcase your AI research, tools, or experiments. Projects are
+            synced with GitHub.</p>
     </div>
 
-    <div class="card p-6 md:p-8 dark:bg-dark-surface dark:border-dark-border">
+    <div class="bg-white border border-[#e0e0e0] p-6 md:p-8 dark:bg-[#262626] dark:border-[#393939]">
         <form method="post" class="space-y-6">
             {% csrf_token %}
 
             {% if form.non_field_errors %}
-            <div class="p-3 bg-red-50 text-red-700 rounded text-sm dark:bg-red-900/20 dark:text-red-400">
+            <div class="p-3 bg-[#fff1f1] text-[#da1e28] text-sm border-l-4 border-[#da1e28]">
                 {{ form.non_field_errors }}
             </div>
             {% endif %}
@@ -24,42 +24,41 @@
             <!-- Name -->
             <div class="space-y-1">
                 <label for="{{ form.name.id_for_label }}"
-                    class="block text-sm font-medium text-text-primary dark:text-dark-text">Project Name</label>
+                    class="block text-sm font-medium text-[#161616] dark:text-white">Project Name</label>
                 {{ form.name }}
                 {% if form.name.errors %}
-                <p class="text-xs text-error mt-1">{{ form.name.errors.0 }}</p>
+                <p class="text-xs text-[#da1e28] mt-1">{{ form.name.errors.0 }}</p>
                 {% endif %}
             </div>
 
             <!-- Category -->
             <div class="space-y-1">
                 <label for="{{ form.category.id_for_label }}"
-                    class="block text-sm font-medium text-text-primary dark:text-dark-text">Category</label>
+                    class="block text-sm font-medium text-[#161616] dark:text-white">Category</label>
                 {{ form.category }}
                 {% if form.category.errors %}
-                <p class="text-xs text-error mt-1">{{ form.category.errors.0 }}</p>
+                <p class="text-xs text-[#da1e28] mt-1">{{ form.category.errors.0 }}</p>
                 {% endif %}
             </div>
 
             <!-- Description -->
             <div class="space-y-1">
                 <label for="{{ form.description.id_for_label }}"
-                    class="block text-sm font-medium text-text-primary dark:text-dark-text">Description</label>
+                    class="block text-sm font-medium text-[#161616] dark:text-white">Description</label>
                 {{ form.description }}
                 {% if form.description.errors %}
-                <p class="text-xs text-error mt-1">{{ form.description.errors.0 }}</p>
+                <p class="text-xs text-[#da1e28] mt-1">{{ form.description.errors.0 }}</p>
                 {% endif %}
             </div>
 
             <!-- GitHub URL -->
             <div class="space-y-1">
                 <label for="{{ form.github_repo_url.id_for_label }}"
-                    class="block text-sm font-medium text-text-primary dark:text-dark-text">GitHub Repository
-                    URL</label>
+                    class="block text-sm font-medium text-[#161616] dark:text-white">GitHub Repository URL</label>
                 {{ form.github_repo_url }}
-                <p class="text-xs text-text-tertiary dark:text-dark-secondary">{{ form.github_repo_url.help_text }}</p>
+                <p class="text-xs text-[#a8a8a8]">{{ form.github_repo_url.help_text }}</p>
                 {% if form.github_repo_url.errors %}
-                <p class="text-xs text-error mt-1">{{ form.github_repo_url.errors.0 }}</p>
+                <p class="text-xs text-[#da1e28] mt-1">{{ form.github_repo_url.errors.0 }}</p>
                 {% endif %}
             </div>
 
@@ -67,14 +66,12 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div class="space-y-1">
                     <label for="{{ form.demo_url.id_for_label }}"
-                        class="block text-sm font-medium text-text-primary dark:text-dark-text">Demo URL
-                        (Optional)</label>
+                        class="block text-sm font-medium text-[#161616] dark:text-white">Demo URL (Optional)</label>
                     {{ form.demo_url }}
                 </div>
                 <div class="space-y-1">
                     <label for="{{ form.huggingface_url.id_for_label }}"
-                        class="block text-sm font-medium text-text-primary dark:text-dark-text">Hugging Face
-                        (Optional)</label>
+                        class="block text-sm font-medium text-[#161616] dark:text-white">Hugging Face (Optional)</label>
                     {{ form.huggingface_url }}
                 </div>
             </div>
@@ -82,22 +79,24 @@
             <!-- Topics -->
             <div class="space-y-1">
                 <label for="{{ form.topics.id_for_label }}"
-                    class="block text-sm font-medium text-text-primary dark:text-dark-text">Topics (Tags)</label>
+                    class="block text-sm font-medium text-[#161616] dark:text-white">Topics (Tags)</label>
                 {{ form.topics }}
-                <p class="text-xs text-text-tertiary dark:text-dark-secondary">{{ form.topics.help_text }}</p>
+                <p class="text-xs text-[#a8a8a8]">{{ form.topics.help_text }}</p>
             </div>
 
             <!-- Turnstile -->
             <div class="pt-2">
                 {{ form.turnstile }}
                 {% if form.turnstile.errors %}
-                <p class="text-xs text-error mt-1">{{ form.turnstile.errors.0 }}</p>
+                <p class="text-xs text-[#da1e28] mt-1">{{ form.turnstile.errors.0 }}</p>
                 {% endif %}
             </div>
 
             <div class="pt-4 flex items-center justify-end gap-3">
-                <a href="{% url 'projects:list' %}" class="btn-secondary text-sm">Cancel</a>
-                <button type="submit" class="btn-primary text-sm">
+                <a href="{% url 'projects:list' %}"
+                    class="px-4 py-2 border border-[#e0e0e0] text-[#525252] text-sm hover:bg-[#f4f4f4] transition-colors dark:border-[#393939] dark:text-[#a8a8a8] dark:hover:bg-[#393939]">Cancel</a>
+                <button type="submit"
+                    class="px-4 py-2 bg-[#0f62fe] text-white text-sm font-medium hover:bg-[#0353e9] transition-colors">
                     Submit Project
                 </button>
             </div>
@@ -105,6 +104,7 @@
     </div>
 </div>
 
+<div class="h-16 md:hidden"></div>
 {% endblock %}
 
 {% block extra_css %}

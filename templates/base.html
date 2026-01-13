@@ -6,87 +6,181 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{% block title %}Kiri Research Board{% endblock %}</title>
+    <title>{% block title %}Kiri{% endblock %}</title>
     <meta name="description"
-        content="{% block meta_description %}The operating system for modern research. Join the Projects.{% endblock %}">
+        content="{% block meta_description %}The operating system for modern research.{% endblock %}">
     <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
 
-    <!-- Open Graph / Social -->
+    <!-- Open Graph -->
     <meta property="og:type" content="website">
-    <meta property="og:title" content="{% block og_title %}Kiri Research Labs{% endblock %}">
+    <meta property="og:title" content="{% block og_title %}Kiri{% endblock %}">
     <meta property="og:description"
         content="{% block og_description %}The operating system for modern research.{% endblock %}">
-    <meta property="og:image" content="{% static 'images/logos/logo.png' %}">
-    <meta name="twitter:card" content="summary_large_image">
 
-    <!-- Fonts: Inter + JetBrains Mono -->
+    <!-- Inter Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link
-        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@500;700&display=swap"
-        rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 
-    <!-- Cloudflare Turnstile -->
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
-
-    <!-- HTMX -->
     <!-- HTMX -->
     <script src="https://unpkg.com/htmx.org@2.0.0"></script>
-    <script src="https://unpkg.com/htmx.org/dist/ext/ws.js"></script>
 
     {% block extra_head %}{% endblock %}
 
-    <!-- Tailwind (Output) -->
+    <!-- Tailwind CSS -->
     <link rel="stylesheet" href="{% static 'css/output.css' %}">
 
     <!-- Theme Init -->
     <script src="{% static 'js/theme_init.js' %}"></script>
 
     {% progressive_web_app_meta %}
-    {% block extra_css %}{% endblock %}
+
+    <style>
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        /* Sidebar states */
+        #sidebar {
+            width: 56px;
+        }
+
+        #sidebar.expanded {
+            width: 220px;
+        }
+
+        #sidebar .nav-label {
+            opacity: 0;
+        }
+
+        #sidebar.expanded .nav-label {
+            opacity: 1;
+        }
+    </style>
 </head>
 
-<body
-    class="h-full bg-bg-primary text-text-primary font-sans antialiased selection:bg-brand selection:text-white dark:bg-dark-bg dark:text-dark-text overflow-hidden flex">
+<body class="h-full bg-[#F8F9FA] text-[#212529] dark:bg-[#121212] dark:text-[#E4E4E7]">
 
-    <!-- Desktop Sidebar -->
-    {% include "partials/_sidebar.html" %}
+    <!-- ===== HEADER ===== -->
+    <header
+        class="fixed top-0 left-0 right-0 h-14 bg-white border-b border-[#DEE2E6] flex items-center z-50 dark:bg-[#1E1E1E] dark:border-[#3D3D3D]">
 
-    <!-- Main Content Area -->
-    <div class="flex-1 flex flex-col h-screen overflow-hidden relative">
+        <!-- Left: Hamburger + Logo -->
+        <div class="flex items-center h-full">
+            <button id="sidebar-toggle"
+                class="w-14 h-14 flex items-center justify-center text-[#495057] hover:bg-[#F8F9FA] dark:text-[#A1A1AA] dark:hover:bg-[#2D2D2D] transition-colors"
+                title="Toggle sidebar">
+                <i class="fas fa-bars text-lg"></i>
+            </button>
 
-        <!-- Mobile Header -->
-        <header
-            class="md:hidden flex items-center justify-between px-4 h-14 border-b border-border bg-bg-secondary dark:bg-dark-bg dark:border-dark-border sticky top-0 z-30 backdrop-blur-sm bg-opacity-90">
-            <a href="/" class="flex items-center gap-2">
-                <img src="{% static 'images/logos/logo.png' %}" alt="Kiri Logo" class="w-8 h-8 rounded-lg shadow-sm">
-                <span
-                    class="text-xl font-bold font-display tracking-tight text-text-primary dark:text-white">KIRI</span>
+            <a href="/"
+                class="flex items-center h-full px-2 hover:bg-[#F8F9FA] dark:hover:bg-[#2D2D2D] transition-colors">
+                <img src="{% static 'images/logos/logo.png' %}" alt="Kiri" class="h-9 w-auto">
             </a>
-            <div class="flex items-center gap-3">
-                <button id="mobile-theme-toggle"
-                    class="p-2 text-text-tertiary hover:text-text-primary dark:hover:text-white transition-colors">
-                    <i class="fas fa-adjust"></i>
-                </button>
-            </div>
-        </header>
+        </div>
 
-        <!-- Scrollable Content -->
-        <main class="flex-1 overflow-y-auto overflow-x-hidden p-4 md:p-8 scroll-smooth" id="main-content">
+        <!-- Center: Search Bar -->
+        <div class="flex-1 flex justify-center px-4">
+            <div class="relative w-full max-w-lg">
+                <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-[#ADB5BD]"></i>
+                <input type="text" placeholder="Search Kiri..."
+                    class="w-full h-10 pl-10 pr-4 bg-[#F8F9FA] border border-[#DEE2E6] rounded-lg text-sm focus:border-[#0D7C3D] focus:ring-2 focus:ring-[#0D7C3D]/20 focus:bg-white outline-none transition-all dark:bg-[#2D2D2D] dark:border-[#3D3D3D] dark:text-white dark:focus:bg-[#1E1E1E]">
+            </div>
+        </div>
+
+        <!-- Right: Actions -->
+        <div class="flex items-center h-full gap-1 pr-2">
+            <!-- Theme Toggle (Single Icon) -->
+            <button id="theme-toggle"
+                class="w-10 h-10 flex items-center justify-center text-[#495057] hover:bg-[#F8F9FA] rounded-lg dark:text-[#A1A1AA] dark:hover:bg-[#2D2D2D] transition-colors"
+                title="Toggle theme">
+                <i class="fas fa-moon" id="theme-icon-light"></i>
+                <i class="fas fa-sun hidden" id="theme-icon-dark"></i>
+            </button>
+
+            {% if user.is_authenticated %}
+            <!-- Notifications -->
+            <button
+                class="w-10 h-10 flex items-center justify-center text-[#495057] hover:bg-[#F8F9FA] rounded-lg dark:text-[#A1A1AA] dark:hover:bg-[#2D2D2D] transition-colors relative"
+                title="Notifications">
+                <i class="far fa-bell"></i>
+            </button>
+
+            <!-- User Avatar -->
+            <a href="{% url 'users:profile' user.username %}" class="w-10 h-10 flex items-center justify-center">
+                {% if user.github_avatar_url %}
+                <img src="{{ user.github_avatar_url }}" alt="{{ user.username }}" class="w-8 h-8 rounded-full">
+                {% else %}
+                <div
+                    class="w-8 h-8 rounded-full bg-gradient-to-br from-[#0D7C3D] to-[#0A5C2C] text-white flex items-center justify-center text-xs font-semibold">
+                    {{ user.username|slice:":2"|upper }}
+                </div>
+                {% endif %}
+            </a>
+            {% else %}
+            <!-- Join Button (Beautiful) -->
+            <a href="{% url 'account_login' %}"
+                class="ml-2 px-5 py-2 bg-gradient-to-r from-[#0D7C3D] to-[#0A5C2C] text-white text-sm font-semibold rounded-lg hover:from-[#0B6A34] hover:to-[#094F26] shadow-sm hover:shadow transition-all">
+                Join Kiri
+            </a>
+            {% endif %}
+        </div>
+    </header>
+
+    <!-- ===== SIDEBAR ===== -->
+    <aside id="sidebar"
+        class="fixed top-14 left-0 bottom-0 bg-white border-r border-[#DEE2E6] z-40 transition-all duration-200 overflow-hidden dark:bg-[#1E1E1E] dark:border-[#3D3D3D]">
+        <nav class="py-3 flex flex-col h-full">
+            <!-- Main Navigation -->
+            <div class="flex-1">
+                <a href="{% url 'core:home' %}"
+                    class="flex items-center h-11 px-4 gap-3 text-[#495057] hover:bg-[#F8F9FA] hover:text-[#0D7C3D] transition-colors {% if request.path == '/' %}bg-[#E8F5ED] text-[#0D7C3D] border-r-2 border-[#0D7C3D]{% endif %} dark:text-[#A1A1AA] dark:hover:bg-[#2D2D2D] dark:hover:text-[#0D7C3D] {% if request.path == '/' %}dark:bg-[#0D7C3D]/10{% endif %}">
+                    <i class="fas fa-home w-5 text-center"></i>
+                    <span
+                        class="nav-label text-sm font-medium whitespace-nowrap transition-opacity duration-200">Home</span>
+                </a>
+
+                <a href="{% url 'publications:list' %}"
+                    class="flex items-center h-11 px-4 gap-3 text-[#495057] hover:bg-[#F8F9FA] hover:text-[#0D7C3D] transition-colors {% if 'library' in request.path %}bg-[#E8F5ED] text-[#0D7C3D] border-r-2 border-[#0D7C3D]{% endif %} dark:text-[#A1A1AA] dark:hover:bg-[#2D2D2D] dark:hover:text-[#0D7C3D] {% if 'library' in request.path %}dark:bg-[#0D7C3D]/10{% endif %}">
+                    <i class="fas fa-book w-5 text-center"></i>
+                    <span
+                        class="nav-label text-sm font-medium whitespace-nowrap transition-opacity duration-200">Library</span>
+                </a>
+
+                <a href="{% url 'projects:list' %}"
+                    class="flex items-center h-11 px-4 gap-3 text-[#495057] hover:bg-[#F8F9FA] hover:text-[#0D7C3D] transition-colors {% if 'projects' in request.path or 'colosseum' in request.path %}bg-[#E8F5ED] text-[#0D7C3D] border-r-2 border-[#0D7C3D]{% endif %} dark:text-[#A1A1AA] dark:hover:bg-[#2D2D2D] dark:hover:text-[#0D7C3D] {% if 'projects' in request.path or 'colosseum' in request.path %}dark:bg-[#0D7C3D]/10{% endif %}">
+                    <i class="fas fa-rocket w-5 text-center"></i>
+                    <span
+                        class="nav-label text-sm font-medium whitespace-nowrap transition-opacity duration-200">Projects</span>
+                </a>
+
+                <div class="my-3 mx-4 border-t border-[#DEE2E6] dark:border-[#3D3D3D]"></div>
+
+                <a href="{% url 'core:about' %}"
+                    class="flex items-center h-11 px-4 gap-3 text-[#495057] hover:bg-[#F8F9FA] hover:text-[#0D7C3D] transition-colors {% if 'about' in request.path %}bg-[#E8F5ED] text-[#0D7C3D] border-r-2 border-[#0D7C3D]{% endif %} dark:text-[#A1A1AA] dark:hover:bg-[#2D2D2D] dark:hover:text-[#0D7C3D]">
+                    <i class="fas fa-info-circle w-5 text-center"></i>
+                    <span
+                        class="nav-label text-sm font-medium whitespace-nowrap transition-opacity duration-200">About</span>
+                </a>
+            </div>
+        </nav>
+    </aside>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <main class="min-h-screen pt-14 pl-14 transition-all duration-200" id="main-content">
+        <div class="min-h-full">
             <!-- Messages -->
             {% if messages %}
-            <div class="max-w-4xl mx-auto mb-6 space-y-2">
+            <div class="p-4 space-y-2">
                 {% for message in messages %}
                 <div
-                    class="p-3 rounded-sm text-sm border flex items-center gap-3
-                    {% if message.tags == 'error' %}bg-red-50 border-red-200 text-red-700 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400
-                    {% elif message.tags == 'success' %}bg-emerald-50 border-emerald-200 text-emerald-700 dark:bg-emerald-900/20 dark:border-emerald-800 dark:text-emerald-400
-                    {% else %}bg-blue-50 border-blue-200 text-blue-700 dark:bg-blue-900/20 dark:border-blue-800 dark:text-blue-400{% endif %}">
-                    <i
-                        class="fas {% if message.tags == 'error' %}fa-exclamation-circle{% elif message.tags == 'success' %}fa-check-circle{% else %}fa-info-circle{% endif %}"></i>
+                    class="p-3 text-sm rounded-lg border-l-4 
+                    {% if message.tags == 'error' %}bg-red-50 border-red-500 text-red-700 dark:bg-red-900/20 dark:text-red-400
+                    {% elif message.tags == 'success' %}bg-[#E8F5ED] border-[#0D7C3D] text-[#0D7C3D] dark:bg-[#0D7C3D]/20 dark:text-[#4ADE80]
+                    {% else %}bg-[#FDF5E6] border-[#C4992E] text-[#8B6914] dark:bg-[#C4992E]/20 dark:text-[#FBBF24]{% endif %}">
                     {{ message }}
                 </div>
                 {% endfor %}
@@ -94,23 +188,167 @@
             {% endif %}
 
             {% block content %}{% endblock %}
+        </div>
 
-            <!-- Bottom Spacer for Mobile Nav -->
-            <div class="h-20 md:hidden"></div>
-        </main>
+        <!-- ===== FOOTER ===== -->
+        <footer class="bg-white border-t border-[#DEE2E6] dark:bg-[#1E1E1E] dark:border-[#3D3D3D] mt-auto">
+            <div class="max-w-7xl mx-auto px-6 py-12">
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
+                    <!-- Brand -->
+                    <div class="col-span-2 md:col-span-1">
+                        <a href="/" class="flex items-center gap-2 mb-4">
+                            <img src="{% static 'images/logos/logo.png' %}" alt="Kiri" class="h-10 w-auto">
+                        </a>
+                        <p class="text-sm text-[#6C757D] dark:text-[#A1A1AA]">The operating system for modern research.
+                        </p>
+                    </div>
 
-    </div>
+                    <!-- Platform -->
+                    <div>
+                        <h4 class="font-semibold text-[#212529] dark:text-white mb-4">Platform</h4>
+                        <ul class="space-y-2 text-sm">
+                            <li><a href="{% url 'publications:list' %}"
+                                    class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">Library</a>
+                            </li>
+                            <li><a href="{% url 'projects:list' %}"
+                                    class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">Projects</a>
+                            </li>
+                        </ul>
+                    </div>
 
-    <!-- Mobile Bottom Nav -->
-    {% include "partials/_mobile_nav.html" %}
+                    <!-- Company -->
+                    <div>
+                        <h4 class="font-semibold text-[#212529] dark:text-white mb-4">Company</h4>
+                        <ul class="space-y-2 text-sm">
+                            <li><a href="{% url 'core:about' %}"
+                                    class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">About</a>
+                            </li>
+                            <li><a href="{% url 'core:privacy' %}"
+                                    class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">Privacy</a>
+                            </li>
+                            <li><a href="{% url 'core:terms' %}"
+                                    class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">Terms</a>
+                            </li>
+                        </ul>
+                    </div>
 
-    <!-- Install Button -->
-    {% include "partials/_install_button.html" %}
+                    <!-- Connect -->
+                    <div>
+                        <h4 class="font-semibold text-[#212529] dark:text-white mb-4">Connect</h4>
+                        <div class="flex gap-3">
+                            <a href="https://github.com/kiri-research" target="_blank"
+                                class="w-9 h-9 flex items-center justify-center rounded-lg bg-[#F8F9FA] text-[#495057] hover:bg-[#0D7C3D] hover:text-white transition-colors dark:bg-[#2D2D2D] dark:text-[#A1A1AA]">
+                                <i class="fab fa-github"></i>
+                            </a>
+                            <a href="https://twitter.com/kiri_research" target="_blank"
+                                class="w-9 h-9 flex items-center justify-center rounded-lg bg-[#F8F9FA] text-[#495057] hover:bg-[#0D7C3D] hover:text-white transition-colors dark:bg-[#2D2D2D] dark:text-[#A1A1AA]">
+                                <i class="fab fa-x-twitter"></i>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Bottom -->
+                <div
+                    class="mt-10 pt-6 border-t border-[#DEE2E6] dark:border-[#3D3D3D] flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-[#6C757D] dark:text-[#A1A1AA]">
+                    <p>&copy; 2026 Kiri Research Labs. All rights reserved.</p>
+                    <p>Built with <i class="fas fa-heart text-[#C4992E]"></i> for researchers everywhere.</p>
+                </div>
+            </div>
+        </footer>
+    </main>
+
+    <!-- ===== MOBILE BOTTOM NAV ===== -->
+    <nav
+        class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-[#DEE2E6] z-50 dark:bg-[#1E1E1E] dark:border-[#3D3D3D] safe-area-pb">
+        <div class="grid grid-cols-4 h-full">
+            <a href="{% url 'core:home' %}"
+                class="flex flex-col items-center justify-center gap-1 {% if request.path == '/' %}text-[#0D7C3D]{% else %}text-[#6C757D] dark:text-[#A1A1AA]{% endif %}">
+                <i class="fas fa-home text-lg"></i>
+                <span class="text-[10px] font-medium">Home</span>
+            </a>
+            <a href="{% url 'publications:list' %}"
+                class="flex flex-col items-center justify-center gap-1 {% if 'library' in request.path %}text-[#0D7C3D]{% else %}text-[#6C757D] dark:text-[#A1A1AA]{% endif %}">
+                <i class="fas fa-book text-lg"></i>
+                <span class="text-[10px] font-medium">Library</span>
+            </a>
+            <a href="{% url 'projects:list' %}"
+                class="flex flex-col items-center justify-center gap-1 {% if 'projects' in request.path or 'colosseum' in request.path %}text-[#0D7C3D]{% else %}text-[#6C757D] dark:text-[#A1A1AA]{% endif %}">
+                <i class="fas fa-rocket text-lg"></i>
+                <span class="text-[10px] font-medium">Projects</span>
+            </a>
+            {% if user.is_authenticated %}
+            <a href="{% url 'users:profile' user.username %}"
+                class="flex flex-col items-center justify-center gap-1 {% if 'nexus' in request.path %}text-[#0D7C3D]{% else %}text-[#6C757D] dark:text-[#A1A1AA]{% endif %}">
+                <i class="fas fa-user text-lg"></i>
+                <span class="text-[10px] font-medium">Profile</span>
+            </a>
+            {% else %}
+            <a href="{% url 'account_login' %}" class="flex flex-col items-center justify-center gap-1 text-[#0D7C3D]">
+                <i class="fas fa-sign-in-alt text-lg"></i>
+                <span class="text-[10px] font-medium">Join</span>
+            </a>
+            {% endif %}
+        </div>
+    </nav>
 
     <!-- Scripts -->
-    <script src="{% static 'js/htmx.min.js' %}" defer></script>
-    <script src="{% static 'js/theme_toggle.js' %}" defer></script>
-    <script src="{% static 'js/pwa_install.js' %}" defer></script>
+    <script src="{% static 'js/htmx.min.js' %}"></script>
+    <script src="{% static 'js/pwa_install.js' %}"></script>
+
+    <script>
+        // Theme Toggle
+        const themeToggle = document.getElementById('theme-toggle');
+        const iconLight = document.getElementById('theme-icon-light');
+        const iconDark = document.getElementById('theme-icon-dark');
+
+        function updateThemeIcons() {
+            if (document.documentElement.classList.contains('dark')) {
+                iconLight.classList.add('hidden');
+                iconDark.classList.remove('hidden');
+            } else {
+                iconLight.classList.remove('hidden');
+                iconDark.classList.add('hidden');
+            }
+        }
+
+        themeToggle?.addEventListener('click', () => {
+            document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+            updateThemeIcons();
+        });
+
+        // Init theme icons
+        updateThemeIcons();
+
+        // Sidebar Toggle
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        const sidebar = document.getElementById('sidebar');
+        const mainContent = document.getElementById('main-content');
+
+        sidebarToggle?.addEventListener('click', () => {
+            sidebar.classList.toggle('expanded');
+            if (sidebar.classList.contains('expanded')) {
+                mainContent.style.paddingLeft = '220px';
+            } else {
+                mainContent.style.paddingLeft = '56px';
+            }
+        });
+
+        // Auto-expand sidebar on hover (desktop)
+        if (window.innerWidth >= 768) {
+            sidebar?.addEventListener('mouseenter', () => {
+                sidebar.classList.add('expanded');
+                mainContent.style.paddingLeft = '220px';
+            });
+            sidebar?.addEventListener('mouseleave', () => {
+                if (!sidebar.dataset.pinned) {
+                    sidebar.classList.remove('expanded');
+                    mainContent.style.paddingLeft = '56px';
+                }
+            });
+        }
+    </script>
     {% block extra_js %}{% endblock %}
 </body>
 

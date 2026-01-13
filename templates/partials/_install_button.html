@@ -1,17 +1,16 @@
 <button id="pwa-install-btn"
-    class="hidden hidden-install-btn fixed bottom-4 right-4 z-50 w-12 h-12 bg-bg-primary border border-border rounded-full shadow-lg items-center justify-center text-text-primary hover:bg-bg-tertiary transition-all duration-300 dark:bg-dark-surface dark:border-dark-border dark:text-white dark:hover:bg-dark-bg animate-bounce-slow group">
+    class="hidden hidden-install-btn fixed bottom-4 right-4 z-50 w-12 h-12 bg-white border border-[#e0e0e0] shadow-lg items-center justify-center text-[#161616] hover:bg-[#f4f4f4] transition-all duration-300 dark:bg-[#262626] dark:border-[#393939] dark:text-white dark:hover:bg-[#393939] animate-bounce-slow group">
     <i class="fas fa-arrow-down transform group-hover:translate-y-1 transition-transform"></i>
     <span class="sr-only">Install App</span>
 
     <!-- Tooltip -->
     <div
-        class="absolute bottom-full mb-2 right-0 w-max px-2 py-1 bg-black text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none dark:bg-white dark:text-black">
+        class="absolute bottom-full mb-2 right-0 w-max px-2 py-1 bg-[#161616] text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none dark:bg-white dark:text-[#161616]">
         Install App
     </div>
 </button>
 
 <style>
-    /* Custom bounce animation for the install button */
     @keyframes bounce-slow {
 
         0%,
@@ -28,7 +27,6 @@
         animation: bounce-slow 2s infinite;
     }
 
-    /* Ensure flex display when visible */
     #pwa-install-btn.flex {
         display: flex;
     }

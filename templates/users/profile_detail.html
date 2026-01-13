@@ -4,20 +4,20 @@
 {% block title %}{{ profile_user.username }} | Kiri Profile{% endblock %}
 
 {% block content %}
-<div class="max-w-5xl mx-auto space-y-8">
+<div class="p-4 max-w-5xl mx-auto space-y-8">
 
     <!-- Profile Header -->
-    <div class="bg-white border border-border rounded-xl p-6 md:p-8 dark:bg-dark-surface dark:border-dark-border">
+    <div class="bg-white border border-[#e0e0e0] p-6 md:p-8 dark:bg-[#262626] dark:border-[#393939]">
         <div class="flex flex-col md:flex-row gap-6 items-start md:items-center">
 
             <!-- Avatar -->
             <div class="shrink-0">
                 {% if profile_user.github_avatar_url %}
                 <img src="{{ profile_user.github_avatar_url }}" alt="{{ profile_user.username }}"
-                    class="w-24 h-24 md:w-32 md:h-32 rounded-lg border-2 border-border object-cover dark:border-dark-border">
+                    class="w-24 h-24 md:w-32 md:h-32 border-2 border-[#e0e0e0] object-cover dark:border-[#393939]">
                 {% else %}
                 <div
-                    class="w-24 h-24 md:w-32 md:h-32 rounded-lg bg-bg-tertiary text-text-tertiary flex items-center justify-center text-4xl font-bold dark:bg-dark-surface dark:border-dark-border border border-border dark:border-dark-border">
+                    class="w-24 h-24 md:w-32 md:h-32 bg-[#f4f4f4] text-[#a8a8a8] flex items-center justify-center text-4xl font-bold dark:bg-[#393939] border border-[#e0e0e0] dark:border-[#525252]">
                     {{ profile_user.username|slice:":2"|upper }}
                 </div>
                 {% endif %}
@@ -26,41 +26,40 @@
             <!-- Meta -->
             <div class="flex-1 space-y-2">
                 <div class="flex items-center gap-3 flex-wrap">
-                    <h1 class="text-2xl md:text-3xl font-display font-bold text-text-primary dark:text-white">
+                    <h1 class="text-2xl md:text-3xl font-semibold text-[#161616] dark:text-white">
                         {{ profile_user.username }}
                     </h1>
                     <span
-                        class="px-2 py-0.5 rounded text-xs font-mono font-medium border
-                        {% if profile_user.role == 'core_team' %}bg-brand text-white border-brand
-                        {% elif profile_user.role == 'researcher' %}bg-purple-100 text-purple-700 border-purple-200 dark:bg-purple-900/30 dark:border-purple-800 dark:text-purple-300
-                        {% else %}bg-bg-tertiary text-text-secondary border-border dark:bg-dark-bg dark:border-dark-border dark:text-dark-secondary{% endif %}">
+                        class="px-2 py-0.5 text-xs font-mono font-medium border
+                        {% if profile_user.role == 'core_team' %}bg-[#0f62fe] text-white border-[#0f62fe]
+                        {% elif profile_user.role == 'researcher' %}bg-[#edf5ff] text-[#0f62fe] border-[#0f62fe]
+                        {% else %}bg-[#f4f4f4] text-[#525252] border-[#e0e0e0] dark:bg-[#393939] dark:border-[#525252] dark:text-[#a8a8a8]{% endif %}">
                         {{ profile_user.get_role_display }}
                     </span>
                     {% if profile_user.is_verified %}
-                    <span class="text-brand-green" title="Verified Researcher"><i
-                            class="fas fa-check-circle"></i></span>
+                    <span class="text-[#198038]" title="Verified Researcher"><i class="fas fa-check-circle"></i></span>
                     {% endif %}
                 </div>
 
                 {% if profile_user.bio %}
-                <p class="text-text-secondary max-w-2xl dark:text-dark-secondary">{{ profile_user.bio }}</p>
+                <p class="text-[#525252] max-w-2xl dark:text-[#a8a8a8]">{{ profile_user.bio }}</p>
                 {% endif %}
 
-                <div class="flex items-center gap-4 text-sm text-text-tertiary pt-2 flex-wrap">
+                <div class="flex items-center gap-4 text-sm text-[#a8a8a8] pt-2 flex-wrap">
                     {% if profile_user.github_username %}
                     <a href="https://github.com/{{ profile_user.github_username }}" target="_blank"
-                        class="hover:text-text-primary transition-colors dark:hover:text-white">
+                        class="hover:text-[#161616] transition-colors dark:hover:text-white">
                         <i class="fab fa-github mr-1"></i> {{ profile_user.github_username }}
                     </a>
                     {% endif %}
                     {% if profile_user.website %}
                     <a href="{{ profile_user.website }}" target="_blank"
-                        class="hover:text-text-primary transition-colors dark:hover:text-white">
+                        class="hover:text-[#161616] transition-colors dark:hover:text-white">
                         <i class="fas fa-link mr-1"></i> Website
                     </a>
                     {% endif %}
                     {% if profile_user.orcid_id %}
-                    <span class="hover:text-text-primary cursor-help dark:hover:text-white" title="ORCID iD">
+                    <span class="hover:text-[#161616] cursor-help dark:hover:text-white" title="ORCID iD">
                         <i class="fas fa-id-card mr-1"></i> {{ profile_user.orcid_id }}
                     </span>
                     {% endif %}
@@ -70,11 +69,12 @@
                 </div>
             </div>
 
-            <!-- Actions (if logged in user is viewing their own profile) -->
+            <!-- Actions -->
             {% if request.user == profile_user %}
             <div class="flex flex-col gap-2">
-                <a href="#" class="btn-secondary text-xs">
-                    <i class="fas fa-cog"></i> Settings
+                <a href="#"
+                    class="px-4 py-2 border border-[#e0e0e0] text-[#525252] text-xs hover:bg-[#f4f4f4] transition-colors dark:border-[#393939] dark:text-[#a8a8a8] dark:hover:bg-[#393939]">
+                    <i class="fas fa-cog mr-1"></i> Settings
                 </a>
             </div>
             {% endif %}
@@ -86,10 +86,10 @@
 
         <!-- Projects -->
         <section class="space-y-4">
-            <div class="flex items-center justify-between border-b border-border pb-2 dark:border-dark-border">
-                <h2 class="text-lg font-bold font-display text-text-primary dark:text-white">Projects</h2>
+            <div class="flex items-center justify-between border-b border-[#e0e0e0] pb-2 dark:border-[#393939]">
+                <h2 class="text-lg font-semibold text-[#161616] dark:text-white">Projects</h2>
                 <span
-                    class="text-xs font-mono bg-bg-tertiary px-2 py-1 rounded-full text-text-secondary dark:bg-dark-border dark:text-dark-secondary">{{
+                    class="text-xs font-mono bg-[#f4f4f4] px-2 py-1 text-[#525252] dark:bg-[#393939] dark:text-[#a8a8a8]">{{
                     projects|length }}</span>
             </div>
 
@@ -97,33 +97,32 @@
             <div class="space-y-3">
                 {% for project in projects %}
                 <a href="{% url 'projects:detail' project.slug %}"
-                    class="block p-4 border border-border rounded-lg bg-white hover:border-brand-green/50 transition-colors group dark:bg-dark-surface dark:border-dark-border dark:hover:border-brand-green/30">
+                    class="block p-4 border border-[#e0e0e0] bg-white hover:border-[#0f62fe] transition-colors group dark:bg-[#262626] dark:border-[#393939] dark:hover:border-[#0f62fe]">
                     <div class="flex justify-between items-start mb-1">
                         <h3
-                            class="font-medium text-text-primary group-hover:text-brand-green transition-colors dark:text-white">
+                            class="font-medium text-[#161616] group-hover:text-[#0f62fe] transition-colors dark:text-white">
                             {{ project.name }}</h3>
-                        <div class="flex items-center gap-2 text-xs text-text-tertiary">
-                            <span class="flex items-center gap-1"><i class="fas fa-star text-brand-gold"></i> {{
+                        <div class="flex items-center gap-2 text-xs text-[#a8a8a8]">
+                            <span class="flex items-center gap-1"><i class="fas fa-star text-[#f1c21b]"></i> {{
                                 project.stars_count }}</span>
                         </div>
                     </div>
-                    <p class="text-sm text-text-secondary line-clamp-2 mb-2 dark:text-dark-secondary">{{
-                        project.description }}</p>
+                    <p class="text-sm text-[#525252] line-clamp-2 mb-2 dark:text-[#a8a8a8]">{{ project.description }}
+                    </p>
                     <div class="flex items-center gap-2">
                         {% if project.is_hot %}
                         <span
-                            class="text-[10px] font-bold text-brand-gold bg-brand-gold/10 px-1.5 py-0.5 rounded border border-brand-gold/20">Trending</span>
+                            class="text-[10px] font-bold text-[#8e6a00] bg-[#f1c21b]/10 px-1.5 py-0.5 border border-[#f1c21b]/20">Trending</span>
                         {% endif %}
                         <span
-                            class="text-[10px] bg-bg-tertiary px-2 py-0.5 rounded text-text-tertiary dark:bg-dark-bg dark:text-dark-secondary">{{
+                            class="text-[10px] bg-[#f4f4f4] px-2 py-0.5 text-[#525252] dark:bg-[#393939] dark:text-[#a8a8a8]">{{
                             project.language }}</span>
                     </div>
                 </a>
                 {% endfor %}
             </div>
             {% else %}
-            <div
-                class="text-center py-8 border border-dashed border-border rounded-lg text-text-tertiary dark:border-dark-border">
+            <div class="text-center py-8 border border-dashed border-[#e0e0e0] text-[#a8a8a8] dark:border-[#393939]">
                 <p class="text-sm">No projects showcased yet.</p>
             </div>
             {% endif %}
@@ -131,10 +130,10 @@
 
         <!-- Publications -->
         <section class="space-y-4">
-            <div class="flex items-center justify-between border-b border-border pb-2 dark:border-dark-border">
-                <h2 class="text-lg font-bold font-display text-text-primary dark:text-white">Publications</h2>
+            <div class="flex items-center justify-between border-b border-[#e0e0e0] pb-2 dark:border-[#393939]">
+                <h2 class="text-lg font-semibold text-[#161616] dark:text-white">Publications</h2>
                 <span
-                    class="text-xs font-mono bg-bg-tertiary px-2 py-1 rounded-full text-text-secondary dark:bg-dark-border dark:text-dark-secondary">{{
+                    class="text-xs font-mono bg-[#f4f4f4] px-2 py-1 text-[#525252] dark:bg-[#393939] dark:text-[#a8a8a8]">{{
                     publications|length }}</span>
             </div>
 
@@ -142,23 +141,21 @@
             <div class="space-y-3">
                 {% for pub in publications %}
                 <a href="{% url 'publications:detail' pub.slug %}"
-                    class="block p-4 border border-border rounded-lg bg-white hover:border-brand-green/50 transition-colors group dark:bg-dark-surface dark:border-dark-border dark:hover:border-brand-green/30">
+                    class="block p-4 border border-[#e0e0e0] bg-white hover:border-[#0f62fe] transition-colors group dark:bg-[#262626] dark:border-[#393939] dark:hover:border-[#0f62fe]">
                     <h3
-                        class="font-medium text-text-primary group-hover:text-brand-green transition-colors mb-1 dark:text-white">
+                        class="font-medium text-[#161616] group-hover:text-[#0f62fe] transition-colors mb-1 dark:text-white">
                         {{ pub.title }}</h3>
-                    <p class="text-xs text-text-tertiary dark:text-dark-secondary mb-2">{{ pub.created_at|date:"M Y" }}
-                    </p>
+                    <p class="text-xs text-[#a8a8a8] mb-2">{{ pub.created_at|date:"M Y" }}</p>
                     <div class="flex items-center gap-2">
                         <span
-                            class="text-[10px] font-mono bg-brand-green/10 text-brand-green px-1.5 py-0.5 rounded border border-brand-green/20">v{{
+                            class="text-[10px] font-mono bg-[#edf5ff] text-[#0f62fe] px-1.5 py-0.5 border border-[#0f62fe]/20">v{{
                             pub.version }}</span>
                     </div>
                 </a>
                 {% endfor %}
             </div>
             {% else %}
-            <div
-                class="text-center py-8 border border-dashed border-border rounded-lg text-text-tertiary dark:border-dark-border">
+            <div class="text-center py-8 border border-dashed border-[#e0e0e0] text-[#a8a8a8] dark:border-[#393939]">
                 <p class="text-sm">No publications yet.</p>
             </div>
             {% endif %}
@@ -166,10 +163,10 @@
 
         <!-- Contributions -->
         <section class="space-y-4 md:col-span-2">
-            <div class="flex items-center justify-between border-b border-border pb-2 dark:border-dark-border">
-                <h2 class="text-lg font-bold font-display text-text-primary dark:text-white">Contributions</h2>
+            <div class="flex items-center justify-between border-b border-[#e0e0e0] pb-2 dark:border-[#393939]">
+                <h2 class="text-lg font-semibold text-[#161616] dark:text-white">Contributions</h2>
                 <span
-                    class="text-xs font-mono bg-bg-tertiary px-2 py-1 rounded-full text-text-secondary dark:bg-dark-border dark:text-dark-secondary">{{
+                    class="text-xs font-mono bg-[#f4f4f4] px-2 py-1 text-[#525252] dark:bg-[#393939] dark:text-[#a8a8a8]">{{
                     contributions|length }}</span>
             </div>
 
@@ -177,12 +174,11 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {% for pub in contributions %}
                 <a href="{% url 'publications:detail' pub.slug %}"
-                    class="block p-4 border border-border rounded-lg bg-white hover:border-brand-gold/50 transition-colors group dark:bg-dark-surface dark:border-dark-border dark:hover:border-brand-gold/30">
+                    class="block p-4 border border-[#e0e0e0] bg-white hover:border-[#f1c21b] transition-colors group dark:bg-[#262626] dark:border-[#393939] dark:hover:border-[#f1c21b]">
                     <h3
-                        class="font-medium text-text-primary group-hover:text-brand-gold transition-colors mb-1 dark:text-white">
+                        class="font-medium text-[#161616] group-hover:text-[#f1c21b] transition-colors mb-1 dark:text-white">
                         {{ pub.title }}</h3>
-                    <p class="text-xs text-text-tertiary dark:text-dark-secondary">Contributed to Research • {{
-                        pub.created_at|date:"M Y" }}</p>
+                    <p class="text-xs text-[#a8a8a8]">Contributed to Research • {{ pub.created_at|date:"M Y" }}</p>
                 </a>
                 {% endfor %}
             </div>
@@ -191,4 +187,6 @@
 
     </div>
 </div>
+
+<div class="h-16 md:hidden"></div>
 {% endblock %}

@@ -2,11 +2,10 @@
     <!-- Avatar -->
     <div class="shrink-0">
         {% if comment.author.github_avatar_url %}
-        <img src="{{ comment.author.github_avatar_url }}"
-            class="w-8 h-8 rounded-sm border border-border dark:border-dark-border">
+        <img src="{{ comment.author.github_avatar_url }}" class="w-8 h-8 border border-[#e0e0e0] dark:border-[#393939]">
         {% else %}
         <div
-            class="w-8 h-8 rounded-sm bg-bg-tertiary text-text-secondary flex items-center justify-center font-bold text-[10px] dark:bg-dark-border dark:text-dark-secondary">
+            class="w-8 h-8 bg-[#f4f4f4] text-[#525252] flex items-center justify-center font-bold text-[10px] dark:bg-[#393939] dark:text-[#a8a8a8]">
             {{ comment.author.username|slice:":1"|upper }}
         </div>
         {% endif %}
@@ -15,44 +14,44 @@
     <!-- Body -->
     <div class="flex-1">
         <div class="flex items-center gap-2 mb-1">
-            <span class="text-sm font-bold text-text-primary dark:text-white">{{ comment.author.username }}</span>
-            <span class="text-xs text-text-tertiary dark:text-dark-secondary">{{ comment.created_at|timesince }}
-                ago</span>
+            <span class="text-sm font-bold text-[#161616] dark:text-white">{{ comment.author.username }}</span>
+            <span class="text-xs text-[#a8a8a8]">{{ comment.created_at|timesince }} ago</span>
 
             {% if user.is_authenticated %}
             <button onclick="document.getElementById('reply-form-{{ comment.id }}').classList.toggle('hidden')"
-                class="text-xs text-text-tertiary hover:text-brand-green ml-2 opacity-0 group-hover:opacity-100 transition-opacity dark:hover:text-white">
+                class="text-xs text-[#a8a8a8] hover:text-[#0f62fe] ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
                 <i class="fas fa-reply"></i> Reply
             </button>
             {% endif %}
         </div>
 
-        <div class="text-sm text-text-secondary dark:text-dark-secondary mb-3 prose dark:prose-invert max-w-none">
+        <div class="text-sm text-[#525252] dark:text-[#a8a8a8] mb-3 prose dark:prose-invert max-w-none">
             {{ comment.content|linebreaksbr }}
         </div>
 
         <!-- Reply Form (Hidden) -->
         {% if user.is_authenticated %}
         <form id="reply-form-{{ comment.id }}"
-            class="hidden mb-4 ml-4 pl-4 border-l-2 border-border dark:border-dark-border" {% if comment.content_type %}
-            hx-post="{% url 'core:add_comment' comment.content_type.id comment.object_id %}" {% endif %}
+            class="hidden mb-4 ml-4 pl-4 border-l-2 border-[#e0e0e0] dark:border-[#393939]" {% if comment.content_type
+            %} hx-post="{% url 'core:add_comment' comment.content_type.id comment.object_id %}" {% endif %}
             hx-target="#replies-{{ comment.id }}" hx-swap="beforeend"
             hx-on::after-request="this.reset(); this.classList.add('hidden')">
             {% csrf_token %}
             <input type="hidden" name="parent_id" value="{{ comment.id }}">
             <textarea name="content" rows="2"
-                class="w-full p-2 text-sm rounded border border-border bg-white dark:bg-dark-surface dark:border-dark-border dark:text-white place-holder-text-tertiary"
+                class="w-full p-2 text-sm border border-[#e0e0e0] bg-white dark:bg-[#262626] dark:border-[#393939] dark:text-white placeholder-[#a8a8a8]"
                 placeholder="Write a reply..."></textarea>
             <div class="mt-2 flex justify-end gap-2">
                 <button type="button" onclick="this.closest('form').classList.add('hidden')"
-                    class="text-xs text-text-tertiary hover:text-text-primary dark:hover:text-white">Cancel</button>
-                <button type="submit" class="btn-primary text-xs py-1 px-3">Reply</button>
+                    class="text-xs text-[#a8a8a8] hover:text-[#161616] dark:hover:text-white">Cancel</button>
+                <button type="submit"
+                    class="px-3 py-1 text-xs bg-[#0f62fe] text-white hover:bg-[#0353e9] transition-colors">Reply</button>
             </div>
         </form>
         {% endif %}
 
         <!-- Replies (Recursive) -->
-        <div id="replies-{{ comment.id }}" class="space-y-4 pl-4 border-l border-border dark:border-dark-border mt-2">
+        <div id="replies-{{ comment.id }}" class="space-y-4 pl-4 border-l border-[#e0e0e0] dark:border-[#393939] mt-2">
             {% for reply in comment.replies.all %}
             {% include "core/partials/comment_item.html" with comment=reply %}
             {% endfor %}

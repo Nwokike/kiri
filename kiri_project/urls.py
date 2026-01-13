@@ -10,12 +10,12 @@ urlpatterns = [
     path("serviceworker.js", core_views.serviceworker, name="serviceworker"),
     path("", include("pwa.urls")),
     
-    # Districts
+    # Main Routes
     path("library/", include("publications.urls", namespace="publications")),
-    path("colosseum/", include("projects.urls", namespace="projects")),
+    path("projects/", include("projects.urls", namespace="projects")),
     path("nexus/", include("users.urls", namespace="users")),
     
-    # Core (Home, About, etc.) - Must be last to catch catch-all paths if any
+    # Core (Home, About, etc.) - Must be last
     path("", include("core.urls", namespace="core")),
 ]
 

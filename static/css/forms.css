@@ -4,10 +4,9 @@
     --color-bg-primary: #FFFFFF;
     --color-text-primary: #18181B;
     --color-brand-green: #10B981;
-    --color-dark-surface: #18181B;
+    --color-dark-surface: #121212;
     --color-dark-border: #27272A;
     --color-dark-text: #FAFAFA;
-    --color-accent: #3B82F6;
 }
 
 input[type="text"],

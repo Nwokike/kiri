@@ -8,7 +8,7 @@
     <header class="flex flex-col gap-6 pb-6 border-b border-border dark:border-dark-border">
         <div class="flex flex-col md:flex-row md:items-end justify-between gap-4">
             <div>
-                <h1 class="text-2xl font-bold font-display text-text-primary dark:text-white mb-2">The Colosseum</h1>
+                <h1 class="text-2xl font-bold font-display text-text-primary dark:text-white mb-2">Projects</h1>
                 <p class="text-text-secondary dark:text-dark-secondary">
                     Open-source projects and GitHub repositories from the community.
                 </p>
@@ -46,79 +46,71 @@
             </a>
             <a href="?hot=true"
                 class="px-3 py-1.5 rounded-full border transition-colors
-               {% if request.GET.hot %}bg-orange-500 text-white border-orange-500{% else %}bg-bg-tertiary text-text-secondary border-border hover:border-orange-300 dark:bg-dark-surface dark:border-dark-border dark:text-dark-secondary{% endif %}">
-                🔥 Hot
+               {% if request.GET.hot %}bg-brand-gold text-white border-brand-gold{% else %}bg-bg-tertiary text-text-secondary border-border hover:border-brand-gold/50 dark:bg-dark-surface dark:border-dark-border dark:text-dark-secondary{% endif %}">
+                Trending
             </a>
 
             <div class="ml-auto">
                 <select onchange="window.location.href=this.value"
                     class="bg-transparent border-none text-text-secondary text-sm focus:ring-0 cursor-pointer dark:text-dark-secondary">
-                    <option value="?sort=-created_at" {% if request.GET.sort == '-created_at' %}selected{% endif %}>Newest
+                    <option value="?sort=-created_at" {% if request.GET.sort=='-created_at' %}selected{% endif %}>Newest
                     </option>
-                    <option value="?sort=-stars_count" {% if request.GET.sort == '-stars_count' %}selected{% endif %}>Most
+                    <option value="?sort=-stars_count" {% if request.GET.sort=='-stars_count' %}selected{% endif %}>Most
                         Stars</option>
                 </select>
             </div>
         </div>
     </header>
 
-    <!-- Submission Area (Hidden by default, populated by HTMX) -->
+    <!-- Submission Area -->
     <div id="submission-area" class="empty:hidden"></div>
 
     <!-- Projects Grid -->
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {% for project in projects %}
-        <article class="card p-6 hover:border-brand-green/30 transition-all group flex flex-col h-full">
-            <div class="flex items-center justify-between mb-3">
-                <span class="px-2.5 py-1 rounded-md text-xs font-medium bg-brand-green/10 text-brand-green">
-                    {{ project.language|default:"Project" }}
+        <article
+            class="p-6 rounded-xl border border-border bg-bg-secondary hover:border-brand-green/30 transition-all group flex flex-col h-full dark:border-dark-border dark:bg-dark-surface">
+            <div class="flex items-center justify-between mb-4">
+                <span
+                    class="px-2 py-1 rounded bg-brand-green/10 text-brand-green text-[10px] font-bold uppercase tracking-wider">
+                    {{ project.language|default:"Repository" }}
                 </span>
-                <div class="flex items-center gap-1 text-xs text-gray-400">
+                <div class="flex items-center gap-1 text-xs text-text-tertiary">
                     <i class="fas fa-star text-brand-gold"></i>
                     <span>{{ project.stars_count }}</span>
                 </div>
             </div>
 
-            <h3 class="text-lg font-semibold text-gray-900 group-hover:text-brand-green transition-colors mb-2">
-                {% if project.demo_url %}
-                <a href="{{ project.demo_url }}" target="_blank" rel="noopener noreferrer"
-                    class="focus:outline-none flex items-center gap-2">
-                    {{ project.name }}
-                    <i class="fas fa-external-link-alt text-xs opacity-50"></i>
-                </a>
-                {% else %}
-                <a href="{{ project.github_repo_url }}" target="_blank" rel="noopener noreferrer"
-                    class="focus:outline-none">
+            <h3
+                class="text-lg font-bold font-display text-text-primary dark:text-white group-hover:text-brand-green transition-colors mb-2">
+                <a href="{% url 'projects:detail' project.slug %}" class="focus:outline-none">
                     {{ project.name }}
                 </a>
-                {% endif %}
             </h3>
 
-            <p class="text-sm text-gray-600 line-clamp-3 mb-4 flex-1">
+            <p class="text-sm text-text-secondary dark:text-dark-secondary line-clamp-3 mb-6 flex-1">
                 {{ project.description }}
             </p>
 
-            <div class="flex items-center justify-between pt-4 border-t border-gray-200 mt-auto">
+            <div class="flex items-center justify-between pt-4 border-t border-border dark:border-dark-border mt-auto">
                 <div class="flex items-center gap-2">
-                    <span
-                        class="w-6 h-6 rounded-full bg-brand-green/10 text-brand-green flex items-center justify-center text-xs font-medium">
+                    <div
+                        class="w-6 h-6 rounded bg-brand-green/10 text-brand-green flex items-center justify-center text-[10px] font-bold">
                         {{ project.submitted_by.username|slice:":1"|upper }}
-                    </span>
-                    <span class="text-xs text-gray-400">{{ project.submitted_by.username }}</span>
+                    </div>
+                    <span class="text-xs text-text-tertiary dark:text-dark-secondary">{{ project.submitted_by.username
+                        }}</span>
                 </div>
-                <a href="{{ project.github_repo_url }}" target="_blank" rel="noopener noreferrer"
-                    class="text-gray-400 hover:text-gray-900 transition-colors" title="GitHub">
+                <a href="{{ project.github_repo_url }}" target="_blank"
+                    class="text-text-tertiary hover:text-text-primary dark:hover:text-white transition-colors">
                     <i class="fab fa-github"></i>
                 </a>
             </div>
         </article>
         {% empty %}
-        <div class="col-span-full card p-12 text-center">
-            <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
-                <i class="fas fa-folder-open text-gray-400 text-2xl"></i>
-            </div>
-            <h3 class="text-gray-900 font-medium mb-2">No projects yet</h3>
-            <p class="text-gray-600 text-sm">Be the first to submit a project.</p>
+        <div class="col-span-full py-12 text-center text-text-tertiary">
+            <i class="fas fa-folder-open text-4xl mb-4 opacity-50"></i>
+            <p>No projects found.</p>
         </div>
         {% endfor %}
     </div>
@@ -129,16 +121,16 @@
         <div class="flex items-center gap-2">
             {% if page_obj.has_previous %}
             <a href="?page={{ page_obj.previous_page_number }}"
-                class="px-4 py-2 rounded-lg border border-gray-200 text-gray-600 hover:text-gray-900 hover:border-gray-400 text-sm transition-colors">
+                class="px-4 py-2 rounded-lg border border-border text-text-secondary hover:text-text-primary hover:border-text-tertiary text-sm transition-colors dark:border-dark-border dark:text-dark-secondary dark:hover:text-white">
                 Previous
             </a>
             {% endif %}
-            <span class="px-4 py-2 text-sm text-gray-400">
+            <span class="px-4 py-2 text-sm text-text-tertiary dark:text-dark-secondary">
                 Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
             </span>
             {% if page_obj.has_next %}
             <a href="?page={{ page_obj.next_page_number }}"
-                class="px-4 py-2 rounded-lg border border-gray-200 text-gray-600 hover:text-gray-900 hover:border-gray-400 text-sm transition-colors">
+                class="px-4 py-2 rounded-lg border border-border text-text-secondary hover:text-text-primary hover:border-text-tertiary text-sm transition-colors dark:border-dark-border dark:text-dark-secondary dark:hover:text-white">
                 Next
             </a>
             {% endif %}

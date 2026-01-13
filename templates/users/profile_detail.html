@@ -17,7 +17,7 @@
                     class="w-24 h-24 md:w-32 md:h-32 rounded-lg border-2 border-border object-cover dark:border-dark-border">
                 {% else %}
                 <div
-                    class="w-24 h-24 md:w-32 md:h-32 rounded-lg bg-brand text-white flex items-center justify-center text-4xl font-bold dark:bg-dark-border">
+                    class="w-24 h-24 md:w-32 md:h-32 rounded-lg bg-bg-tertiary text-text-tertiary flex items-center justify-center text-4xl font-bold dark:bg-dark-surface dark:border-dark-border border border-border dark:border-dark-border">
                     {{ profile_user.username|slice:":2"|upper }}
                 </div>
                 {% endif %}
@@ -81,14 +81,15 @@
         </div>
     </div>
 
-    <!-- Content Tabs (Simple Layout) -->
+    <!-- Content Sections -->
     <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
 
-        <!-- colosseum Projects -->
+        <!-- Projects -->
         <section class="space-y-4">
             <div class="flex items-center justify-between border-b border-border pb-2 dark:border-dark-border">
-                <h2 class="text-lg font-bold font-display dark:text-white">Colosseum Projects</h2>
-                <span class="text-xs font-mono bg-bg-tertiary px-2 py-1 rounded-full dark:bg-dark-border">{{
+                <h2 class="text-lg font-bold font-display text-text-primary dark:text-white">Projects</h2>
+                <span
+                    class="text-xs font-mono bg-bg-tertiary px-2 py-1 rounded-full text-text-secondary dark:bg-dark-border dark:text-dark-secondary">{{
                     projects|length }}</span>
             </div>
 
@@ -98,8 +99,9 @@
                 <a href="{% url 'projects:detail' project.slug %}"
                     class="block p-4 border border-border rounded-lg bg-white hover:border-brand-green/50 transition-colors group dark:bg-dark-surface dark:border-dark-border dark:hover:border-brand-green/30">
                     <div class="flex justify-between items-start mb-1">
-                        <h3 class="font-medium group-hover:text-brand-green transition-colors dark:text-white">{{
-                            project.name }}</h3>
+                        <h3
+                            class="font-medium text-text-primary group-hover:text-brand-green transition-colors dark:text-white">
+                            {{ project.name }}</h3>
                         <div class="flex items-center gap-2 text-xs text-text-tertiary">
                             <span class="flex items-center gap-1"><i class="fas fa-star text-brand-gold"></i> {{
                                 project.stars_count }}</span>
@@ -110,7 +112,7 @@
                     <div class="flex items-center gap-2">
                         {% if project.is_hot %}
                         <span
-                            class="text-[10px] font-bold text-orange-500 bg-orange-50 px-1.5 py-0.5 rounded border border-orange-100 dark:bg-orange-900/20 dark:border-orange-900/50">HOT</span>
+                            class="text-[10px] font-bold text-brand-gold bg-brand-gold/10 px-1.5 py-0.5 rounded border border-brand-gold/20">Trending</span>
                         {% endif %}
                         <span
                             class="text-[10px] bg-bg-tertiary px-2 py-0.5 rounded text-text-tertiary dark:bg-dark-bg dark:text-dark-secondary">{{
@@ -121,17 +123,18 @@
             </div>
             {% else %}
             <div
-                class="text-center py-8 border border-dashed border-border rounded-lg dark:border-dark-border text-text-tertiary">
+                class="text-center py-8 border border-dashed border-border rounded-lg text-text-tertiary dark:border-dark-border">
                 <p class="text-sm">No projects showcased yet.</p>
             </div>
             {% endif %}
         </section>
 
-        <!-- Library Publications -->
+        <!-- Publications -->
         <section class="space-y-4">
             <div class="flex items-center justify-between border-b border-border pb-2 dark:border-dark-border">
-                <h2 class="text-lg font-bold font-display dark:text-white">Research Papers</h2>
-                <span class="text-xs font-mono bg-bg-tertiary px-2 py-1 rounded-full dark:bg-dark-border">{{
+                <h2 class="text-lg font-bold font-display text-text-primary dark:text-white">Publications</h2>
+                <span
+                    class="text-xs font-mono bg-bg-tertiary px-2 py-1 rounded-full text-text-secondary dark:bg-dark-border dark:text-dark-secondary">{{
                     publications|length }}</span>
             </div>
 
@@ -140,12 +143,14 @@
                 {% for pub in publications %}
                 <a href="{% url 'publications:detail' pub.slug %}"
                     class="block p-4 border border-border rounded-lg bg-white hover:border-brand-green/50 transition-colors group dark:bg-dark-surface dark:border-dark-border dark:hover:border-brand-green/30">
-                    <h3 class="font-medium group-hover:text-brand-green transition-colors mb-1 dark:text-white">{{
-                        pub.title }}</h3>
-                    <p class="text-xs text-text-tertiary mb-2">{{ pub.created_at|date:"M Y" }}</p>
+                    <h3
+                        class="font-medium text-text-primary group-hover:text-brand-green transition-colors mb-1 dark:text-white">
+                        {{ pub.title }}</h3>
+                    <p class="text-xs text-text-tertiary dark:text-dark-secondary mb-2">{{ pub.created_at|date:"M Y" }}
+                    </p>
                     <div class="flex items-center gap-2">
                         <span
-                            class="text-[10px] font-mono bg-blue-50 text-blue-600 px-1.5 py-0.5 rounded border border-blue-100 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-900/50">v{{
+                            class="text-[10px] font-mono bg-brand-green/10 text-brand-green px-1.5 py-0.5 rounded border border-brand-green/20">v{{
                             pub.version }}</span>
                     </div>
                 </a>
@@ -153,7 +158,7 @@
             </div>
             {% else %}
             <div
-                class="text-center py-8 border border-dashed border-border rounded-lg dark:border-dark-border text-text-tertiary">
+                class="text-center py-8 border border-dashed border-border rounded-lg text-text-tertiary dark:border-dark-border">
                 <p class="text-sm">No publications yet.</p>
             </div>
             {% endif %}
@@ -162,8 +167,9 @@
         <!-- Contributions -->
         <section class="space-y-4 md:col-span-2">
             <div class="flex items-center justify-between border-b border-border pb-2 dark:border-dark-border">
-                <h2 class="text-lg font-bold font-display dark:text-white">Contributions</h2>
-                <span class="text-xs font-mono bg-bg-tertiary px-2 py-1 rounded-full dark:bg-dark-border">{{
+                <h2 class="text-lg font-bold font-display text-text-primary dark:text-white">Contributions</h2>
+                <span
+                    class="text-xs font-mono bg-bg-tertiary px-2 py-1 rounded-full text-text-secondary dark:bg-dark-border dark:text-dark-secondary">{{
                     contributions|length }}</span>
             </div>
 
@@ -171,11 +177,12 @@
             <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                 {% for pub in contributions %}
                 <a href="{% url 'publications:detail' pub.slug %}"
-                    class="block p-4 border border-border rounded-lg bg-white hover:border-purple-500/50 transition-colors group dark:bg-dark-surface dark:border-dark-border dark:hover:border-purple-500/30">
+                    class="block p-4 border border-border rounded-lg bg-white hover:border-brand-gold/50 transition-colors group dark:bg-dark-surface dark:border-dark-border dark:hover:border-brand-gold/30">
                     <h3
-                        class="font-medium group-hover:text-purple-600 transition-colors mb-1 dark:text-white dark:group-hover:text-purple-400">
+                        class="font-medium text-text-primary group-hover:text-brand-gold transition-colors mb-1 dark:text-white">
                         {{ pub.title }}</h3>
-                    <p class="text-xs text-text-tertiary">Contributed to Research • {{ pub.created_at|date:"M Y" }}</p>
+                    <p class="text-xs text-text-tertiary dark:text-dark-secondary">Contributed to Research • {{
+                        pub.created_at|date:"M Y" }}</p>
                 </a>
                 {% endfor %}
             </div>

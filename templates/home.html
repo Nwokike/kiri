@@ -5,13 +5,13 @@
 {% block content %}
 <div class="space-y-12">
 
-    <!-- Welcome Section (Clean, no hero) -->
+    <!-- Welcome Section -->
     <section class="text-center py-8">
-        <h1 class="text-3xl sm:text-4xl font-bold text-gray-900 mb-4">
+        <h1 class="text-3xl sm:text-4xl font-bold text-text-primary dark:text-white mb-4">
             Kiri Research Labs
         </h1>
-        <p class="text-lg text-gray-600 max-w-2xl mx-auto">
-            A technology and research-focused enterprise developing software platforms, AI-driven solutions, and digital
+        <p class="text-lg text-text-secondary dark:text-dark-secondary max-w-2xl mx-auto">
+            A technology and research enterprise developing software platforms, AI-driven solutions, and digital
             research tools.
         </p>
     </section>
@@ -19,7 +19,7 @@
     <!-- Featured Projects Section -->
     <section>
         <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl font-semibold text-gray-900">Featured Projects</h2>
+            <h2 class="text-xl font-semibold text-text-primary dark:text-white">Featured Projects</h2>
             <a href="{% url 'projects:list' %}"
                 class="text-sm text-brand-green hover:text-brand-green-dark font-medium transition-colors">
                 View all <i class="fas fa-arrow-right ml-1 text-xs"></i>
@@ -29,40 +29,44 @@
         {% if featured_projects %}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {% for project in featured_projects %}
-            <article class="card p-6 hover:border-brand-green/30 transition-all group">
-                <div class="flex items-center justify-between mb-3">
-                    <span class="px-2.5 py-1 rounded-md text-xs font-medium bg-brand-green/10 text-brand-green">
-                        {{ project.language|default:"Project" }}
+            <article
+                class="p-6 rounded-xl border border-border bg-bg-secondary hover:border-brand-green/30 transition-all group flex flex-col h-full dark:border-dark-border dark:bg-dark-surface">
+                <div class="flex items-center justify-between mb-4">
+                    <span
+                        class="px-2 py-1 rounded bg-brand-green/10 text-brand-green text-[10px] font-bold uppercase tracking-wider">
+                        {{ project.language|default:"Repository" }}
                     </span>
                     {% if project.stars_count %}
-                    <div class="flex items-center gap-1 text-xs text-gray-400">
+                    <div class="flex items-center gap-1 text-xs text-text-tertiary">
                         <i class="fas fa-star text-brand-gold"></i>
                         <span>{{ project.stars_count }}</span>
                     </div>
                     {% endif %}
                 </div>
 
-                <h3 class="font-semibold text-gray-900 group-hover:text-brand-green transition-colors mb-2">
-                    <a href="{{ project.demo_url|default:project.github_repo_url }}" target="_blank"
-                        rel="noopener noreferrer" class="focus:outline-none">
+                <h3
+                    class="text-lg font-bold font-display text-text-primary dark:text-white group-hover:text-brand-green transition-colors mb-2">
+                    <a href="{{ project.get_absolute_url }}" class="focus:outline-none">
                         {{ project.name }}
                     </a>
                 </h3>
 
-                <p class="text-sm text-gray-600 line-clamp-2 mb-4">
+                <p class="text-sm text-text-secondary dark:text-dark-secondary line-clamp-2 mb-6 flex-1">
                     {{ project.description }}
                 </p>
 
-                <div class="flex items-center justify-between pt-4 border-t border-gray-200">
+                <div
+                    class="flex items-center justify-between pt-4 border-t border-border dark:border-dark-border mt-auto">
                     <div class="flex items-center gap-2">
-                        <span
-                            class="w-6 h-6 rounded-full bg-brand-green/10 text-brand-green flex items-center justify-center text-xs font-medium">
+                        <div
+                            class="w-6 h-6 rounded bg-brand-green/10 text-brand-green flex items-center justify-center text-[10px] font-bold">
                             {{ project.submitted_by.username|slice:":1"|upper }}
-                        </span>
-                        <span class="text-xs text-gray-400">{{ project.submitted_by.username }}</span>
+                        </div>
+                        <span class="text-xs text-text-tertiary dark:text-dark-secondary">{{
+                            project.submitted_by.username }}</span>
                     </div>
-                    <a href="{{ project.github_repo_url }}" target="_blank" rel="noopener noreferrer"
-                        class="text-gray-400 hover:text-gray-900 transition-colors" title="View on GitHub">
+                    <a href="{{ project.github_repo_url }}" target="_blank"
+                        class="text-text-tertiary hover:text-text-primary dark:hover:text-white transition-colors">
                         <i class="fab fa-github"></i>
                     </a>
                 </div>
@@ -70,20 +74,17 @@
             {% endfor %}
         </div>
         {% else %}
-        <div class="card p-12 text-center">
-            <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
-                <i class="fas fa-folder-open text-gray-400 text-2xl"></i>
+        <div class="card p-12 text-center border border-border dark:border-dark-border">
+            <div
+                class="w-16 h-16 rounded-full bg-bg-tertiary dark:bg-dark-bg flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-folder-open text-text-tertiary text-2xl"></i>
             </div>
-            <h3 class="text-gray-900 font-medium mb-2">No projects yet</h3>
-            <p class="text-gray-600 text-sm mb-6">Be the first to submit a project to the platform.</p>
+            <h3 class="text-text-primary dark:text-white font-medium mb-2">No projects yet</h3>
+            <p class="text-text-secondary dark:text-dark-secondary text-sm mb-6">Be the first to submit a project.</p>
             {% if user.is_authenticated %}
-            <a href="{% url 'projects:list' %}" class="btn-primary">
-                Submit a Project
-            </a>
+            <a href="{% url 'projects:list' %}" class="btn-primary">Submit a Project</a>
             {% else %}
-            <a href="{% url 'account_login' %}" class="btn-primary">
-                Sign in to Submit
-            </a>
+            <a href="{% url 'account_login' %}" class="btn-primary">Sign in to Submit</a>
             {% endif %}
         </div>
         {% endif %}
@@ -92,7 +93,7 @@
     <!-- Latest Publications Section -->
     <section>
         <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl font-semibold text-gray-900">Latest Publications</h2>
+            <h2 class="text-xl font-semibold text-text-primary dark:text-white">Latest Publications</h2>
             <a href="{% url 'publications:list' %}"
                 class="text-sm text-brand-green hover:text-brand-green-dark font-medium transition-colors">
                 View all <i class="fas fa-arrow-right ml-1 text-xs"></i>
@@ -102,33 +103,39 @@
         {% if latest_publications %}
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {% for pub in latest_publications %}
-            <article class="card p-6 hover:border-brand-gold/30 transition-all group">
-                <div class="flex items-center gap-2 mb-3">
-                    <span class="px-2.5 py-1 rounded-md text-xs font-mono font-medium bg-brand-gold/10 text-brand-gold">
-                        PAPER
+            <article
+                class="p-6 rounded-xl border border-border bg-bg-secondary hover:border-brand-gold/30 transition-all group dark:border-dark-border dark:bg-dark-surface">
+                <div class="flex items-center gap-2 mb-4">
+                    <span
+                        class="px-2 py-1 rounded bg-brand-gold/10 text-brand-gold text-[10px] font-bold uppercase tracking-wider">
+                        Publication
                     </span>
-                    <span class="text-xs text-gray-400">{{ pub.created_at|date:"M Y" }}</span>
+                    <span class="text-xs text-text-tertiary dark:text-dark-secondary">{{ pub.created_at|date:"M Y"
+                        }}</span>
                 </div>
 
-                <h3 class="font-semibold text-gray-900 group-hover:text-brand-gold transition-colors mb-2">
+                <h3
+                    class="text-lg font-bold font-display text-text-primary dark:text-white group-hover:text-brand-gold transition-colors mb-2">
                     <a href="{% url 'publications:detail' pub.slug %}" class="focus:outline-none">
                         {{ pub.title }}
                     </a>
                 </h3>
 
-                <p class="text-sm text-gray-600 line-clamp-3">
+                <p class="text-sm text-text-secondary dark:text-dark-secondary line-clamp-3">
                     {{ pub.abstract }}
                 </p>
             </article>
             {% endfor %}
         </div>
         {% else %}
-        <div class="card p-12 text-center">
-            <div class="w-16 h-16 rounded-full bg-gray-100 flex items-center justify-center mx-auto mb-4">
-                <i class="fas fa-book-open text-gray-400 text-2xl"></i>
+        <div class="card p-12 text-center border border-border dark:border-dark-border">
+            <div
+                class="w-16 h-16 rounded-full bg-bg-tertiary dark:bg-dark-bg flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-book-open text-text-tertiary text-2xl"></i>
             </div>
-            <h3 class="text-gray-900 font-medium mb-2">No publications yet</h3>
-            <p class="text-gray-600 text-sm">Research papers and publications will appear here.</p>
+            <h3 class="text-text-primary dark:text-white font-medium mb-2">No publications yet</h3>
+            <p class="text-text-secondary dark:text-dark-secondary text-sm">Research papers and publications will appear
+                here.</p>
         </div>
         {% endif %}
     </section>

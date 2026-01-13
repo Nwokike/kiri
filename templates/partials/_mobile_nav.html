@@ -1,9 +1,6 @@
-{% load static %}
-<!-- Mobile Bottom Navigation -->
 <nav
     class="md:hidden fixed bottom-0 left-0 right-0 z-50 bg-bg-primary border-t border-border shrink-0 py-1 transition-colors dark:bg-dark-bg dark:border-dark-border safe-area-pb">
     <div class="grid grid-cols-4 h-14 items-center">
-        <!-- Home -->
         <a href="{% url 'core:home' %}"
             class="flex flex-col items-center justify-center gap-1 transition-colors
            {% if request.path == '/' %}text-text-primary dark:text-white{% else %}text-text-tertiary hover:text-text-primary dark:text-dark-secondary dark:hover:text-white{% endif %}">
@@ -11,23 +8,20 @@
             <span class="text-[10px] font-medium">Home</span>
         </a>
 
-        <!-- Colosseum -->
         <a href="{% url 'projects:list' %}"
             class="flex flex-col items-center justify-center gap-1 transition-colors
            {% if 'projects' in request.path %}text-text-primary dark:text-white{% else %}text-text-tertiary hover:text-text-primary dark:text-dark-secondary dark:hover:text-white{% endif %}">
-            <i class="fas fa-trophy text-lg"></i>
-            <span class="text-[10px] font-medium">Colosseum</span>
+            <i class="fas fa-code text-lg"></i>
+            <span class="text-[10px] font-medium">Projects</span>
         </a>
 
-        <!-- Library -->
         <a href="{% url 'publications:list' %}"
             class="flex flex-col items-center justify-center gap-1 transition-colors
             {% if 'publications' in request.path %}text-text-primary dark:text-white{% else %}text-text-tertiary hover:text-text-primary dark:text-dark-secondary dark:hover:text-white{% endif %}">
             <i class="fas fa-book text-lg"></i>
-            <span class="text-[10px] font-medium">Library</span>
+            <span class="text-[10px] font-medium">Publications</span>
         </a>
 
-        <!-- Profile / Login -->
         {% if user.is_authenticated %}
         <a href="{% url 'users:profile' user.username %}"
             class="flex flex-col items-center justify-center gap-1 transition-colors

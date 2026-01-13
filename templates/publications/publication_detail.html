@@ -4,14 +4,12 @@
 {% load markdown_tags %}
 {% load bibtex_tags %}
 
-{% block title %}{{ publication.title }} | Kiri Library{% endblock %}
+{% block title %}{{ publication.title }} | Kiri Publications{% endblock %}
 
 {% block extra_head %}
 {% if publication.executable_script %}
-<!-- Pyodide only loaded if script exists -->
 <script src="https://cdn.jsdelivr.net/pyodide/v0.27.0/full/pyodide.js"></script>
 {% endif %}
-<!-- MathJax for LaTeX support -->
 <script>
     MathJax = {
         tex: {
@@ -22,8 +20,8 @@
         }
     };
 </script>
-<script type="text/javascript" id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js">
-</script>
+<script type="text/javascript" id="MathJax-script" async
+    src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 {% endblock %}
 
 {% block content %}
@@ -32,7 +30,7 @@
     <header class="mb-8">
         <div class="flex items-center gap-2 mb-4 text-sm text-text-tertiary dark:text-dark-secondary">
             <a href="{% url 'publications:list' %}" class="hover:text-brand-green transition-colors">
-                <i class="fas fa-arrow-left mr-1"></i> Library
+                <i class="fas fa-arrow-left mr-1"></i> Publications
             </a>
             <span>/</span>
             <span>{{ publication.created_at|date:"Y" }}</span>
@@ -89,12 +87,10 @@
         {% endif %}
     </header>
 
-    <!-- Content -->
     <article class="prose prose-zinc dark:prose-invert max-w-none mb-12">
         {{ publication.content|render_markdown }}
     </article>
 
-    <!-- Executable Code -->
     {% if publication.executable_script %}
     <div
         class="mb-12 rounded-xl border border-border bg-bg-secondary overflow-hidden dark:border-dark-border dark:bg-dark-surface">
@@ -115,18 +111,26 @@
                 <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-white"></div>
             </div>
         </div>
+        <!-- Reference Output area for the runner script -->
         <div id="output-area"
             class="p-4 bg-black font-mono text-xs text-brand-green border-t border-border dark:border-dark-border min-h-[100px] hidden">
             <div class="text-gray-500 mb-2">Reference output:</div>
             <pre id="output-content"></pre>
         </div>
-    </div>
 
-    <!-- Data for JS -->
+        <div
+            class="p-4 border-t border-border bg-white dark:bg-dark-bg dark:border-dark-border flex justify-between items-center">
+            <span id="pyodide-status" class="text-xs text-text-tertiary">Kernel Idle</span>
+            <button class="btn-primary text-xs run-python-btn" data-code="{{ publication.executable_script|escapejs }}"
+                data-output="output-content"
+                onclick="document.getElementById('output-area').classList.remove('hidden')">
+                <i class="fas fa-play"></i> Run Code
+            </button>
+        </div>
+    </div>
     <div id="script-data" data-code="{{ publication.executable_script|escapejs }}"></div>
     {% endif %}
 
-    <!-- BibTeX -->
     <div
         class="bg-bg-secondary p-6 rounded-xl border border-border dark:bg-dark-surface dark:border-dark-border mb-12 print:hidden">
         <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
@@ -142,55 +146,14 @@
 }</pre>
     </div>
 
-    <!-- Print-only footer -->
     <div class="hidden print:block mt-8 pt-4 border-t border-gray-300 text-xs text-gray-500">
         <p>Printed from Kiri Research Labs - {{ request.build_absolute_uri }}</p>
         <p>&copy; {% now "Y" %} {{ publication.author.username }}</p>
     </div>
 
-    <!-- Discussion -->
     <div class="print:hidden">
         {% include "core/partials/comments_section.html" with comments=comments object=publication %}
     </div>
-    {% if publication.executable_script %}
-    <div class="my-8">
-        <div class="flex items-center justify-between mb-2">
-            <h3 class="text-sm font-bold uppercase tracking-wider text-text-secondary dark:text-dark-secondary">
-                Interactive Demo</h3>
-            <span class="text-xs text-brand-green"><i class="fas fa-play-circle"></i> Live Execution</span>
-        </div>
-        <div
-            class="rounded-lg border border-border overflow-hidden bg-bg-secondary dark:bg-dark-surface dark:border-dark-border">
-            <div
-                class="bg-gray-900 text-gray-400 text-xs px-4 py-2 font-mono border-b border-gray-800 flex justify-between">
-                <span>main.py</span>
-                <span>Python 3.11 (Pyodide)</span>
-            </div>
-            <pre
-                class="p-4 overflow-x-auto text-sm font-mono text-text-primary dark:text-white"><code>{{ publication.executable_script }}</code></pre>
-
-            <!-- Execution Output -->
-            <div id="exec-output-{{ publication.id }}"
-                class="bg-black text-green-400 font-mono text-xs p-4 border-t border-gray-800 hidden empty:hidden">
-            </div>
-
-            <div
-                class="p-4 border-t border-border bg-white dark:bg-dark-bg dark:border-dark-border flex justify-between items-center">
-                <span id="pyodide-status" class="text-xs text-text-tertiary">Kernel Idle</span>
-                <button class="btn-primary text-xs run-python-btn"
-                    data-code="{{ publication.executable_script|escapejs }}"
-                    data-output="exec-output-{{ publication.id }}"
-                    onclick="document.getElementById('exec-output-{{ publication.id }}').classList.remove('hidden')">
-                    <i class="fas fa-play"></i> Run Code
-                </button>
-            </div>
-        </div>
-    </div>
-    {% endif %}
-
-    <!-- Discussion -->
-    {% include "core/partials/comments_section.html" with comments=comments object=publication %}
-
 </div>
 {% endblock %}
 

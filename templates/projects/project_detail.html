@@ -2,7 +2,7 @@
 {% load static %}
 {% load core_tags %}
 
-{% block title %}{{ project.name }} | Kiri Colosseum{% endblock %}
+{% block title %}{{ project.name }} | Kiri Projects{% endblock %}
 
 {% block content %}
 <div class="max-w-4xl mx-auto space-y-8">
@@ -16,7 +16,7 @@
                         }}</span>
                     {% if project.is_hot %}
                     <span
-                        class="text-[10px] font-bold text-orange-500 bg-orange-50 px-1.5 py-0.5 rounded border border-orange-100 dark:bg-orange-900/20 dark:border-orange-900/50">HOT</span>
+                        class="text-[10px] font-bold text-brand-gold bg-brand-gold/10 px-1.5 py-0.5 rounded border border-brand-gold/20">Trending</span>
                     {% endif %}
                 </div>
                 <h1 class="text-3xl md:text-4xl font-display font-bold text-text-primary dark:text-white mb-2">{{
@@ -24,7 +24,6 @@
                 <p class="text-lg text-text-secondary dark:text-dark-secondary">{{ project.description }}</p>
             </div>
 
-            <!-- Actions -->
             <div class="flex flex-col gap-2 shrink-0">
                 <a href="{{ project.github_repo_url }}" target="_blank" class="btn-primary">
                     <i class="fab fa-github"></i> Star <span class="bg-black/10 px-1.5 rounded text-xs ml-1">{{
@@ -38,7 +37,6 @@
             </div>
         </div>
 
-        <!-- Meta -->
         <div
             class="flex items-center gap-6 text-sm text-text-tertiary border-b border-border pb-6 dark:border-dark-border dark:text-dark-secondary">
             <div class="flex items-center gap-2">
@@ -60,8 +58,8 @@
                 <span><i class="far fa-eye"></i> {{ project.view_count }}</span>
             </div>
             {% if project.huggingface_url %}
-            <a href="{{ project.huggingface_url }}" target="_blank" class="hover:text-brand-gold transition-colors ml-4"
-                title="Hugging Face">
+            <a href="{{ project.huggingface_url }}" target="_blank"
+                class="hover:text-brand-gold transition-colors ml-4">
                 <img src="https://huggingface.co/front/assets/huggingface_logo-noborder.svg"
                     class="w-5 h-5 inline opacity-70 hover:opacity-100">
             </a>
@@ -69,7 +67,6 @@
         </div>
     </div>
 
-    <!-- Topics -->
     {% if project.topics %}
     <div class="flex flex-wrap gap-2">
         {% for topic in project.topics %}
@@ -81,7 +78,6 @@
     </div>
     {% endif %}
 
-    <!-- Discussion -->
     {% include "core/partials/comments_section.html" with comments=comments object=project %}
 
 </div>

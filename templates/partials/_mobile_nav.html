@@ -37,7 +37,8 @@
             <span class="text-[10px] font-medium">Me</span>
         </a>
         {% else %}
-        <a href="{% url 'account_login' %}"
+        {% load socialaccount %}
+        <a href="{% provider_login_url 'github' process='login' %}"
             class="flex flex-col items-center justify-center gap-1 transition-colors text-text-tertiary hover:text-text-primary dark:text-dark-secondary dark:hover:text-white">
             <i class="fas fa-sign-in-alt text-lg"></i>
             <span class="text-[10px] font-medium">Join</span>

@@ -1,81 +1,159 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}About | Kiri{% endblock %}
+{% block title %}About | Kiri Research Labs{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/about.css' %}">
+{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto px-6 py-12">
-    <!-- Hero -->
-    <header class="mb-12">
-        <h1 class="text-4xl font-bold text-[#212529] dark:text-white mb-4">About Kiri</h1>
-        <p class="text-xl text-[#6C757D] dark:text-[#A1A1AA]">The operating system for modern research.</p>
+<div class="min-h-screen bg-[#F8F9FA] dark:bg-[#121212]">
+    <!-- Premium Hero Section -->
+    <header class="hero-mesh relative overflow-hidden py-24 px-6 text-center">
+        <div class="max-w-6xl mx-auto flex flex-col items-center relative z-10">
+            <img src="{% static 'images/logos/logo.png' %}" alt="Kiri Research Labs" class="hero-logo float-anim">
+            <p class="text-xl md:text-2xl text-white/90 max-w-2xl mx-auto font-medium leading-relaxed drop-shadow-md">
+                The operating system for modern research and digital innovation.
+            </p>
+        </div>
     </header>
 
-    <!-- Mission -->
-    <section class="mb-12">
-        <h2 class="text-2xl font-semibold text-[#212529] dark:text-white mb-4 flex items-center gap-3">
-            <span class="w-10 h-10 bg-[#E8F5ED] dark:bg-[#0D7C3D]/20 rounded-lg flex items-center justify-center">
-                <i class="fas fa-bullseye text-[#0D7C3D]"></i>
-            </span>
-            Our Mission
-        </h2>
-        <p class="text-[#495057] dark:text-[#A1A1AA] leading-relaxed">
-            Kiri exists to democratize access to research tools and knowledge. We believe that great ideas
-            should be shared freely, and that collaboration accelerates innovation. Our platform brings together
-            researchers, developers, and enthusiasts from around the world to share their work, learn from each
-            other, and build the future together.
-        </p>
-    </section>
-
-    <!-- What We Offer -->
-    <section class="mb-12">
-        <h2 class="text-2xl font-semibold text-[#212529] dark:text-white mb-6 flex items-center gap-3">
-            <span class="w-10 h-10 bg-[#FDF5E6] dark:bg-[#C4992E]/20 rounded-lg flex items-center justify-center">
-                <i class="fas fa-cubes text-[#C4992E]"></i>
-            </span>
-            What We Offer
-        </h2>
-        <div class="grid md:grid-cols-2 gap-6">
-            <div class="p-6 bg-white rounded-xl border border-[#DEE2E6] dark:bg-[#1E1E1E] dark:border-[#3D3D3D]">
-                <i class="fas fa-book text-2xl text-[#0D7C3D] mb-4"></i>
-                <h3 class="text-lg font-semibold text-[#212529] dark:text-white mb-2">Library</h3>
-                <p class="text-sm text-[#6C757D] dark:text-[#A1A1AA]">
-                    A curated collection of research papers, tutorials, and technical write-ups from our community.
-                </p>
+    <div class="max-w-6xl mx-auto px-6 py-16">
+        <!-- Official Description Section -->
+        <section class="reveal mb-24 grid lg:grid-cols-5 gap-12 items-center">
+            <div class="lg:col-span-3">
+                <h2 class="text-2xl font-bold text-[#212529] dark:text-white mb-6 flex items-center gap-3">
+                    <span
+                        class="w-10 h-10 bg-[#E8F5ED] dark:bg-[#0D7C3D]/20 rounded-lg flex items-center justify-center text-[#0D7C3D]">
+                        <i class="fas fa-building"></i>
+                    </span>
+                    Who We Are
+                </h2>
+                <div class="space-y-4">
+                    <p class="text-lg leading-relaxed text-[#495057] dark:text-[#E4E4E7]">
+                        Kiri Research Labs is a technology and research-focused enterprise developing software
+                        platforms, AI-driven solutions, and digital research tools.
+                    </p>
+                    <p class="text-base leading-relaxed text-[#6C757D] dark:text-[#A1A1AA]">
+                        The business works on data analytics, artificial intelligence, and web-based platforms for
+                        research, education, and social-impact initiatives.
+                    </p>
+                </div>
             </div>
-            <div class="p-6 bg-white rounded-xl border border-[#DEE2E6] dark:bg-[#1E1E1E] dark:border-[#3D3D3D]">
-                <i class="fas fa-rocket text-2xl text-[#C4992E] mb-4"></i>
-                <h3 class="text-lg font-semibold text-[#212529] dark:text-white mb-2">Projects</h3>
-                <p class="text-sm text-[#6C757D] dark:text-[#A1A1AA]">
-                    Open-source projects and tools showcased by developers from the Kiri community.
-                </p>
+            <div class="lg:col-span-2">
+                <div class="glass-card p-8 rounded-xl">
+                    <h4 class="text-[#0D7C3D] font-bold uppercase tracking-wider text-xs mb-4">Core Focus Areas</h4>
+                    <ul class="space-y-3">
+                        <li class="flex items-start gap-3 text-sm">
+                            <i class="fas fa-circle text-[8px] mt-1.5 text-[#C4992E]"></i>
+                            <span class="text-[#495057] dark:text-[#A1A1AA]">AI-Driven Solutions & Research</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-sm">
+                            <i class="fas fa-circle text-[8px] mt-1.5 text-[#C4992E]"></i>
+                            <span class="text-[#495057] dark:text-[#A1A1AA]">Digital Intelligence Platforms</span>
+                        </li>
+                        <li class="flex items-start gap-3 text-sm">
+                            <i class="fas fa-circle text-[8px] mt-1.5 text-[#C4992E]"></i>
+                            <span class="text-[#495057] dark:text-[#A1A1AA]">Social-Impact Digital Infrastructure</span>
+                        </li>
+                    </ul>
+                </div>
             </div>
-        </div>
-    </section>
+        </section>
 
-    <!-- Company -->
-    <section class="mb-12">
-        <h2 class="text-2xl font-semibold text-[#212529] dark:text-white mb-4 flex items-center gap-3">
-            <span class="w-10 h-10 bg-[#E8F5ED] dark:bg-[#0D7C3D]/20 rounded-lg flex items-center justify-center">
-                <i class="fas fa-building text-[#0D7C3D]"></i>
-            </span>
-            Kiri Research Labs
-        </h2>
-        <p class="text-[#495057] dark:text-[#A1A1AA] leading-relaxed">
-            Kiri is developed and maintained by <strong>Kiri Research Labs</strong>, a company dedicated to
-            building tools that empower researchers and developers worldwide. Founded with the vision of
-            making research more accessible, we continue to grow and evolve with input from our community.
-        </p>
-    </section>
+        <!-- Featured Platforms Showcase -->
+        <section class="reveal mb-24">
+            <div class="mb-12">
+                <h2 class="text-2xl font-bold text-[#212529] dark:text-white mb-2">Featured Platforms</h2>
+                <p class="text-[#6C757D] dark:text-[#A1A1AA]">Live platforms demonstrating our research and development
+                    capabilities.</p>
+            </div>
 
-    <!-- Contact -->
-    <section class="p-8 bg-gradient-to-r from-[#0D7C3D] to-[#0A5C2C] rounded-xl text-white">
-        <h2 class="text-2xl font-semibold mb-4">Get In Touch</h2>
-        <p class="mb-6 opacity-90">Have questions, feedback, or want to collaborate? We'd love to hear from you.</p>
-        <a href="mailto:hello@kiri.ng"
-            class="inline-flex items-center gap-2 px-6 py-3 bg-white text-[#0D7C3D] font-semibold rounded-lg hover:bg-[#F8F9FA] transition-colors">
-            <i class="fas fa-envelope"></i>
-            Contact Us
-        </a>
-    </section>
+            <div class="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+                <!-- Imara -->
+                <a href="https://imara.africa/" target="_blank" class="glass-card p-6 rounded-xl flex flex-col group">
+                    <div class="mb-5">
+                        <img src="{% static 'images/logos/imara.png' %}" alt="Imara" class="platform-logo">
+                    </div>
+                    <h3
+                        class="text-lg font-bold text-[#212529] dark:text-white mb-2 group-hover:text-[#0D7C3D] transition-colors">
+                        Imara</h3>
+                    <p class="text-xs text-[#6C757D] dark:text-[#A1A1AA] mb-6 leading-relaxed">Digital bodyguard
+                        protecting against online gender-based violence.</p>
+                    <span class="mt-auto text-xs text-[#0D7C3D] font-bold flex items-center gap-1.5">
+                        VISIT PLATFORM <i class="fas fa-chevron-right text-[10px]"></i>
+                    </span>
+                </a>
+
+                <!-- SpanInsight -->
+                <a href="https://spaninsight.com/" target="_blank"
+                    class="glass-card p-6 rounded-xl flex flex-col group">
+                    <div class="mb-5">
+                        <img src="{% static 'images/logos/spaninsight.webp' %}" alt="SpanInsight" class="platform-logo">
+                    </div>
+                    <h3
+                        class="text-lg font-bold text-[#212529] dark:text-white mb-2 group-hover:text-[#0D7C3D] transition-colors">
+                        SpanInsight</h3>
+                    <p class="text-xs text-[#6C757D] dark:text-[#A1A1AA] mb-6 leading-relaxed">Data intelligence
+                        platform for collection and dashboard analytics.</p>
+                    <span class="mt-auto text-xs text-[#0D7C3D] font-bold flex items-center gap-1.5">
+                        VISIT PLATFORM <i class="fas fa-chevron-right text-[10px]"></i>
+                    </span>
+                </a>
+
+                <!-- Igbo Archives -->
+                <a href="https://igboarchives.com.ng" target="_blank"
+                    class="glass-card p-6 rounded-xl flex flex-col group">
+                    <div class="mb-5">
+                        <img src="{% static 'images/logos/igboarchives.png' %}" alt="Igbo Archives"
+                            class="platform-logo">
+                    </div>
+                    <h3
+                        class="text-lg font-bold text-[#212529] dark:text-white mb-2 group-hover:text-[#0D7C3D] transition-colors">
+                        Igbo Archives</h3>
+                    <p class="text-xs text-[#6C757D] dark:text-[#A1A1AA] mb-6 leading-relaxed">Modern archive preserving
+                        Igbo cultural heritage digitally.</p>
+                    <span class="mt-auto text-xs text-[#0D7C3D] font-bold flex items-center gap-1.5">
+                        VISIT PLATFORM <i class="fas fa-chevron-right text-[10px]"></i>
+                    </span>
+                </a>
+
+                <!-- Akili -->
+                <a href="https://akili-jwe7.onrender.com" target="_blank"
+                    class="glass-card p-6 rounded-xl flex flex-col group">
+                    <div class="mb-5">
+                        <img src="{% static 'images/logos/akili.png' %}" alt="Akili" class="platform-logo">
+                    </div>
+                    <h3
+                        class="text-lg font-bold text-[#212529] dark:text-white mb-2 group-hover:text-[#0D7C3D] transition-colors">
+                        Akili</h3>
+                    <p class="text-xs text-[#6C757D] dark:text-[#A1A1AA] mb-6 leading-relaxed">Innovative learning
+                        platform with KaTeX support and quizzes.</p>
+                    <span class="mt-auto text-xs text-[#0D7C3D] font-bold flex items-center gap-1.5">
+                        VISIT PLATFORM <i class="fas fa-chevron-right text-[10px]"></i>
+                    </span>
+                </a>
+            </div>
+        </section>
+
+        <!-- Final Contact CTA -->
+        <section
+            class="reveal bg-white border border-[#DEE2E6] dark:bg-[#1E1E1E] dark:border-[#3D3D3D] rounded-xl p-8 text-center">
+            <h2 class="text-xl font-bold text-[#212529] dark:text-white mb-3">Let's Build the Future</h2>
+            <p class="text-sm text-[#6C757D] dark:text-[#A1A1AA] mb-6 max-w-xl mx-auto">Have a project in mind or want
+                to collaborate with Kiri Research Labs? We are always open to new ideas.</p>
+            <div class="flex justify-center gap-4">
+                <a href="mailto:nwokikeonyeka@gmail.com"
+                    class="px-6 py-2.5 bg-[#0D7C3D] text-white font-semibold rounded-lg hover:bg-[#0B6A34] transition-colors text-sm">
+                    Contact Us
+                </a>
+            </div>
+        </section>
+    </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/about.js' %}"></script>
 {% endblock %}

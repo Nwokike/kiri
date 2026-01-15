@@ -258,6 +258,25 @@ README excerpt: {readme}
                 'start_command': 'python app.py'
             }
         
+        # Lane A indicators - SLM/Browser ML (transformers.js, Pyodide)
+        slm_keywords = ['@xenova/transformers', 'transformers.js', '@huggingface/transformers']
+        pyodide_keywords = ['pyodide', 'gradio-lite', 'pyscript']
+        
+        package_json_lower = package_json.lower()
+        if any(kw in package_json_lower for kw in slm_keywords):
+            return {
+                'lane': 'A',
+                'reason': 'Browser-runnable ML using transformers.js',
+                'start_command': 'npm run dev'
+            }
+        
+        if any(kw in requirements for kw in pyodide_keywords):
+            return {
+                'lane': 'A',
+                'reason': 'Browser-runnable Python using Pyodide',
+                'start_command': ''
+            }
+        
         # Lane A indicators (Frontend/Node)
         if package_json or any(f.endswith('.jsx') or f.endswith('.tsx') for f in files):
             return {

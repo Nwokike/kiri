@@ -192,17 +192,19 @@ README excerpt: {readme}
             response = requests.post(
                 cls.GROQ_API_URL,
                 json={
-                    # llama-3.1-8b-instant: Fast, high rate limits (30k+ TPM)
-                    # Perfect for simple classification tasks where speed > intelligence
-                    # Fallback from Gemini, so quality isn't critical
-                    "model": "llama-3.1-8b-instant",
+                    # llama-3.3-70b-versatile: GPT-4 class intelligence
+                    # Best quality for classification, supports JSON mode
+                    # Rate limits: ~6k TPM (sufficient for fallback usage)
+                    "model": "llama-3.3-70b-versatile",
                     "messages": [{
                         "role": "system",
-                        "content": "You are an expert at analyzing code repositories. Always respond with valid JSON only, no markdown."
+                        "content": "You are an expert at analyzing code repositories. Respond ONLY with valid JSON, no explanations."
                     }, {
                         "role": "user", 
                         "content": prompt
                     }],
+                    # JSON Object Mode - guarantees syntactically valid JSON
+                    "response_format": {"type": "json_object"},
                     "temperature": 0.1,
                     "max_tokens": 256,
                 },

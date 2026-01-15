@@ -74,19 +74,22 @@
                 <!-- Traffic Controller Launch Buttons -->
                 {% if project.lane == 'B' and project.execution_url %}
                 <a href="{{ project.execution_url }}" target="_blank"
-                    class="px-4 py-2 bg-[#ff832b] text-white text-sm font-medium hover:bg-[#e66a1a] transition-colors inline-flex items-center gap-2">
+                    class="px-4 py-2 bg-[#ff832b] text-white text-sm font-medium hover:bg-[#e66a1a] transition-colors inline-flex items-center gap-2"
+                    title="⏱️ First launch takes 30-60s to build. Opens a temporary cloud server.">
                     <i class="fas fa-server"></i>
                     Launch in Cloud
                 </a>
                 {% elif project.lane == 'C' and project.execution_url %}
                 <a href="{{ project.execution_url }}" target="_blank"
-                    class="px-4 py-2 bg-[#da1e28] text-white text-sm font-medium hover:bg-[#b81922] transition-colors inline-flex items-center gap-2">
+                    class="px-4 py-2 bg-[#da1e28] text-white text-sm font-medium hover:bg-[#b81922] transition-colors inline-flex items-center gap-2"
+                    title="⚡ Opens in Google Colab. Requires Google sign-in for GPU access.">
                     <i class="fas fa-microchip"></i>
                     Open in Colab
                 </a>
                 {% elif project.lane == 'A' %}
                 <a href="https://run.kiri.ng/?repo={{ project.github_repo_url }}" target="_blank"
-                    class="px-4 py-2 bg-[#24a148] text-white text-sm font-medium hover:bg-[#1e8e3e] transition-colors inline-flex items-center gap-2">
+                    class="px-4 py-2 bg-[#24a148] text-white text-sm font-medium hover:bg-[#1e8e3e] transition-colors inline-flex items-center gap-2"
+                    title="🚀 First run may take 10-30s (cached after). Runs entirely in your browser - no server needed!">
                     <i class="fas fa-play"></i>
                     Run in Browser
                 </a>

@@ -192,8 +192,15 @@ README excerpt: {readme}
             response = requests.post(
                 cls.GROQ_API_URL,
                 json={
-                    "model": "llama-3.1-8b-instant",  # Fast, free tier friendly
-                    "messages": [{"role": "user", "content": prompt}],
+                    # llama-3-groq-8b-tool-use is optimized for JSON/structured output
+                    "model": "llama-3-groq-8b-tool-use",
+                    "messages": [{
+                        "role": "system",
+                        "content": "You are an expert at analyzing code repositories. Always respond with valid JSON only."
+                    }, {
+                        "role": "user", 
+                        "content": prompt
+                    }],
                     "temperature": 0.1,
                     "max_tokens": 256,
                 },

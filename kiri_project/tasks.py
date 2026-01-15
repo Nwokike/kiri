@@ -165,3 +165,160 @@ def sync_github_stats():
             errors += 1
             
     logger.info(f"GitHub Sync Complete. Updated: {updated_count}, Errors: {errors}")
+
+
+@task()
+def classify_project_lane(project_id: int):
+    """
+    Background task to classify a project and generate execution config.
+    Called when a project is submitted or when user triggers re-classification.
+    
+    Uses AI (Gemini + Groq fallback) to analyze the repository and determine:
+    - Lane A: Client-side (WebContainer) - React, Vue, Node.js
+    - Lane B: Cloud Container (Binder) - Django, Flask, FastAPI
+    - Lane C: GPU Cluster (Colab) - PyTorch, TensorFlow, Transformers
+    """
+    from projects.models import Project
+    from projects.gist_service import GistService
+    from core.ai_service import AIService
+    
+    logger.info(f"Starting lane classification for project {project_id}")
+    
+    try:
+        project = Project.objects.get(id=project_id)
+    except Project.DoesNotExist:
+        logger.error(f"Project {project_id} not found")
+        return
+    
+    # 1. Fetch repository structure from GitHub
+    repo_files = fetch_github_structure(project.github_repo_url)
+    if not repo_files:
+        logger.error(f"Failed to fetch repo structure for {project.github_repo_url}")
+        project.lane = 'P'  # Keep as pending
+        project.lane_classification_reason = "Failed to fetch repository structure"
+        project.save()
+        return
+    
+    # 2. AI Classification (Gemini + Groq fallback)
+    result = AIService.classify_repository_lane(repo_files)
+    
+    # 3. Save classification result
+    project.lane = result['lane']
+    project.lane_classification_reason = result.get('reason', '')
+    project.start_command = result.get('start_command', '')
+    
+    # 4. Generate magic link for Lanes B and C
+    if project.lane == 'B':
+        gist_id = GistService.create_binder_gist(project)
+        if gist_id:
+            project.gist_id = gist_id
+            project.execution_url = GistService.build_binder_url(
+                gist_id, 
+                port=8000 if 'django' in result.get('reason', '').lower() else 5000
+            )
+            logger.info(f"Created Binder execution URL for project {project_id}")
+        else:
+            logger.warning(f"Failed to create Binder gist for project {project_id}")
+    
+    elif project.lane == 'C':
+        notebook_json = AIService.generate_colab_notebook(
+            project.github_repo_url,
+            project.start_command
+        )
+        gist_id = GistService.create_colab_gist(project, notebook_json)
+        if gist_id:
+            project.gist_id = gist_id
+            project.execution_url = GistService.build_colab_url(gist_id)
+            logger.info(f"Created Colab execution URL for project {project_id}")
+        else:
+            logger.warning(f"Failed to create Colab gist for project {project_id}")
+    
+    # Lane A doesn't need server-side prep (runs in browser)
+    
+    project.save()
+    logger.info(f"Classified project {project_id} as Lane {project.lane}: {project.lane_classification_reason}")
+
+
+def fetch_github_structure(repo_url: str) -> dict:
+    """
+    Fetches repository structure and key files from GitHub for lane classification.
+    
+    Returns:
+        Dict with comprehensive repo info for AI analysis:
+        - file_list: List of file paths in the repo
+        - package_json: contents of package.json (Node.js)
+        - requirements_txt: contents of requirements.txt (Python)
+        - pyproject_toml: contents of pyproject.toml (Python)
+        - dockerfile: contents of Dockerfile (Docker)
+        - main_file: contents of main entry point (app.py, main.py, etc.)
+        - readme: first 1000 chars of README for context
+    """
+    from projects.services import GitHubService
+    
+    parsed = GitHubService.parse_repo_url(repo_url)
+    if not parsed:
+        return None
+    
+    owner, repo = parsed
+    
+    result = {
+        'file_list': [],
+        'package_json': '',
+        'requirements_txt': '',
+        'pyproject_toml': '',
+        'dockerfile': '',
+        'main_file': '',
+        'readme': ''
+    }
+    
+    # Get file tree (first 100 files)
+    try:
+        tree_url = f"https://api.github.com/repos/{owner}/{repo}/git/trees/HEAD?recursive=1"
+        headers = {'Accept': 'application/vnd.github.v3+json'}
+        
+        token = os.environ.get('GITHUB_TOKEN')
+        if token:
+            headers['Authorization'] = f'token {token}'
+        
+        response = requests.get(tree_url, headers=headers, timeout=15)
+        if response.status_code == 200:
+            tree = response.json().get('tree', [])
+            result['file_list'] = [item['path'] for item in tree[:150] if item['type'] == 'blob']
+    except Exception as e:
+        logger.warning(f"Failed to fetch file tree: {e}")
+    
+    def fetch_file(filepath: str, limit: int = 2000) -> str:
+        """Helper to fetch a single file from the repo."""
+        try:
+            url = f"https://raw.githubusercontent.com/{owner}/{repo}/HEAD/{filepath}"
+            resp = requests.get(url, timeout=10)
+            if resp.status_code == 200:
+                return resp.text[:limit]
+        except Exception:
+            pass
+        return ''
+    
+    # Fetch key dependency/config files
+    result['package_json'] = fetch_file('package.json')
+    result['requirements_txt'] = fetch_file('requirements.txt')
+    result['pyproject_toml'] = fetch_file('pyproject.toml')
+    result['dockerfile'] = fetch_file('Dockerfile', limit=1500)
+    
+    # Try to find and fetch main entry point
+    entry_points = ['app.py', 'main.py', 'run.py', 'server.py', 'manage.py', 'index.js', 'src/index.js', 'src/main.py']
+    for entry in entry_points:
+        if entry in result['file_list'] or f'src/{entry}' in result['file_list']:
+            content = fetch_file(entry, limit=1000)
+            if content:
+                result['main_file'] = content
+                break
+    
+    # Fetch README for additional context
+    for readme_name in ['README.md', 'readme.md', 'README.rst', 'README']:
+        readme = fetch_file(readme_name, limit=1000)
+        if readme:
+            result['readme'] = readme
+            break
+    
+    return result
+

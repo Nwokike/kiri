@@ -30,6 +30,28 @@
                         <i class="fas fa-fire mr-1"></i> Trending
                     </span>
                     {% endif %}
+
+                    <!-- Traffic Controller Lane Badge -->
+                    {% if project.lane == 'A' %}
+                    <span class="px-2 py-1 text-xs font-medium bg-[#24a148]/10 text-[#24a148] uppercase"
+                        title="Runs instantly in your browser">
+                        🟢 Instant Run
+                    </span>
+                    {% elif project.lane == 'B' %}
+                    <span class="px-2 py-1 text-xs font-medium bg-[#ff832b]/10 text-[#ff832b] uppercase"
+                        title="Dedicated cloud container (~60s startup)">
+                        🟠 Cloud Boot
+                    </span>
+                    {% elif project.lane == 'C' %}
+                    <span class="px-2 py-1 text-xs font-medium bg-[#da1e28]/10 text-[#da1e28] uppercase"
+                        title="Requires Google account for GPU access">
+                        🔴 GPU Powered
+                    </span>
+                    {% elif project.lane == 'P' %}
+                    <span class="px-2 py-1 text-xs font-medium bg-[#8d8d8d]/10 text-[#8d8d8d] uppercase animate-pulse">
+                        ⏳ Analyzing...
+                    </span>
+                    {% endif %}
                 </div>
 
                 <h1 class="text-3xl font-semibold text-[#161616] dark:text-white mb-3">
@@ -48,6 +70,29 @@
                     Star on GitHub
                     <span class="px-2 py-0.5 bg-white/20 text-xs">{{ project.stars_count }}</span>
                 </a>
+
+                <!-- Traffic Controller Launch Buttons -->
+                {% if project.lane == 'B' and project.execution_url %}
+                <a href="{{ project.execution_url }}" target="_blank"
+                    class="px-4 py-2 bg-[#ff832b] text-white text-sm font-medium hover:bg-[#e66a1a] transition-colors inline-flex items-center gap-2">
+                    <i class="fas fa-server"></i>
+                    Launch in Cloud
+                </a>
+                {% elif project.lane == 'C' and project.execution_url %}
+                <a href="{{ project.execution_url }}" target="_blank"
+                    class="px-4 py-2 bg-[#da1e28] text-white text-sm font-medium hover:bg-[#b81922] transition-colors inline-flex items-center gap-2">
+                    <i class="fas fa-microchip"></i>
+                    Open in Colab
+                </a>
+                {% elif project.lane == 'A' %}
+                <button id="launch-webcontainer" disabled
+                    class="px-4 py-2 bg-[#24a148] text-white text-sm font-medium hover:bg-[#1e8e3e] transition-colors inline-flex items-center gap-2 opacity-60 cursor-not-allowed"
+                    title="WebContainer runner coming soon">
+                    <i class="fas fa-play"></i>
+                    Run in Browser (Soon)
+                </button>
+                {% endif %}
+
                 {% if project.demo_url %}
                 <a href="{{ project.demo_url }}" target="_blank"
                     class="px-4 py-2 border border-[#0f62fe] text-[#0f62fe] text-sm font-medium hover:bg-[#edf5ff] transition-colors inline-flex items-center gap-2">

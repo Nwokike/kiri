@@ -87,5 +87,12 @@ class ProjectSubmitView(LoginRequiredMixin, CreateView):
              sync_project_metadata(self.object)
         except Exception:
              pass # Don't block submission if sync fails
+        
+        # Trigger lane classification (async via Huey)
+        try:
+            from kiri_project.tasks import classify_project_lane
+            classify_project_lane(self.object.id)
+        except Exception:
+            pass  # Don't block submission if classification queuing fails
              
         return response

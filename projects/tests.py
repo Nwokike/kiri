@@ -132,3 +132,164 @@ class ProjectFormTests(TestCase):
         
         self.assertTrue(form.is_valid(), form.errors)
         self.assertEqual(form.cleaned_data['topics'], ['nlp', 'cv', 'transformers'])
+
+
+# ============================================================================
+# Traffic Controller Tests
+# ============================================================================
+
+class TrafficControllerClassificationTests(TestCase):
+    """Tests for the AI-powered lane classification system."""
+    
+    def test_react_project_classification(self):
+        """React/Vue/Node.js projects should be classified as Lane A."""
+        from core.ai_service import AIService
+        
+        repo_files = {
+            'file_list': ['package.json', 'src/App.jsx', 'src/index.js', 'vite.config.js'],
+            'package_json': '{"dependencies": {"react": "^18.2.0", "vite": "^5.0.0"}}',
+            'requirements_txt': '',
+            'pyproject_toml': '',
+            'dockerfile': '',
+            'main_file': '',
+            'readme': '# React App'
+        }
+        
+        # Use heuristic directly to avoid API calls in tests
+        result = AIService._heuristic_classification(repo_files)
+        self.assertEqual(result['lane'], 'A')
+        self.assertIn('JavaScript', result['reason'])
+    
+    def test_django_project_classification(self):
+        """Django/Flask projects should be classified as Lane B."""
+        from core.ai_service import AIService
+        
+        repo_files = {
+            'file_list': ['manage.py', 'app/views.py', 'app/models.py', 'requirements.txt'],
+            'package_json': '',
+            'requirements_txt': 'django==4.2\ngunicorn\npsycopg2-binary',
+            'pyproject_toml': '',
+            'dockerfile': '',
+            'main_file': '',
+            'readme': '# Django Web App'
+        }
+        
+        result = AIService._heuristic_classification(repo_files)
+        self.assertEqual(result['lane'], 'B')
+        self.assertIn('Django', result['reason'])
+    
+    def test_ml_project_classification(self):
+        """PyTorch/TensorFlow projects should be classified as Lane C."""
+        from core.ai_service import AIService
+        
+        repo_files = {
+            'file_list': ['train.py', 'model.py', 'requirements.txt', 'data/train.csv'],
+            'package_json': '',
+            'requirements_txt': 'torch==2.1.0\ntransformers\nsentencepiece\naccelerate',
+            'pyproject_toml': '',
+            'dockerfile': '',
+            'main_file': '',
+            'readme': '# LLM Fine-tuning'
+        }
+        
+        result = AIService._heuristic_classification(repo_files)
+        self.assertEqual(result['lane'], 'C')
+        self.assertIn('ML', result['reason'])
+    
+    def test_validation_corrects_ai_mistakes(self):
+        """Validation layer should correct obvious AI misclassifications."""
+        from core.ai_service import AIService
+        
+        # Simulate AI mistakenly returning Lane A for a Django project
+        wrong_ai_result = {'lane': 'A', 'reason': 'Some incorrect reason', 'start_command': 'npm run dev'}
+        
+        repo_files = {
+            'file_list': ['manage.py', 'app/views.py'],
+            'package_json': '',
+            'requirements_txt': 'django>=4.0\ngunicorn',
+            'pyproject_toml': '',
+            'dockerfile': '',
+            'main_file': '',
+            'readme': ''
+        }
+        
+        # Validation should correct this
+        corrected = AIService._validate_classification(wrong_ai_result, repo_files)
+        self.assertEqual(corrected['lane'], 'B')
+    
+    def test_lane_field_on_model(self):
+        """Test that Project model has lane field with correct defaults."""
+        self.user = User.objects.create_user(username='lane_tester', password='password')
+        project = Project.objects.create(
+            name='Lane Test Project',
+            submitted_by=self.user,
+            description='Testing lane field.',
+            github_repo_url='https://github.com/test/lane-test'
+        )
+        
+        # Default should be 'P' (Pending)
+        self.assertEqual(project.lane, 'P')
+        self.assertEqual(project.get_lane_display(), 'Pending Classification')
+        
+        # Should be able to set lane
+        project.lane = 'A'
+        project.save()
+        project.refresh_from_db()
+        self.assertEqual(project.lane, 'A')
+
+
+class TrafficControllerGistServiceTests(TestCase):
+    """Tests for Gist URL generation (not actual API calls)."""
+    
+    def test_binder_url_format(self):
+        """Test Binder URL is correctly formatted."""
+        from projects.gist_service import GistService
+        import os
+        os.environ['KIRI_BOT_USERNAME'] = 'test-bot'
+        
+        url = GistService.build_binder_url('abc123', port=8000)
+        
+        self.assertIn('mybinder.org', url)
+        self.assertIn('gist', url)
+        self.assertIn('abc123', url)
+        self.assertIn('proxy/8000/', url)
+    
+    def test_colab_url_format(self):
+        """Test Colab URL is correctly formatted."""
+        from projects.gist_service import GistService
+        import os
+        os.environ['KIRI_BOT_USERNAME'] = 'test-bot'
+        
+        url = GistService.build_colab_url('xyz789')
+        
+        self.assertIn('colab.research.google.com', url)
+        self.assertIn('gist', url)
+        self.assertIn('xyz789', url)
+        self.assertIn('demo.ipynb', url)
+
+
+class TrafficControllerColabNotebookTests(TestCase):
+    """Tests for Colab notebook generation."""
+    
+    def test_notebook_generation(self):
+        """Test that generated notebook has correct structure."""
+        from core.ai_service import AIService
+        import json
+        
+        notebook_json = AIService.generate_colab_notebook(
+            'https://github.com/user/ml-project',
+            'python train.py'
+        )
+        
+        notebook = json.loads(notebook_json)
+        
+        self.assertEqual(notebook['nbformat'], 4)
+        self.assertIn('cells', notebook)
+        self.assertTrue(len(notebook['cells']) >= 3)
+        
+        # Check that git clone is in first code cell
+        code_cells = [c for c in notebook['cells'] if c['cell_type'] == 'code']
+        first_code = ''.join(code_cells[0]['source'])
+        self.assertIn('git clone', first_code)
+        self.assertIn('ml-project', first_code)
+

@@ -43,6 +43,19 @@ class Project(models.Model):
     is_approved = models.BooleanField(default=False)
     submitted_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="projects")
     
+    # Traffic Controller: Execution Lane Classification
+    class Lane(models.TextChoices):
+        LANE_A = 'A', 'Client-Side (WebContainer)'
+        LANE_B = 'B', 'Cloud Container (Binder)'
+        LANE_C = 'C', 'GPU Cluster (Colab)'
+        PENDING = 'P', 'Pending Classification'
+    
+    lane = models.CharField(max_length=1, choices=Lane.choices, default=Lane.PENDING)
+    execution_url = models.URLField(blank=True, null=True, help_text="Magic link for Binder/Colab")
+    lane_classification_reason = models.TextField(blank=True, help_text="AI explanation for lane choice")
+    start_command = models.CharField(max_length=255, blank=True, help_text="e.g., npm run dev, python manage.py runserver")
+    gist_id = models.CharField(max_length=64, blank=True, help_text="GitHub Gist ID for Binder/Colab config")
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     last_synced_at = models.DateTimeField(null=True, blank=True)

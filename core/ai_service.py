@@ -77,10 +77,15 @@ README excerpt: {readme}
         # Try Gemini first
         result = cls._call_gemini(prompt)
         
-        # Fallback to Groq if Gemini fails
+        # Fallback to Groq 70b if Gemini fails
         if result is None:
-            logger.warning("Gemini failed, falling back to Groq")
-            result = cls._call_groq(prompt)
+            logger.warning("Gemini failed, falling back to Groq 70b")
+            result = cls._call_groq(prompt, model="llama-3.3-70b-versatile")
+        
+        # Secondary fallback to Groq 8b if 70b fails (higher rate limits)
+        if result is None:
+            logger.warning("Groq 70b failed, falling back to Groq 8b")
+            result = cls._call_groq(prompt, model="llama-3.1-8b-instant")
         
         # Ultimate fallback - heuristic classification
         if result is None:
@@ -181,8 +186,8 @@ README excerpt: {readme}
             return None
     
     @classmethod
-    def _call_groq(cls, prompt: str) -> Optional[dict]:
-        """Call Groq API as fallback."""
+    def _call_groq(cls, prompt: str, model: str = "llama-3.3-70b-versatile") -> Optional[dict]:
+        """Call Groq API as fallback. Supports multiple models for fallback chain."""
         api_key = os.environ.get('GROQ_API_KEY')
         if not api_key:
             logger.error("GROQ_API_KEY not set")
@@ -192,10 +197,7 @@ README excerpt: {readme}
             response = requests.post(
                 cls.GROQ_API_URL,
                 json={
-                    # llama-3.3-70b-versatile: GPT-4 class intelligence
-                    # Best quality for classification, supports JSON mode
-                    # Rate limits: ~6k TPM (sufficient for fallback usage)
-                    "model": "llama-3.3-70b-versatile",
+                    "model": model,
                     "messages": [{
                         "role": "system",
                         "content": "You are an expert at analyzing code repositories. Respond ONLY with valid JSON, no explanations."

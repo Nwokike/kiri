@@ -88,11 +88,15 @@
 
 /* Platform Logo Styles */
 .hero-logo {
-    height: 72px;
-    /* Medium-small size */
+    height: 56px;
+    /* Compact size - not overwhelming */
     width: auto;
-    margin-bottom: 1.5rem;
-    filter: drop-shadow(0 4px 6px rgba(0, 0, 0, 0.1));
+    margin-bottom: 1.25rem;
+    filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.2));
+}
+
+.hero-mesh p {
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.4);
 }
 
 .platform-logo {

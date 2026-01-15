@@ -85,12 +85,11 @@
                     Open in Colab
                 </a>
                 {% elif project.lane == 'A' %}
-                <button id="launch-webcontainer" disabled
-                    class="px-4 py-2 bg-[#24a148] text-white text-sm font-medium hover:bg-[#1e8e3e] transition-colors inline-flex items-center gap-2 opacity-60 cursor-not-allowed"
-                    title="WebContainer runner coming soon">
+                <a href="https://run.kiri.ng/?repo={{ project.github_repo_url }}" target="_blank"
+                    class="px-4 py-2 bg-[#24a148] text-white text-sm font-medium hover:bg-[#1e8e3e] transition-colors inline-flex items-center gap-2">
                     <i class="fas fa-play"></i>
-                    Run in Browser (Soon)
-                </button>
+                    Run in Browser
+                </a>
                 {% endif %}
 
                 {% if project.demo_url %}

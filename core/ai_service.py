@@ -192,11 +192,13 @@ README excerpt: {readme}
             response = requests.post(
                 cls.GROQ_API_URL,
                 json={
-                    # llama-3-groq-8b-tool-use is optimized for JSON/structured output
-                    "model": "llama-3-groq-8b-tool-use",
+                    # llama-3.1-8b-instant: Fast, high rate limits (30k+ TPM)
+                    # Perfect for simple classification tasks where speed > intelligence
+                    # Fallback from Gemini, so quality isn't critical
+                    "model": "llama-3.1-8b-instant",
                     "messages": [{
                         "role": "system",
-                        "content": "You are an expert at analyzing code repositories. Always respond with valid JSON only."
+                        "content": "You are an expert at analyzing code repositories. Always respond with valid JSON only, no markdown."
                     }, {
                         "role": "user", 
                         "content": prompt

@@ -53,6 +53,9 @@ INSTALLED_APPS = [
     "allauth.account",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.github",
+    "allauth.socialaccount.providers.gitlab",
+    "allauth.socialaccount.providers.bitbucket_oauth2",
+    "users.providers.huggingface",  # Custom Hugging Face provider
     "django_htmx",
     "pwa",
     "huey.contrib.djhuey",  # Task Queue
@@ -179,25 +182,65 @@ AUTHENTICATION_BACKENDS = [
 # Allauth settings
 ACCOUNT_LOGIN_METHODS = {"email"}
 ACCOUNT_SIGNUP_FIELDS = ["email*"]
-ACCOUNT_EMAIL_VERIFICATION = "optional" if DEBUG else "mandatory"
+ACCOUNT_EMAIL_VERIFICATION = "mandatory"  # Required for code-based verification
 ACCOUNT_CONFIRM_EMAIL_ON_GET = True
 ACCOUNT_USER_MODEL_USERNAME_FIELD = "username"
+ACCOUNT_UNIQUE_EMAIL = True
+
+# Code-based email verification (OTP style)
+ACCOUNT_EMAIL_VERIFICATION_BY_CODE_ENABLED = True
+ACCOUNT_LOGIN_BY_CODE_ENABLED = True  # Magic code login
+
+# Rate limits (replaces deprecated ACCOUNT_EMAIL_CONFIRMATION_COOLDOWN)
+ACCOUNT_RATE_LIMITS = {
+    "confirm_email": "3/m",  # 3 requests per minute
+    "login": "5/m",
+    "login_failed": "10/m/ip",
+}
+
+# Account linking - prevent duplicate accounts by auto-linking same email
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
+
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
-# GitHub OAuth
+# OAuth Providers (GitHub, GitLab, Bitbucket, Hugging Face)
 SOCIALACCOUNT_PROVIDERS = {
     "github": {
         "APP": {
             "client_id": os.environ.get("GITHUB_CLIENT_ID", ""),
             "secret": os.environ.get("GITHUB_SECRET", ""),
         },
-        "SCOPE": ["read:user", "user:email"],
-    }
+        # Full scopes for: profile, email, starring repos, push/create repos
+        "SCOPE": ["read:user", "user:email", "public_repo", "repo"],
+    },
+    "gitlab": {
+        "APP": {
+            "client_id": os.environ.get("GITLAB_CLIENT_ID", ""),
+            "secret": os.environ.get("GITLAB_SECRET", ""),
+        },
+        # Full scopes for: profile, repos read/write, API access
+        "SCOPE": ["read_user", "read_repository", "write_repository", "api", "openid", "email"],
+    },
+    "bitbucket_oauth2": {
+        "APP": {
+            "client_id": os.environ.get("BITBUCKET_CLIENT_ID", ""),
+            "secret": os.environ.get("BITBUCKET_SECRET", ""),
+        },
+    },
+    # Hugging Face - custom provider
+    "huggingface": {
+        "APP": {
+            "client_id": os.environ.get("HUGGINGFACE_CLIENT_ID", ""),
+            "secret": os.environ.get("HUGGINGFACE_SECRET", ""),
+        },
+        "SCOPE": ["openid", "profile", "email", "read-repos", "write-repos", "inference-api"],
+    },
 }
 SOCIALACCOUNT_LOGIN_ON_GET = True
 SOCIALACCOUNT_STORE_TOKENS = True
-SOCIALACCOUNT_ADAPTER = 'users.adapter.GithubAdapter'
+SOCIALACCOUNT_ADAPTER = 'users.adapter.KiriSocialAccountAdapter'
 
 # Cloudflare Turnstile Settings
 TURNSTILE_SITEKEY = os.environ.get("TURNSTILE_SITEKEY", "1x00000000000000000000AA") # Test key

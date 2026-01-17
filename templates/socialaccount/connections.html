@@ -1,0 +1,149 @@
+{% extends "base.html" %}
+{% load static socialaccount %}
+
+{% block title %}Connected Accounts | Kiri{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-2xl font-bold text-[#212529] dark:text-white">Connected Accounts</h1>
+        <p class="text-[#6C757D] dark:text-[#A1A1AA] mt-1">
+            Manage your linked platform accounts. Connect more to unlock additional features.
+        </p>
+    </div>
+
+    <!-- Connected Accounts -->
+    <div
+        class="bg-white rounded-2xl border border-[#DEE2E6] shadow-sm overflow-hidden dark:bg-[#1E1E1E] dark:border-[#3D3D3D] mb-6">
+        <div class="p-5 border-b border-[#DEE2E6] dark:border-[#3D3D3D]">
+            <h2 class="font-semibold text-[#212529] dark:text-white">Connected</h2>
+        </div>
+
+        {% get_social_accounts user as accounts %}
+
+        {% if accounts %}
+        <div class="divide-y divide-[#DEE2E6] dark:divide-[#3D3D3D]">
+            {% for provider, account_list in accounts.items %}
+            {% for account in account_list %}
+            <div class="p-5 flex items-center justify-between">
+                <div class="flex items-center gap-4">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center
+                        {% if provider == 'github' %}bg-[#24292F]
+                        {% elif provider == 'gitlab' %}bg-[#FC6D26]/10
+                        {% elif provider == 'bitbucket_oauth2' %}bg-[#0052CC]/10
+                        {% elif provider == 'huggingface' %}bg-[#FF9D00]/10
+                        {% else %}bg-[#F8F9FA] dark:bg-[#2D2D2D]{% endif %}">
+                        {% if provider == 'github' %}
+                        <i class="fab fa-github text-white"></i>
+                        {% elif provider == 'gitlab' %}
+                        <i class="fab fa-gitlab text-[#FC6D26]"></i>
+                        {% elif provider == 'bitbucket_oauth2' %}
+                        <i class="fab fa-bitbucket text-[#0052CC]"></i>
+                        {% elif provider == 'huggingface' %}
+                        <i class="fas fa-robot text-[#FF9D00]"></i>
+                        {% else %}
+                        <i class="fas fa-link text-[#6C757D]"></i>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <p class="font-medium text-[#212529] dark:text-white capitalize">
+                            {% if provider == 'bitbucket_oauth2' %}Bitbucket{% else %}{{ provider }}{% endif %}
+                        </p>
+                        <p class="text-sm text-[#6C757D] dark:text-[#A1A1AA]">
+                            {{
+                            account.extra_data.login|default:account.extra_data.username|default:account.extra_data.preferred_username|default:"Connected"
+                            }}
+                        </p>
+                    </div>
+                </div>
+                <form method="post" action="{% url 'socialaccount_connections' %}">
+                    {% csrf_token %}
+                    <input type="hidden" name="account" value="{{ account.id }}">
+                    <button type="submit" class="text-sm text-red-500 hover:text-red-600 font-medium">
+                        Disconnect
+                    </button>
+                </form>
+            </div>
+            {% endfor %}
+            {% endfor %}
+        </div>
+        {% else %}
+        <div class="p-8 text-center">
+            <div
+                class="w-12 h-12 mx-auto mb-3 bg-[#F8F9FA] dark:bg-[#2D2D2D] rounded-xl flex items-center justify-center">
+                <i class="fas fa-link text-[#ADB5BD]"></i>
+            </div>
+            <p class="text-[#6C757D] dark:text-[#A1A1AA]">No accounts connected yet</p>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Available to Connect -->
+    <div
+        class="bg-white rounded-2xl border border-[#DEE2E6] shadow-sm overflow-hidden dark:bg-[#1E1E1E] dark:border-[#3D3D3D]">
+        <div class="p-5 border-b border-[#DEE2E6] dark:border-[#3D3D3D]">
+            <h2 class="font-semibold text-[#212529] dark:text-white">Connect More</h2>
+            <p class="text-sm text-[#6C757D] dark:text-[#A1A1AA] mt-1">
+                Link additional platforms to import projects and sync your activity
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 p-5">
+            {% if 'github' not in accounts %}
+            <a href="{% provider_login_url 'github' process='connect' %}"
+                class="flex items-center gap-3 p-4 border border-[#DEE2E6] rounded-xl hover:border-[#0D7C3D] hover:bg-[#F8F9FA] transition-all dark:border-[#3D3D3D] dark:hover:bg-[#2D2D2D]">
+                <div class="w-10 h-10 bg-[#24292F] rounded-xl flex items-center justify-center">
+                    <i class="fab fa-github text-white"></i>
+                </div>
+                <div>
+                    <p class="font-medium text-[#212529] dark:text-white">GitHub</p>
+                    <p class="text-xs text-[#6C757D]">Import repos, star sync</p>
+                </div>
+            </a>
+            {% endif %}
+
+            {% if 'gitlab' not in accounts %}
+            <a href="{% provider_login_url 'gitlab' process='connect' %}"
+                class="flex items-center gap-3 p-4 border border-[#DEE2E6] rounded-xl hover:border-[#0D7C3D] hover:bg-[#F8F9FA] transition-all dark:border-[#3D3D3D] dark:hover:bg-[#2D2D2D]">
+                <div class="w-10 h-10 bg-[#FC6D26]/10 rounded-xl flex items-center justify-center">
+                    <i class="fab fa-gitlab text-[#FC6D26]"></i>
+                </div>
+                <div>
+                    <p class="font-medium text-[#212529] dark:text-white">GitLab</p>
+                    <p class="text-xs text-[#6C757D]">Import projects</p>
+                </div>
+            </a>
+            {% endif %}
+
+            {% if 'bitbucket_oauth2' not in accounts %}
+            <a href="{% provider_login_url 'bitbucket_oauth2' process='connect' %}"
+                class="flex items-center gap-3 p-4 border border-[#DEE2E6] rounded-xl hover:border-[#0D7C3D] hover:bg-[#F8F9FA] transition-all dark:border-[#3D3D3D] dark:hover:bg-[#2D2D2D]">
+                <div class="w-10 h-10 bg-[#0052CC]/10 rounded-xl flex items-center justify-center">
+                    <i class="fab fa-bitbucket text-[#0052CC]"></i>
+                </div>
+                <div>
+                    <p class="font-medium text-[#212529] dark:text-white">Bitbucket</p>
+                    <p class="text-xs text-[#6C757D]">Import repositories</p>
+                </div>
+            </a>
+            {% endif %}
+
+            {% if 'huggingface' not in accounts %}
+            <a href="{% provider_login_url 'huggingface' process='connect' %}"
+                class="flex items-center gap-3 p-4 border border-[#DEE2E6] rounded-xl hover:border-[#0D7C3D] hover:bg-[#F8F9FA] transition-all dark:border-[#3D3D3D] dark:hover:bg-[#2D2D2D]">
+                <div class="w-10 h-10 bg-[#FF9D00]/10 rounded-xl flex items-center justify-center">
+                    <i class="fas fa-robot text-[#FF9D00]"></i>
+                </div>
+                <div>
+                    <p class="font-medium text-[#212529] dark:text-white">Hugging Face</p>
+                    <p class="text-xs text-[#6C757D]">Import models, spaces</p>
+                </div>
+            </a>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<div class="h-20 md:hidden"></div>
+{% endblock %}

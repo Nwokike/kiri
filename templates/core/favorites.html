@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Favorites | Kiri{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <div class="mb-8">
+        <h1 class="text-2xl font-semibold text-[#212529] dark:text-white flex items-center gap-3">
+            <i class="fas fa-heart text-[#C4992E]"></i>
+            My Favorites
+        </h1>
+        <p class="text-sm text-[#6C757D] dark:text-[#A1A1AA] mt-1">
+            Items you've liked are saved here. Stars sync with GitHub when connected.
+        </p>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex gap-4 border-b border-[#DEE2E6] dark:border-[#3D3D3D] mb-6">
+        <button class="tab-btn active px-4 py-2 text-sm font-medium border-b-2 border-[#0D7C3D] text-[#0D7C3D]"
+            data-tab="all">
+            All ({{ favorites|length }})
+        </button>
+        <button
+            class="tab-btn px-4 py-2 text-sm font-medium text-[#6C757D] hover:text-[#212529] dark:text-[#A1A1AA] dark:hover:text-white"
+            data-tab="projects">
+            Projects ({{ project_favorites|length }})
+        </button>
+        <button
+            class="tab-btn px-4 py-2 text-sm font-medium text-[#6C757D] hover:text-[#212529] dark:text-[#A1A1AA] dark:hover:text-white"
+            data-tab="publications">
+            Publications ({{ publication_favorites|length }})
+        </button>
+    </div>
+
+    <!-- Favorites List -->
+    {% if favorites %}
+    <div class="space-y-4" id="favorites-list">
+        {% for fav in favorites %}
+        <div
+            class="p-4 bg-white rounded-xl border border-[#DEE2E6] hover:border-[#0D7C3D] transition-colors dark:bg-[#1E1E1E] dark:border-[#3D3D3D] dark:hover:border-[#0D7C3D]">
+            <div class="flex items-start justify-between gap-4">
+                <div class="flex-1">
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-xs px-2 py-0.5 bg-[#E8F5ED] text-[#0D7C3D] rounded-full dark:bg-[#0D7C3D]/20">
+                            {{ fav.content_type.model|title }}
+                        </span>
+                        <span class="text-xs text-[#6C757D]">{{ fav.created_at|timesince }} ago</span>
+                    </div>
+                    <h3 class="font-medium text-[#212529] dark:text-white">
+                        {% if fav.content_object %}
+                        {{ fav.content_object.name|default:fav.content_object.title }}
+                        {% else %}
+                        [Deleted]
+                        {% endif %}
+                    </h3>
+                    {% if fav.content_object.description %}
+                    <p class="text-sm text-[#6C757D] dark:text-[#A1A1AA] line-clamp-2 mt-1">
+                        {{ fav.content_object.description|truncatewords:20 }}
+                    </p>
+                    {% endif %}
+                </div>
+                <button hx-post="{% url 'core:toggle_favorite' fav.content_type.id fav.object_id %}" hx-swap="outerHTML"
+                    class="p-2 text-red-500 hover:bg-red-50 rounded-lg transition-colors dark:hover:bg-red-900/20">
+                    <i class="fas fa-heart"></i>
+                </button>
+            </div>
+            {% if fav.github_synced %}
+            <div class="mt-2 flex items-center gap-1 text-xs text-[#0D7C3D]">
+                <i class="fab fa-github"></i>
+                <span>Synced to GitHub</span>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-16">
+        <div
+            class="w-16 h-16 mx-auto mb-4 bg-[#F8F9FA] rounded-full flex items-center justify-center dark:bg-[#2D2D2D]">
+            <i class="far fa-heart text-2xl text-[#ADB5BD]"></i>
+        </div>
+        <h3 class="text-lg font-medium text-[#212529] dark:text-white mb-2">No favorites yet</h3>
+        <p class="text-sm text-[#6C757D] dark:text-[#A1A1AA] mb-6">
+            Like projects and publications to save them here.
+        </p>
+        <a href="{% url 'projects:list' %}"
+            class="inline-flex items-center gap-2 px-4 py-2 bg-[#0D7C3D] text-white font-medium rounded-lg hover:bg-[#0A5C2C] transition-colors">
+            <i class="fas fa-rocket"></i>
+            Explore Projects
+        </a>
+    </div>
+    {% endif %}
+</div>
+
+<div class="h-20 md:hidden"></div>
+{% endblock %}

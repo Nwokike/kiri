@@ -72,13 +72,56 @@
             <!-- Actions -->
             {% if request.user == profile_user %}
             <div class="flex flex-col gap-2">
-                <a href="#"
+                <a href="{% url 'socialaccount_connections' %}"
                     class="px-4 py-2 border border-[#e0e0e0] text-[#525252] text-xs hover:bg-[#f4f4f4] transition-colors dark:border-[#393939] dark:text-[#a8a8a8] dark:hover:bg-[#393939]">
                     <i class="fas fa-cog mr-1"></i> Settings
                 </a>
             </div>
             {% endif %}
         </div>
+
+        <!-- Connected Platforms (Owner View) -->
+        {% if request.user == profile_user and integrations %}
+        <div class="mt-6 pt-6 border-t border-[#e0e0e0] dark:border-[#393939]">
+            <div class="flex items-center justify-between mb-3">
+                <h3 class="text-sm font-medium text-[#6C757D] dark:text-[#A1A1AA]">Connected Platforms</h3>
+                <a href="{% url 'socialaccount_connections' %}"
+                    class="text-xs text-[#0D7C3D] hover:underline">Manage</a>
+            </div>
+            <div class="flex flex-wrap gap-2">
+                {% for integration in integrations %}
+                <div
+                    class="inline-flex items-center gap-2 px-3 py-1.5 bg-[#F8F9FA] rounded-full text-sm dark:bg-[#2D2D2D]">
+                    {% if integration.platform == 'github' %}
+                    <i class="fab fa-github text-[#24292F] dark:text-white"></i>
+                    {% elif integration.platform == 'gitlab' %}
+                    <i class="fab fa-gitlab text-[#FC6D26]"></i>
+                    {% elif integration.platform == 'bitbucket' %}
+                    <i class="fab fa-bitbucket text-[#0052CC]"></i>
+                    {% elif integration.platform == 'huggingface' %}
+                    <i class="fas fa-robot text-[#FF9D00]"></i>
+                    {% endif %}
+                    <span class="text-[#495057] dark:text-[#A1A1AA]">{{ integration.platform_username }}</span>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Public Platforms View (for other users) -->
+        {% if request.user != profile_user %}
+        <div class="mt-6 pt-6 border-t border-[#e0e0e0] dark:border-[#393939]">
+            <div class="flex flex-wrap gap-2">
+                {% if profile_user.github_username %}
+                <a href="https://github.com/{{ profile_user.github_username }}" target="_blank"
+                    class="inline-flex items-center gap-2 px-3 py-1.5 bg-[#24292F] text-white rounded-full text-sm hover:bg-[#1B1F23] transition-colors">
+                    <i class="fab fa-github"></i>
+                    <span>{{ profile_user.github_username }}</span>
+                </a>
+                {% endif %}
+            </div>
+        </div>
+        {% endif %}
     </div>
 
     <!-- Content Sections -->

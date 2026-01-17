@@ -1,0 +1,12 @@
+{% load static %}
+{# Favorite button partial for HTMX swapping #}
+
+<button hx-post="{% url 'core:toggle_favorite' content_type.id obj.pk %}" hx-swap="outerHTML" class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-sm font-medium transition-colors
+        {% if is_favorited %}
+        bg-red-50 text-red-500 hover:bg-red-100 dark:bg-red-900/20 dark:text-red-400 dark:hover:bg-red-900/30
+        {% else %}
+        bg-[#F8F9FA] text-[#6C757D] hover:bg-[#E8F5ED] hover:text-[#0D7C3D] dark:bg-[#2D2D2D] dark:text-[#A1A1AA] dark:hover:bg-[#0D7C3D]/20 dark:hover:text-[#0D7C3D]
+        {% endif %}">
+    <i class="{% if is_favorited %}fas{% else %}far{% endif %} fa-heart"></i>
+    <span>{% if is_favorited %}Liked{% else %}Like{% endif %}</span>
+</button>

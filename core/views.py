@@ -6,7 +6,7 @@ from django.views.decorators.http import require_POST
 from django.db.models import Case, When, Value, IntegerField
 from django.core.cache import cache
 import bleach
-from .models import Comment
+from .models import Comment, Favorite, Notification
 from .forms import CommentForm
 
 
@@ -120,3 +120,109 @@ def add_comment(request, content_type_id, object_id):
     return render(request, 'core/partials/comment_form_errors.html', {
         'errors': form.errors
     }, status=400)
+
+
+# ============================================================================
+# FAVORITES
+# ============================================================================
+
+@login_required
+def favorites_list(request):
+    """Display user's favorited items."""
+    favorites = Favorite.objects.filter(
+        user=request.user
+    ).select_related('content_type').order_by('-created_at')
+    
+    # Group by content type for tabs
+    from projects.models import Project
+    from publications.models import Publication
+    
+    project_ct = ContentType.objects.get_for_model(Project)
+    pub_ct = ContentType.objects.get_for_model(Publication)
+    
+    project_favorites = [f for f in favorites if f.content_type_id == project_ct.id]
+    publication_favorites = [f for f in favorites if f.content_type_id == pub_ct.id]
+    
+    return render(request, 'core/favorites.html', {
+        'favorites': favorites,
+        'project_favorites': project_favorites,
+        'publication_favorites': publication_favorites,
+    })
+
+
+@login_required
+@require_POST
+def toggle_favorite(request, content_type_id, object_id):
+    """Toggle favorite status for an item. HTMX compatible."""
+    content_type = get_object_or_404(ContentType, id=content_type_id)
+    obj = get_object_or_404(content_type.model_class(), id=object_id)
+    
+    favorite, created = Favorite.objects.get_or_create(
+        user=request.user,
+        content_type=content_type,
+        object_id=object_id,
+    )
+    
+    if not created:
+        # Already exists, remove it
+        favorite.delete()
+        is_favorited = False
+    else:
+        is_favorited = True
+        # Queue GitHub star sync if user has repo scope
+        try:
+            from kiri_project.tasks import sync_github_star
+            sync_github_star(favorite.id)
+        except Exception:
+            pass  # Don't block the response if task queuing fails
+    
+    # Return updated button for HTMX
+    return render(request, 'core/partials/favorite_button.html', {
+        'obj': obj,
+        'content_type': content_type,
+        'is_favorited': is_favorited,
+    })
+
+
+# ============================================================================
+# NOTIFICATIONS
+# ============================================================================
+
+@login_required
+def notifications_list(request):
+    """Display user's notifications."""
+    notifications = Notification.objects.filter(
+        recipient=request.user
+    ).select_related('actor').order_by('-created_at')[:50]
+    
+    unread_count = notifications.filter(is_read=False).count()
+    
+    return render(request, 'core/notifications.html', {
+        'notifications': notifications,
+        'unread_count': unread_count,
+    })
+
+
+@login_required
+@require_POST
+def mark_notification_read(request, pk):
+    """Mark a single notification as read."""
+    notification = get_object_or_404(Notification, pk=pk, recipient=request.user)
+    notification.is_read = True
+    notification.save(update_fields=['is_read'])
+    
+    if request.htmx:
+        return HttpResponse('')
+    return JsonResponse({'status': 'ok'})
+
+
+@login_required
+@require_POST
+def mark_all_notifications_read(request):
+    """Mark all notifications as read."""
+    Notification.objects.filter(recipient=request.user, is_read=False).update(is_read=True)
+    
+    if request.htmx:
+        return HttpResponse('<span class="text-sm text-[#6C757D]">All caught up!</span>')
+    return JsonResponse({'status': 'ok'})
+

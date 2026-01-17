@@ -1,5 +1,6 @@
 from django.contrib.auth.models import AbstractUser
 from django.db import models
+from django.conf import settings
 from django.utils.translation import gettext_lazy as _
 from django.core.validators import RegexValidator
 from django.urls import reverse
@@ -60,3 +61,61 @@ class CustomUser(AbstractUser):
         
     def get_absolute_url(self):
         return reverse("users:profile", kwargs={"username": self.username})
+    
+    def get_primary_integration(self):
+        """Get the user's primary integration for content creation."""
+        return self.integrations.filter(is_primary=True).first()
+
+
+class UserIntegration(models.Model):
+    """
+    Stores user's connected platform integrations.
+    Each integration stores OAuth tokens for API access.
+    """
+    class Platform(models.TextChoices):
+        GITHUB = 'github', 'GitHub'
+        GITLAB = 'gitlab', 'GitLab'
+        BITBUCKET = 'bitbucket', 'Bitbucket'
+        HUGGINGFACE = 'huggingface', 'Hugging Face'
+    
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='integrations')
+    platform = models.CharField(max_length=20, choices=Platform.choices)
+    platform_username = models.CharField(max_length=100, help_text="Username on the platform")
+    platform_user_id = models.CharField(max_length=100, blank=True, help_text="User ID on the platform")
+    avatar_url = models.URLField(blank=True)
+    
+    # OAuth tokens (encrypted in production via application-level encryption)
+    access_token = models.TextField(help_text="OAuth access token")
+    refresh_token = models.TextField(blank=True, help_text="OAuth refresh token if available")
+    token_expires_at = models.DateTimeField(null=True, blank=True)
+    
+    # Scope tracking for incremental authorization
+    granted_scopes = models.JSONField(default=list, blank=True, help_text="List of granted OAuth scopes")
+    has_repo_scope = models.BooleanField(default=False, help_text="Can star repositories")
+    has_write_scope = models.BooleanField(default=False, help_text="Can create repositories")
+    
+    # Primary integration for content creation
+    is_primary = models.BooleanField(default=False)
+    
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        unique_together = ['user', 'platform']
+        indexes = [
+            models.Index(fields=['user', 'is_primary']),
+            models.Index(fields=['platform']),
+        ]
+    
+    def __str__(self):
+        return f"{self.user.username} - {self.get_platform_display()}"
+    
+    def save(self, *args, **kwargs):
+        # Ensure only one primary integration per user
+        if self.is_primary:
+            UserIntegration.objects.filter(user=self.user, is_primary=True).exclude(pk=self.pk).update(is_primary=False)
+        # If this is the first integration, make it primary
+        if not self.pk and not UserIntegration.objects.filter(user=self.user).exists():
+            self.is_primary = True
+        super().save(*args, **kwargs)
+

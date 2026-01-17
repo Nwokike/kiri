@@ -1,4 +1,4 @@
-from django.test import TestCase
+from django.test import TestCase, override_settings
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.utils import timezone
@@ -117,6 +117,7 @@ class ProjectViewTests(TestCase):
         response = self.client.get(url)
         self.assertEqual(response.status_code, 200)
 
+@override_settings(TESTING=True)
 class ProjectFormTests(TestCase):
     def test_clean_topics(self):
         form = ProjectSubmissionForm(data={
@@ -125,10 +126,9 @@ class ProjectFormTests(TestCase):
             'category': 'other',
             'github_repo_url': 'https://github.com/foo/bar',
             'topics': '["nlp", "cv", "transformers"]',  # Expected JSON format
-            'turnstile': 'passed' # Mock value
         })
-        # Mock turnstile passed
-        form.fields['turnstile'].required = False 
+        # Remove turnstile field entirely for testing
+        del form.fields['turnstile']
         
         self.assertTrue(form.is_valid(), form.errors)
         self.assertEqual(form.cleaned_data['topics'], ['nlp', 'cv', 'transformers'])

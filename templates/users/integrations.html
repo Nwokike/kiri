@@ -1,0 +1,112 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Integrations | Kiri{% endblock %}
+
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-8">
+    <div class="mb-8">
+        <h1 class="text-2xl font-semibold text-[#212529] dark:text-white flex items-center gap-3">
+            <i class="fas fa-plug text-[#C4992E]"></i>
+            Integrations
+        </h1>
+        <p class="text-sm text-[#6C757D] dark:text-[#A1A1AA] mt-1">
+            Connect your accounts to import projects and sync activity.
+        </p>
+    </div>
+
+    <!-- Primary Integration Notice -->
+    {% if primary_integration %}
+    <div
+        class="mb-6 p-4 bg-[#E8F5ED] rounded-xl border border-[#0D7C3D]/20 dark:bg-[#0D7C3D]/10 dark:border-[#0D7C3D]/30">
+        <div class="flex items-center gap-3">
+            <i class="{{ primary_integration.get_platform_display|lower }} text-[#0D7C3D] text-xl"></i>
+            <div>
+                <p class="text-sm font-medium text-[#0D7C3D]">Primary Integration</p>
+                <p class="text-xs text-[#0D7C3D]/80">{{ primary_integration.get_platform_display }} ({{
+                    primary_integration.platform_username }}) is used for creating content.</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Platforms List -->
+    <div class="space-y-4">
+        {% for platform in platforms %}
+        <div class="p-5 bg-white rounded-xl border border-[#DEE2E6] dark:bg-[#1E1E1E] dark:border-[#3D3D3D]">
+            <div class="flex items-start justify-between gap-4">
+                <div class="flex items-start gap-4">
+                    <div
+                        class="w-12 h-12 rounded-xl bg-[#F8F9FA] flex items-center justify-center text-xl text-[#495057] dark:bg-[#2D2D2D] dark:text-[#A1A1AA]">
+                        <i class="{{ platform.icon }}"></i>
+                    </div>
+                    <div>
+                        <h3 class="font-medium text-[#212529] dark:text-white">{{ platform.name }}</h3>
+                        <p class="text-sm text-[#6C757D] dark:text-[#A1A1AA] mt-0.5">{{ platform.description }}</p>
+
+                        {% if platform.connected %}
+                        <div class="flex items-center gap-2 mt-2">
+                            <span
+                                class="inline-flex items-center gap-1 px-2 py-1 bg-[#E8F5ED] text-[#0D7C3D] text-xs rounded-full dark:bg-[#0D7C3D]/20">
+                                <i class="fas fa-check-circle"></i>
+                                Connected as {{ platform.connected.platform_username }}
+                            </span>
+                            {% if platform.connected.has_repo_scope %}
+                            <span
+                                class="inline-flex items-center gap-1 px-2 py-1 bg-[#FDF5E6] text-[#8B6914] text-xs rounded-full dark:bg-[#C4992E]/20 dark:text-[#FBBF24]">
+                                <i class="fas fa-star"></i>
+                                Star sync enabled
+                            </span>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    {% if platform.connected %}
+                    <span class="text-xs text-[#6C757D]">Connected</span>
+                    {% else %}
+                    <a href="{{ platform.connect_url }}"
+                        class="px-4 py-2 bg-[#0D7C3D] text-white text-sm font-medium rounded-lg hover:bg-[#0A5C2C] transition-colors">
+                        Connect
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if platform.connected and not platform.connected.has_repo_scope and platform.id == 'github' %}
+            <div class="mt-4 pt-4 border-t border-[#DEE2E6] dark:border-[#3D3D3D]">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-sm font-medium text-[#212529] dark:text-white">Enable Star Sync</p>
+                        <p class="text-xs text-[#6C757D] dark:text-[#A1A1AA]">
+                            Likes on Kiri will automatically star repos on GitHub
+                        </p>
+                    </div>
+                    <a href="{{ platform.connect_url }}&scope=public_repo"
+                        class="px-3 py-1.5 border border-[#0D7C3D] text-[#0D7C3D] text-sm rounded-lg hover:bg-[#E8F5ED] transition-colors">
+                        Upgrade
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Info Section -->
+    <div class="mt-8 p-4 bg-[#F8F9FA] rounded-xl dark:bg-[#2D2D2D]">
+        <div class="flex items-start gap-3">
+            <i class="fas fa-info-circle text-[#6C757D] mt-0.5"></i>
+            <div class="text-sm text-[#6C757D] dark:text-[#A1A1AA]">
+                <p class="font-medium text-[#212529] dark:text-white mb-1">About Integrations</p>
+                <p>When you log in with a provider, we automatically create an integration for that account. You can add
+                    more integrations to import from multiple sources.</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="h-20 md:hidden"></div>
+{% endblock %}

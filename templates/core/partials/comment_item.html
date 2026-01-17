@@ -32,8 +32,8 @@
         <!-- Reply Form (Hidden) -->
         {% if user.is_authenticated %}
         <form id="reply-form-{{ comment.id }}"
-            class="hidden mb-4 ml-4 pl-4 border-l-2 border-[#e0e0e0] dark:border-[#393939]" {% if comment.content_type
-            %} hx-post="{% url 'core:add_comment' comment.content_type.id comment.object_id %}" {% endif %}
+            class="hidden mb-4 ml-4 pl-4 border-l-2 border-[#e0e0e0] dark:border-[#393939]"
+            hx-post="{% url 'core:add_comment' comment.content_type.id comment.object_id %}"
             hx-target="#replies-{{ comment.id }}" hx-swap="beforeend"
             hx-on::after-request="this.reset(); this.classList.add('hidden')">
             {% csrf_token %}

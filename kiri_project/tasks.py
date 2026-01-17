@@ -322,3 +322,136 @@ def fetch_github_structure(repo_url: str) -> dict:
     
     return result
 
+
+@task()
+def sync_github_star(favorite_id: int):
+    """
+    Background task to star a GitHub repository when user likes a project on Kiri.
+    Only runs if user has granted public_repo scope.
+    """
+    from core.models import Favorite
+    from users.models import UserIntegration
+    from projects.models import Project
+    from django.contrib.contenttypes.models import ContentType
+    
+    logger.info(f"Starting GitHub star sync for favorite {favorite_id}")
+    
+    try:
+        favorite = Favorite.objects.select_related('user').get(id=favorite_id)
+    except Favorite.DoesNotExist:
+        logger.error(f"Favorite {favorite_id} not found")
+        return
+    
+    # Check if the favorited item is a Project
+    project_ct = ContentType.objects.get_for_model(Project)
+    if favorite.content_type_id != project_ct.id:
+        logger.info(f"Favorite {favorite_id} is not a project, skipping star sync")
+        return
+    
+    # Get the project
+    try:
+        project = Project.objects.get(id=favorite.object_id)
+    except Project.DoesNotExist:
+        logger.error(f"Project {favorite.object_id} not found")
+        return
+    
+    # Check if project has a GitHub URL
+    if not project.github_repo_url:
+        logger.info(f"Project {project.id} has no GitHub URL, skipping star sync")
+        return
+    
+    # Check if user has GitHub integration with repo scope
+    try:
+        github_integration = UserIntegration.objects.get(
+            user=favorite.user,
+            platform='github',
+            has_repo_scope=True
+        )
+    except UserIntegration.DoesNotExist:
+        logger.info(f"User {favorite.user.id} has no GitHub integration with repo scope")
+        return
+    
+    # Parse repo URL
+    from projects.services import GitHubService
+    parsed = GitHubService.parse_repo_url(project.github_repo_url)
+    if not parsed:
+        logger.error(f"Failed to parse GitHub URL: {project.github_repo_url}")
+        return
+    
+    owner, repo = parsed
+    
+    # Star the repository
+    try:
+        headers = {
+            'Accept': 'application/vnd.github.v3+json',
+            'Authorization': f'token {github_integration.access_token}'
+        }
+        
+        response = requests.put(
+            f"https://api.github.com/user/starred/{owner}/{repo}",
+            headers=headers,
+            timeout=15
+        )
+        
+        if response.status_code == 204:
+            # Success - mark as synced
+            favorite.github_synced = True
+            favorite.sync_failed = False
+            favorite.save(update_fields=['github_synced', 'sync_failed'])
+            logger.info(f"Successfully starred {owner}/{repo} for user {favorite.user.username}")
+        elif response.status_code == 401:
+            # Token expired or invalid
+            logger.error(f"GitHub token invalid for user {favorite.user.id}")
+            favorite.sync_failed = True
+            favorite.save(update_fields=['sync_failed'])
+        else:
+            logger.error(f"Failed to star repo: {response.status_code} - {response.text}")
+            favorite.sync_failed = True
+            favorite.save(update_fields=['sync_failed'])
+            
+    except Exception as e:
+        logger.error(f"Error starring repo: {e}")
+        favorite.sync_failed = True
+        favorite.save(update_fields=['sync_failed'])
+
+
+@task()
+def create_notification(recipient_id: int, notification_type: str, title: str, 
+                       message: str = '', link: str = '', actor_id: int = None,
+                       content_type_id: int = None, object_id: int = None):
+    """
+    Background task to create a notification for a user.
+    """
+    from core.models import Notification
+    from django.contrib.auth import get_user_model
+    
+    User = get_user_model()
+    
+    try:
+        recipient = User.objects.get(id=recipient_id)
+    except User.DoesNotExist:
+        logger.error(f"Recipient {recipient_id} not found")
+        return
+    
+    actor = None
+    if actor_id:
+        try:
+            actor = User.objects.get(id=actor_id)
+        except User.DoesNotExist:
+            pass
+    
+    notification = Notification.objects.create(
+        recipient=recipient,
+        notification_type=notification_type,
+        title=title,
+        message=message,
+        link=link,
+        actor=actor,
+        content_type_id=content_type_id,
+        object_id=object_id,
+    )
+    
+    logger.info(f"Created notification {notification.id} for user {recipient.username}")
+    return notification.id
+
+

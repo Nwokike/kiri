@@ -11,12 +11,28 @@
             synced with GitHub.</p>
     </div>
 
-    <div class="bg-white border border-[#e0e0e0] p-6 md:p-8 dark:bg-[#262626] dark:border-[#393939]">
-        <form method="post" class="space-y-6">
+    <!-- Repo Picker Section -->
+    <div
+        class="bg-gradient-to-r from-[#0D7C3D]/10 to-[#0A5C2C]/10 border border-[#0D7C3D]/20 rounded-xl p-5 mb-6 dark:from-[#0D7C3D]/20 dark:to-[#0A5C2C]/20">
+        <div class="flex items-center justify-between">
+            <div>
+                <h3 class="font-medium text-[#161616] dark:text-white mb-1">Import from Your Repositories</h3>
+                <p class="text-sm text-[#525252] dark:text-[#a8a8a8]">Select from your connected platforms</p>
+            </div>
+            <button type="button" id="openRepoPicker"
+                class="px-4 py-2 bg-[#0D7C3D] text-white text-sm font-medium rounded-lg hover:bg-[#0A5C2C] transition-colors flex items-center gap-2">
+                <i class="fas fa-folder-open"></i>
+                Select Repo
+            </button>
+        </div>
+    </div>
+
+    <div class="bg-white border border-[#e0e0e0] p-6 md:p-8 dark:bg-[#262626] dark:border-[#393939] rounded-xl">
+        <form method="post" class="space-y-6" id="projectForm">
             {% csrf_token %}
 
             {% if form.non_field_errors %}
-            <div class="p-3 bg-[#fff1f1] text-[#da1e28] text-sm border-l-4 border-[#da1e28]">
+            <div class="p-3 bg-[#fff1f1] text-[#da1e28] text-sm border-l-4 border-[#da1e28] rounded">
                 {{ form.non_field_errors }}
             </div>
             {% endif %}
@@ -94,13 +110,50 @@
 
             <div class="pt-4 flex items-center justify-end gap-3">
                 <a href="{% url 'projects:list' %}"
-                    class="px-4 py-2 border border-[#e0e0e0] text-[#525252] text-sm hover:bg-[#f4f4f4] transition-colors dark:border-[#393939] dark:text-[#a8a8a8] dark:hover:bg-[#393939]">Cancel</a>
+                    class="px-4 py-2 border border-[#e0e0e0] text-[#525252] text-sm hover:bg-[#f4f4f4] transition-colors dark:border-[#393939] dark:text-[#a8a8a8] dark:hover:bg-[#393939] rounded-lg">Cancel</a>
                 <button type="submit"
-                    class="px-4 py-2 bg-[#0f62fe] text-white text-sm font-medium hover:bg-[#0353e9] transition-colors">
+                    class="px-4 py-2 bg-[#0f62fe] text-white text-sm font-medium hover:bg-[#0353e9] transition-colors rounded-lg">
                     Submit Project
                 </button>
             </div>
         </form>
+    </div>
+</div>
+
+<!-- Repo Picker Modal -->
+<div id="repoPickerModal" class="fixed inset-0 z-50 hidden">
+    <div class="absolute inset-0 bg-black/50 backdrop-blur-sm" id="modalBackdrop"></div>
+    <div class="relative min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-[#1E1E1E] rounded-2xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col">
+            <!-- Header -->
+            <div class="p-5 border-b border-[#DEE2E6] dark:border-[#3D3D3D] flex items-center justify-between">
+                <h2 class="text-lg font-semibold text-[#212529] dark:text-white">Select Repository</h2>
+                <button type="button" id="closeRepoPicker"
+                    class="text-[#6C757D] hover:text-[#212529] dark:hover:text-white">
+                    <i class="fas fa-times text-xl"></i>
+                </button>
+            </div>
+
+            <!-- Search -->
+            <div class="p-4 border-b border-[#DEE2E6] dark:border-[#3D3D3D]">
+                <input type="text" id="repoSearch" placeholder="Search repositories..."
+                    class="w-full px-4 py-2 rounded-lg border border-[#DEE2E6] bg-white text-[#212529] placeholder-[#ADB5BD] focus:border-[#0D7C3D] focus:ring-1 focus:ring-[#0D7C3D] dark:bg-[#2D2D2D] dark:border-[#3D3D3D] dark:text-white">
+            </div>
+
+            <!-- Repos List -->
+            <div class="flex-1 overflow-y-auto p-4" id="reposList">
+                <div class="flex items-center justify-center py-12">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0D7C3D]"></div>
+                </div>
+            </div>
+
+            <!-- Footer -->
+            <div class="p-4 border-t border-[#DEE2E6] dark:border-[#3D3D3D] text-center">
+                <a href="{% url 'socialaccount_connections' %}" class="text-sm text-[#0D7C3D] hover:underline">
+                    <i class="fas fa-plus mr-1"></i> Connect more platforms
+                </a>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -109,4 +162,122 @@
 
 {% block extra_css %}
 <link rel="stylesheet" href="{% static 'css/forms.css' %}">
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const modal = document.getElementById('repoPickerModal');
+        const openBtn = document.getElementById('openRepoPicker');
+        const closeBtn = document.getElementById('closeRepoPicker');
+        const backdrop = document.getElementById('modalBackdrop');
+        const reposList = document.getElementById('reposList');
+        const searchInput = document.getElementById('repoSearch');
+        let allRepos = [];
+
+        // Open modal
+        openBtn.addEventListener('click', function () {
+            modal.classList.remove('hidden');
+            document.body.style.overflow = 'hidden';
+            loadRepos();
+        });
+
+        // Close modal
+        function closeModal() {
+            modal.classList.add('hidden');
+            document.body.style.overflow = '';
+        }
+        closeBtn.addEventListener('click', closeModal);
+        backdrop.addEventListener('click', closeModal);
+
+        // Load repos
+        async function loadRepos() {
+            reposList.innerHTML = '<div class="flex items-center justify-center py-12"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0D7C3D]"></div></div>';
+
+            try {
+                const response = await fetch('{% url "projects:user_repos_api" %}');
+                const data = await response.json();
+                allRepos = data.repos || [];
+                renderRepos(allRepos);
+            } catch (error) {
+                reposList.innerHTML = '<div class="text-center py-12 text-[#6C757D]"><i class="fas fa-exclamation-circle text-2xl mb-2"></i><p>Failed to load repositories</p></div>';
+            }
+        }
+
+        // Render repos
+        function renderRepos(repos) {
+            if (repos.length === 0) {
+                reposList.innerHTML = '<div class="text-center py-12 text-[#6C757D]"><i class="fas fa-folder-open text-3xl mb-3"></i><p>No repositories found</p><p class="text-sm mt-1">Connect platforms to see your repositories</p></div>';
+                return;
+            }
+
+            const platformIcons = {
+                github: '<i class="fab fa-github"></i>',
+                gitlab: '<i class="fab fa-gitlab text-[#FC6D26]"></i>',
+                bitbucket: '<i class="fab fa-bitbucket text-[#0052CC]"></i>',
+                huggingface: '<i class="fas fa-robot text-[#FF9D00]"></i>'
+            };
+
+            reposList.innerHTML = repos.map(repo => `
+            <button type="button" class="repo-item w-full text-left p-4 rounded-xl border border-[#DEE2E6] dark:border-[#3D3D3D] hover:border-[#0D7C3D] hover:bg-[#F8F9FA] dark:hover:bg-[#2D2D2D] transition-all mb-3"
+                data-url="${repo.url}"
+                data-name="${repo.name}"
+                data-description="${repo.description || ''}"
+                data-platform="${repo.platform}">
+                <div class="flex items-start gap-3">
+                    <div class="w-10 h-10 rounded-lg bg-[#F8F9FA] dark:bg-[#2D2D2D] flex items-center justify-center text-lg">
+                        ${platformIcons[repo.platform] || '<i class="fas fa-code"></i>'}
+                    </div>
+                    <div class="flex-1 min-w-0">
+                        <div class="flex items-center gap-2">
+                            <span class="font-medium text-[#212529] dark:text-white truncate">${repo.name}</span>
+                            ${repo.private ? '<span class="text-xs px-1.5 py-0.5 bg-[#FFF3CD] text-[#856404] rounded">Private</span>' : ''}
+                        </div>
+                        <p class="text-sm text-[#6C757D] truncate">${repo.full_name}</p>
+                        ${repo.description ? `<p class="text-sm text-[#6C757D] mt-1 line-clamp-2">${repo.description}</p>` : ''}
+                        <div class="flex items-center gap-3 mt-2 text-xs text-[#ADB5BD]">
+                            ${repo.language ? `<span><i class="fas fa-code mr-1"></i>${repo.language}</span>` : ''}
+                            ${repo.stars > 0 ? `<span><i class="fas fa-star mr-1"></i>${repo.stars}</span>` : ''}
+                        </div>
+                    </div>
+                </div>
+            </button>
+        `).join('');
+
+            // Add click handlers
+            document.querySelectorAll('.repo-item').forEach(item => {
+                item.addEventListener('click', function () {
+                    selectRepo(this.dataset);
+                });
+            });
+        }
+
+        // Select repo
+        function selectRepo(data) {
+            // Fill form fields
+            document.querySelector('[name="name"]').value = data.name;
+            document.querySelector('[name="description"]').value = data.description || '';
+
+            const urlField = document.querySelector('[name="github_repo_url"]');
+            if (data.platform === 'github' && data.url) {
+                urlField.value = data.url;
+            } else if (data.platform === 'huggingface' && data.url) {
+                document.querySelector('[name="huggingface_url"]').value = data.url;
+            }
+
+            closeModal();
+        }
+
+        // Search
+        searchInput.addEventListener('input', function () {
+            const query = this.value.toLowerCase();
+            const filtered = allRepos.filter(repo =>
+                repo.name.toLowerCase().includes(query) ||
+                repo.full_name.toLowerCase().includes(query) ||
+                (repo.description && repo.description.toLowerCase().includes(query))
+            );
+            renderRepos(filtered);
+        });
+    });
+</script>
 {% endblock %}

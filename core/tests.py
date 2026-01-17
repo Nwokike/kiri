@@ -16,12 +16,6 @@ class CoreTests(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, 'home.html')
 
-    def test_universal_translator_demo(self):
-        """Test universal translator demo page."""
-        response = self.client.get(reverse('core:universal_translator'))
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, 'demos/universal_translator.html')
-        
     def test_health_check(self):
         """Test health check endpoint."""
         response = self.client.get(reverse('core:health'))

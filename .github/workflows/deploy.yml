@@ -23,8 +23,8 @@ jobs:
         script: |
           set -e  # Exit on any error
           
-          # 1. Add path to 'uv' and 'npm'
-          export PATH=$PATH:$HOME/.local/bin:/usr/bin
+          # 1. Add path to 'uv'
+          export PATH=$PATH:$HOME/.local/bin
 
           # 2. Go to project folder
           cd /home/nwokikeonyeka/kiri
@@ -38,37 +38,34 @@ jobs:
           # 4. Sync Dependencies
           uv sync
 
-          # 5. Build CSS (Tailwind)
-          npm ci --prefer-offline
-          npm run build:css
-
-          # 6. Run Migrations
+          # 5. Run Migrations
           uv run python manage.py migrate
 
-          # 7. Collect Static
+          # 6. Collect Static
           uv run python manage.py collectstatic --noinput
 
-          # 8. Run Django deployment checks
+          # 7. Run Django deployment checks
           uv run python manage.py check --deploy
 
-          # 9. Restart Services (ensure passwordless sudo is configured for this user)
-          sudo systemctl restart kiri
-          sudo systemctl restart kiri-huey
-          sudo systemctl restart nginx
+          # 8. Restart Services
+          echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S systemctl restart kiri
+          echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S systemctl restart kiri-huey
+          echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S systemctl restart nginx
 
-          # 10. Wait for services to start
+          # 9. Wait for services to start
           sleep 5
 
-          # 11. Health check
+          # 10. Health check with rollback
           if ! curl -f http://localhost:8000/health/; then
             echo "Health check failed! Rolling back to $PREV_COMMIT"
             git checkout $PREV_COMMIT
             uv sync
             uv run python manage.py migrate
             uv run python manage.py collectstatic --noinput
-            sudo systemctl restart kiri
-            sudo systemctl restart kiri-huey
+            echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S systemctl restart kiri
+            echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S systemctl restart kiri-huey
             exit 1
           fi
 
           echo "Deployment Complete! 🚀"
+

@@ -4,8 +4,7 @@ import requests
 import hashlib
 import time
 import logging
-from huey import SqliteHuey
-from huey.contrib.djhuey import periodic_task, task
+from huey.contrib.djhuey import periodic_task, task, HUEY as huey
 import boto3
 from django.conf import settings
 from django.utils import timezone
@@ -14,8 +13,7 @@ import shutil
 # Configure logging
 logger = logging.getLogger(__name__)
 
-# Configure Huey with SQLite backend
-huey = SqliteHuey(filename=settings.HUEY['filename'])
+# Huey is configured via djhuey settings - HUEY imported above
 
 def calculate_file_md5(filepath):
     """Calculates MD5 hash of a file efficiently."""
@@ -44,13 +42,9 @@ def update_project_hot_status():
         score=F('view_count') + (F('stars_count') * 10)
     ).order_by('-score')
     
-    # Mark top 5 as HOT
-    updated_count = 0
-    top_projects = projects[:5]
-    for p in top_projects:
-        p.is_hot = True
-        p.save()
-        updated_count += 1
+    # Mark top 5 as HOT using bulk_update to avoid N+1
+    top_project_ids = list(projects[:5].values_list('id', flat=True))
+    updated_count = Project.objects.filter(id__in=top_project_ids).update(is_hot=True)
     
     logger.info(f"Updated {updated_count} projects to HOT at {timezone.now()}")
 
@@ -142,13 +136,21 @@ def backup_db_to_r2():
 def sync_github_stats():
     """
     Syncs stars, forks, and description from GitHub for all projects.
-    Uses centralized GitHubService.
+    Uses centralized GitHubService with batching to avoid rate limits.
     """
     from projects.models import Project
     from projects.utils import sync_project_metadata
     
     logger.info("Starting GitHub stats sync...")
-    projects = Project.objects.all()
+    
+    # Batch projects to avoid GitHub rate limits (5000/hr)
+    # Each 30-min run processes a different batch
+    BATCH_SIZE = 20
+    current_minute = timezone.now().minute
+    batch_offset = (current_minute // 30) * BATCH_SIZE
+    
+    total_projects = Project.objects.count()
+    projects = Project.objects.all()[batch_offset:batch_offset + BATCH_SIZE]
     
     updated_count = 0
     errors = 0

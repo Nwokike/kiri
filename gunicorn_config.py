@@ -32,3 +32,7 @@ limit_request_field_size = 8190
 
 # Graceful timeout
 graceful_timeout = 30
+
+# Preload application for shared memory (reduces per-worker memory)
+preload_app = True
+

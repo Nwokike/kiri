@@ -41,6 +41,7 @@ CSRF_TRUSTED_ORIGINS = [
 
 # Application definition
 INSTALLED_APPS = [
+    "kiri_project.apps.KiriProjectConfig",  # Must be first for SQLite signals
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -72,6 +73,7 @@ SITE_ID = 1
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "csp.middleware.CSPMiddleware",  # Content Security Policy
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -104,20 +106,15 @@ TEMPLATES = [
 WSGI_APPLICATION = "kiri_project.wsgi.application"
 
 # Database - SQLite optimized for 1GB RAM production
+# NOTE: PRAGMAs are applied via connection signals in kiri_project/apps.py
+# (init_command is deprecated in Django 6.0 for SQLite)
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
         "OPTIONS": {
             "timeout": 20,
-            "init_command": (
-                "PRAGMA journal_mode=WAL;"
-                "PRAGMA busy_timeout=5000;"
-                "PRAGMA synchronous=NORMAL;"
-                "PRAGMA cache_size=2000;"
-                "PRAGMA temp_store=MEMORY;"
-                "PRAGMA mmap_size=134217728;"
-            ),
+            "transaction_mode": "IMMEDIATE",  # Better concurrency
         },
     }
 }
@@ -317,9 +314,13 @@ if not DEBUG:
         "default": {
             "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
             "LOCATION": "kiri-cache",
-            "OPTIONS": {"MAX_ENTRIES": 1000},
+            "OPTIONS": {"MAX_ENTRIES": 5000},  # ~20MB max
         }
     }
+    
+    # CSRF Cookie settings
+    CSRF_COOKIE_HTTPONLY = True
+    CSRF_COOKIE_SAMESITE = "Strict"
 
 # Logging
 LOGGING = {

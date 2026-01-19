@@ -81,5 +81,3 @@ class PublicationViewTest(TestCase):
         self.pub.save()
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 404)
-
-        self.assertEqual(response.status_code, 404)

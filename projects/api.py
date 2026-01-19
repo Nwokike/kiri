@@ -1,12 +1,15 @@
 """
 API views for fetching user repositories from connected platforms.
 """
+import logging
 import requests
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_GET
 from django.core.cache import cache
 from users.models import UserIntegration
+
+logger = logging.getLogger(__name__)
 
 
 def fetch_github_repos(token):
@@ -35,8 +38,10 @@ def fetch_github_repos(token):
                     "language": repo.get("language", ""),
                     "private": repo.get("private", False),
                 })
-    except Exception:
-        pass
+        else:
+            logger.warning(f"GitHub API returned {response.status_code}")
+    except Exception as e:
+        logger.error(f"Failed to fetch GitHub repos: {e}")
     return repos
 
 
@@ -65,8 +70,10 @@ def fetch_gitlab_repos(token):
                     "language": "",  # GitLab doesn't include this in basic response
                     "private": repo.get("visibility") == "private",
                 })
-    except Exception:
-        pass
+        else:
+            logger.warning(f"GitLab API returned {response.status_code}")
+    except Exception as e:
+        logger.error(f"Failed to fetch GitLab repos: {e}")
     return repos
 
 
@@ -96,8 +103,10 @@ def fetch_bitbucket_repos(token):
                     "language": repo.get("language", ""),
                     "private": repo.get("is_private", False),
                 })
-    except Exception:
-        pass
+        else:
+            logger.warning(f"Bitbucket API returned {response.status_code}")
+    except Exception as e:
+        logger.error(f"Failed to fetch Bitbucket repos: {e}")
     return repos
 
 
@@ -149,8 +158,8 @@ def fetch_huggingface_repos(token):
                     "private": space.get("private", False),
                     "type": "space",
                 })
-    except Exception:
-        pass
+    except Exception as e:
+        logger.error(f"Failed to fetch HuggingFace repos: {e}")
     return repos
 
 

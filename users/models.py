@@ -97,6 +97,9 @@ class UserIntegration(models.Model):
     # Primary integration for content creation
     is_primary = models.BooleanField(default=False)
     
+    # Flag to track if tokens are encrypted (for migration)
+    tokens_encrypted = models.BooleanField(default=True)
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
     
@@ -109,6 +112,42 @@ class UserIntegration(models.Model):
     
     def __str__(self):
         return f"{self.user.username} - {self.get_platform_display()}"
+    
+    def get_decrypted_access_token(self):
+        """Get decrypted access token for API calls."""
+        if not self.access_token:
+            return ""
+        if not self.tokens_encrypted:
+            return self.access_token
+        from .encryption import decrypt_token
+        return decrypt_token(self.access_token)
+    
+    def set_encrypted_access_token(self, token):
+        """Set and encrypt access token."""
+        if not token:
+            self.access_token = ""
+            return
+        from .encryption import encrypt_token
+        self.access_token = encrypt_token(token)
+        self.tokens_encrypted = True
+    
+    def get_decrypted_refresh_token(self):
+        """Get decrypted refresh token."""
+        if not self.refresh_token:
+            return ""
+        if not self.tokens_encrypted:
+            return self.refresh_token
+        from .encryption import decrypt_token
+        return decrypt_token(self.refresh_token)
+    
+    def set_encrypted_refresh_token(self, token):
+        """Set and encrypt refresh token."""
+        if not token:
+            self.refresh_token = ""
+            return
+        from .encryption import encrypt_token
+        self.refresh_token = encrypt_token(token)
+        self.tokens_encrypted = True
     
     def save(self, *args, **kwargs):
         # Ensure only one primary integration per user

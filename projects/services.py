@@ -82,10 +82,7 @@ class GitHubService:
             'User-Agent': 'Kiri-Research-Labs-Bot'
         }
         
-        # Add Token if available
-        # Order: Model/View provided token -> Env var
-        token = getattr(settings, 'GITHUB_TOKEN', None) or list(settings.os.environ.get('GITHUB_TOKEN', ''))
-        # Fix: settings doesn't have os directly usually, stick to os.environ
+        # Add Token if available from environment
         import os
         token = os.environ.get('GITHUB_TOKEN')
         

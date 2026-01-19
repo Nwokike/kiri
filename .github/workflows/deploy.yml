@@ -23,11 +23,14 @@ jobs:
         script: |
           set -e  # Exit on any error
           
-          # 1. Add path to 'uv'
-          export PATH=$PATH:$HOME/.local/bin
+          # 1. Add path to 'uv' and 'npm'
+          export PATH=$PATH:$HOME/.local/bin:/usr/bin
 
           # 2. Go to project folder
           cd /home/nwokikeonyeka/kiri
+
+          # Store current commit for rollback
+          PREV_COMMIT=$(git rev-parse HEAD)
 
           # 3. Pull latest code
           git pull origin main
@@ -35,24 +38,37 @@ jobs:
           # 4. Sync Dependencies
           uv sync
 
-          # 5. Run Migrations
+          # 5. Build CSS (Tailwind)
+          npm ci --prefer-offline
+          npm run build:css
+
+          # 6. Run Migrations
           uv run python manage.py migrate
 
-          # 6. Collect Static
+          # 7. Collect Static
           uv run python manage.py collectstatic --noinput
 
-          # 7. Run Django deployment checks
+          # 8. Run Django deployment checks
           uv run python manage.py check --deploy
 
-          # 8. Restart Services
-          echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S systemctl restart kiri
-          echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S systemctl restart kiri-huey
-          echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S systemctl restart nginx
+          # 9. Restart Services (ensure passwordless sudo is configured for this user)
+          sudo systemctl restart kiri
+          sudo systemctl restart kiri-huey
+          sudo systemctl restart nginx
 
-          # 9. Wait for services to start
+          # 10. Wait for services to start
           sleep 5
 
-          # 10. Health check
-          curl -f http://localhost:8000/health/ || echo "Health check endpoint not yet implemented"
+          # 11. Health check
+          if ! curl -f http://localhost:8000/health/; then
+            echo "Health check failed! Rolling back to $PREV_COMMIT"
+            git checkout $PREV_COMMIT
+            uv sync
+            uv run python manage.py migrate
+            uv run python manage.py collectstatic --noinput
+            sudo systemctl restart kiri
+            sudo systemctl restart kiri-huey
+            exit 1
+          fi
 
           echo "Deployment Complete! 🚀"

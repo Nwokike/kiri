@@ -129,16 +129,25 @@ def add_comment(request, content_type_id, object_id):
 @login_required
 def favorites_list(request):
     """Display user's favorited items."""
-    favorites = Favorite.objects.filter(
-        user=request.user
-    ).select_related('content_type').order_by('-created_at')
-    
-    # Group by content type for tabs
+    from django.contrib.contenttypes.prefetch import GenericPrefetch
     from projects.models import Project
     from publications.models import Publication
     
     project_ct = ContentType.objects.get_for_model(Project)
     pub_ct = ContentType.objects.get_for_model(Publication)
+    
+    # Use GenericPrefetch to avoid N+1 when accessing content_object
+    favorites = Favorite.objects.filter(
+        user=request.user
+    ).select_related('content_type').prefetch_related(
+        GenericPrefetch(
+            'content_object',
+            [
+                Project.objects.select_related('submitted_by'),
+                Publication.objects.select_related('author'),
+            ]
+        )
+    ).order_by('-created_at')
     
     project_favorites = [f for f in favorites if f.content_type_id == project_ct.id]
     publication_favorites = [f for f in favorites if f.content_type_id == pub_ct.id]
@@ -173,8 +182,9 @@ def toggle_favorite(request, content_type_id, object_id):
         try:
             from kiri_project.tasks import sync_github_star
             sync_github_star(favorite.id)
-        except Exception:
-            pass  # Don't block the response if task queuing fails
+        except Exception as e:
+            import logging
+            logging.getLogger(__name__).warning(f"Failed to queue GitHub star sync: {e}")
     
     # Return updated button for HTMX
     return render(request, 'core/partials/favorite_button.html', {

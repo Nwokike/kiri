@@ -73,6 +73,11 @@ class Publication(models.Model):
 
     def __str__(self):
         return self.title
+    
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse("publications:detail", kwargs={"slug": self.slug})
+
 
 class PublicationRevision(models.Model):
     publication = models.ForeignKey(Publication, on_delete=models.CASCADE, related_name='revisions')
@@ -86,3 +91,4 @@ class PublicationRevision(models.Model):
         
     def __str__(self):
         return f"{self.publication.title} v{self.version}"
+

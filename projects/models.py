@@ -86,3 +86,7 @@ class Project(models.Model):
 
     def __str__(self):
         return self.name
+    
+    def get_absolute_url(self):
+        from django.urls import reverse
+        return reverse("projects:detail", kwargs={"slug": self.slug})

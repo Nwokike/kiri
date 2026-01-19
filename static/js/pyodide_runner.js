@@ -53,7 +53,9 @@ window.runPythonCode = async function (code, outputElementId) {
         }
 
     } catch (err) {
-        outputEl.innerHTML = `<span class="text-error font-bold">Error:</span> ${err}`;
+        // Use textContent for XSS safety - error message could contain user input
+        outputEl.textContent = `Error: ${err}`;
+        outputEl.className = 'text-error font-bold';
         console.error(err);
     }
 };

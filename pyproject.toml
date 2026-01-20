@@ -32,5 +32,7 @@ dependencies = [
     "sentry-sdk>=2.0.0",
     "markdown>=3.5.0",
     "cryptography>=44.0.0",
+    "django-crispy-forms>=2.5",
+    "crispy-tailwind>=1.0.3",
 ]
 

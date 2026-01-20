@@ -37,6 +37,21 @@
     <!-- Theme Init -->
     <script src="{% static 'js/theme_init.js' %}"></script>
 
+    <!-- Google Analytics 4 -->
+    {% if GOOGLE_ANALYTICS_ID %}
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ GOOGLE_ANALYTICS_ID }}"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
+        gtag('config', '{{ GOOGLE_ANALYTICS_ID }}');
+    </script>
+    {% endif %}
+
+    <!-- Google AdSense -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5679949845754640"
+        crossorigin="anonymous"></script>
+
     {% progressive_web_app_meta %}
 
     <style>
@@ -378,7 +393,7 @@
                                 class="w-9 h-9 flex items-center justify-center rounded-lg bg-[#F8F9FA] text-[#495057] hover:bg-[#0D7C3D] hover:text-white transition-colors dark:bg-[#2D2D2D] dark:text-[#A1A1AA]">
                                 <i class="fab fa-github"></i>
                             </a>
-                            <a href="https://x.com/kiringdotng" target="_blank" rel="noopener noreferrer"
+                            <a href="https://x.com/kiri_research" target="_blank" rel="noopener noreferrer"
                                 class="w-9 h-9 flex items-center justify-center rounded-lg bg-[#F8F9FA] text-[#495057] hover:bg-[#0D7C3D] hover:text-white transition-colors dark:bg-[#2D2D2D] dark:text-[#A1A1AA]">
                                 <i class="fab fa-x-twitter"></i>
                             </a>

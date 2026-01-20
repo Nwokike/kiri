@@ -14,3 +14,4 @@ def base64_converter(request):
 
 def diff_viewer(request):
     return render(request, 'tools/diff_viewer.html')
+

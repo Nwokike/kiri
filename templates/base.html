@@ -40,11 +40,11 @@
     <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-8DSDW7CV38"></script>
     <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
+        window.dataLayer = window.dataLayer || [];
+        function gtag() { dataLayer.push(arguments); }
+        gtag('js', new Date());
 
-    gtag('config', 'G-8DSDW7CV38');
+        gtag('config', 'G-8DSDW7CV38');
     </script>
 
     <!-- Google AdSense -->
@@ -361,6 +361,12 @@
                             </li>
                             <li><a href="{% url 'projects:list' %}"
                                     class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">Projects</a>
+                            </li>
+                            <li><a href="{% url 'discussions:list' %}"
+                                    class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">Discuss</a>
+                            </li>
+                            <li><a href="{% url 'activity:feed' %}"
+                                    class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">Activity</a>
                             </li>
                         </ul>
                     </div>

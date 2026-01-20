@@ -3,13 +3,15 @@ from django.urls import path, include
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib.sitemaps.views import sitemap
-from django.views.generic import TemplateView
+from django.views.generic import TemplateView, RedirectView
 from core import views as core_views
 from .sitemaps import sitemaps
 
 urlpatterns = [
     path("admin/", admin.site.urls),
+    path("accounts/signup/", RedirectView.as_view(url="/accounts/login/", permanent=True)),
     path("accounts/", include("allauth.urls")),
+    path("accounts/huggingface/", include("users.providers.huggingface.urls")),
     path("serviceworker.js", core_views.serviceworker, name="serviceworker"),
     path("sitemap.xml", sitemap, {'sitemaps': sitemaps}, name='sitemap'),
     path("robots.txt", TemplateView.as_view(template_name="robots.txt", content_type="text/plain")),

@@ -200,3 +200,80 @@ def user_repos_api(request):
     cache.set(cache_key, all_repos, 300)
     
     return JsonResponse({"repos": all_repos, "cached": False})
+
+
+@login_required
+def save_gist_api(request):
+    """API to save code as a Gist."""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method not allowed"}, status=405)
+        
+    try:
+        data = json.loads(request.body)
+        files = data.get("files")
+        description = data.get("description", "Kiri Studio Snippet")
+        public = data.get("public", True)
+        
+        if not files:
+            return JsonResponse({"error": "No files provided"}, status=400)
+            
+        from .gist_service import GistService
+        result = GistService.create_user_gist(request.user, files, description, public)
+        
+        if result:
+            return JsonResponse(result)
+        else:
+            return JsonResponse({"error": "Failed to create Gist. Ensure GitHub is connected."}, status=400)
+            
+    except json.JSONDecodeError:
+        return JsonResponse({"error": "Invalid JSON"}, status=400)
+    except Exception as e:
+        logger.error(f"Save Gist API Error: {e}")
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+@login_required
+def studio_ai_assist(request):
+    """API for Kiri Studio AI assistance (Explain, Debug, Write)."""
+    if request.method != "POST":
+        return JsonResponse({"error": "Method not allowed"}, status=405)
+        
+    try:
+        data = json.loads(request.body)
+        task = data.get("task") # 'explain', 'debug', 'write'
+        code = data.get("code")
+        context = data.get("context", "")
+        
+        if not code or not task:
+            return JsonResponse({"error": "Missing code or task"}, status=400)
+            
+        # Construct primitive prompt for now (Phase 2.1 had better logic, reusing simple fallback)
+        prompts = {
+            "explain": f"Explain this code concisely:\n\n{code}",
+            "debug": f"Find bugs in this code and suggest fixes:\n\n{code}\nContext: {context}",
+            "write": f"Write code based on this request:\n\n{context}\n\nexisting code context:\n{code}"
+        }
+        
+        prompt = prompts.get(task, f"Analyze this:\n{code}")
+        
+        # Reuse the AI Advisor logic if possible, or simple direct call
+        # For speed/simplicity here, we'll try to import the service helper
+        from .ai_advisor import call_ai
+        
+        # We need to await? No, call_ai is async but Django view is sync unless async def
+        # wrapper. Let's make this view async or use async_to_sync
+        from asgiref.sync import async_to_sync
+        response = async_to_sync(call_ai)(prompt)
+        
+        # Parse JSON if call_ai returns JSON string, or just return text
+        try:
+            # call_ai might return a dict or string depending on implementation
+            if isinstance(response, str):
+                return JsonResponse({"result": response})
+            return JsonResponse(response)
+        except:
+            return JsonResponse({"result": str(response)})
+
+    except Exception as e:
+        logger.error(f"Studio AI API Error: {e}")
+        return JsonResponse({"error": str(e)}, status=500)

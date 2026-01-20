@@ -226,3 +226,67 @@ cd /home/jovyan/project
         except Exception as e:
             logger.error(f"Gist deletion error: {e}")
             return False
+    @classmethod
+    def create_user_gist(cls, user, files: dict, description: str = "Created via Kiri Studio", public: bool = True) -> Optional[dict]:
+        """
+        Creates a Gist on behalf of a user.
+        
+        Args:
+            user: Django User instance
+            files: Dict of filename -> content strings (or dict with 'content' key)
+            description: Gist description
+            public: Whether gist is public
+            
+        Returns:
+            Dict with gist 'id' and 'html_url', or None on failure
+        """
+        from users.models import UserIntegration
+        
+        # Get user's GitHub token
+        integration = UserIntegration.objects.filter(user=user, platform='github').first()
+        if not integration or not integration.access_token:
+            logger.warning(f"No GitHub integration found for user {user.username}")
+            return None
+        
+        token = integration.get_decrypted_access_token()
+        
+        # Format files for API
+        api_files = {}
+        for filename, content in files.items():
+            if isinstance(content, dict):
+                api_files[filename] = content
+            else:
+                api_files[filename] = {"content": content}
+        
+        data = {
+            "description": description,
+            "public": public,
+            "files": api_files
+        }
+        
+        headers = {
+            "Authorization": f"token {token}",
+            "Accept": "application/vnd.github.v3+json",
+        }
+        
+        try:
+            response = requests.post(
+                cls.GITHUB_API_URL,
+                headers=headers,
+                json=data,
+                timeout=30
+            )
+            
+            if response.status_code == 201:
+                data = response.json()
+                return {
+                    "id": data['id'],
+                    "html_url": data['html_url']
+                }
+            else:
+                logger.error(f"Failed to create User Gist: {response.status_code} - {response.text[:200]}")
+                return None
+                
+        except Exception as e:
+            logger.error(f"User Gist creation error: {e}")
+            return None

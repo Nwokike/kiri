@@ -42,11 +42,13 @@
                 <span>Run</span>
             </button>
             <div class="h-6 w-px bg-[#333] mx-1 hidden sm:block"></div>
-            <button class="hidden sm:block text-[#A1A1AA] hover:text-white p-1.5 rounded hover:bg-[#3C3C3C]"
-                title="Save">
+            <button id="save-btn"
+                class="hidden sm:block text-[#A1A1AA] hover:text-white p-1.5 rounded hover:bg-[#3C3C3C]"
+                title="Save to Gist">
                 <i class="fas fa-save"></i>
             </button>
-            <button class="hidden sm:block text-[#A1A1AA] hover:text-white p-1.5 rounded hover:bg-[#3C3C3C]"
+            <button id="settings-btn"
+                class="hidden sm:block text-[#A1A1AA] hover:text-white p-1.5 rounded hover:bg-[#3C3C3C]"
                 title="Settings">
                 <i class="fas fa-cog"></i>
             </button>
@@ -104,6 +106,36 @@
             <iframe id="preview-frame" class="w-full h-full bg-white"></iframe>
         </div>
 
+        <!-- AI Assistant Modal -->
+        <div id="ai-modal"
+            class="hidden absolute top-14 right-4 w-96 bg-[#252526] border border-[#333] shadow-xl rounded-lg z-50 flex flex-col max-h-[500px]">
+            <div class="flex items-center justify-between p-3 border-b border-[#333]">
+                <span class="text-sm font-semibold text-[#CCCCCC]"><i class="fas fa-magic text-purple-400 mr-2"></i>AI
+                    Assistant</span>
+                <button onclick="toggleAIModal()" class="text-[#A1A1AA] hover:text-white"><i
+                        class="fas fa-times"></i></button>
+            </div>
+            <div id="ai-chat-history" class="p-3 overflow-y-auto flex-1 space-y-3 min-h-[200px] text-sm text-[#CCCCCC]">
+                <div class="bg-[#37373D] p-2 rounded">Hello! I'm your Kiri AI assistant. select code and ask me to
+                    'Explain' or 'Debug', or just ask a question!</div>
+            </div>
+            <div class="p-3 border-t border-[#333]">
+                <div class="flex gap-2">
+                    <input type="text" id="ai-input" placeholder="Ask anything..."
+                        class="flex-1 bg-[#1E1E1E] border border-[#333] rounded px-2 py-1 text-white text-sm focus:border-[#0D7C3D] outline-none">
+                    <button onclick="sendAIRequest('chat')"
+                        class="px-3 py-1 bg-[#0D7C3D] hover:bg-[#0A5C2C] text-white rounded"><i
+                            class="fas fa-paper-plane"></i></button>
+                </div>
+                <div class="flex gap-2 mt-2 text-xs">
+                    <button onclick="sendAIRequest('explain')"
+                        class="bg-[#3C3C3C] hover:bg-[#4C4C4C] text-[#A1A1AA] hover:text-white px-2 py-1 rounded">Explain
+                        Selection</button>
+                    <button onclick="sendAIRequest('debug')"
+                        class="bg-[#3C3C3C] hover:bg-[#4C4C4C] text-[#A1A1AA] hover:text-white px-2 py-1 rounded">Debug</button>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -145,6 +177,12 @@
 
         // Resize observer
         new ResizeObserver(() => editor.layout()).observe(document.getElementById('monaco-editor'));
+
+        // Restore session
+        loadSavedState();
+        editor.onDidChangeModelContent(() => {
+            localStorage.setItem('kiri_code_' + currentLang, editor.getValue());
+        });
     });
 
     // Initialize Terminal
@@ -283,6 +321,122 @@ app.listen(port, () => {
             startProcess.output.pipeTo(new WritableStream({
                 write(data) { term.write(data); }
             }));
+        }
+    });
+
+    // --- Persistence (Auto-Save) ---
+    function loadSavedState() {
+        const savedCode = localStorage.getItem('kiri_code_' + currentLang);
+        if (savedCode) {
+            editor.setValue(savedCode);
+            term.writeln('\x1b[36mRestored saved session.\x1b[0m');
+        }
+    }
+
+    // Auto-save on change
+    if (editor) {
+        editor.onDidChangeModelContent(() => {
+            localStorage.setItem('kiri_code_' + currentLang, editor.getValue());
+        });
+    }
+
+    // --- AI Features ---
+    function toggleAIModal() {
+        document.getElementById('ai-modal').classList.toggle('hidden');
+        document.getElementById('ai-input').focus();
+    }
+
+    document.getElementById('ai-advisor-btn').addEventListener('click', toggleAIModal);
+
+    async function sendAIRequest(task) {
+        const inputField = document.getElementById('ai-input');
+        const chatHistory = document.getElementById('ai-chat-history');
+        const selection = editor.getModel().getValueInRange(editor.getSelection());
+        const fullCode = editor.getValue();
+
+        let context = inputField.value;
+        if (task === 'explain' || task === 'debug') {
+            context = selection || "No code selected. Analyzing full file.";
+            chatHistory.innerHTML += `<div class="bg-[#2D2D2D] p-2 rounded mb-2 text-right"><span class="text-xs text-gray-500 block">${task.toUpperCase()}</span>Code Request</div>`;
+        } else {
+            if (!context) return;
+            chatHistory.innerHTML += `<div class="bg-[#2D2D2D] p-2 rounded mb-2 text-right">${context}</div>`;
+            inputField.value = '';
+        }
+
+        // Show loading state
+        chatHistory.innerHTML += `<div id="ai-loading" class="text-gray-500 text-xs italic">AI is thinking...</div>`;
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+
+        try {
+            const response = await fetch('{% url "projects:api_studio_ai" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    task: task,
+                    code: selection || fullCode,
+                    context: task === 'chat' ? context : ''
+                })
+            });
+
+            const data = await response.json();
+            document.getElementById('ai-loading').remove();
+
+            if (data.error) {
+                chatHistory.innerHTML += `<div class="bg-red-900/30 text-red-300 p-2 rounded mb-2">Error: ${data.error}</div>`;
+            } else {
+                // If the response is a dict with structured data, we might need parsing, but api returns 'result' key or direct string usually
+                // The current API might return generic JSON, let's assume it has a text field or is text
+                let reply = data.result || JSON.stringify(data);
+
+                // convert newlines to <br> for simple display
+                reply = reply.replace(/\n/g, '<br>');
+                chatHistory.innerHTML += `<div class="bg-[#37373D] p-2 rounded mb-2">${reply}</div>`;
+            }
+        } catch (err) {
+            document.getElementById('ai-loading')?.remove();
+            chatHistory.innerHTML += `<div class="bg-red-900/30 text-red-300 p-2 rounded mb-2">Network Error</div>`;
+        }
+        chatHistory.scrollTop = chatHistory.scrollHeight;
+    }
+
+    // --- Save to Gist ---
+    document.getElementById('save-btn').addEventListener('click', async () => {
+        const code = editor.getValue();
+        const filename = currentLang === 'python' ? 'main.py' : 'index.js';
+
+        const btn = document.getElementById('save-btn');
+        const icon = btn.querySelector('i');
+        icon.className = 'fas fa-spinner fa-spin';
+
+        try {
+            const response = await fetch('{% url "projects:api_studio_gist" %}', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({
+                    files: { [filename]: code },
+                    description: `Kiri Studio Snippet (${currentLang})`,
+                    public: true
+                })
+            });
+
+            const data = await response.json();
+            if (data.html_url) {
+                term.writeln(`\x1b[32m✔ Gist Created: ${data.html_url}\x1b[0m`);
+                window.open(data.html_url, '_blank');
+            } else {
+                term.writeln(`\x1b[31mSave failed: ${data.error}\x1b[0m`);
+            }
+        } catch (err) {
+            term.writeln(`\x1b[31mSave error: ${err}\x1b[0m`);
+        } finally {
+            icon.className = 'fas fa-save';
         }
     });
 

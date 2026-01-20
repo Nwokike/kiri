@@ -121,3 +121,90 @@ class GitHubService:
             return None
             
         return None
+
+    @classmethod
+    def fetch_structure(cls, repo_url):
+        """
+        Fetches repository structure and key files from GitHub.
+        
+        Returns:
+            Dict with comprehensive repo info for AI analysis:
+            - file_list: List of file paths in the repo
+            - package_json: contents of package.json (Node.js)
+            - requirements_txt: contents of requirements.txt (Python)
+            - pyproject_toml: contents of pyproject.toml (Python)
+            - dockerfile: contents of Dockerfile (Docker)
+            - main_file: contents of main entry point (app.py, main.py, etc.)
+            - readme: first 2000 chars of README for context
+        """
+        parsed = cls.parse_repo_url(repo_url)
+        if not parsed:
+            return None
+        
+        owner, repo = parsed
+        
+        result = {
+            'file_list': [],
+            'package_json': '',
+            'requirements_txt': '',
+            'pyproject_toml': '',
+            'dockerfile': '',
+            'main_file': '',
+            'readme': ''
+        }
+        
+        # Get file tree (first 150 files)
+        try:
+            tree_url = f"{cls.BASE_API_URL}/{owner}/{repo}/git/trees/HEAD?recursive=1"
+            headers = {'Accept': 'application/vnd.github.v3+json'}
+            
+            import os
+            token = os.environ.get('GITHUB_TOKEN')
+            if token:
+                headers['Authorization'] = f'token {token}'
+            
+            response = requests.get(tree_url, headers=headers, timeout=15)
+            if response.status_code == 200:
+                tree = response.json().get('tree', [])
+                # Filter for blobs (files) only
+                result['file_list'] = [item['path'] for item in tree[:150] if item['type'] == 'blob']
+        except Exception as e:
+            logger.warning(f"Failed to fetch file tree: {e}")
+        
+        def fetch_file(filepath: str, limit: int = 4000) -> str:
+            """Helper to fetch a single file from the repo."""
+            try:
+                # Use raw.githubusercontent.com for file content
+                url = f"https://raw.githubusercontent.com/{owner}/{repo}/HEAD/{filepath}"
+                resp = requests.get(url, timeout=10)
+                if resp.status_code == 200:
+                    return resp.text[:limit]
+            except Exception:
+                pass
+            return ''
+        
+        # Fetch key dependency/config files
+        result['package_json'] = fetch_file('package.json')
+        result['requirements_txt'] = fetch_file('requirements.txt')
+        result['pyproject_toml'] = fetch_file('pyproject.toml')
+        result['dockerfile'] = fetch_file('Dockerfile', limit=2000)
+        
+        # Try to find and fetch main entry point
+        entry_points = ['app.py', 'main.py', 'run.py', 'server.py', 'manage.py', 'index.js', 'src/index.js', 'src/main.py']
+        for entry in entry_points:
+            # Check if file exists in the file list we fetched
+            if entry in result['file_list'] or f'src/{entry}' in result['file_list']:
+                # If we found it in the list (or just blindly try fetching)
+                content = fetch_file(entry, limit=2000)
+                if content:
+                    result['main_file'] = content
+                    break
+        
+        # Fetch README for additional context
+        for readme_name in ['README.md', 'readme.md', 'README.rst', 'README']:
+            readme = fetch_file(readme_name, limit=5000) # Increased limit for better AI context
+            if readme:
+                result['readme'] = readme
+                break
+        
+        return result

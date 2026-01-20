@@ -87,11 +87,11 @@
                     Open in Colab
                 </a>
                 {% elif project.lane == 'A' %}
-                <a href="https://run.kiri.ng/?repo={{ project.github_repo_url }}" target="_blank"
+                <a href="{% url 'core:studio' %}?repo={{ project.github_repo_url }}" target="_blank"
                     class="px-4 py-2 bg-[#24a148] text-white text-sm font-medium hover:bg-[#1e8e3e] transition-colors inline-flex items-center gap-2"
-                    title="🚀 First run may take 10-30s (cached after). Runs entirely in your browser - no server needed!">
+                    title="🚀 First run may take 10-30s (cached after). Runs entirely in your browser using Pyodide (WASM)!">
                     <i class="fas fa-play"></i>
-                    Run in Browser
+                    Open in Kiri Studio
                 </a>
                 {% endif %}
 

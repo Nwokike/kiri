@@ -90,3 +90,34 @@ class Project(models.Model):
     def get_absolute_url(self):
         from django.urls import reverse
         return reverse("projects:detail", kwargs={"slug": self.slug})
+
+
+class ProjectInsight(models.Model):
+    """
+    AI-generated insights for a project.
+    Populated by the AI Advisor service.
+    """
+    project = models.OneToOneField(Project, on_delete=models.CASCADE, related_name='insight')
+    
+    # AI Analysis
+    summary = models.TextField(help_text="AI-generated 2-3 sentence summary")
+    tech_stack = models.JSONField(default=list, help_text="Detected languages and frameworks")
+    complexity_score = models.IntegerField(default=5, help_text="1-10 rating of code complexity")
+    complexity_reason = models.TextField(blank=True, help_text="Why this score was given")
+    
+    # Suggestions
+    improvements = models.JSONField(default=list, help_text="List of suggested code improvements")
+    roadmap = models.JSONField(default=list, help_text="Suggested next steps/features")
+    
+    # Metadata
+    last_analyzed_at = models.DateTimeField(auto_now=True)
+    ai_model_used = models.CharField(max_length=50, default="gemini-2.5-flash")
+    
+    class Meta:
+        ordering = ['-last_analyzed_at']
+        indexes = [
+            models.Index(fields=['complexity_score']),
+        ]
+
+    def __str__(self):
+        return f"Insight for {self.project.name}"

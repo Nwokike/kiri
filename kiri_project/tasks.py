@@ -193,7 +193,9 @@ def classify_project_lane(project_id: int):
         return
     
     # 1. Fetch repository structure from GitHub
-    repo_files = fetch_github_structure(project.github_repo_url)
+    from projects.services import GitHubService
+    repo_files = GitHubService.fetch_structure(project.github_repo_url)
+    
     if not repo_files:
         logger.error(f"Failed to fetch repo structure for {project.github_repo_url}")
         project.lane = 'P'  # Keep as pending
@@ -239,90 +241,6 @@ def classify_project_lane(project_id: int):
     
     project.save()
     logger.info(f"Classified project {project_id} as Lane {project.lane}: {project.lane_classification_reason}")
-
-
-def fetch_github_structure(repo_url: str) -> dict:
-    """
-    Fetches repository structure and key files from GitHub for lane classification.
-    
-    Returns:
-        Dict with comprehensive repo info for AI analysis:
-        - file_list: List of file paths in the repo
-        - package_json: contents of package.json (Node.js)
-        - requirements_txt: contents of requirements.txt (Python)
-        - pyproject_toml: contents of pyproject.toml (Python)
-        - dockerfile: contents of Dockerfile (Docker)
-        - main_file: contents of main entry point (app.py, main.py, etc.)
-        - readme: first 1000 chars of README for context
-    """
-    from projects.services import GitHubService
-    
-    parsed = GitHubService.parse_repo_url(repo_url)
-    if not parsed:
-        return None
-    
-    owner, repo = parsed
-    
-    result = {
-        'file_list': [],
-        'package_json': '',
-        'requirements_txt': '',
-        'pyproject_toml': '',
-        'dockerfile': '',
-        'main_file': '',
-        'readme': ''
-    }
-    
-    # Get file tree (first 100 files)
-    try:
-        tree_url = f"https://api.github.com/repos/{owner}/{repo}/git/trees/HEAD?recursive=1"
-        headers = {'Accept': 'application/vnd.github.v3+json'}
-        
-        token = os.environ.get('GITHUB_TOKEN')
-        if token:
-            headers['Authorization'] = f'token {token}'
-        
-        response = requests.get(tree_url, headers=headers, timeout=15)
-        if response.status_code == 200:
-            tree = response.json().get('tree', [])
-            result['file_list'] = [item['path'] for item in tree[:150] if item['type'] == 'blob']
-    except Exception as e:
-        logger.warning(f"Failed to fetch file tree: {e}")
-    
-    def fetch_file(filepath: str, limit: int = 2000) -> str:
-        """Helper to fetch a single file from the repo."""
-        try:
-            url = f"https://raw.githubusercontent.com/{owner}/{repo}/HEAD/{filepath}"
-            resp = requests.get(url, timeout=10)
-            if resp.status_code == 200:
-                return resp.text[:limit]
-        except Exception:
-            pass
-        return ''
-    
-    # Fetch key dependency/config files
-    result['package_json'] = fetch_file('package.json')
-    result['requirements_txt'] = fetch_file('requirements.txt')
-    result['pyproject_toml'] = fetch_file('pyproject.toml')
-    result['dockerfile'] = fetch_file('Dockerfile', limit=1500)
-    
-    # Try to find and fetch main entry point
-    entry_points = ['app.py', 'main.py', 'run.py', 'server.py', 'manage.py', 'index.js', 'src/index.js', 'src/main.py']
-    for entry in entry_points:
-        if entry in result['file_list'] or f'src/{entry}' in result['file_list']:
-            content = fetch_file(entry, limit=1000)
-            if content:
-                result['main_file'] = content
-                break
-    
-    # Fetch README for additional context
-    for readme_name in ['README.md', 'readme.md', 'README.rst', 'README']:
-        readme = fetch_file(readme_name, limit=1000)
-        if readme:
-            result['readme'] = readme
-            break
-    
-    return result
 
 
 @task()
@@ -455,5 +373,40 @@ def create_notification(recipient_id: int, notification_type: str, title: str,
     
     logger.info(f"Created notification {notification.id} for user {recipient.username}")
     return notification.id
+
+
+@task()
+def analyze_project_task(project_id: int):
+    """
+    Background task to analyze a project using AI Advisor.
+    Wrapper for async service function.
+    """
+    import asyncio
+    from projects.ai_advisor import analyze_project
+    
+    logger.info(f"Starting AI analysis for project {project_id}")
+    
+    # Run async function in sync task
+    try:
+        # Use asyncio.run for a fresh event loop in the worker process
+        result = asyncio.run(analyze_project(project_id))
+        if result:
+            logger.info(f"AI Analysis task completed for project {project_id}")
+        else:
+            logger.warning(f"AI Analysis task failed/returned None for project {project_id}")
+    except Exception as e:
+        logger.error(f"Error in analyze_project_task: {e}")
+        # Log to ErrorLog
+        from core.models import ErrorLog
+        try:
+            # Sync creation for ErrorLog inside sync wrapper
+            ErrorLog.objects.create(
+                level='error',
+                path='kiri_project.tasks.analyze_project_task',
+                message=str(e),
+                exception_type=type(e).__name__
+            )
+        except Exception:
+            pass
 
 

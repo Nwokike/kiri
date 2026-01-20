@@ -11,6 +11,7 @@ urlpatterns = [
     path('offline/', views.offline, name='offline'),
     path('health/', views.health, name='health'),
     path('playground/', views.playground, name='playground'),
+    path('studio/', views.studio, name='studio'),
     path('comment/add/<int:content_type_id>/<int:object_id>/', views.add_comment, name='add_comment'),
     # Favorites
     path('favorites/', views.favorites_list, name='favorites'),

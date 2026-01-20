@@ -69,6 +69,14 @@ def playground(request):
     return render(request, "core/playground.html")
 
 
+def studio(request):
+    """
+    Kiri Studio: Client-side Vibe Coding IDE.
+    Features: Monaco Editor, Pyodide (WASM), xterm.js, Live Preview.
+    """
+    return render(request, "core/kiri_studio.html")
+
+
 def privacy(request):
     """Privacy policy page."""
     return render(request, "core/privacy.html")

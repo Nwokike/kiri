@@ -41,8 +41,9 @@ jobs:
           # 5. Run Migrations
           uv run python manage.py migrate
 
-          # 6. Collect Static
+          # 6. Collect Static and create cache table
           uv run python manage.py collectstatic --noinput
+          uv run python manage.py createcachetable
 
           # 7. Run Django deployment checks
           uv run python manage.py check --deploy

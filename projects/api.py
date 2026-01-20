@@ -275,5 +275,36 @@ def studio_ai_assist(request):
             return JsonResponse({"result": str(response)})
 
     except Exception as e:
-        logger.error(f"Studio AI API Error: {e}")
+        return JsonResponse({"error": str(e)}, status=500)
+
+
+@login_required
+@require_GET
+def repo_files_api(request):
+    """
+    API to fetch file list for a given repo URL.
+    Used for selecting a file for Publications.
+    """
+    repo_url = request.GET.get('url')
+    if not repo_url:
+        return JsonResponse({"error": "Missing URL"}, status=400)
+    
+    from .services import GitHubService
+    # Fetch structure (cached inside service if implemented, or we cache here)
+    cache_key = f"repo_files_{repo_url}"
+    cached = cache.get(cache_key)
+    if cached:
+        return JsonResponse({"files": cached})
+        
+    try:
+        data = GitHubService.fetch_structure(repo_url)
+        if data and 'file_list' in data:
+            files = data['file_list']
+            # Filter for likely publication files (markdown, pdf, latex)
+            # But return all is safer, let frontend filter
+            cache.set(cache_key, files, 300)
+            return JsonResponse({"files": files})
+        return JsonResponse({"files": []})
+    except Exception as e:
+        logger.error(f"Repo Files API Error: {e}")
         return JsonResponse({"error": str(e)}, status=500)

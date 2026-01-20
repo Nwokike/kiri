@@ -66,11 +66,45 @@ class ProjectDetailView(DetailView):
         context['comment_form'] = CommentForm()
         return context
 
+class ImportLandingView(LoginRequiredMixin, ListView):
+    template_name = 'projects/import_landing.html'
+    context_object_name = 'repos'
+
+    def get_queryset(self):
+        return []  # Fetched via API client-side
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        user = self.request.user
+        
+        # Get connection status for UI
+        from users.models import UserIntegration
+        integrations = UserIntegration.objects.filter(user=user)
+        connected_map = {i.platform: i for i in integrations}
+        
+        platforms = [
+            {'name': 'GitHub', 'icon': 'fab fa-github', 'connected': connected_map.get('github'), 'connect_url': '/accounts/github/login/?process=connect'},
+            {'name': 'GitLab', 'icon': 'fab fa-gitlab', 'connected': connected_map.get('gitlab'), 'connect_url': '/accounts/gitlab/login/?process=connect'},
+            {'name': 'Bitbucket', 'icon': 'fab fa-bitbucket', 'connected': connected_map.get('bitbucket'), 'connect_url': '/accounts/bitbucket_oauth2/login/?process=connect'},
+            {'name': 'Hugging Face', 'icon': 'fas fa-robot text-[#FFD21E]', 'connected': connected_map.get('huggingface'), 'connect_url': '/accounts/huggingface/login/?process=connect'},
+        ]
+        context['platforms'] = platforms
+        return context
+
 class ProjectSubmitView(LoginRequiredMixin, CreateView):
     model = Project
     form_class = ProjectSubmissionForm
     template_name = 'projects/project_form.html'
     success_url = reverse_lazy('projects:list')
+    
+    def get_initial(self):
+        initial = super().get_initial()
+        # Pre-fill from GET params (Import Flow)
+        if self.request.GET.get('import_mode'):
+            initial['github_repo_url'] = self.request.GET.get('repo_url')
+            initial['name'] = self.request.GET.get('name')
+            initial['description'] = self.request.GET.get('description')
+        return initial
     
     def get_template_names(self):
         if self.request.htmx:

@@ -92,7 +92,28 @@
 
     <!-- Article Content -->
     <article class="prose prose-zinc dark:prose-invert max-w-none mb-12">
+        {% if github_error %}
+        <div class="bg-red-900/20 border border-red-900/50 p-4 rounded mb-4 text-red-200">
+            <p class="font-bold"><i class="fas fa-exclamation-circle mr-2"></i>Content Error</p>
+            <p>{{ github_error }}</p>
+            <p class="text-xs mt-2 opacity-70">Falling back to local cache if available...</p>
+        </div>
+        {% endif %}
+
+        {% if github_content %}
+        <div class="mb-4 text-xs text-[#a8a8a8] flex items-center gap-2">
+            <i class="fab fa-github"></i>
+            <span>Synced from <a href="{{ publication.github_repo_url }}" target="_blank"
+                    class="hover:underline text-[#0f62fe]">GitHub</a></span>
+        </div>
+        {{ github_content|render_markdown }}
+        {% else %}
+        {% if publication.content %}
         {{ publication.content|render_markdown }}
+        {% else %}
+        <p class="italic text-gray-500">No content available.</p>
+        {% endif %}
+        {% endif %}
     </article>
 
     <!-- Executable Code Section -->

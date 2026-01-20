@@ -2,6 +2,7 @@ from django.test import TestCase, override_settings
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.utils import timezone
+from unittest.mock import patch
 from .models import Project
 from .forms import ProjectSubmissionForm
 
@@ -109,7 +110,7 @@ class ProjectViewTests(TestCase):
 
     def test_submit_view_access(self):
         """Test submission view requires login."""
-        url = reverse('projects:submit')
+        url = reverse('projects:create_manual')
         response = self.client.get(url)
         self.assertEqual(response.status_code, 302) # Redirect to login
         
@@ -293,3 +294,80 @@ class TrafficControllerColabNotebookTests(TestCase):
         self.assertIn('git clone', first_code)
         self.assertIn('ml-project', first_code)
 
+
+class ImportLandingViewTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='importer', password='password')
+        self.url = reverse('projects:create') # The new import landing
+
+    def test_access_requires_login(self):
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 302)
+        
+        self.client.login(username='importer', password='password')
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, 'projects/import_landing.html')
+
+    def test_context_platforms(self):
+        self.client.login(username='importer', password='password')
+        response = self.client.get(self.url)
+        platforms = response.context['platforms']
+        self.assertEqual(len(platforms), 4)
+        names = [p['name'] for p in platforms]
+        self.assertIn('GitHub', names)
+        # Check Hugging Face specifically as it was a pain point
+        hf = next(p for p in platforms if p['name'] == 'Hugging Face')
+        self.assertIn('text-[#FFD21E]', hf['icon'])
+
+class ProjectSubmitImportTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='importer', password='password')
+        self.url = reverse('projects:create_manual') # The submit form
+
+    def test_prefill_from_params(self):
+        self.client.login(username='importer', password='password')
+        
+        # Simulate clicking "Import" from the landing page
+        params = {
+            'import_mode': 'true',
+            'repo_url': 'https://github.com/importer/my-repo',
+            'name': 'My Imported Repo',
+            'description': 'Auto description'
+        }
+        response = self.client.get(self.url, params)
+        self.assertEqual(response.status_code, 200)
+        
+        # Check if form initial data is populated
+        form = response.context['form']
+        self.assertEqual(form.initial['github_repo_url'], 'https://github.com/importer/my-repo')
+        self.assertEqual(form.initial['name'], 'My Imported Repo')
+        self.assertEqual(form.initial['description'], 'Auto description')
+
+
+class RepoFilesApiTests(TestCase):
+    def setUp(self):
+        self.user = User.objects.create_user(username='importer', password='password')
+        self.url = reverse('projects:api_repo_files')
+
+    def test_api_requires_login(self):
+        response = self.client.get(self.url, {'url': 'https://github.com/foo/bar'})
+        self.assertEqual(response.status_code, 302)
+
+    @patch('projects.services.GitHubService.fetch_structure')
+    def test_fetch_files_success(self, mock_fetch):
+        mock_fetch.return_value = {
+            'file_list': ['README.md', 'paper.pdf', 'code.py']
+        }
+        self.client.login(username='importer', password='password')
+        
+        response = self.client.get(self.url, {'url': 'https://github.com/foo/bar'})
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(len(data['files']), 3)
+        self.assertIn('paper.pdf', data['files'])
+
+    def test_missing_url_param(self):
+        self.client.login(username='importer', password='password')
+        response = self.client.get(self.url)
+        self.assertEqual(response.status_code, 400)

@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}New Project | Kiri{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8" x-data="projectImport()">
+    <div class="mb-8 text-center">
+        <h1 class="text-3xl font-bold text-[#212529] dark:text-white mb-2">Import a Repository</h1>
+        <p class="text-[#6C757D] dark:text-[#A1A1AA]">
+            Select a repository from your connected accounts to create a project in seconds.
+        </p>
+    </div>
+
+    <!-- Integrations Status -->
+    <div class="flex items-center justify-center gap-4 mb-8">
+        {% for platform in platforms %}
+        <div
+            class="flex items-center gap-2 px-4 py-2 rounded-full border {% if platform.connected %}bg-[#E8F5ED] border-[#0D7C3D]/20 text-[#0D7C3D] dark:bg-[#0D7C3D]/20{% else %}bg-white border-[#DEE2E6] text-[#6C757D] dark:bg-[#1E1E1E] dark:border-[#3D3D3D]{% endif %}">
+            <i class="{{ platform.icon }}"></i>
+            <span class="text-xs font-medium">{{ platform.name }}</span>
+            {% if not platform.connected %}
+            <a href="{{ platform.connect_url }}"
+                class="ml-2 w-5 h-5 flex items-center justify-center rounded-full bg-[#E9ECEF] hover:bg-[#DEE2E6] text-[#495057] transition-colors">
+                <i class="fas fa-plus text-[10px]"></i>
+            </a>
+            {% endif %}
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Search & Filter -->
+    <div
+        class="flex items-center gap-4 mb-6 bg-white dark:bg-[#1E1E1E] p-4 rounded-xl border border-[#DEE2E6] dark:border-[#3D3D3D]">
+        <div class="relative flex-1">
+            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-[#ADB5BD]"></i>
+            <input type="text" x-model="search" placeholder="Search your repositories..."
+                class="w-full pl-10 pr-4 py-2 bg-[#F8F9FA] dark:bg-[#2D2D2D] border-none rounded-lg focus:ring-2 focus:ring-[#0D7C3D]/50 text-[#212529] dark:text-white">
+        </div>
+        <button @click="fetchRepos()"
+            class="p-2 text-[#0D7C3D] hover:bg-[#E8F5ED] dark:hover:bg-[#0D7C3D]/20 rounded-lg transition-colors"
+            title="Refresh">
+            <i class="fas fa-sync-alt" :class="{'fa-spin': loading}"></i>
+        </button>
+    </div>
+
+    <!-- Repo Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" x-show="!loading">
+        <template x-for="repo in filteredRepos" :key="repo.id">
+            <div
+                class="group relative bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl p-5 hover:border-[#0D7C3D] transition-colors">
+                <div class="flex items-start justify-between mb-3">
+                    <div class="flex items-center gap-2">
+                        <i :class="getIcon(repo.platform)" class="text-lg"></i>
+                        <span
+                            class="text-xs font-medium px-2 py-0.5 rounded-full bg-[#F8F9FA] dark:bg-[#2D2D2D] text-[#6C757D] dark:text-[#A1A1AA]"
+                            x-text="repo.platform"></span>
+                        <template x-if="repo.private">
+                            <i class="fas fa-lock text-[#6C757D] text-xs" title="Private"></i>
+                        </template>
+                    </div>
+                    <div class="flex items-center gap-1 text-[#F1C21B]">
+                        <i class="fas fa-star text-xs"></i>
+                        <span class="text-xs font-medium" x-text="repo.stars"></span>
+                    </div>
+                </div>
+
+                <h3 class="font-semibold text-[#212529] dark:text-white truncate mb-1" x-text="repo.name"></h3>
+                <p class="text-xs text-[#6C757D] dark:text-[#A1A1AA] line-clamp-2 mb-4 h-8"
+                    x-text="repo.description || 'No description'"></p>
+
+                <button @click="importRepo(repo)"
+                    class="w-full py-2 bg-[#F8F9FA] dark:bg-[#2D2D2D] hover:bg-[#0D7C3D] hover:text-white text-[#495057] dark:text-[#D1D5DB] font-medium text-sm rounded-lg transition-colors flex items-center justify-center gap-2 group-hover:bg-[#0D7C3D] group-hover:text-white">
+                    <span>Import</span>
+                    <i class="fas fa-arrow-right text-xs"></i>
+                </button>
+            </div>
+        </template>
+
+        <!-- Empty State -->
+        <div x-show="filteredRepos.length === 0" class="col-span-full text-center py-12">
+            <div
+                class="w-16 h-16 bg-[#F8F9FA] dark:bg-[#2D2D2D] rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-code-branch text-[#ADB5BD] text-2xl"></i>
+            </div>
+            <p class="text-[#6C757D] dark:text-[#A1A1AA]">No repositories found matching your search.</p>
+        </div>
+    </div>
+
+    <!-- Loading State -->
+    <div x-show="loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        <template x-for="i in 6">
+            <div class="h-40 bg-[#F8F9FA] dark:bg-[#2D2D2D] rounded-xl animate-pulse"></div>
+        </template>
+    </div>
+
+    <!-- Manual Creation Link -->
+    <div class="mt-12 text-center">
+        <p class="text-sm text-[#6C757D] dark:text-[#A1A1AA]">
+            Want to start from scratch?
+            <a href="{% url 'projects:create_manual' %}" class="text-[#0D7C3D] font-medium hover:underline">Create blank
+                project</a>
+        </p>
+    </div>
+</div>
+
+<script>
+    function projectImport() {
+        return {
+            loading: true,
+            search: '',
+            repos: [],
+
+            init() {
+                this.fetchRepos();
+            },
+
+            fetchRepos() {
+                this.loading = true;
+                fetch('/projects/api/user-repos/')
+                    .then(res => res.json())
+                    .then(data => {
+                        this.repos = data.repos;
+                        this.loading = false;
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        this.loading = false;
+                    });
+            },
+
+            get filteredRepos() {
+                if (!this.search) return this.repos;
+                const q = this.search.toLowerCase();
+                return this.repos.filter(r =>
+                    r.name.toLowerCase().includes(q) ||
+                    r.full_name.toLowerCase().includes(q)
+                );
+            },
+
+            getIcon(platform) {
+                const icons = {
+                    'github': 'fab fa-github',
+                    'gitlab': 'fab fa-gitlab',
+                    'bitbucket': 'fab fa-bitbucket',
+                    'huggingface': 'fas fa-robot text-[#FFD21E]'
+                };
+                return icons[platform] || 'fas fa-code-branch';
+            },
+
+            importRepo(repo) {
+                // Redirect to create form with pre-filled data
+                const params = new URLSearchParams({
+                    repo_url: repo.url,
+                    name: repo.name,
+                    description: repo.description,
+                    import_mode: 'true'
+                });
+                window.location.href = "{% url 'projects:create_manual' %}?" + params.toString();
+            }
+        }
+    }
+</script>
+{% endblock %}

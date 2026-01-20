@@ -87,6 +87,44 @@ def terms(request):
     return render(request, "core/terms.html")
 
 
+def contact(request):
+    """Contact page with email form."""
+    from django.core.mail import send_mail
+    from django.conf import settings
+    from .forms import ContactForm
+    
+    success = False
+    email = None
+    
+    if request.method == 'POST':
+        form = ContactForm(request.POST)
+        if form.is_valid():
+            name = form.cleaned_data['name']
+            email = form.cleaned_data['email']
+            subject = form.cleaned_data['subject']
+            message = form.cleaned_data['message']
+            
+            try:
+                send_mail(
+                    subject=f"[Kiri Contact] {subject}",
+                    message=f"From: {name} <{email}>\n\n{message}",
+                    from_email=settings.DEFAULT_FROM_EMAIL,
+                    recipient_list=['hello@kiri.ng'],
+                    fail_silently=False,
+                )
+                success = True
+            except Exception as e:
+                form.add_error(None, f"Failed to send email: {e}")
+    else:
+        form = ContactForm()
+    
+    return render(request, "core/contact.html", {
+        'form': form,
+        'success': success,
+        'email': email,
+    })
+
+
 def offline(request):
     """Offline page for PWA."""
     return render(request, "offline.html")

@@ -195,7 +195,7 @@
             reposList.innerHTML = '<div class="flex items-center justify-center py-12"><div class="animate-spin rounded-full h-8 w-8 border-b-2 border-[#0D7C3D]"></div></div>';
 
             try {
-                const response = await fetch('{% url "projects:user_repos_api" %}');
+                const response = await fetch('{% url "projects:api_user_repos" %}');
                 const data = await response.json();
                 allRepos = data.repos || [];
                 renderRepos(allRepos);

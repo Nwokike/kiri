@@ -117,6 +117,11 @@
                 title="Toggle sidebar">
                 <i class="fas fa-bars text-lg"></i>
             </button>
+            <a href="{% url 'projects:create' %}"
+                class="flex items-center gap-3 px-3 py-2 text-[#ADB5BD] hover:text-[#0D7C3D] hover:bg-[#E8F5ED] dark:hover:bg-[#0D7C3D]/20 rounded-lg transition-colors group">
+                <i class="fas fa-plus w-5 text-center group-hover:scale-110 transition-transform"></i>
+                <span class="font-medium">New Project</span>
+            </a>
 
             <a href="/"
                 class="flex items-center h-full px-2 hover:bg-[#F8F9FA] dark:hover:bg-[#2D2D2D] transition-colors">
@@ -359,6 +364,9 @@
                             <li><a href="{% url 'core:terms' %}"
                                     class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">Terms</a>
                             </li>
+                            <li><a href="{% url 'core:contact' %}"
+                                    class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">Contact</a>
+                            </li>
                         </ul>
                     </div>
 
@@ -366,13 +374,21 @@
                     <div>
                         <h4 class="font-semibold text-[#212529] dark:text-white mb-4">Connect</h4>
                         <div class="flex gap-3">
-                            <a href="https://github.com/kiri-research" target="_blank" rel="noopener noreferrer"
+                            <a href="https://github.com/kiri-labs" target="_blank" rel="noopener noreferrer"
                                 class="w-9 h-9 flex items-center justify-center rounded-lg bg-[#F8F9FA] text-[#495057] hover:bg-[#0D7C3D] hover:text-white transition-colors dark:bg-[#2D2D2D] dark:text-[#A1A1AA]">
                                 <i class="fab fa-github"></i>
                             </a>
-                            <a href="https://twitter.com/kiri_research" target="_blank" rel="noopener noreferrer"
+                            <a href="https://x.com/kiringdotng" target="_blank" rel="noopener noreferrer"
                                 class="w-9 h-9 flex items-center justify-center rounded-lg bg-[#F8F9FA] text-[#495057] hover:bg-[#0D7C3D] hover:text-white transition-colors dark:bg-[#2D2D2D] dark:text-[#A1A1AA]">
                                 <i class="fab fa-x-twitter"></i>
+                            </a>
+                            <a href="https://facebook.com/kiri.ng.social" target="_blank" rel="noopener noreferrer"
+                                class="w-9 h-9 flex items-center justify-center rounded-lg bg-[#F8F9FA] text-[#495057] hover:bg-[#0D7C3D] hover:text-white transition-colors dark:bg-[#2D2D2D] dark:text-[#A1A1AA]">
+                                <i class="fab fa-facebook-f"></i>
+                            </a>
+                            <a href="https://instagram.com/kiri.ng.social" target="_blank" rel="noopener noreferrer"
+                                class="w-9 h-9 flex items-center justify-center rounded-lg bg-[#F8F9FA] text-[#495057] hover:bg-[#0D7C3D] hover:text-white transition-colors dark:bg-[#2D2D2D] dark:text-[#A1A1AA]">
+                                <i class="fab fa-instagram"></i>
                             </a>
                         </div>
                     </div>
@@ -387,6 +403,13 @@
             </div>
         </footer>
     </main>
+
+    <!-- ===== PWA INSTALL BUTTON ===== -->
+    <button id="pwa-install-btn"
+        class="hidden fixed bottom-20 md:bottom-6 right-4 w-12 h-12 bg-gradient-to-r from-[#0D7C3D] to-[#0A5C2C] text-white rounded-full shadow-lg hover:shadow-xl transition-all z-40 flex items-center justify-center animate-bounce"
+        title="Install Kiri App">
+        <i class="fas fa-download text-lg"></i>
+    </button>
 
     <!-- ===== MOBILE BOTTOM NAV ===== -->
     <nav

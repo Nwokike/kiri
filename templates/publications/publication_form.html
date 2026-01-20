@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+
+{% block title %}{% if form.instance.pk %}Edit Publication{% else %}New Publication{% endif %} | Kiri{% endblock %}
+
+{% block extra_js %}
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const repoInput = document.getElementById('id_github_repo_url');
+        const fileInput = document.getElementById('id_github_file_path');
+
+        if (!repoInput || !fileInput) return;
+
+        // Create a container for file suggestions
+        const suggestionBox = document.createElement('div');
+        suggestionBox.className = 'mt-2 text-sm hidden';
+        fileInput.parentNode.appendChild(suggestionBox);
+
+        // Check initial value
+        if (repoInput.value) {
+            fetchFiles(repoInput.value);
+        }
+
+        repoInput.addEventListener('change', function () {
+            fetchFiles(this.value);
+        });
+
+        async function fetchFiles(url) {
+            if (!url) return;
+
+            suggestionBox.innerHTML = '<span class="text-[#A1A1AA]"><i class="fas fa-spinner fa-spin mr-1"></i>Scanning repository for files...</span>';
+            suggestionBox.classList.remove('hidden');
+
+            try {
+                const api = "{% url 'projects:api_repo_files' %}";
+                const res = await fetch(`${api}?url=${encodeURIComponent(url)}`);
+                const data = await res.json();
+
+                if (data.files && data.files.length > 0) {
+                    renderFiles(data.files);
+                } else {
+                    suggestionBox.innerHTML = '<span class="text-[#A1A1AA]">No files found or unable to scan.</span>';
+                }
+            } catch (err) {
+                console.error(err);
+                suggestionBox.innerHTML = '<span class="text-red-400">Error scanning repository.</span>';
+            }
+        }
+
+        function renderFiles(files) {
+            // Filter for relevant files
+            const relevant = files.filter(f => f.endsWith('.md') || f.endsWith('.pdf') || f.endsWith('.tex'));
+
+            if (relevant.length === 0) {
+                suggestionBox.innerHTML = '<span class="text-[#A1A1AA]">No Markdown or PDF files found.</span>';
+                return;
+            }
+
+            let html = '<p class="text-[#A1A1AA] mb-2">Detected files (click to select):</p>';
+            html += '<div class="flex flex-wrap gap-2">';
+
+            relevant.forEach(f => {
+                html += `<button type="button" class="file-chip px-3 py-1 bg-[#1E1E1E] border border-[#3D3D3D] rounded-full text-[#0D7C3D] hover:bg-[#0D7C3D] hover:text-white transition-colors text-xs">
+                ${f}
+            </button>`;
+            });
+
+            html += '</div>';
+            suggestionBox.innerHTML = html;
+
+            // Add listeners
+            suggestionBox.querySelectorAll('.file-chip').forEach(btn => {
+                btn.addEventListener('click', function () {
+                    fileInput.value = this.innerText.trim();
+                    // Visual feedback
+                    this.classList.add('bg-[#0D7C3D]', 'text-white');
+                    setTimeout(() => {
+                        suggestionBox.classList.add('hidden');
+                    }, 300);
+                });
+            });
+        }
+    });
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8">
+    <div class="flex items-center justify-between mb-6">
+        <h1 class="text-2xl font-bold text-white">{% if form.instance.pk %}Edit Publication{% else %}New Publication{%
+            endif %}</h1>
+        <a href="{% url 'publications:list' %}" class="text-[#A1A1AA] hover:text-white">Cancel</a>
+    </div>
+
+    <div class="bg-[#252526] border border-[#333] rounded-lg p-6">
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+
+            <div class="grid grid-cols-1 gap-6">
+                {{ form|crispy }}
+            </div>
+
+            <div class="flex items-center justify-end gap-3 pt-6 border-t border-[#333]">
+                <button type="submit"
+                    class="px-6 py-2 bg-[#0D7C3D] hover:bg-[#0A5C2C] text-white font-medium rounded transition-colors">
+                    {% if form.instance.pk %}Save Changes{% else %}Publish{% endif %}
+                </button>
+            </div>
+        </form>
+    </div>
+
+    <div class="mt-6 p-4 bg-[#1E1E1E] border border-[#333] rounded text-sm text-[#A1A1AA]">
+        <div class="flex items-start gap-3">
+            <i class="fas fa-info-circle mt-1 text-blue-400"></i>
+            <div>
+                <p class="font-semibold text-[#CCCCCC] mb-1">Zero-Local-File Policy</p>
+                <p>Kiri does not store your content locally. Please write your paper in Markdown on GitHub and link it
+                    here.</p>
+                <ul class="list-disc pl-4 mt-2 space-y-1">
+                    <li><strong>GitHub Repo URL:</strong> The full URL to your repository.</li>
+                    <li><strong>File Path:</strong> The path to the `.md` file (e.g., `papers/v1.md`).</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 {% load static %}
+{% load socialaccount %}
 
 {% block title %}Join | Kiri{% endblock %}
 
@@ -16,104 +17,113 @@
         </div>
 
         <!-- Main Card -->
-        <div class="bg-white/80 backdrop-blur-xl rounded-2xl border border-[#DEE2E6] shadow-xl p-8 dark:bg-[#1E1E1E]/80 dark:border-[#3D3D3D]">
+        <div
+            class="bg-white/80 backdrop-blur-xl rounded-2xl border border-[#DEE2E6] shadow-xl p-8 dark:bg-[#1E1E1E]/80 dark:border-[#3D3D3D]">
 
             <!-- OAuth Buttons - Primary -->
-            <div class="space-y-3 mb-6">
-                <a href="{% url 'github_login' %}"
-                    class="flex items-center justify-center gap-3 w-full px-4 py-3 bg-[#24292e] text-white rounded-xl text-sm font-medium hover:bg-[#1b1f23] transition-all">
-                    <i class="fab fa-github text-xl"></i>
-                    Continue with GitHub
-                </a>
-                <a href="{% url 'gitlab_login' %}"
-                    class="flex items-center justify-center gap-3 w-full px-4 py-3 bg-[#FC6D26] text-white rounded-xl text-sm font-medium hover:bg-[#e85d17] transition-all">
-                    <i class="fab fa-gitlab text-xl"></i>
-                    Continue with GitLab
-                </a>
-                <a href="{% url 'bitbucket_oauth2_login' %}"
-                    class="flex items-center justify-center gap-3 w-full px-4 py-3 bg-[#0052CC] text-white rounded-xl text-sm font-medium hover:bg-[#0047b3] transition-all">
-                    <i class="fab fa-bitbucket text-xl"></i>
-                    Continue with Bitbucket
-                </a>
-                <a href="{% url 'huggingface_login' %}"
-                    class="flex items-center justify-center gap-3 w-full px-4 py-3 bg-[#FFD21E] text-[#1a1a1a] rounded-xl text-sm font-medium hover:bg-[#e6bd1b] transition-all">
-                    <span class="text-xl">🤗</span>
-                    Continue with Hugging Face
-                </a>
-            </div>
-
-            <!-- Divider -->
-            <div class="relative my-6">
-                <div class="absolute inset-0 flex items-center">
-                    <div class="w-full border-t border-[#DEE2E6] dark:border-[#3D3D3D]"></div>
-                </div>
-                <div class="relative flex justify-center text-sm">
-                    <span class="px-4 bg-white text-[#6C757D] dark:bg-[#1E1E1E] dark:text-[#A1A1AA]">or with email</span>
-                </div>
-            </div>
-
-            <!-- Email Login Form -->
-            <form method="post" action="{% url 'account_login' %}" class="space-y-4">
-                {% csrf_token %}
-
-                {% if form.non_field_errors %}
-                <div class="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400">
-                    {% for error in form.non_field_errors %}
-                    <p>{{ error }}</p>
-                    {% endfor %}
-                </div>
-                {% endif %}
-
-                <div>
-                    <label for="id_login" class="block text-sm font-medium text-[#495057] dark:text-[#A1A1AA] mb-2">
-                        Email address
-                    </label>
-                    <input type="email" name="login" id="id_login"
-                        class="w-full px-4 py-3 rounded-xl border border-[#DEE2E6] bg-white text-[#212529] placeholder-[#ADB5BD] focus:border-[#0D7C3D] focus:ring-2 focus:ring-[#0D7C3D]/20 transition-all dark:bg-[#2D2D2D] dark:border-[#3D3D3D] dark:text-white dark:placeholder-[#6C757D]"
-                        placeholder="you@example.com" autocomplete="email" required>
-                    {% if form.login.errors %}
-                    <p class="mt-1 text-sm text-red-500">{{ form.login.errors.0 }}</p>
-                    {% endif %}
-                </div>
-
-                <div>
-                    <div class="flex items-center justify-between mb-2">
-                        <label for="id_password" class="block text-sm font-medium text-[#495057] dark:text-[#A1A1AA]">
-                            Password
-                        </label>
-                        <a href="{% url 'account_reset_password' %}" class="text-sm text-[#0D7C3D] hover:underline">
-                            Forgot password?
-                        </a>
-                    </div>
-                    <input type="password" name="password" id="id_password"
-                        class="w-full px-4 py-3 rounded-xl border border-[#DEE2E6] bg-white text-[#212529] placeholder-[#ADB5BD] focus:border-[#0D7C3D] focus:ring-2 focus:ring-[#0D7C3D]/20 transition-all dark:bg-[#2D2D2D] dark:border-[#3D3D3D] dark:text-white dark:placeholder-[#6C757D]"
-                        placeholder="Enter your password" autocomplete="current-password">
-                    {% if form.password.errors %}
-                    <p class="mt-1 text-sm text-red-500">{{ form.password.errors.0 }}</p>
-                    {% endif %}
-                </div>
-
-                <div class="flex items-center">
-                    <input type="checkbox" name="remember" id="id_remember"
-                        class="w-4 h-4 rounded border-[#DEE2E6] text-[#0D7C3D] focus:ring-[#0D7C3D]">
-                    <label for="id_remember" class="ml-2 text-sm text-[#6C757D] dark:text-[#A1A1AA]">
-                        Keep me signed in
-                    </label>
-                </div>
-
-                <button type="submit"
-                    class="w-full py-3 px-4 bg-gradient-to-r from-[#0D7C3D] to-[#0A5C2C] text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-[#0D7C3D]/25 transition-all duration-300 transform hover:-translate-y-0.5">
-                    Continue with Email
-                </button>
-            </form>
-
-            <!-- Info text -->
-            <p class="text-center text-xs text-[#6C757D] dark:text-[#A1A1AA] mt-6">
-                New users will be automatically registered.<br>
-                By joining, you agree to our <a href="{% url 'core:about' %}" class="text-[#0D7C3D] hover:underline">Terms of Service</a>.
-            </p>
+            {% load socialaccount %}
+            <a href="{% provider_login_url 'github' %}"
+                class="flex items-center justify-center gap-3 w-full px-4 py-3 bg-[#24292e] text-white rounded-xl text-sm font-medium hover:bg-[#1b1f23] transition-all">
+                <i class="fab fa-github text-xl"></i>
+                Continue with GitHub
+            </a>
+            <a href="{% provider_login_url 'gitlab' %}"
+                class="flex items-center justify-center gap-3 w-full px-4 py-3 bg-[#FC6D26] text-white rounded-xl text-sm font-medium hover:bg-[#e85d17] transition-all">
+                <i class="fab fa-gitlab text-xl"></i>
+                Continue with GitLab
+            </a>
+            <a href="{% provider_login_url 'bitbucket_oauth2' %}"
+                class="flex items-center justify-center gap-3 w-full px-4 py-3 bg-[#0052CC] text-white rounded-xl text-sm font-medium hover:bg-[#0047b3] transition-all">
+                <i class="fab fa-bitbucket text-xl"></i>
+                Continue with Bitbucket
+            </a>
+            <a href="{% provider_login_url 'huggingface' %}"
+                class="flex items-center justify-center gap-3 w-full px-4 py-3 bg-[#FFD21E] text-[#1a1a1a] rounded-xl text-sm font-medium hover:bg-[#e6bd1b] transition-all">
+                <span class="text-xl">🤗</span>
+                Continue with Hugging Face
+            </a>
         </div>
+
+        <!-- Divider -->
+        <div class="relative my-6">
+            <div class="absolute inset-0 flex items-center">
+                <div class="w-full border-t border-[#DEE2E6] dark:border-[#3D3D3D]"></div>
+            </div>
+            <div class="relative flex justify-center text-sm">
+                <span class="px-4 bg-white text-[#6C757D] dark:bg-[#1E1E1E] dark:text-[#A1A1AA]">or with email</span>
+            </div>
+        </div>
+
+        <!-- Email Login Form -->
+        <form method="post" action="{% url 'account_login' %}" class="space-y-4">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div
+                class="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400">
+                {% for error in form.non_field_errors %}
+                <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div>
+                <label for="id_login" class="block text-sm font-medium text-[#495057] dark:text-[#A1A1AA] mb-2">
+                    Email address
+                </label>
+                <input type="email" name="login" id="id_login"
+                    class="w-full px-4 py-3 rounded-xl border border-[#DEE2E6] bg-white text-[#212529] placeholder-[#ADB5BD] focus:border-[#0D7C3D] focus:ring-2 focus:ring-[#0D7C3D]/20 transition-all dark:bg-[#2D2D2D] dark:border-[#3D3D3D] dark:text-white dark:placeholder-[#6C757D]"
+                    placeholder="you@example.com" autocomplete="email" required>
+                {% if form.login.errors %}
+                <p class="mt-1 text-sm text-red-500">{{ form.login.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div>
+                <div class="flex items-center justify-between mb-2">
+                    <label for="id_password" class="block text-sm font-medium text-[#495057] dark:text-[#A1A1AA]">
+                        Password
+                    </label>
+                    <a href="{% url 'account_reset_password' %}" class="text-sm text-[#0D7C3D] hover:underline">
+                        Forgot password?
+                    </a>
+                </div>
+                <input type="password" name="password" id="id_password"
+                    class="w-full px-4 py-3 rounded-xl border border-[#DEE2E6] bg-white text-[#212529] placeholder-[#ADB5BD] focus:border-[#0D7C3D] focus:ring-2 focus:ring-[#0D7C3D]/20 transition-all dark:bg-[#2D2D2D] dark:border-[#3D3D3D] dark:text-white dark:placeholder-[#6C757D]"
+                    placeholder="Enter your password" autocomplete="current-password">
+                {% if form.password.errors %}
+                <p class="mt-1 text-sm text-red-500">{{ form.password.errors.0 }}</p>
+                {% endif %}
+            </div>
+
+            <div class="flex items-center">
+                <input type="checkbox" name="remember" id="id_remember"
+                    class="w-4 h-4 rounded border-[#DEE2E6] text-[#0D7C3D] focus:ring-[#0D7C3D]">
+                <label for="id_remember" class="ml-2 text-sm text-[#6C757D] dark:text-[#A1A1AA]">
+                    Keep me signed in
+                </label>
+            </div>
+
+            <!-- Turnstile CAPTCHA -->
+            <div class="flex justify-center">
+                {% load turnstile %}
+                {% turnstile_field %}
+            </div>
+
+            <button type="submit"
+                class="w-full py-3 px-4 bg-gradient-to-r from-[#0D7C3D] to-[#0A5C2C] text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-[#0D7C3D]/25 transition-all duration-300 transform hover:-translate-y-0.5">
+                Continue with Email
+            </button>
+        </form>
+
+        <!-- Info text -->
+        <p class="text-center text-xs text-[#6C757D] dark:text-[#A1A1AA] mt-6">
+            New users will be automatically registered.<br>
+            By joining, you agree to our <a href="{% url 'core:terms' %}" class="text-[#0D7C3D] hover:underline">Terms
+                of Service</a>.
+        </p>
     </div>
+</div>
 </div>
 
 <div class="h-20 md:hidden"></div>

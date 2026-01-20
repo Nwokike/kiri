@@ -15,7 +15,7 @@
             </div>
 
             {% if user.is_authenticated %}
-            <a href="#"
+            <a href="{% url 'publications:create' %}"
                 class="px-5 py-2.5 bg-[#0D7C3D] text-white text-sm font-semibold rounded-lg hover:bg-[#0A5C2C] transition-colors">
                 <i class="fas fa-plus mr-2"></i>New Publication
             </a>

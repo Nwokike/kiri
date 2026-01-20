@@ -1,0 +1,108 @@
+{% extends "base.html" %}
+{% load turnstile %}
+
+{% block title %}Contact | Kiri{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto px-4 py-12">
+    <div class="text-center mb-8">
+        <h1 class="text-3xl font-bold text-[#212529] dark:text-white mb-2">Get in Touch</h1>
+        <p class="text-[#6C757D] dark:text-[#A1A1AA]">
+            Have a question, feedback, or want to collaborate? We'd love to hear from you.
+        </p>
+    </div>
+
+    <div class="bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-2xl p-8 shadow-sm">
+        {% if success %}
+        <div class="text-center py-8">
+            <div
+                class="w-16 h-16 bg-[#E8F5ED] dark:bg-[#0D7C3D]/20 rounded-full flex items-center justify-center mx-auto mb-4">
+                <i class="fas fa-check text-[#0D7C3D] text-2xl"></i>
+            </div>
+            <h2 class="text-xl font-semibold text-[#212529] dark:text-white mb-2">Message Sent!</h2>
+            <p class="text-[#6C757D] dark:text-[#A1A1AA]">We'll get back to you at {{ email }} soon.</p>
+            <a href="{% url 'core:home' %}"
+                class="inline-block mt-6 px-6 py-2 bg-[#0D7C3D] text-white rounded-lg hover:bg-[#0A5C2C] transition-colors">
+                Back to Home
+            </a>
+        </div>
+        {% else %}
+        <form method="post" class="space-y-6">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+            <div
+                class="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400">
+                {% for error in form.non_field_errors %}
+                <p>{{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                    <label for="id_name" class="block text-sm font-medium text-[#495057] dark:text-[#A1A1AA] mb-2">
+                        Your Name
+                    </label>
+                    <input type="text" name="name" id="id_name" required
+                        class="w-full px-4 py-3 rounded-xl border border-[#DEE2E6] bg-white text-[#212529] placeholder-[#ADB5BD] focus:border-[#0D7C3D] focus:ring-2 focus:ring-[#0D7C3D]/20 transition-all dark:bg-[#2D2D2D] dark:border-[#3D3D3D] dark:text-white"
+                        placeholder="Jane Doe" value="{{ form.name.value|default:'' }}">
+                    {% if form.name.errors %}<p class="mt-1 text-sm text-red-500">{{ form.name.errors.0 }}</p>{% endif
+                    %}
+                </div>
+                <div>
+                    <label for="id_email" class="block text-sm font-medium text-[#495057] dark:text-[#A1A1AA] mb-2">
+                        Email Address
+                    </label>
+                    <input type="email" name="email" id="id_email" required
+                        class="w-full px-4 py-3 rounded-xl border border-[#DEE2E6] bg-white text-[#212529] placeholder-[#ADB5BD] focus:border-[#0D7C3D] focus:ring-2 focus:ring-[#0D7C3D]/20 transition-all dark:bg-[#2D2D2D] dark:border-[#3D3D3D] dark:text-white"
+                        placeholder="you@example.com" value="{{ form.email.value|default:'' }}">
+                    {% if form.email.errors %}<p class="mt-1 text-sm text-red-500">{{ form.email.errors.0 }}</p>{% endif
+                    %}
+                </div>
+            </div>
+
+            <div>
+                <label for="id_subject" class="block text-sm font-medium text-[#495057] dark:text-[#A1A1AA] mb-2">
+                    Subject
+                </label>
+                <input type="text" name="subject" id="id_subject" required
+                    class="w-full px-4 py-3 rounded-xl border border-[#DEE2E6] bg-white text-[#212529] placeholder-[#ADB5BD] focus:border-[#0D7C3D] focus:ring-2 focus:ring-[#0D7C3D]/20 transition-all dark:bg-[#2D2D2D] dark:border-[#3D3D3D] dark:text-white"
+                    placeholder="How can we help?" value="{{ form.subject.value|default:'' }}">
+                {% if form.subject.errors %}<p class="mt-1 text-sm text-red-500">{{ form.subject.errors.0 }}</p>{% endif
+                %}
+            </div>
+
+            <div>
+                <label for="id_message" class="block text-sm font-medium text-[#495057] dark:text-[#A1A1AA] mb-2">
+                    Message
+                </label>
+                <textarea name="message" id="id_message" rows="5" required
+                    class="w-full px-4 py-3 rounded-xl border border-[#DEE2E6] bg-white text-[#212529] placeholder-[#ADB5BD] focus:border-[#0D7C3D] focus:ring-2 focus:ring-[#0D7C3D]/20 transition-all dark:bg-[#2D2D2D] dark:border-[#3D3D3D] dark:text-white resize-none"
+                    placeholder="Tell us what's on your mind...">{{ form.message.value|default:'' }}</textarea>
+                {% if form.message.errors %}<p class="mt-1 text-sm text-red-500">{{ form.message.errors.0 }}</p>{% endif
+                %}
+            </div>
+
+            <!-- Turnstile CAPTCHA -->
+            <div class="flex justify-center">
+                {% turnstile_field %}
+            </div>
+            {% if form.turnstile.errors %}<p class="text-sm text-red-500 text-center">{{ form.turnstile.errors.0 }}</p>
+            {% endif %}
+
+            <button type="submit"
+                class="w-full py-3 px-4 bg-gradient-to-r from-[#0D7C3D] to-[#0A5C2C] text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-[#0D7C3D]/25 transition-all duration-300 transform hover:-translate-y-0.5">
+                <i class="fas fa-paper-plane mr-2"></i>
+                Send Message
+            </button>
+        </form>
+        {% endif %}
+    </div>
+
+    <div class="mt-8 text-center text-sm text-[#6C757D] dark:text-[#A1A1AA]">
+        <p>You can also reach us directly at <a href="mailto:hello@kiri.ng"
+                class="text-[#0D7C3D] hover:underline">hello@kiri.ng</a></p>
+    </div>
+</div>
+{% endblock %}

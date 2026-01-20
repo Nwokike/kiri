@@ -81,13 +81,8 @@ class GitHubService:
             'Accept': 'application/vnd.github.v3+json',
             'User-Agent': 'Kiri-Research-Labs-Bot'
         }
-        
-        # Add Token if available from environment
-        import os
-        token = os.environ.get('GITHUB_TOKEN')
-        
-        if token:
-            headers['Authorization'] = f'token {token}'
+        # Note: Public repos don't need auth. For user-specific actions,
+        # pass user's OAuth token from UserIntegration model.
             
         try:
             response = requests.get(api_url, headers=headers, timeout=10)
@@ -157,11 +152,8 @@ class GitHubService:
         try:
             tree_url = f"{cls.BASE_API_URL}/{owner}/{repo}/git/trees/HEAD?recursive=1"
             headers = {'Accept': 'application/vnd.github.v3+json'}
-            
-            import os
-            token = os.environ.get('GITHUB_TOKEN')
-            if token:
-                headers['Authorization'] = f'token {token}'
+            # Note: fetch_structure doesn't need auth for public repos
+            # For private repos, pass token via calling code
             
             response = requests.get(tree_url, headers=headers, timeout=15)
             if response.status_code == 200:

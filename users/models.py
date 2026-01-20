@@ -2,8 +2,9 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 from django.conf import settings
 from django.utils.translation import gettext_lazy as _
-from django.core.validators import RegexValidator
+from django.core.validators import RegexValidator, URLValidator
 from django.urls import reverse
+from django.utils import timezone
 
 orcid_validator = RegexValidator(
     regex=r'^\d{4}-\d{4}-\d{4}-\d{3}[\dX]$',
@@ -34,7 +35,11 @@ class CustomUser(AbstractUser):
     github_avatar_url = models.URLField(blank=True, help_text="Avatar URL synced from GitHub")
     github_public_repos = models.IntegerField(default=0, help_text="Number of public repos")
     
-    website = models.URLField(blank=True)
+    website = models.URLField(
+        blank=True,
+        validators=[URLValidator(schemes=['http', 'https'])],
+        help_text="Personal or research website (http/https only)"
+    )
     orcid_id = models.CharField(
         max_length=20, 
         blank=True, 
@@ -88,6 +93,13 @@ class UserIntegration(models.Model):
     access_token = models.TextField(help_text="OAuth access token")
     refresh_token = models.TextField(blank=True, help_text="OAuth refresh token if available")
     token_expires_at = models.DateTimeField(null=True, blank=True)
+    
+    @property
+    def is_token_expired(self):
+        """Check if the access token has expired."""
+        if not self.token_expires_at:
+            return False  # No expiry set, assume not expired
+        return timezone.now() >= self.token_expires_at
     
     # Scope tracking for incremental authorization
     granted_scopes = models.JSONField(default=list, blank=True, help_text="List of granted OAuth scopes")

@@ -233,6 +233,7 @@ def mark_all_notifications_read(request):
     Notification.objects.filter(recipient=request.user, is_read=False).update(is_read=True)
     
     if request.htmx:
-        return HttpResponse('<span class="text-sm text-[#6C757D]">All caught up!</span>')
+        return render(request, 'core/partials/notifications_empty.html')
     return JsonResponse({'status': 'ok'})
+
 

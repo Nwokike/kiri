@@ -11,9 +11,11 @@ from .forms import CommentForm
 
 
 def home(request):
-    """Homepage with dynamic content from database."""
+    """Homepage with fully dynamic content from database."""
     from projects.models import Project
     from publications.models import Publication
+    from users.models import CustomUser
+    from django.db.models import Count
 
     # Get featured projects - prioritize HOT, then sort by stars
     featured_projects = Project.objects.filter(
@@ -31,9 +33,29 @@ def home(request):
         is_published=True
     ).order_by('-created_at').select_related('author')[:3]
 
+    # Dynamic stats
+    stats = {
+        'total_projects': Project.objects.filter(is_approved=True).count(),
+        'total_publications': Publication.objects.filter(is_published=True).count(),
+        'total_researchers': CustomUser.objects.filter(is_active=True).count(),
+    }
+
+    # Get project categories with counts
+    categories = Project.objects.filter(is_approved=True).values('category').annotate(
+        count=Count('id')
+    ).order_by('-count')[:5]
+
+    # Get trending projects (most viewed in recent period)
+    trending_projects = Project.objects.filter(
+        is_approved=True
+    ).order_by('-view_count')[:3]
+
     return render(request, "home.html", {
         "featured_projects": featured_projects,
         "latest_publications": latest_publications,
+        "stats": stats,
+        "categories": categories,
+        "trending_projects": trending_projects,
     })
 
 

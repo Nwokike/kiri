@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Kiri{% endblock %}
+{% block title %}Kiri - The Research OS{% endblock %}
 
 {% block content %}
 <div class="max-w-7xl mx-auto px-6 py-8">
@@ -12,22 +12,38 @@
             class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0D7C3D] via-[#0A5C2C] to-[#084422] p-8 md:p-12">
             <div class="relative z-10">
                 <h1 class="text-3xl md:text-4xl font-bold text-white mb-4">
-                    Welcome to Kiri
+                    The Research OS
                 </h1>
                 <p class="text-lg text-white/80 max-w-xl mb-6">
-                    The operating system for modern research. Discover, share, and collaborate on cutting-edge projects
-                    and publications.
+                    Discover, share, and run research projects instantly. From papers to working code in one click.
                 </p>
-                <div class="flex flex-wrap gap-3">
-                    <a href="{% url 'publications:list' %}"
-                        class="inline-flex items-center gap-2 px-6 py-3 bg-white text-[#0D7C3D] font-semibold rounded-lg hover:bg-[#F8F9FA] transition-colors">
+
+                <!-- Dynamic Stats Bar -->
+                <div class="flex flex-wrap gap-6 mb-6 text-white/90">
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-rocket"></i>
+                        <span class="font-semibold">{{ stats.total_projects }}</span> Projects
+                    </div>
+                    <div class="flex items-center gap-2">
                         <i class="fas fa-book"></i>
-                        Browse Library
-                    </a>
+                        <span class="font-semibold">{{ stats.total_publications }}</span> Publications
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <i class="fas fa-users"></i>
+                        <span class="font-semibold">{{ stats.total_researchers }}</span> Researchers
+                    </div>
+                </div>
+
+                <div class="flex flex-wrap gap-3">
                     <a href="{% url 'projects:list' %}"
-                        class="inline-flex items-center gap-2 px-6 py-3 bg-white/10 text-white font-semibold rounded-lg hover:bg-white/20 transition-colors border border-white/20">
+                        class="inline-flex items-center gap-2 px-6 py-3 bg-white text-[#0D7C3D] font-semibold rounded-lg hover:bg-[#F8F9FA] transition-colors">
                         <i class="fas fa-rocket"></i>
                         Explore Projects
+                    </a>
+                    <a href="{% url 'publications:list' %}"
+                        class="inline-flex items-center gap-2 px-6 py-3 bg-white/10 text-white font-semibold rounded-lg hover:bg-white/20 transition-colors border border-white/20">
+                        <i class="fas fa-book"></i>
+                        Browse Library
                     </a>
                 </div>
             </div>
@@ -74,7 +90,7 @@
                             {{ project.name }}
                         </h3>
                         <p class="text-sm text-[#6C757D] dark:text-[#A1A1AA] line-clamp-2 mb-3">
-                            {{ project.description }}
+                            {{ project.description|truncatewords:20 }}
                         </p>
                         <div class="flex items-center gap-4 text-xs text-[#6C757D] dark:text-[#A1A1AA]">
                             <span class="flex items-center gap-1">
@@ -84,6 +100,10 @@
                             <span class="flex items-center gap-1">
                                 <i class="fas fa-code-branch"></i>
                                 {{ project.forks_count }}
+                            </span>
+                            <span class="flex items-center gap-1">
+                                <i class="fas fa-eye"></i>
+                                {{ project.view_count }}
                             </span>
                         </div>
                     </a>
@@ -136,15 +156,15 @@
                     class="w-20 h-20 mx-auto mb-6 bg-[#F8F9FA] dark:bg-[#2D2D2D] rounded-full flex items-center justify-center">
                     <i class="fas fa-seedling text-3xl text-[#0D7C3D]"></i>
                 </div>
-                <h3 class="text-xl font-semibold text-[#212529] dark:text-white mb-2">We're just getting started</h3>
+                <h3 class="text-xl font-semibold text-[#212529] dark:text-white mb-2">Building something new</h3>
                 <p class="text-[#6C757D] dark:text-[#A1A1AA] mb-6 max-w-md mx-auto">
-                    Be among the first to share your research and projects with the Kiri community.
+                    Be among the first to share your research and projects.
                 </p>
                 {% if not user.is_authenticated %}
                 <a href="{% url 'account_login' %}"
                     class="inline-flex items-center gap-2 px-6 py-3 bg-[#0D7C3D] text-white font-semibold rounded-lg hover:bg-[#0A5C2C] transition-colors">
-                    <i class="fab fa-github"></i>
-                    Join with GitHub
+                    <i class="fas fa-user-plus"></i>
+                    Join Now
                 </a>
                 {% endif %}
             </section>
@@ -156,47 +176,100 @@
             <!-- Join CTA (for guests) -->
             {% if not user.is_authenticated %}
             <div class="p-6 bg-gradient-to-br from-[#0D7C3D] to-[#0A5C2C] rounded-xl text-white">
-                <h3 class="text-lg font-semibold mb-2">Join the Community</h3>
+                <h3 class="text-lg font-semibold mb-2">Join Kiri</h3>
                 <p class="text-sm text-white/80 mb-4">
-                    Connect with researchers and developers. Share your work and discover new ideas.
+                    Connect with GitHub, GitLab, Bitbucket, or Hugging Face.
                 </p>
                 <a href="{% url 'account_login' %}"
                     class="flex items-center justify-center gap-2 w-full py-3 bg-white text-[#0D7C3D] font-semibold rounded-lg hover:bg-[#F8F9FA] transition-colors">
-                    <i class="fab fa-github"></i>
-                    Sign in with GitHub
+                    <i class="fas fa-arrow-right"></i>
+                    Get Started
                 </a>
             </div>
             {% endif %}
 
-            <!-- About Card -->
+            <!-- Trending Projects -->
+            {% if trending_projects %}
+            <div class="p-6 bg-white rounded-xl border border-[#DEE2E6] dark:bg-[#1E1E1E] dark:border-[#3D3D3D]">
+                <h3 class="text-lg font-semibold text-[#212529] dark:text-white mb-4 flex items-center gap-2">
+                    <i class="fas fa-chart-line text-[#C4992E]"></i>
+                    Trending
+                </h3>
+                <div class="space-y-3">
+                    {% for project in trending_projects %}
+                    <a href="{% url 'projects:detail' project.slug %}" class="flex items-center gap-3 group">
+                        <span class="text-lg font-bold text-[#DEE2E6] dark:text-[#3D3D3D]">{{ forloop.counter }}</span>
+                        <div class="flex-1 min-w-0">
+                            <p
+                                class="text-sm font-medium text-[#212529] dark:text-white truncate group-hover:text-[#0D7C3D] transition-colors">
+                                {{ project.name }}
+                            </p>
+                            <p class="text-xs text-[#6C757D] dark:text-[#A1A1AA]">
+                                {{ project.view_count }} views
+                            </p>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Categories -->
+            {% if categories %}
+            <div class="p-6 bg-white rounded-xl border border-[#DEE2E6] dark:bg-[#1E1E1E] dark:border-[#3D3D3D]">
+                <h3 class="text-lg font-semibold text-[#212529] dark:text-white mb-4 flex items-center gap-2">
+                    <i class="fas fa-tags text-[#0D7C3D]"></i>
+                    Categories
+                </h3>
+                <div class="flex flex-wrap gap-2">
+                    {% for cat in categories %}
+                    <a href="{% url 'projects:list' %}?category={{ cat.category }}"
+                        class="px-3 py-1.5 text-sm bg-[#F8F9FA] dark:bg-[#2D2D2D] text-[#495057] dark:text-[#A1A1AA] rounded-lg hover:bg-[#E8F5ED] hover:text-[#0D7C3D] transition-colors">
+                        {{ cat.category|default:"Other" }}
+                        <span class="text-xs text-[#6C757D]">({{ cat.count }})</span>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Platform Stats -->
+            <div class="p-6 bg-white rounded-xl border border-[#DEE2E6] dark:bg-[#1E1E1E] dark:border-[#3D3D3D]">
+                <h3 class="text-lg font-semibold text-[#212529] dark:text-white mb-4 flex items-center gap-2">
+                    <i class="fas fa-chart-bar text-[#6C757D]"></i>
+                    Platform Stats
+                </h3>
+                <div class="space-y-3">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-[#6C757D] dark:text-[#A1A1AA]">Projects</span>
+                        <span class="text-sm font-semibold text-[#212529] dark:text-white">{{ stats.total_projects
+                            }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-[#6C757D] dark:text-[#A1A1AA]">Publications</span>
+                        <span class="text-sm font-semibold text-[#212529] dark:text-white">{{ stats.total_publications
+                            }}</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-[#6C757D] dark:text-[#A1A1AA]">Researchers</span>
+                        <span class="text-sm font-semibold text-[#212529] dark:text-white">{{ stats.total_researchers
+                            }}</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Learn More -->
             <div class="p-6 bg-white rounded-xl border border-[#DEE2E6] dark:bg-[#1E1E1E] dark:border-[#3D3D3D]">
                 <h3 class="text-lg font-semibold text-[#212529] dark:text-white mb-3 flex items-center gap-2">
                     <i class="fas fa-info-circle text-[#C4992E]"></i>
-                    About Kiri
+                    About
                 </h3>
                 <p class="text-sm text-[#6C757D] dark:text-[#A1A1AA] mb-4">
-                    Kiri is the operating system for modern research—a platform where knowledge flows freely.
+                    Kiri is a platform for discovering, sharing, and running research projects.
                 </p>
                 <a href="{% url 'core:about' %}" class="text-sm text-[#0D7C3D] hover:underline font-medium">
                     Learn More <i class="fas fa-arrow-right ml-1"></i>
                 </a>
-            </div>
-
-            <!-- Quick Stats -->
-            <div class="p-6 bg-white rounded-xl border border-[#DEE2E6] dark:bg-[#1E1E1E] dark:border-[#3D3D3D]">
-                <h3 class="text-lg font-semibold text-[#212529] dark:text-white mb-4">Platform Stats</h3>
-                <div class="space-y-3">
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm text-[#6C757D] dark:text-[#A1A1AA]">Publications</span>
-                        <span class="text-sm font-semibold text-[#212529] dark:text-white">{{ latest_publications|length
-                            }}+</span>
-                    </div>
-                    <div class="flex items-center justify-between">
-                        <span class="text-sm text-[#6C757D] dark:text-[#A1A1AA]">Projects</span>
-                        <span class="text-sm font-semibold text-[#212529] dark:text-white">{{ featured_projects|length
-                            }}+</span>
-                    </div>
-                </div>
             </div>
         </div>
     </div>

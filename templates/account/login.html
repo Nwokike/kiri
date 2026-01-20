@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Sign In | Kiri{% endblock %}
+{% block title %}Join | Kiri{% endblock %}
 
 {% block content %}
 <div class="min-h-[80vh] flex items-center justify-center px-4 py-12">
@@ -11,21 +11,53 @@
             <a href="{% url 'core:home' %}" class="inline-block mb-4">
                 <img src="{% static 'images/logos/logo.png' %}" alt="Kiri" class="h-12 mx-auto">
             </a>
-            <h1 class="text-2xl font-bold text-[#212529] dark:text-white">Welcome back</h1>
-            <p class="text-sm text-[#6C757D] dark:text-[#A1A1AA] mt-1">Sign in to continue to Kiri</p>
+            <h1 class="text-2xl font-bold text-[#212529] dark:text-white">Join Kiri</h1>
+            <p class="text-sm text-[#6C757D] dark:text-[#A1A1AA] mt-1">Sign in or create your account</p>
         </div>
 
         <!-- Main Card -->
-        <div
-            class="bg-white/80 backdrop-blur-xl rounded-2xl border border-[#DEE2E6] shadow-xl p-8 dark:bg-[#1E1E1E]/80 dark:border-[#3D3D3D]">
+        <div class="bg-white/80 backdrop-blur-xl rounded-2xl border border-[#DEE2E6] shadow-xl p-8 dark:bg-[#1E1E1E]/80 dark:border-[#3D3D3D]">
+
+            <!-- OAuth Buttons - Primary -->
+            <div class="space-y-3 mb-6">
+                <a href="{% url 'github_login' %}"
+                    class="flex items-center justify-center gap-3 w-full px-4 py-3 bg-[#24292e] text-white rounded-xl text-sm font-medium hover:bg-[#1b1f23] transition-all">
+                    <i class="fab fa-github text-xl"></i>
+                    Continue with GitHub
+                </a>
+                <a href="{% url 'gitlab_login' %}"
+                    class="flex items-center justify-center gap-3 w-full px-4 py-3 bg-[#FC6D26] text-white rounded-xl text-sm font-medium hover:bg-[#e85d17] transition-all">
+                    <i class="fab fa-gitlab text-xl"></i>
+                    Continue with GitLab
+                </a>
+                <a href="{% url 'bitbucket_oauth2_login' %}"
+                    class="flex items-center justify-center gap-3 w-full px-4 py-3 bg-[#0052CC] text-white rounded-xl text-sm font-medium hover:bg-[#0047b3] transition-all">
+                    <i class="fab fa-bitbucket text-xl"></i>
+                    Continue with Bitbucket
+                </a>
+                <a href="{% url 'huggingface_login' %}"
+                    class="flex items-center justify-center gap-3 w-full px-4 py-3 bg-[#FFD21E] text-[#1a1a1a] rounded-xl text-sm font-medium hover:bg-[#e6bd1b] transition-all">
+                    <span class="text-xl">🤗</span>
+                    Continue with Hugging Face
+                </a>
+            </div>
+
+            <!-- Divider -->
+            <div class="relative my-6">
+                <div class="absolute inset-0 flex items-center">
+                    <div class="w-full border-t border-[#DEE2E6] dark:border-[#3D3D3D]"></div>
+                </div>
+                <div class="relative flex justify-center text-sm">
+                    <span class="px-4 bg-white text-[#6C757D] dark:bg-[#1E1E1E] dark:text-[#A1A1AA]">or with email</span>
+                </div>
+            </div>
 
             <!-- Email Login Form -->
-            <form method="post" action="{% url 'account_login' %}" class="space-y-5">
+            <form method="post" action="{% url 'account_login' %}" class="space-y-4">
                 {% csrf_token %}
 
                 {% if form.non_field_errors %}
-                <div
-                    class="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400">
+                <div class="p-3 bg-red-50 border border-red-200 rounded-lg text-sm text-red-600 dark:bg-red-900/20 dark:border-red-800 dark:text-red-400">
                     {% for error in form.non_field_errors %}
                     <p>{{ error }}</p>
                     {% endfor %}
@@ -71,53 +103,16 @@
 
                 <button type="submit"
                     class="w-full py-3 px-4 bg-gradient-to-r from-[#0D7C3D] to-[#0A5C2C] text-white font-semibold rounded-xl hover:shadow-lg hover:shadow-[#0D7C3D]/25 transition-all duration-300 transform hover:-translate-y-0.5">
-                    Sign in
+                    Continue with Email
                 </button>
             </form>
 
-            <!-- Divider -->
-            <div class="relative my-6">
-                <div class="absolute inset-0 flex items-center">
-                    <div class="w-full border-t border-[#DEE2E6] dark:border-[#3D3D3D]"></div>
-                </div>
-                <div class="relative flex justify-center text-sm">
-                    <span class="px-4 bg-white text-[#6C757D] dark:bg-[#1E1E1E] dark:text-[#A1A1AA]">or continue
-                        with</span>
-                </div>
-            </div>
-
-            <!-- Social Login Buttons -->
-            <div class="grid grid-cols-2 gap-3">
-                <a href="{% url 'github_login' %}"
-                    class="flex items-center justify-center gap-2 px-4 py-3 border border-[#DEE2E6] rounded-xl text-sm font-medium text-[#495057] hover:bg-[#F8F9FA] hover:border-[#0D7C3D] transition-all dark:border-[#3D3D3D] dark:text-[#A1A1AA] dark:hover:bg-[#2D2D2D] dark:hover:border-[#0D7C3D]">
-                    <i class="fab fa-github text-lg"></i>
-                    GitHub
-                </a>
-                <a href="{% url 'gitlab_login' %}"
-                    class="flex items-center justify-center gap-2 px-4 py-3 border border-[#DEE2E6] rounded-xl text-sm font-medium text-[#495057] hover:bg-[#F8F9FA] hover:border-[#0D7C3D] transition-all dark:border-[#3D3D3D] dark:text-[#A1A1AA] dark:hover:bg-[#2D2D2D] dark:hover:border-[#0D7C3D]">
-                    <i class="fab fa-gitlab text-lg text-[#FC6D26]"></i>
-                    GitLab
-                </a>
-                <a href="{% url 'bitbucket_oauth2_login' %}"
-                    class="flex items-center justify-center gap-2 px-4 py-3 border border-[#DEE2E6] rounded-xl text-sm font-medium text-[#495057] hover:bg-[#F8F9FA] hover:border-[#0D7C3D] transition-all dark:border-[#3D3D3D] dark:text-[#A1A1AA] dark:hover:bg-[#2D2D2D] dark:hover:border-[#0D7C3D]">
-                    <i class="fab fa-bitbucket text-lg text-[#0052CC]"></i>
-                    Bitbucket
-                </a>
-                <a href="{% url 'huggingface_login' %}"
-                    class="flex items-center justify-center gap-2 px-4 py-3 border border-[#DEE2E6] rounded-xl text-sm font-medium text-[#495057] hover:bg-[#F8F9FA] hover:border-[#0D7C3D] transition-all dark:border-[#3D3D3D] dark:text-[#A1A1AA] dark:hover:bg-[#2D2D2D] dark:hover:border-[#0D7C3D]">
-                    <i class="fas fa-robot text-lg text-[#FF9D00]"></i>
-                    Hugging Face
-                </a>
-            </div>
+            <!-- Info text -->
+            <p class="text-center text-xs text-[#6C757D] dark:text-[#A1A1AA] mt-6">
+                New users will be automatically registered.<br>
+                By joining, you agree to our <a href="{% url 'core:about' %}" class="text-[#0D7C3D] hover:underline">Terms of Service</a>.
+            </p>
         </div>
-
-        <!-- Sign Up Link -->
-        <p class="text-center text-sm text-[#6C757D] dark:text-[#A1A1AA] mt-6">
-            Don't have an account?
-            <a href="{% url 'account_signup' %}" class="text-[#0D7C3D] font-medium hover:underline">
-                Create one
-            </a>
-        </p>
     </div>
 </div>
 

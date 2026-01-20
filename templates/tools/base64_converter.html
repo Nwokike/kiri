@@ -1,0 +1,72 @@
+{% extends "base.html" %}
+
+{% block title %}Base64 Converter | Kiri Tools{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8" x-data="base64Converter()">
+    <nav class="mb-6 text-sm">
+        <a href="{% url 'tools:index' %}" class="text-blue-600 hover:underline"><i class="fas fa-arrow-left mr-1"></i>
+            Tools</a>
+        <span class="text-gray-400 mx-2">/</span>
+        <span class="text-gray-600 dark:text-gray-300">Base64 Converter</span>
+    </nav>
+
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Base64 Converter</h1>
+
+    <div class="bg-white dark:bg-[#1E1E1E] border border-gray-200 dark:border-[#333] rounded-lg p-6">
+
+        <!-- Tabs -->
+        <div class="flex border-b border-gray-200 dark:border-[#333] mb-6">
+            <button @click="mode = 'encode'"
+                :class="{'border-blue-500 text-blue-600': mode === 'encode', 'border-transparent text-gray-500 hover:text-gray-700': mode !== 'encode'}"
+                class="px-4 py-2 border-b-2 font-medium text-sm transition-colors">Encode</button>
+            <button @click="mode = 'decode'"
+                :class="{'border-blue-500 text-blue-600': mode === 'decode', 'border-transparent text-gray-500 hover:text-gray-700': mode !== 'decode'}"
+                class="px-4 py-2 border-b-2 font-medium text-sm transition-colors">Decode</button>
+        </div>
+
+        <!-- Input -->
+        <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
+                x-text="mode === 'encode' ? 'Text to Encode' : 'Base64 to Decode'"></label>
+            <textarea x-model="input" rows="5"
+                class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 dark:border-[#444] rounded-md bg-white dark:bg-[#2D2D2D] text-gray-900 dark:text-white font-mono"></textarea>
+        </div>
+
+        <!-- Output -->
+        <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Result</label>
+            <div class="relative">
+                <textarea readonly x-model="output" rows="5"
+                    class="shadow-sm block w-full sm:text-sm border-gray-300 dark:border-[#444] rounded-md bg-gray-50 dark:bg-[#252526] text-gray-900 dark:text-gray-300 font-mono"></textarea>
+            </div>
+            <p class="mt-1 text-xs text-red-500" x-text="error" x-show="error"></p>
+        </div>
+    </div>
+</div>
+
+<script>
+    function base64Converter() {
+        return {
+            mode: 'encode',
+            input: '',
+            error: '',
+
+            get output() {
+                this.error = '';
+                if (!this.input) return '';
+                try {
+                    if (this.mode === 'encode') {
+                        return btoa(this.input);
+                    } else {
+                        return atob(this.input);
+                    }
+                } catch (e) {
+                    this.error = 'Invalid input for ' + this.mode;
+                    return '';
+                }
+            }
+        }
+    }
+</script>
+{% endblock %}

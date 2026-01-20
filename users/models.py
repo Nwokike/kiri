@@ -170,3 +170,17 @@ class UserIntegration(models.Model):
             self.is_primary = True
         super().save(*args, **kwargs)
 
+
+class Contact(models.Model):
+    user_from = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='rel_from_set', on_delete=models.CASCADE)
+    user_to = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='rel_to_set', on_delete=models.CASCADE)
+    created = models.DateTimeField(auto_now_add=True, db_index=True)
+
+    class Meta:
+        ordering = ('-created',)
+        indexes = [
+            models.Index(fields=['-created']),
+        ]
+
+    def __str__(self):
+        return f'{self.user_from} follows {self.user_to}'

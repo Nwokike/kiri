@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+
+{% block title %}Regex Tester | Kiri Tools{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8" x-data="regexTester()">
+    <nav class="mb-6 text-sm">
+        <a href="{% url 'tools:index' %}" class="text-blue-600 hover:underline"><i class="fas fa-arrow-left mr-1"></i>
+            Tools</a>
+        <span class="text-gray-400 mx-2">/</span>
+        <span class="text-gray-600 dark:text-gray-300">Regex Tester</span>
+    </nav>
+
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Regex Tester</h1>
+
+    <div class="bg-white dark:bg-[#1E1E1E] border border-gray-200 dark:border-[#333] rounded-lg p-6">
+        <!-- Regex Input -->
+        <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Regular Expression</label>
+            <div class="flex">
+                <span
+                    class="inline-flex items-center px-3 rounded-l-md border border-r-0 border-gray-300 dark:border-[#444] bg-gray-50 dark:bg-[#2D2D2D] text-gray-500 dark:text-gray-400 text-sm">/</span>
+                <input type="text" x-model="regex"
+                    class="flex-1 min-w-0 block w-full px-3 py-2 rounded-none border border-gray-300 dark:border-[#444] bg-white dark:bg-[#2D2D2D] text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500 sm:text-sm font-mono"
+                    placeholder="Pattern...">
+                <span
+                    class="inline-flex items-center px-3 rounded-r-md border border-l-0 border-gray-300 dark:border-[#444] bg-gray-50 dark:bg-[#2D2D2D] text-gray-500 dark:text-gray-400 text-sm">/gm</span>
+            </div>
+            <p class="mt-1 text-xs text-red-500" x-text="error" x-show="error"></p>
+        </div>
+
+        <!-- Test String -->
+        <div class="mb-4">
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Test String</label>
+            <textarea x-model="text" rows="5"
+                class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 dark:border-[#444] rounded-md bg-white dark:bg-[#2D2D2D] text-gray-900 dark:text-white font-mono"
+                placeholder="Content to test against..."></textarea>
+        </div>
+
+        <!-- Matches -->
+        <div>
+            <h3 class="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Matches</h3>
+
+            <template x-if="matches.length === 0 && !error">
+                <div class="text-sm text-gray-500 italic">No matches found.</div>
+            </template>
+
+            <div class="space-y-2">
+                <template x-for="(match, index) in matches" :key="index">
+                    <div
+                        class="p-3 bg-blue-50 dark:bg-blue-900/20 rounded border border-blue-100 dark:border-blue-800 text-sm font-mono text-gray-800 dark:text-gray-200">
+                        <span class="font-bold text-blue-600 dark:text-blue-400"
+                            x-text="'Match ' + (index + 1) + ': '"></span>
+                        <span x-text="match"></span>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function regexTester() {
+        return {
+            regex: '[a-zA-Z]+',
+            text: 'Hello World 123',
+            error: '',
+
+            get matches() {
+                this.error = '';
+                try {
+                    if (!this.regex) return [];
+                    const re = new RegExp(this.regex, 'gm');
+                    const matches = this.text.match(re);
+                    return matches || [];
+                } catch (e) {
+                    this.error = e.message;
+                    return [];
+                }
+            }
+        }
+    }
+</script>
+{% endblock %}

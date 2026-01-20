@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Discussions | Kiri{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8">
+    <div class="flex justify-between items-center mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Discussions</h1>
+            <p class="text-gray-600 dark:text-gray-400">Join the conversation with the community.</p>
+        </div>
+        <a href="{% url 'discussions:create' %}"
+            class="bg-[#0D7C3D] text-white px-4 py-2 rounded-lg hover:bg-[#0A6230]">
+            <i class="fas fa-plus mr-2"></i>New Topic
+        </a>
+    </div>
+
+    <!-- Filters -->
+    <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
+        <a href="{% url 'discussions:list' %}"
+            class="px-3 py-1 rounded-full bg-gray-100 dark:bg-[#333] text-gray-700 dark:text-gray-300 hover:bg-gray-200 text-sm">All</a>
+        {% for cat_val, cat_label in view.model.CATEGORY_CHOICES %}
+        <a href="?category={{ cat_val }}"
+            class="px-3 py-1 rounded-full border border-gray-200 dark:border-[#444] text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#2D2D2D] text-sm whitespace-nowrap">{{
+            cat_label }}</a>
+        {% endfor %}
+    </div>
+
+    <!-- Topic List -->
+    <div
+        class="bg-white dark:bg-[#1E1E1E] border border-gray-200 dark:border-[#333] rounded-lg divide-y divide-gray-200 dark:divide-[#333]">
+        {% for topic in object_list %}
+        <div class="p-4 hover:bg-gray-50 dark:hover:bg-[#252526] transition-colors">
+            <div class="flex items-start gap-4">
+                <div class="flex-1 min-w-0">
+                    <div class="flex items-center gap-2 mb-1">
+                        {% if topic.is_pinned %}
+                        <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">Pinned</span>
+                        {% endif %}
+                        <span
+                            class="text-xs bg-gray-100 dark:bg-[#333] text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded">{{
+                            topic.get_category_display }}</span>
+                        <span class="text-xs text-gray-500">• {{ topic.created_at|timesince }} ago</span>
+                    </div>
+                    <a href="{% url 'discussions:detail' slug=topic.slug %}"
+                        class="text-lg font-semibold text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400 block truncate">
+                        {{ topic.title }}
+                    </a>
+                    <p class="text-sm text-gray-500 dark:text-gray-400 mt-1 truncate">{{ topic.content|striptags }}</p>
+                </div>
+                <div class="text-center px-4 hidden sm:block">
+                    <div class="text-xl font-bold text-gray-700 dark:text-gray-300">{{ topic.replies.count }}</div>
+                    <div class="text-xs text-gray-500">Replies</div>
+                </div>
+                <div class="flex-shrink-0">
+                    {% include "partials/user_avatar.html" with user=topic.author size="sm" %}
+                </div>
+            </div>
+        </div>
+        {% empty %}
+        <div class="p-8 text-center text-gray-500">
+            No discussions yet. Be the first to modify the silence!
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- Pagination -->
+    {% if is_paginated %}
+    <div class="mt-6">
+        <!-- Add standard pagination here -->
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

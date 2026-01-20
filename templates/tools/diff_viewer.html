@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block title %}Diff Viewer | Kiri Tools{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8" x-data="diffViewer()">
+    <nav class="mb-6 text-sm">
+        <a href="{% url 'tools:index' %}" class="text-blue-600 hover:underline"><i class="fas fa-arrow-left mr-1"></i>
+            Tools</a>
+        <span class="text-gray-400 mx-2">/</span>
+        <span class="text-gray-600 dark:text-gray-300">Diff Viewer</span>
+    </nav>
+
+    <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Diff Viewer</h1>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+        <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Original Text</label>
+            <textarea x-model="original" rows="10"
+                class="w-full p-3 text-sm font-mono border border-gray-300 dark:border-[#444] rounded-lg bg-white dark:bg-[#1E1E1E] text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Paste original text here..."></textarea>
+        </div>
+        <div>
+            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Changed Text</label>
+            <textarea x-model="changed" rows="10"
+                class="w-full p-3 text-sm font-mono border border-gray-300 dark:border-[#444] rounded-lg bg-white dark:bg-[#1E1E1E] text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
+                placeholder="Paste changed text here..."></textarea>
+        </div>
+    </div>
+
+    <!-- Compute Button -->
+    <div class="text-center mb-8">
+        <button @click="compare()"
+            class="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
+            Compare Texts
+        </button>
+    </div>
+
+    <!-- Result -->
+    <div x-show="compared"
+        class="bg-white dark:bg-[#1E1E1E] border border-gray-200 dark:border-[#333] rounded-lg p-4 font-mono text-sm overflow-x-auto">
+        <div class="flex flex-col gap-1">
+            <template x-for="(part, index) in diffs" :key="index">
+                <span :class="{
+                    'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300': part.added,
+                    'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300': part.removed,
+                    'text-gray-600 dark:text-gray-400': !part.added && !part.removed
+                }" x-text="part.value" class="whitespace-pre-wrap"></span>
+            </template>
+        </div>
+    </div>
+</div>
+
+<!-- Load jsdiff library from CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jsdiff/5.1.0/diff.min.js"></script>
+
+<script>
+    function diffViewer() {
+        return {
+            original: 'The quick brown fox jumps over the lazy dog.',
+            changed: 'The quick green fox jumps over the active dog.',
+            diffs: [],
+            compared: false,
+
+            compare() {
+                if (typeof Diff === 'undefined') {
+                    alert('Diff library loading...');
+                    return;
+                }
+
+                // Use jsdiff to compute word diff
+                this.diffs = Diff.diffWords(this.original, this.changed);
+                this.compared = true;
+            }
+        }
+    }
+</script>
+{% endblock %}

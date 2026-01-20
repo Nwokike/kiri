@@ -237,6 +237,20 @@
                         class="nav-label text-sm font-medium whitespace-nowrap transition-opacity duration-200">Projects</span>
                 </a>
 
+                <a href="{% url 'discussions:list' %}"
+                    class="flex items-center h-11 px-4 gap-3 text-[#495057] hover:bg-[#F8F9FA] hover:text-[#0D7C3D] transition-colors {% if 'discuss' in request.path %}bg-[#E8F5ED] text-[#0D7C3D] border-r-2 border-[#0D7C3D]{% endif %} dark:text-[#A1A1AA] dark:hover:bg-[#2D2D2D] dark:hover:text-[#0D7C3D]">
+                    <i class="fas fa-comments w-5 text-center"></i>
+                    <span
+                        class="nav-label text-sm font-medium whitespace-nowrap transition-opacity duration-200">Discuss</span>
+                </a>
+
+                <a href="{% url 'activity:feed' %}"
+                    class="flex items-center h-11 px-4 gap-3 text-[#495057] hover:bg-[#F8F9FA] hover:text-[#0D7C3D] transition-colors {% if 'feed' in request.path %}bg-[#E8F5ED] text-[#0D7C3D] border-r-2 border-[#0D7C3D]{% endif %} dark:text-[#A1A1AA] dark:hover:bg-[#2D2D2D] dark:hover:text-[#0D7C3D]">
+                    <i class="fas fa-stream w-5 text-center"></i>
+                    <span
+                        class="nav-label text-sm font-medium whitespace-nowrap transition-opacity duration-200">Activity</span>
+                </a>
+
                 <div class="my-3 mx-4 border-t border-[#DEE2E6] dark:border-[#3D3D3D]"></div>
 
                 <a href="{% url 'core:about' %}"
@@ -252,17 +266,32 @@
                 <div class="tools-section" x-data="{ open: false }">
                     <button @click="open = !open"
                         class="w-full flex items-center h-11 px-4 gap-3 text-[#495057] hover:bg-[#F8F9FA] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA] dark:hover:bg-[#2D2D2D] dark:hover:text-[#0D7C3D]">
-                        <i class="fas fa-wrench w-5 text-center"></i>
+                        <i class="fas fa-toolbox w-5 text-center"></i>
                         <span
-                            class="nav-label text-sm font-medium whitespace-nowrap transition-opacity duration-200 flex-1 text-left">Tools</span>
+                            class="nav-label text-sm font-medium whitespace-nowrap transition-opacity duration-200 flex-1 text-left">Toolkit</span>
                         <i class="fas fa-chevron-down nav-label text-xs transition-transform"
                             :class="open ? 'rotate-180' : ''"></i>
                     </button>
-                    <div x-show="open" x-transition class="pl-4">
-                        <a href="{% url 'core:playground' %}"
-                            class="flex items-center h-10 px-4 gap-3 text-sm text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
-                            <i class="fas fa-code w-4 text-center"></i>
-                            <span class="nav-label whitespace-nowrap">Playground</span>
+                    <div x-show="open" x-transition
+                        class="pl-4 border-l-2 border-gray-100 dark:border-[#333] ml-6 my-1 space-y-1">
+                        <a href="{% url 'core:studio' %}"
+                            class="flex items-center h-9 px-4 gap-3 text-sm text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
+                            <i class="fas fa-laptop-code w-4 text-center"></i>
+                            <span class="nav-label whitespace-nowrap">Kiri Studio</span>
+                        </a>
+                        <a href="{% url 'tools:index' %}"
+                            class="flex items-center h-9 px-4 gap-3 text-sm text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
+                            <i class="fas fa-wrench w-4 text-center"></i>
+                            <span class="nav-label whitespace-nowrap">Dev Tools</span>
+                        </a>
+                        <!-- Quick Links to specific tools -->
+                        <a href="{% url 'tools:json_formatter' %}"
+                            class="flex items-center h-8 px-4 gap-3 text-xs text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA] pl-8 opacity-75">
+                            <span class="nav-label whitespace-nowrap">JSON Formatter</span>
+                        </a>
+                        <a href="{% url 'tools:regex_tester' %}"
+                            class="flex items-center h-8 px-4 gap-3 text-xs text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA] pl-8 opacity-75">
+                            <span class="nav-label whitespace-nowrap">Regex Tester</span>
                         </a>
                     </div>
                 </div>

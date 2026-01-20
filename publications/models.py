@@ -11,6 +11,10 @@ class Publication(models.Model):
     abstract = models.TextField(help_text="Brief summary.")
     content = models.TextField(help_text="Main content in Markdown.")
     
+    # GitHub-First Storage
+    github_repo_url = models.CharField(max_length=255, blank=True, help_text="URL to the GitHub repository storing content.")
+    github_file_path = models.CharField(max_length=255, blank=True, help_text="Path to the markdown file within the repo.")
+    
     # Metadata
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="authored_publications")
     contributors = models.ManyToManyField(settings.AUTH_USER_MODEL, related_name='contributed_publications', blank=True)

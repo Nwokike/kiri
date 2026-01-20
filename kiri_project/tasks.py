@@ -410,3 +410,51 @@ def analyze_project_task(project_id: int):
             pass
 
 
+@periodic_task(huey.crontab(minute=0, hour='*/4'))  # Run every 4 hours
+def cleanup_tmp_files():
+    """
+    Cleans up temporary files to maintain the "Zero-Local-File" policy.
+    Removes files in /tmp/kiri/ older than 1 hour.
+    """
+    import time
+    
+    logger.info("Starting temporary file cleanup...")
+    
+    # Define temp directories to clean
+    # We primarily use /tmp on Linux/Mac, or GetTempPath on Windows
+    # For Kiri, we assume a designated temp workspace might be used for git clones
+    temp_dirs = [
+        '/tmp/kiri_repos',          # Linux/Container default
+        'C:\\Windows\\Temp\\kiri',  # Windows potential path
+        os.path.join(settings.BASE_DIR, 'tmp'), # Project local tmp
+    ]
+    
+    deleted_count = 0
+    errors = 0
+    now = time.time()
+    max_age = 3600  # 1 hour
+    
+    for temp_dir in temp_dirs:
+        if not os.path.exists(temp_dir):
+            continue
+            
+        for root, dirs, files in os.walk(temp_dir, topdown=False):
+            for name in files:
+                filepath = os.path.join(root, name)
+                try:
+                    # Check age
+                    if now - os.path.getmtime(filepath) > max_age:
+                        os.remove(filepath)
+                        deleted_count += 1
+                except Exception as e:
+                    errors += 1
+            
+            for name in dirs:
+                dirpath = os.path.join(root, name)
+                try:
+                    # Try to remove empty dirs
+                    os.rmdir(dirpath)
+                except:
+                    pass
+    
+    logger.info(f"Cleanup Complete. Deleted {deleted_count} files. Errors: {errors}")

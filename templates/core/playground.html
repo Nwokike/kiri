@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Playground | Kiri{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-6 py-8">
+    <!-- Header -->
+    <div class="mb-8">
+        <h1 class="text-2xl font-bold text-[#212529] dark:text-white mb-2">
+            <i class="fas fa-code text-[#0D7C3D] mr-2"></i>
+            Playground
+        </h1>
+        <p class="text-[#6C757D] dark:text-[#A1A1AA]">
+            Run Python code in your browser using Pyodide. No server required.
+        </p>
+    </div>
+
+    <!-- Playground -->
+    <div class="grid lg:grid-cols-2 gap-6">
+        <!-- Code Editor -->
+        <div
+            class="bg-white rounded-xl border border-[#DEE2E6] dark:bg-[#1E1E1E] dark:border-[#3D3D3D] overflow-hidden">
+            <div class="flex items-center justify-between px-4 py-3 border-b border-[#DEE2E6] dark:border-[#3D3D3D]">
+                <span class="text-sm font-semibold text-[#212529] dark:text-white">Python</span>
+                <button id="run-btn" onclick="runCode()"
+                    class="px-4 py-1.5 bg-[#0D7C3D] text-white text-sm font-medium rounded-lg hover:bg-[#0A5C2C] transition-colors">
+                    <i class="fas fa-play mr-1"></i> Run
+                </button>
+            </div>
+            <div class="p-4">
+                <textarea id="code-input"
+                    class="w-full h-80 font-mono text-sm p-4 bg-[#F8F9FA] dark:bg-[#2D2D2D] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-lg text-[#212529] dark:text-white resize-none focus:ring-2 focus:ring-[#0D7C3D]/20 focus:border-[#0D7C3D]"
+                    placeholder="# Enter Python code here...">import sys
+print(f"Python {sys.version}")
+print("Hello from Kiri Playground!")
+
+# Try some calculations
+import math
+print(f"π = {math.pi}")
+
+# List comprehension
+squares = [x**2 for x in range(10)]
+print(f"Squares: {squares}")
+</textarea>
+            </div>
+        </div>
+
+        <!-- Output -->
+        <div
+            class="bg-white rounded-xl border border-[#DEE2E6] dark:bg-[#1E1E1E] dark:border-[#3D3D3D] overflow-hidden">
+            <div class="flex items-center justify-between px-4 py-3 border-b border-[#DEE2E6] dark:border-[#3D3D3D]">
+                <span class="text-sm font-semibold text-[#212529] dark:text-white">Output</span>
+                <button onclick="clearOutput()"
+                    class="px-3 py-1 text-xs text-[#6C757D] hover:text-[#212529] dark:text-[#A1A1AA] dark:hover:text-white transition-colors">
+                    <i class="fas fa-trash-alt mr-1"></i> Clear
+                </button>
+            </div>
+            <div id="output"
+                class="h-80 overflow-y-auto p-4 font-mono text-sm text-[#212529] dark:text-white bg-[#F8F9FA] dark:bg-[#2D2D2D]">
+                <span class="text-[#6C757D] dark:text-[#A1A1AA]">Press Run to execute your code...</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Status -->
+    <div class="mt-4 flex items-center gap-2 text-sm text-[#6C757D] dark:text-[#A1A1AA]">
+        <span id="pyodide-status">
+            <i class="fas fa-spinner fa-spin"></i> Loading Pyodide...
+        </span>
+    </div>
+</div>
+
+<!-- Mobile Spacer -->
+<div class="h-20 md:hidden"></div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
+<script>
+    let pyodide = null;
+
+    async function initPyodide() {
+        try {
+            pyodide = await loadPyodide();
+            document.getElementById('pyodide-status').innerHTML =
+                '<i class="fas fa-check-circle text-[#0D7C3D]"></i> Pyodide ready';
+        } catch (error) {
+            document.getElementById('pyodide-status').innerHTML =
+                '<i class="fas fa-exclamation-circle text-red-500"></i> Failed to load Pyodide';
+            console.error(error);
+        }
+    }
+
+    async function runCode() {
+        if (!pyodide) {
+            addOutput('Error: Pyodide not loaded yet. Please wait...', 'error');
+            return;
+        }
+
+        const code = document.getElementById('code-input').value;
+        const btn = document.getElementById('run-btn');
+
+        btn.disabled = true;
+        btn.innerHTML = '<i class="fas fa-spinner fa-spin mr-1"></i> Running';
+
+        // Clear and show loading
+        document.getElementById('output').innerHTML = '';
+
+        try {
+            // Redirect stdout to capture print statements
+            pyodide.runPython(`
+import sys
+from io import StringIO
+sys.stdout = StringIO()
+sys.stderr = StringIO()
+        `);
+
+            // Run user code
+            pyodide.runPython(code);
+
+            // Get output
+            const stdout = pyodide.runPython('sys.stdout.getvalue()');
+            const stderr = pyodide.runPython('sys.stderr.getvalue()');
+
+            if (stdout) addOutput(stdout);
+            if (stderr) addOutput(stderr, 'error');
+            if (!stdout && !stderr) addOutput('(No output)', 'muted');
+
+        } catch (error) {
+            addOutput(error.message, 'error');
+        }
+
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-play mr-1"></i> Run';
+    }
+
+    function addOutput(text, type = 'normal') {
+        const output = document.getElementById('output');
+        const line = document.createElement('pre');
+        line.className = 'whitespace-pre-wrap mb-1';
+
+        if (type === 'error') {
+            line.className += ' text-red-500';
+        } else if (type === 'muted') {
+            line.className += ' text-[#6C757D] dark:text-[#A1A1AA]';
+        }
+
+        line.textContent = text;
+        output.appendChild(line);
+        output.scrollTop = output.scrollHeight;
+    }
+
+    function clearOutput() {
+        document.getElementById('output').innerHTML =
+            '<span class="text-[#6C757D] dark:text-[#A1A1AA]">Output cleared</span>';
+    }
+
+    // Initialize on load
+    initPyodide();
+</script>
+{% endblock %}

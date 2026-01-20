@@ -6,17 +6,9 @@ Optimized for Google Cloud 1GB RAM VM deployment.
 import os
 from pathlib import Path
 from dotenv import load_dotenv
-import sentry_sdk
 
 load_dotenv()
 
-# Initialize Sentry for error monitoring
-if os.environ.get("SENTRY_DSN"):
-    sentry_sdk.init(
-        dsn=os.environ.get("SENTRY_DSN"),
-        traces_sample_rate=0.1,  # Capture 10% of transactions for performance monitoring
-        profiles_sample_rate=0.1,  # Capture 10% of profiles
-    )
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 

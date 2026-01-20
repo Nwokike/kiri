@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Comment, Favorite, Notification
+from .models import Comment, Favorite, Notification, ErrorLog
 
 
 @admin.register(Comment)
@@ -28,3 +28,17 @@ class NotificationAdmin(admin.ModelAdmin):
     raw_id_fields = ['recipient', 'actor']
     readonly_fields = ['created_at']
 
+
+@admin.register(ErrorLog)
+class ErrorLogAdmin(admin.ModelAdmin):
+    list_display = ['level', 'path', 'exception_type', 'is_resolved', 'created_at']
+    list_filter = ['level', 'is_resolved', 'created_at']
+    search_fields = ['path', 'message', 'exception_type']
+    readonly_fields = ['level', 'path', 'method', 'exception_type', 'message', 'traceback', 'user', 'user_agent', 'ip_address', 'created_at']
+    list_per_page = 50
+    
+    actions = ['mark_as_resolved']
+    
+    def mark_as_resolved(self, request, queryset):
+        queryset.update(is_resolved=True)
+    mark_as_resolved.short_description = "Mark selected errors as resolved"

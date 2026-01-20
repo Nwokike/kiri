@@ -64,6 +64,11 @@ def about(request):
     return render(request, "core/about.html")
 
 
+def playground(request):
+    """Python/JS playground for code experiments."""
+    return render(request, "core/playground.html")
+
+
 def privacy(request):
     """Privacy policy page."""
     return render(request, "core/privacy.html")

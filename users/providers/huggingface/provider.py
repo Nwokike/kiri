@@ -1,9 +1,3 @@
-"""
-Hugging Face OAuth2/OIDC Provider for django-allauth.
-
-Hugging Face supports OpenID Connect, which is built on OAuth 2.0.
-This provider implements the OAuth2 flow to authenticate users with Hugging Face.
-"""
 from allauth.socialaccount.providers.base import ProviderAccount
 from allauth.socialaccount.providers.oauth2.provider import OAuth2Provider
 
@@ -28,6 +22,14 @@ class HuggingFaceProvider(OAuth2Provider):
     def get_default_scope(self):
         """Return default scopes for Hugging Face OAuth."""
         return ["openid", "profile", "email"]
+
+    def get_oauth2_adapter(self, request):
+        """
+        Instantiate the adapter. 
+        Import here to avoid circular dependency with views.py.
+        """
+        from .views import HuggingFaceOAuth2Adapter
+        return HuggingFaceOAuth2Adapter(request)
     
     def extract_uid(self, data):
         """Extract user ID from Hugging Face response."""

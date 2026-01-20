@@ -65,6 +65,7 @@ SITE_ID = 1
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "kiri_project.middleware.SecurityHeadersMiddleware",  # Studio COOP/COEP Headers
     "csp.middleware.CSPMiddleware",  # Content Security Policy
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
@@ -108,6 +109,19 @@ DATABASES = {
             "timeout": 20,
             "transaction_mode": "IMMEDIATE",  # Better concurrency
         },
+    }
+}
+
+# Caching - Database Backend (Optimized for 1GB RAM)
+# Using DB instead of RAM (LocMemCache) to save memory for Pyodide/App
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.db.DatabaseCache",
+        "LOCATION": "kiri_cache_table",
+        "TIMEOUT": 60 * 15,  # 15 minutes default
+        "OPTIONS": {
+            "MAX_ENTRIES": 2000
+        }
     }
 }
 

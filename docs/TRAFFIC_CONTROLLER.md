@@ -33,7 +33,7 @@ flowchart LR
 
 | Lane | Badge | Criteria | Infrastructure |
 |------|-------|----------|----------------|
-| **A** | 🟢 Instant Run | React, Vue, Node.js, static sites | User's browser via WebContainers |
+| **A** | 🟢 Instant Run | React, Vue, Node.js, static sites | **Kiri Studio** (Built-in IDE) |
 | **B** | 🟠 Cloud Boot | Django, Flask, FastAPI, Docker | [mybinder.org](https://mybinder.org) |
 | **C** | 🔴 GPU Powered | PyTorch, TensorFlow, Transformers | [Google Colab](https://colab.research.google.com) |
 

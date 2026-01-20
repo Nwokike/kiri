@@ -123,14 +123,19 @@
     let term;
     let fitAddon;
     let pyodide;
+    let webcontainerInstance;
     let currentLang = 'python';
+
+    // Constants
+    const PYTHON_DEFAULT_CODE = `# Welcome to Kiri Studio (Python Mode)\nimport sys\nprint(f"Python {sys.version} running in browser!")\n\ndef hello():\n    print("Hello from Vibe Coding!")\n\nhello()`;
+    const WEB_DEFAULT_CODE = `// Welcome to Kiri Studio (Node.js Mode)\n// Files are virtual. 'npm install' & 'npm start' work!\n\nconsole.log("Hello from Node.js " + process.version);`;
 
     // --- Initialization ---
     require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
 
     require(['vs/editor/editor.main'], function () {
         editor = monaco.editor.create(document.getElementById('monaco-editor'), {
-            value: `# Welcome to Kiri Studio (Beta)\nimport sys\nprint(f"Python {sys.version} running in browser!")\n\ndef hello():\n    print("Hello from Vibe Coding!")\n\nhello()`,
+            value: PYTHON_DEFAULT_CODE,
             language: 'python',
             theme: 'vs-dark',
             fontSize: 14,
@@ -159,33 +164,125 @@
     fitAddon.fit();
 
     term.writeln('\x1b[32mWelcome to Kiri Studio v1.0\x1b[0m');
-    term.writeln('Initializing Pyodide (WASM)...');
+    initPythonMode();
 
-    // Initialize Pyodide
-    async function initPyodide() {
-        try {
-            pyodide = await loadPyodide();
-            term.writeln('\x1b[32m✔ Pyodide Ready\x1b[0m');
-            // Pipe stdout
-            pyodide.setStdout({ batched: (str) => term.writeln(str) });
-            pyodide.setStderr({ batched: (str) => term.writeln(`\x1b[31m${str}\x1b[0m`) });
-        } catch (err) {
-            term.writeln(`\x1b[31mFailed to load Pyodide: ${err}\x1b[0m`);
+    // --- Mode Switching ---
+    async function initPythonMode() {
+        currentLang = 'python';
+        document.getElementById('preview-pane').classList.add('hidden');
+        if (editor) monaco.editor.setModelLanguage(editor.getModel(), 'python');
+
+        if (!pyodide) {
+            term.writeln('Initializing Pyodide (WASM)...');
+            try {
+                pyodide = await loadPyodide();
+                term.writeln('\x1b[32m✔ Pyodide Ready\x1b[0m');
+                pyodide.setStdout({ batched: (str) => term.writeln(str) });
+                pyodide.setStderr({ batched: (str) => term.writeln(`\x1b[31m${str}\x1b[0m`) });
+            } catch (err) {
+                term.writeln(`\x1b[31mFailed to load Pyodide: ${err}\x1b[0m`);
+            }
+        } else {
+            term.writeln('\x1b[36mSwitched to Python Mode\x1b[0m');
         }
     }
-    initPyodide();
 
-    // --- Core Logic ---
+    async function initWebMode() {
+        currentLang = 'web';
+        document.getElementById('preview-pane').classList.remove('hidden');
+        if (editor) monaco.editor.setModelLanguage(editor.getModel(), 'javascript');
+
+        if (!webcontainerInstance) {
+            term.writeln('Booting WebContainer...');
+            try {
+                // Dynamically load WebContainer API logic (using ESM via import map or CDN)
+                // For simplicity in this template, we assume direct ESM import via module script below
+                // But since this is a clean script tag, we use dynamic import
+                const { WebContainer } = await import('https://cdn.jsdelivr.net/npm/@webcontainer/api@1.1.0/+esm');
+
+                webcontainerInstance = await WebContainer.boot();
+                term.writeln('\x1b[32m✔ WebContainer Booted\x1b[0m');
+
+                // Mount simple files
+                await webcontainerInstance.mount({
+                    'index.js': {
+                        file: {
+                            contents: `const express = require('express');
+const app = express();
+const port = 3000;
+
+app.get('/', (req, res) => {
+    res.send('Welcome to Kiri Studio server!');
+});
+
+app.listen(port, () => {
+    console.log(\`App running at http://localhost:\${port}\`);
+});`
+                        }
+                    },
+                    'package.json': {
+                        file: {
+                            contents: `{"name":"kiri-demo","dependencies":{"express":"latest"},"scripts":{"start":"node index.js"}}`
+                        }
+                    }
+                });
+
+                term.writeln('Installing dependencies...');
+                const installProcess = await webcontainerInstance.spawn('npm', ['install']);
+                installProcess.output.pipeTo(new WritableStream({
+                    write(data) { term.write(data); }
+                }));
+                await installProcess.exit;
+                term.writeln('\x1b[32m✔ Dependencies installed\x1b[0m');
+
+                // Listen for server-ready
+                webcontainerInstance.on('server-ready', (port, url) => {
+                    term.writeln(`\x1b[32mServer ready at ${url}\x1b[0m`);
+                    document.getElementById('preview-frame').src = url;
+                });
+
+            } catch (err) {
+                term.writeln(`\x1b[31mFailed to boot WebContainer: ${err}\x1b[0m`);
+                term.writeln('Ensure you are on HTTPS and headers (COOP/COEP) are set.');
+            }
+        } else {
+            term.writeln('\x1b[36mSwitched to Node.js Mode\x1b[0m');
+        }
+    }
+
+    // --- Event Listeners ---
+    document.getElementById('language-select').addEventListener('change', (e) => {
+        if (e.target.value === 'python') {
+            initPythonMode();
+            editor.setValue(PYTHON_DEFAULT_CODE);
+        } else {
+            initWebMode();
+            editor.setValue(WEB_DEFAULT_CODE);
+        }
+    });
+
     document.getElementById('run-btn').addEventListener('click', async () => {
-        if (!pyodide) return;
-
         const code = editor.getValue();
-        term.writeln('\x1b[90m$ python main.py\x1b[0m');
 
-        try {
-            await pyodide.runPythonAsync(code);
-        } catch (err) {
-            term.writeln(`\x1b[31m${err}\x1b[0m`);
+        if (currentLang === 'python') {
+            if (!pyodide) return;
+            term.writeln('\x1b[90m$ python main.py\x1b[0m');
+            try {
+                await pyodide.runPythonAsync(code);
+            } catch (err) {
+                term.writeln(`\x1b[31m${err}\x1b[0m`);
+            }
+        } else {
+            if (!webcontainerInstance) return;
+
+            // Save current code to index.js
+            await webcontainerInstance.fs.writeFile('index.js', code);
+
+            term.writeln('\x1b[90m$ npm start\x1b[0m');
+            const startProcess = await webcontainerInstance.spawn('npm', ['start']);
+            startProcess.output.pipeTo(new WritableStream({
+                write(data) { term.write(data); }
+            }));
         }
     });
 

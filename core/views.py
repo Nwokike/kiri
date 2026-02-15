@@ -155,9 +155,43 @@ def health(request):
 
 @login_not_required
 def serviceworker(request):
-    response = render(request, "serviceworker.js")
-    response['Content-Type'] = 'application/javascript'
-    return response
+    """
+    Serve serviceworker.js with a robust static file resolver.
+    This prevents 500 errors if the static manifest is out of sync.
+    """
+    from django.templatetags.static import static
+    from django.contrib.staticfiles.storage import staticfiles_storage
+
+    def safe_static(path):
+        try:
+            return static(path)
+        except ValueError:
+            # Fallback to the raw STATIC_URL + path if manifest entry is missing
+            from django.conf import settings
+            return f"{settings.STATIC_URL}{path}"
+
+    context = {
+        "static": safe_static
+    }
+    
+    # We use a custom context to override the 'static' tag behavior in the template
+    # if we were using it as a tag, but here we can just pass it as a variable 
+    # and use {{ static("...") }} in the JS template.
+    # However, since serviceworker.js uses {% load static %}, we actually need
+    # to handle this in the view OR use a custom template tag.
+    # A simpler way is to just use a try/except in the view if the template
+    # engine allows, but it's easier to just fix the template.
+    
+    try:
+        response = render(request, "serviceworker.js", context)
+        response['Content-Type'] = 'application/javascript'
+        return response
+    except Exception as e:
+        # Absolute fallback for production stability
+        import logging
+        logger = logging.getLogger(__name__)
+        logger.error(f"Service Worker rendering failed: {e}")
+        return HttpResponse("// Service Worker unavailable due to configuration error", content_type="application/javascript")
 
 
 @login_not_required

@@ -14,6 +14,7 @@ urlpatterns = [
     path("accounts/huggingface/", include("users.providers.huggingface.urls")),
     path("serviceworker.js", core_views.serviceworker, name="serviceworker"),
     path("manifest.json", core_views.pwa_manifest, name="pwa_manifest"),
+    path("favicon.ico", RedirectView.as_view(url=settings.STATIC_URL + "favicon.ico", permanent=True)),
     path("studio/stackframe.js", core_views.silent_asset, {'filename': 'stackframe.js'}),
     path(".well-known/appspecific/com.chrome.devtools.json", core_views.silent_asset, {'filename': 'devtools.json'}),
     path("sitemap.xml", sitemap, {'sitemaps': sitemaps}, name='sitemap'),

@@ -46,9 +46,10 @@ class HuggingFaceProvider(OAuth2Provider):
     
     def extract_email_addresses(self, data):
         """Extract email addresses from Hugging Face response."""
+        from allauth.account.models import EmailAddress
         email = data.get("email")
         if email:
-            return [{"email": email, "verified": data.get("email_verified", False), "primary": True}]
+            return [EmailAddress(email=email, verified=data.get("email_verified", False), primary=True)]
         return []
 
 

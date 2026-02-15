@@ -19,10 +19,9 @@
     <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
         <a href="{% url 'discussions:list' %}"
             class="px-3 py-1 rounded-full bg-gray-100 dark:bg-[#333] text-gray-700 dark:text-gray-300 hover:bg-gray-200 text-sm">All</a>
-        {% for cat_val, cat_label in view.model.CATEGORY_CHOICES %}
+        {% for cat_val, cat_label in category_choices %}
         <a href="?category={{ cat_val }}"
-            class="px-3 py-1 rounded-full border border-gray-200 dark:border-[#444] text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#2D2D2D] text-sm whitespace-nowrap">{{
-            cat_label }}</a>
+            class="px-3 py-1 rounded-full border border-gray-200 dark:border-[#444] text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#2D2D2D] text-sm whitespace-nowrap">{{cat_label }}</a>
         {% endfor %}
     </div>
 
@@ -38,8 +37,7 @@
                         <span class="text-xs bg-yellow-100 text-yellow-800 px-2 py-0.5 rounded">Pinned</span>
                         {% endif %}
                         <span
-                            class="text-xs bg-gray-100 dark:bg-[#333] text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded">{{
-                            topic.get_category_display }}</span>
+                            class="text-xs bg-gray-100 dark:bg-[#333] text-gray-600 dark:text-gray-400 px-2 py-0.5 rounded">{{topic.get_category_display}}</span>
                         <span class="text-xs text-gray-500">• {{ topic.created_at|timesince }} ago</span>
                     </div>
                     <a href="{% url 'discussions:detail' slug=topic.slug %}"

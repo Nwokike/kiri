@@ -13,6 +13,8 @@ urlpatterns = [
     path("accounts/", include("allauth.urls")),
     path("accounts/huggingface/", include("users.providers.huggingface.urls")),
     path("serviceworker.js", core_views.serviceworker, name="serviceworker"),
+    path("manifest.json", core_views.pwa_manifest, name="pwa_manifest"),
+    path("studio/stackframe.js", core_views.silent_asset, {'filename': 'stackframe.js'}),
     path("sitemap.xml", sitemap, {'sitemaps': sitemaps}, name='sitemap'),
     path("robots.txt", TemplateView.as_view(template_name="robots.txt", content_type="text/plain")),
     path("", include("pwa.urls")),

@@ -27,6 +27,11 @@ class TopicListView(ListView):
             
         return qs
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['category_choices'] = Topic.CATEGORY_CHOICES
+        return context
+
 @method_decorator(login_not_required, name='dispatch')
 class TopicDetailView(DetailView):
     model = Topic

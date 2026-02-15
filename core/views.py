@@ -154,6 +154,26 @@ def serviceworker(request):
     return response
 
 
+@login_not_required
+def pwa_manifest(request):
+    """
+    Serve manifest.json with login_not_required to allow PWA installation 
+    even when global login is enforced.
+    """
+    response = render(request, "manifest.json")
+    response['Content-Type'] = 'application/json'
+    return response
+
+
+@login_not_required
+def silent_asset(request, filename):
+    """
+    Silently serve an empty response for missing assets (like stackframe.js)
+    to keep logs clean.
+    """
+    return HttpResponse("", content_type="application/javascript")
+
+
 @login_required
 @require_POST
 def add_comment(request, content_type_id, object_id):

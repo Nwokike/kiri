@@ -228,20 +228,6 @@ SOCIALACCOUNT_PROVIDERS = {
         # Full scopes for: profile, email, starring repos, push/create repos
         "SCOPE": ["read:user", "user:email", "public_repo", "repo"],
     },
-    "gitlab": {
-        "APP": {
-            "client_id": os.environ.get("GITLAB_CLIENT_ID", ""),
-            "secret": os.environ.get("GITLAB_SECRET", ""),
-        },
-        # Full scopes for: profile, repos read/write, API access
-        "SCOPE": ["read_user", "read_repository", "write_repository", "api", "openid", "email"],
-    },
-    "bitbucket_oauth2": {
-        "APP": {
-            "client_id": os.environ.get("BITBUCKET_CLIENT_ID", ""),
-            "secret": os.environ.get("BITBUCKET_SECRET", ""),
-        },
-    },
     # Hugging Face - custom provider
     "huggingface": {
         "APP": {

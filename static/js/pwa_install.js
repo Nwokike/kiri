@@ -2,14 +2,14 @@ let deferredPrompt;
 const installBtn = document.getElementById('pwa-install-btn');
 
 window.addEventListener('beforeinstallprompt', (e) => {
-    // Prevent Chrome 67 and earlier from automatically showing the prompt
     e.preventDefault();
-    // Stash the event so it can be triggered later.
     deferredPrompt = e;
-    // Update UI to notify the user they can add to home screen
     if (installBtn) {
         installBtn.classList.remove('hidden');
-        installBtn.classList.add('flex'); // Assuming flex layout
+        // Small delay to trigger CSS transition
+        setTimeout(() => {
+            installBtn.classList.add('visible');
+        }, 100);
     }
 });
 
@@ -21,8 +21,8 @@ if (installBtn) {
         }
 
         // Hide the app provided install promotion
-        installBtn.classList.add('hidden');
-        installBtn.classList.remove('flex');
+        installBtn.classList.remove('visible');
+        setTimeout(() => installBtn.classList.add('hidden'), 300);
 
         try {
             // Show the prompt

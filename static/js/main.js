@@ -17,13 +17,10 @@ function initThemeToggle() {
     const iconDark = document.getElementById('theme-icon-dark');
 
     function updateThemeIcons() {
-        if (document.documentElement.classList.contains('dark')) {
-            iconLight?.classList.add('hidden');
-            iconDark?.classList.remove('hidden');
-        } else {
-            iconLight?.classList.remove('hidden');
-            iconDark?.classList.add('hidden');
-        }
+        // Visibility is now handled by CSS based on the .dark class on <html>
+        const isDark = document.documentElement.classList.contains('dark');
+        iconLight?.setAttribute('aria-hidden', isDark ? 'true' : 'false');
+        iconDark?.setAttribute('aria-hidden', isDark ? 'false' : 'true');
     }
 
     themeToggle?.addEventListener('click', () => {

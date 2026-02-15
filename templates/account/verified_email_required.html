@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% load account %}
+
+{% block title %}Verify Your Email | Kiri{% endblock %}
+
+{% block content %}
+<div class="min-h-[80vh] flex items-center justify-center px-4 py-12">
+    <div class="w-full max-w-md">
+        <div class="text-center mb-8">
+            <div class="w-20 h-20 bg-yellow-500/10 rounded-full flex items-center justify-center mx-auto mb-6">
+                <i class="fas fa-envelope-open-text text-3xl text-yellow-600"></i>
+            </div>
+            <h1 class="text-2xl font-bold text-[#212529] dark:text-white">Email Verification Required</h1>
+            <p class="text-[#6C757D] dark:text-[#A1A1AA] mt-3">
+                You need to verify your email address before you can continue.
+            </p>
+        </div>
+
+        <div
+            class="bg-white/80 backdrop-blur-xl rounded-2xl border border-[#DEE2E6] shadow-xl p-8 dark:bg-[#1E1E1E]/80 dark:border-[#3D3D3D] text-center">
+            <p class="text-sm text-[#495057] dark:text-[#A1A1AA] mb-6">
+                We've sent a verification link to your email. If you haven't received it yet, you can request a new one.
+            </p>
+
+            <div class="space-y-4">
+                <form method="post" action="{% url 'account_email' %}">
+                    {% csrf_token %}
+                    <button type="submit" name="action_send"
+                        class="w-full py-3 px-4 bg-[#0D7C3D] text-white font-semibold rounded-xl hover:bg-[#0A5C2C] transition-all duration-300">
+                        Resend Verification Email
+                    </button>
+                </form>
+
+                <a href="{% url 'account_logout' %}"
+                    class="block text-sm text-[#6C757D] dark:text-[#A1A1AA] hover:text-[#0D7C3D] transition-colors">
+                    Sign out and try a different account
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

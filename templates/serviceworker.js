@@ -5,14 +5,30 @@ const urlsToCache = [
     '/',
     '{% static "css/output.css" %}',
     '{% static "css/forms.css" %}',
+    '{% static "css/fonts.css" %}',
     '{% static "js/htmx.min.js" %}',
     '{% static "js/theme_init.js" %}',
     '{% static "js/main.js" %}',
     '{% static "js/pwa_install.js" %}',
     '{% static "images/icons/icon-192x192.png" %}',
     '{% static "images/icons/icon-512x512.png" %}',
-    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css',
-    'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@500;700&display=swap'
+    '{% static "vendor/font-awesome/css/all.min.css" %}',
+    '{% static "vendor/alpine/alpine.min.js" %}',
+    '{% static "vendor/inter/Inter-Regular.woff2" %}',
+    '{% static "vendor/inter/Inter-Medium.woff2" %}',
+    '{% static "vendor/inter/Inter-SemiBold.woff2" %}',
+    '{% static "vendor/inter/Inter-Bold.woff2" %}',
+    '{% static "vendor/font-awesome/webfonts/fa-solid-900.woff2" %}',
+    '{% static "vendor/font-awesome/webfonts/fa-regular-400.woff2" %}',
+    '{% static "vendor/font-awesome/webfonts/fa-brands-400.woff2" %}',
+    '{% static "vendor/font-awesome/webfonts/fa-solid-900.ttf" %}',
+    '{% static "vendor/font-awesome/webfonts/fa-regular-400.ttf" %}',
+    '{% static "vendor/font-awesome/webfonts/fa-brands-400.ttf" %}',
+    '{% static "vendor/font-awesome/webfonts/fa-v4compatibility.woff2" %}',
+    '{% static "vendor/font-awesome/webfonts/fa-v4compatibility.ttf" %}',
+    '{% static "vendor/xterm/xterm.js.map" %}',
+    '{% static "vendor/xterm/xterm-addon-fit.js.map" %}',
+    '{% static "vendor/alpine/alpine.min.js.map" %}'
 ];
 
 self.addEventListener('install', event => {

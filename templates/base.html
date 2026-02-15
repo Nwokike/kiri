@@ -5,6 +5,33 @@
 
 <head>
     <meta charset="UTF-8">
+    <style>
+        /* Theme Toggle Icon Visibility */
+        #theme-icon-light,
+        #theme-icon-dark {
+            display: none;
+        }
+
+        html:not(.dark) #theme-icon-light {
+            display: flex;
+        }
+
+        html.dark #theme-icon-dark {
+            display: flex;
+        }
+
+        /* PWA Button Appearance */
+        #pwa-install-btn {
+            transition: transform 0.3s ease, opacity 0.3s ease;
+            opacity: 0;
+            transform: translateY(20px);
+        }
+
+        #pwa-install-btn.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    </style>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Kiri{% endblock %}</title>
     <meta name="description"
@@ -17,16 +44,14 @@
     <meta property="og:description"
         content="{% block og_description %}The efficiency frontier of Artificial Intelligence. Smart, Small, Scalable.{% endblock %}">
 
-    <!-- Inter Font -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Inter Font (Local) -->
+    <link rel="stylesheet" href="{% static 'css/fonts.css' %}">
 
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+    <!-- Font Awesome (Local) -->
+    <link rel="stylesheet" href="{% static 'vendor/font-awesome/css/all.min.css' %}">
 
-    <!-- Alpine.js for interactive components -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
+    <!-- Alpine.js (Local) -->
+    <script defer src="{% static 'vendor/alpine/alpine.min.js' %}"></script>
 
 
     {% block extra_head %}{% endblock %}
@@ -152,12 +177,12 @@
 
         <!-- Right: Actions -->
         <div class="flex items-center h-full gap-1 pr-2">
-            <!-- Theme Toggle (Single Icon) -->
+            <!-- Theme Toggle -->
             <button id="theme-toggle"
-                class="w-10 h-10 flex items-center justify-center text-[#495057] hover:bg-[#F8F9FA] rounded-lg dark:text-[#A1A1AA] dark:hover:bg-[#2D2D2D] transition-colors"
+                class="w-10 h-10 flex items-center justify-center text-[#495057] hover:bg-[#F8F9FA] rounded-lg dark:text-[#A1A1AA] dark:hover:bg-[#2D2D2D] transition-colors focus:outline-none"
                 title="Toggle theme">
                 <i class="fas fa-moon" id="theme-icon-light"></i>
-                <i class="fas fa-sun hidden" id="theme-icon-dark"></i>
+                <i class="fas fa-sun text-yellow-400" id="theme-icon-dark"></i>
             </button>
 
             {% if user.is_authenticated %}
@@ -341,79 +366,92 @@
         <!-- ===== FOOTER ===== -->
         <footer class="bg-white border-t border-[#DEE2E6] dark:bg-[#1E1E1E] dark:border-[#3D3D3D] mt-auto">
             <div class="max-w-7xl mx-auto px-6 py-12">
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-8">
-                    <!-- Brand -->
-                    <div class="col-span-2 md:col-span-1">
+                <div class="grid grid-cols-3 lg:grid-cols-4 gap-12 lg:gap-8">
+                    <!-- Brand & Socials -->
+                    <div class="col-span-3 lg:col-span-1">
                         <a href="/" class="flex items-center gap-2 mb-4">
                             <img src="{% static 'images/logos/logo.png' %}" alt="Kiri" class="h-10 w-auto">
                         </a>
-                        <p class="text-sm text-[#6C757D] dark:text-[#A1A1AA]">The efficiency frontier of Artificial
-                            Intelligence. Smart, Small, Scalable.
+                        <p class="text-sm text-[#6C757D] dark:text-[#A1A1AA] mb-6">
+                            The efficiency frontier of Artificial Intelligence. Smart, Small, Scalable.
                         </p>
+                        <!-- Social Links -->
+                        <div class="flex gap-3">
+                            <a href="https://github.com/kiri-labs" target="_blank" rel="noopener noreferrer"
+                                class="w-8 h-8 flex items-center justify-center rounded-lg bg-[#F8F9FA] text-[#495057] hover:bg-[#0D7C3D] hover:text-white transition-colors dark:bg-[#2D2D2D] dark:text-[#A1A1AA]"
+                                title="GitHub">
+                                <i class="fab fa-github text-sm"></i>
+                            </a>
+                            <a href="https://x.com/kiri_research" target="_blank" rel="noopener noreferrer"
+                                class="w-8 h-8 flex items-center justify-center rounded-lg bg-[#F8F9FA] text-[#495057] hover:bg-[#0D7C3D] hover:text-white transition-colors dark:bg-[#2D2D2D] dark:text-[#A1A1AA]"
+                                title="X (Twitter)">
+                                <i class="fab fa-x-twitter text-sm"></i>
+                            </a>
+                            <a href="https://facebook.com/kiri.ng.social" target="_blank" rel="noopener noreferrer"
+                                class="w-8 h-8 flex items-center justify-center rounded-lg bg-[#F8F9FA] text-[#495057] hover:bg-[#0D7C3D] hover:text-white transition-colors dark:bg-[#2D2D2D] dark:text-[#A1A1AA]"
+                                title="Facebook">
+                                <i class="fab fa-facebook-f text-sm"></i>
+                            </a>
+                            <a href="https://instagram.com/kiri.ng.social" target="_blank" rel="noopener noreferrer"
+                                class="w-8 h-8 flex items-center justify-center rounded-lg bg-[#F8F9FA] text-[#495057] hover:bg-[#0D7C3D] hover:text-white transition-colors dark:bg-[#2D2D2D] dark:text-[#A1A1AA]"
+                                title="Instagram">
+                                <i class="fab fa-instagram text-sm"></i>
+                            </a>
+                        </div>
                     </div>
 
                     <!-- Platform -->
                     <div>
                         <h4 class="font-semibold text-[#212529] dark:text-white mb-4">Platform</h4>
-                        <ul class="space-y-2 text-sm">
+                        <ul class="space-y-3 text-sm">
+                            <li><a href="{% url 'core:studio' %}"
+                                    class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">Kiri
+                                    Studio</a></li>
                             <li><a href="{% url 'publications:list' %}"
                                     class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">Library</a>
                             </li>
                             <li><a href="{% url 'projects:list' %}"
                                     class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">Projects</a>
                             </li>
-                            <li><a href="{% url 'discussions:list' %}"
-                                    class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">Discuss</a>
-                            </li>
-                            <li><a href="{% url 'activity:feed' %}"
-                                    class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">Activity</a>
-                            </li>
+                            <li><a href="{% url 'tools:index' %}"
+                                    class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">Tools
+                                    Hub</a></li>
                         </ul>
                     </div>
 
                     <!-- Company -->
                     <div>
                         <h4 class="font-semibold text-[#212529] dark:text-white mb-4">Company</h4>
-                        <ul class="space-y-2 text-sm">
+                        <ul class="space-y-3 text-sm">
                             <li><a href="{% url 'core:about' %}"
-                                    class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">About</a>
-                            </li>
-                            <li><a href="{% url 'core:privacy' %}"
-                                    class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">Privacy</a>
-                            </li>
-                            <li><a href="{% url 'core:terms' %}"
-                                    class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">Terms</a>
-                            </li>
-                            <li><a href="{% url 'core:refund_policy' %}"
-                                    class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">Refunds</a>
-                            </li>
+                                    class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">About
+                                    Us</a></li>
                             <li><a href="{% url 'core:contact' %}"
                                     class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">Contact</a>
+                            </li>
+                            <li><a href="{% url 'activity:feed' %}"
+                                    class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">Social
+                                    Feed</a></li>
+                            <li><a href="{% url 'discussions:list' %}"
+                                    class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">Community</a>
                             </li>
                         </ul>
                     </div>
 
-                    <!-- Connect -->
+                    <!-- Legal -->
                     <div>
-                        <h4 class="font-semibold text-[#212529] dark:text-white mb-4">Connect</h4>
-                        <div class="flex gap-3">
-                            <a href="https://github.com/kiri-labs" target="_blank" rel="noopener noreferrer"
-                                class="w-9 h-9 flex items-center justify-center rounded-lg bg-[#F8F9FA] text-[#495057] hover:bg-[#0D7C3D] hover:text-white transition-colors dark:bg-[#2D2D2D] dark:text-[#A1A1AA]">
-                                <i class="fab fa-github"></i>
-                            </a>
-                            <a href="https://x.com/kiri_research" target="_blank" rel="noopener noreferrer"
-                                class="w-9 h-9 flex items-center justify-center rounded-lg bg-[#F8F9FA] text-[#495057] hover:bg-[#0D7C3D] hover:text-white transition-colors dark:bg-[#2D2D2D] dark:text-[#A1A1AA]">
-                                <i class="fab fa-x-twitter"></i>
-                            </a>
-                            <a href="https://facebook.com/kiri.ng.social" target="_blank" rel="noopener noreferrer"
-                                class="w-9 h-9 flex items-center justify-center rounded-lg bg-[#F8F9FA] text-[#495057] hover:bg-[#0D7C3D] hover:text-white transition-colors dark:bg-[#2D2D2D] dark:text-[#A1A1AA]">
-                                <i class="fab fa-facebook-f"></i>
-                            </a>
-                            <a href="https://instagram.com/kiri.ng.social" target="_blank" rel="noopener noreferrer"
-                                class="w-9 h-9 flex items-center justify-center rounded-lg bg-[#F8F9FA] text-[#495057] hover:bg-[#0D7C3D] hover:text-white transition-colors dark:bg-[#2D2D2D] dark:text-[#A1A1AA]">
-                                <i class="fab fa-instagram"></i>
-                            </a>
-                        </div>
+                        <h4 class="font-semibold text-[#212529] dark:text-white mb-4">Legal</h4>
+                        <ul class="space-y-3 text-sm">
+                            <li><a href="{% url 'core:privacy' %}"
+                                    class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">Privacy
+                                    Policy</a></li>
+                            <li><a href="{% url 'core:terms' %}"
+                                    class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">Terms
+                                    of Service</a></li>
+                            <li><a href="{% url 'core:refund_policy' %}"
+                                    class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">Refund
+                                    Policy</a></li>
+                        </ul>
                     </div>
                 </div>
 
@@ -422,7 +460,7 @@
                     class="mt-10 pt-6 border-t border-[#DEE2E6] dark:border-[#3D3D3D] flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-[#6C757D] dark:text-[#A1A1AA]">
                     <div class="text-center md:text-left">
                         <p>&copy; 2024 - {{ CURRENT_YEAR }} Kiri Research Labs. All rights reserved.</p>
-                        <p class="mt-1 opacity-75">RC No. 9317920 | SMEDAN ID: SUID-2621-6457-9859-4343</p>
+                        <p class="mt-1 opacity-75">RC No. 9317920 | SUID-2621-6457-9859-4343</p>
                     </div>
                     <p>Built with <i class="fas fa-heart text-[#C4992E]"></i> for researchers everywhere.</p>
                 </div>
@@ -430,11 +468,11 @@
         </footer>
     </main>
 
-    <!-- ===== PWA INSTALL BUTTON (Premium Glassmorphism) ===== -->
+    <!-- ===== PWA INSTALL BUTTON (Minimal & Functional) ===== -->
     <button id="pwa-install-btn"
-        class="hidden fixed bottom-24 md:bottom-8 right-6 w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-xl shadow-2xl hover:bg-white/20 transition-all z-40 flex items-center justify-center group"
+        class="hidden fixed bottom-24 md:bottom-8 right-6 w-9 h-9 bg-white dark:bg-[#2D2D2D] border border-gray-200 dark:border-gray-700 text-[#0D7C3D] dark:text-gray-300 rounded-full shadow-md hover:shadow-lg transition-all z-40 flex items-center justify-center group"
         title="Install Kiri App">
-        <i class="fas fa-download text-lg group-hover:scale-110 transition-transform"></i>
+        <i class="fas fa-download text-xs group-hover:scale-110 transition-transform"></i>
     </button>
 
     <!-- ===== MOBILE BOTTOM NAV ===== -->

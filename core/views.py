@@ -139,6 +139,12 @@ def offline(request):
 
 
 @login_not_required
+def refund_policy(request):
+    """Refund policy page."""
+    return render(request, "core/refund.html")
+
+
+@login_not_required
 def health(request):
     """Health check endpoint for deployment verification."""
     return JsonResponse({
@@ -157,12 +163,22 @@ def serviceworker(request):
 @login_not_required
 def pwa_manifest(request):
     """
-    Serve manifest.json with login_not_required to allow PWA installation 
-    even when global login is enforced.
+    Serve manifest.json from settings with login_not_required.
     """
-    response = render(request, "manifest.json")
-    response['Content-Type'] = 'application/json'
-    return response
+    from django.conf import settings
+    manifest = {
+        "name": getattr(settings, "PWA_APP_NAME", "Kiri"),
+        "short_name": getattr(settings, "PWA_APP_SHORT_NAME", "Kiri"),
+        "description": getattr(settings, "PWA_APP_DESCRIPTION", ""),
+        "start_url": getattr(settings, "PWA_APP_START_URL", "/"),
+        "display": getattr(settings, "PWA_APP_DISPLAY", "standalone"),
+        "background_color": getattr(settings, "PWA_APP_BACKGROUND_COLOR", "#FFFFFF"),
+        "theme_color": getattr(settings, "PWA_APP_THEME_COLOR", "#000000"),
+        "orientation": getattr(settings, "PWA_APP_ORIENTATION", "any"),
+        "scope": getattr(settings, "PWA_APP_SCOPE", "/"),
+        "icons": getattr(settings, "PWA_APP_ICONS", []),
+    }
+    return JsonResponse(manifest)
 
 
 @login_not_required

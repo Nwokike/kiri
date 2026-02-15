@@ -8,14 +8,14 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Kiri{% endblock %}</title>
     <meta name="description"
-        content="{% block meta_description %}The operating system for modern research.{% endblock %}">
+        content="{% block meta_description %}The efficiency frontier of Artificial Intelligence. Smart, Small, Scalable.{% endblock %}">
     <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
 
     <!-- Open Graph -->
     <meta property="og:type" content="website">
     <meta property="og:title" content="{% block og_title %}Kiri{% endblock %}">
     <meta property="og:description"
-        content="{% block og_description %}The operating system for modern research.{% endblock %}">
+        content="{% block og_description %}The efficiency frontier of Artificial Intelligence. Smart, Small, Scalable.{% endblock %}">
 
     <!-- Inter Font -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -347,7 +347,8 @@
                         <a href="/" class="flex items-center gap-2 mb-4">
                             <img src="{% static 'images/logos/logo.png' %}" alt="Kiri" class="h-10 w-auto">
                         </a>
-                        <p class="text-sm text-[#6C757D] dark:text-[#A1A1AA]">The operating system for modern research.
+                        <p class="text-sm text-[#6C757D] dark:text-[#A1A1AA]">The efficiency frontier of Artificial
+                            Intelligence. Smart, Small, Scalable.
                         </p>
                     </div>
 
@@ -383,6 +384,9 @@
                             <li><a href="{% url 'core:terms' %}"
                                     class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">Terms</a>
                             </li>
+                            <li><a href="{% url 'core:refund_policy' %}"
+                                    class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">Refunds</a>
+                            </li>
                             <li><a href="{% url 'core:contact' %}"
                                     class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">Contact</a>
                             </li>
@@ -415,19 +419,22 @@
 
                 <!-- Bottom -->
                 <div
-                    class="mt-10 pt-6 border-t border-[#DEE2E6] dark:border-[#3D3D3D] flex flex-col md:flex-row justify-between items-center gap-4 text-sm text-[#6C757D] dark:text-[#A1A1AA]">
-                    <p>&copy; 2026 Kiri Research Labs. All rights reserved.</p>
+                    class="mt-10 pt-6 border-t border-[#DEE2E6] dark:border-[#3D3D3D] flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-[#6C757D] dark:text-[#A1A1AA]">
+                    <div class="text-center md:text-left">
+                        <p>&copy; 2024 - {{ CURRENT_YEAR }} Kiri Research Labs. All rights reserved.</p>
+                        <p class="mt-1 opacity-75">RC No. 9317920 | SMEDAN ID: SUID-2621-6457-9859-4343</p>
+                    </div>
                     <p>Built with <i class="fas fa-heart text-[#C4992E]"></i> for researchers everywhere.</p>
                 </div>
             </div>
         </footer>
     </main>
 
-    <!-- ===== PWA INSTALL BUTTON ===== -->
+    <!-- ===== PWA INSTALL BUTTON (Premium Glassmorphism) ===== -->
     <button id="pwa-install-btn"
-        class="hidden fixed bottom-20 md:bottom-6 right-4 w-12 h-12 bg-gradient-to-r from-[#0D7C3D] to-[#0A5C2C] text-white rounded-full shadow-lg hover:shadow-xl transition-all z-40 flex items-center justify-center animate-bounce"
+        class="hidden fixed bottom-24 md:bottom-8 right-6 w-12 h-12 bg-white/10 backdrop-blur-md border border-white/20 text-white rounded-xl shadow-2xl hover:bg-white/20 transition-all z-40 flex items-center justify-center group"
         title="Install Kiri App">
-        <i class="fas fa-download text-lg"></i>
+        <i class="fas fa-download text-lg group-hover:scale-110 transition-transform"></i>
     </button>
 
     <!-- ===== MOBILE BOTTOM NAV ===== -->

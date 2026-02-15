@@ -42,7 +42,19 @@ self.addEventListener('fetch', event => {
         event.respondWith(
             caches.match(event.request)
                 .then(response => {
-                    return response || fetch(event.request);
+                    if (response) {
+                        // Ensure cached response has CORP to satisfy COEP: require-corp
+                        const newHeaders = new Headers(response.headers);
+                        if (!newHeaders.has('Cross-Origin-Resource-Policy')) {
+                            newHeaders.set('Cross-Origin-Resource-Policy', 'cross-origin');
+                        }
+                        return new Response(response.body, {
+                            status: response.status,
+                            statusText: response.statusText,
+                            headers: newHeaders
+                        });
+                    }
+                    return fetch(event.request);
                 })
         );
     }

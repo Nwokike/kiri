@@ -6,7 +6,7 @@ import requests
 import json
 import hashlib
 from django.http import JsonResponse
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, login_not_required
 from django.views.decorators.http import require_GET
 from django.core.cache import cache
 from users.models import UserIntegration
@@ -173,14 +173,25 @@ def save_gist_api(request):
         return JsonResponse({"error": str(e)}, status=500)
 
 
-@login_required
+@login_not_required
 async def studio_ai_assist(request):
     """API for Kiri Studio AI assistance (Explain, Debug, Write)."""
-    # 4.3: Rate limiting (10 per minute per user)
-    rate_key = f"ai_assist_rate_{request.user.id}"
-    if cache.get(rate_key, 0) >= 10:
+    # 4.3: Rate limiting (10 per minute per user/IP)
+    if request.user.is_authenticated:
+        rate_key = f"ai_assist_rate_{request.user.id}"
+    else:
+        # Get client IP
+        x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+        if x_forwarded_for:
+            ip = x_forwarded_for.split(',')[0]
+        else:
+            ip = request.META.get('REMOTE_ADDR')
+        rate_key = f"ai_assist_rate_ip_{ip}"
+        
+    current_count = cache.get(rate_key, 0)
+    if current_count >= 10:
         return JsonResponse({"error": "Rate limit exceeded. Please wait a minute."}, status=429)
-    cache.set(rate_key, cache.get(rate_key, 0) + 1, 60)
+    cache.set(rate_key, current_count + 1, 60)
 
     if request.method != "POST":
         return JsonResponse({"error": "Method not allowed"}, status=405)

@@ -1,44 +1,38 @@
-# Kiri Architecture: The "Zero-Local-File" Policy
+# Kiri Architecture: Intelligence Scalable to Zero
 
-**Date:** January 2026
-**Version:** 1.0
+**Date:** February 15, 2026
+**Version:** 1.2
 
 ## Core Philosophy
-To maximize scalability and operate within the constraints of strict cloud environments (1GB RAM, ephemeral filesystems), Kiri adopts a **"GitHub-First"** storage strategy. We minimize local state and delegate content storage to GitHub.
+To maximize scalability and operate within the constraints of strict cloud environments, Kiri adopts an **"Intelligence on the Edge"** strategy. We minimize server-side state and delegate heavy execution to the client's browser (WASM) or ephemeral cloud runners.
 
-## 1. Storage Strategy
+## 1. Storage & Task Strategy
 
-### 1.1 Projects
-- **Source of Truth**: The GitHub Repository.
-- **Kiri Role**: Kiri acts as a viewer/editor interface. It does not "host" the code in its own database.
-- **Syncing**: 
-    - Viewing: Code is fetched via GitHub API.
-    - Editing: Changes are committed directly to GitHub via API.
-    - Cloning: Temporary clones in ephemeral `tmp/` directories for heavy analysis (Lane B/C).
+### 1.1 GitHub-First Storage
+- **Source of Truth**: All user code and publications are stored in GitHub repositories.
+- **Kiri Role**: Acts as a high-fidelity interface for discovery, viewing, and "Vibe Coding."
 
-### 1.2 Publications (New in Phase 4.5)
-- **Content**: Stored as Markdown files in user's GitHub repositories (e.g., `username/my-kiri-papers`).
-- **Media**: Images/Assets are committed to the same repository.
-- **Database**: Stores metadata (title, abstract, stars) and a *pointer* (URL) to the GitHub file.
-- **Rendering**: Kiri fetches the raw Markdown from GitHub and renders it.
+### 1.2 Native Task Management
+- **Scheduler**: Kiri uses **Native Django Tasks** (@task) and a custom management command (`run_periodic_tasks.py`).
+- **Intervals**:
+  - **Frequent (30m)**: GitHub metadata/stats sync.
+  - **Daily**: Database backups to R2, Hot project updates.
+- **Cleanup**: Ephemeral `tmp/` directories are purged hourly via `cleanup_tmp_files`.
 
-### 1.3 User Files
-- **Uploads**: Direct-to-GitHub (via API) or Direct-to-R2 (for profile pics).
-- **No Local Storage**: We do not store user files on the application server disk.
+## 2. Security & Isolation
 
-## 2. Ephemeral Processing & Cleanup
-Since some operations (like dependency analysis or building a container) require local files:
-- **Location**: Use system temp directories (e.g., `/tmp/kiri_repos`).
-- **Lifecycle**: Files exist only for the duration of the task.
-- **Garbage Collection**: A periodic native task (`cleanup_tmp_files`) runs via hourly crontab to forcefully remove any files older than 1 hour.
+### 2.1 Cross-Origin Isolation
+To enable high-performance WASM features (SharedArrayBuffer), Kiri implements:
+- **Global CORP**: `Cross-Origin-Resource-Policy: cross-origin` set in `settings.py` to allow resource sharing across origins.
+- **Path-Specific COOP/COEP**: Applied to `/studio/` and `/playground/` via `SecurityHeadersMiddleware` to enable a strict secure context.
 
 ## 3. Benefits
-1.  **Statelessness**: The app server can be killed/restarted without data loss.
-2.  **Versioning**: Users get full Git history for their publications and projects for free.
-3.  **Ownership**: Users own their data (in their GitHub), not locked into Kiri.
-4.  **Cost**: Drastically reduces Kiri's storage costs (R2/S3 only for backups).
+1.  **State-Scalability**: The "Intelligence Scalable to Zero" model ensures the platform remains performant without massive infrastructure costs.
+2.  **Ownership**: Users own their data (in their GitHub), ensuring no platform lock-in.
+3.  **Privacy/Security**: Client-side execution (Pyodide) prevents user code logic from hitting our servers unless necessary.
 
-## 4. Implementation Details
-- **Native Task**: `kiri_project.tasks.cleanup_tmp_files`
-- **Models**: `Publication` has `github_repo_url` field.
-- **API**: Uses `projects.services.GitHubService` for all file interactions.
+## 4. Implementation Reference
+- **Middleware**: `kiri_project.middleware.SecurityHeadersMiddleware`
+- **Native Tasks**: `kiri_project.tasks.py`
+- **Periodic Runner**: `core.management.commands.run_periodic_tasks`
+- **Services**: `projects.services.GitHubService` for all file interactions.

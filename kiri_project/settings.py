@@ -154,6 +154,14 @@ STATIC_URL = "static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
+# WhiteNoise Headers for COEP/CORP compatibility
+WHITENOISE_CUSTOM_HEADERS = [
+    (r'.*', {
+        'Cross-Origin-Resource-Policy': 'cross-origin',
+        'Access-Control-Allow-Origin': '*',
+    }),
+]
+
 # Storage Configuration (Cloudflare R2 for Prod / Media)
 STORAGES = {
     "default": {
@@ -338,9 +346,9 @@ LOGGING = {
 }
 
 # PWA Settings
-PWA_APP_NAME = 'Kiri Research Labs'
-PWA_APP_SHORT_NAME = 'Kiri'
-PWA_APP_DESCRIPTION = 'The Post-Compute Research Lab'
+PWA_APP_NAME = "Kiri"
+PWA_APP_SHORT_NAME = "Kiri"
+PWA_APP_DESCRIPTION = "The Efficiency Frontier of Artificial Intelligence. Smart. Small. Scalable."
 PWA_APP_THEME_COLOR = '#2E9A4F'
 PWA_APP_BACKGROUND_COLOR = '#0F2F1B'
 PWA_APP_DISPLAY = 'standalone'
@@ -348,8 +356,8 @@ PWA_APP_SCOPE = '/'
 PWA_APP_ORIENTATION = 'any'
 PWA_APP_START_URL = '/'
 PWA_APP_ICONS = [
-    {'src': '/static/images/icons/icon-192x192.png', 'sizes': '192x192'},
-    {'src': '/static/images/icons/icon-512x512.png', 'sizes': '512x512'}
+    {'src': '/static/images/icons/icon-192x192.png', 'sizes': '192x192', 'type': 'image/png'},
+    {'src': '/static/images/icons/icon-512x512.png', 'sizes': '512x512', 'type': 'image/png'}
 ]
 # Note: Service worker served via core.views.serviceworker, not static file
 # PWA_SERVICE_WORKER_PATH setting is not used with our template-based approach

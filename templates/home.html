@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Kiri - The Research OS{% endblock %}
+{% block title %}Kiri - Intelligence on the Edge{% endblock %}
 
 {% block content %}
 <div class="max-w-7xl mx-auto px-6 py-8">
@@ -12,10 +12,11 @@
             class="relative overflow-hidden rounded-2xl bg-gradient-to-br from-[#0D7C3D] via-[#0A5C2C] to-[#084422] p-8 md:p-12">
             <div class="relative z-10">
                 <h1 class="text-3xl md:text-4xl font-bold text-white mb-4">
-                    The Research OS
+                    Intelligence on the Edge
                 </h1>
                 <p class="text-lg text-white/80 max-w-xl mb-6">
-                    Discover, share, and run research projects instantly. From papers to working code in one click.
+                    The Efficiency Frontier of Artificial Intelligence. Smart. Small. Scalable. Applied research and
+                    tools for the modern era.
                 </p>
 
                 <!-- Dynamic Stats Bar -->
@@ -242,15 +243,15 @@
                 <div class="space-y-3">
                     <div class="flex items-center justify-between">
                         <span class="text-sm text-[#6C757D] dark:text-[#A1A1AA]">Projects</span>
-                        <span class="text-sm font-semibold text-[#212529] dark:text-white">{{ stats.total_projects}}</span>
+                        <span class="text-sm font-semibold text-[#212529] dark:text-white">{{stats.total_projects}}</span>
                     </div>
                     <div class="flex items-center justify-between">
                         <span class="text-sm text-[#6C757D] dark:text-[#A1A1AA]">Publications</span>
-                        <span class="text-sm font-semibold text-[#212529] dark:text-white">{{ stats.total_publications}}</span>
+                        <span class="text-sm font-semibold text-[#212529] dark:text-white">{{stats.total_publications}}</span>
                     </div>
                     <div class="flex items-center justify-between">
                         <span class="text-sm text-[#6C757D] dark:text-[#A1A1AA]">Researchers</span>
-                        <span class="text-sm font-semibold text-[#212529] dark:text-white">{{ stats.total_researchers}}</span>
+                        <span class="text-sm font-semibold text-[#212529] dark:text-white">{{stats.total_researchers}}</span>
                     </div>
                 </div>
             </div>
@@ -262,7 +263,8 @@
                     About
                 </h3>
                 <p class="text-sm text-[#6C757D] dark:text-[#A1A1AA] mb-4">
-                    Kiri is a platform for discovering, sharing, and running research projects.
+                    Kiri is a platform for applied research and AI-driven solutions developed by <strong>Kiri Research
+                        Labs</strong>.
                 </p>
                 <a href="{% url 'core:about' %}" class="text-sm text-[#0D7C3D] hover:underline font-medium">
                     Learn More <i class="fas fa-arrow-right ml-1"></i>

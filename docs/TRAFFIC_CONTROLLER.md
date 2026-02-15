@@ -1,8 +1,8 @@
-# Traffic Controller - Technical Documentation
+# Traffic Controller: Intelligence Scalable to Zero
 
-> Enables project previews using free external compute (WebContainers, Binder, Colab).
+> Enables multi-lane project previews using AI classification and cross-platform infrastructure.
 
-## Architecture Overview
+## Architecture
 
 ```mermaid
 flowchart LR
@@ -12,30 +12,36 @@ flowchart LR
     
     subgraph Kiri Backend
         NT[Native Task Queue]
-        AI[AI Classifier]
+        AI[Multi-Tier AI Rotation]
         GS[Gist Service]
     end
     
-    subgraph External Free Compute
-        WC[WebContainer<br/>Browser]
-        BD[Binder<br/>mybinder.org]
-        CL[Colab<br/>Google GPU]
+    subgraph Infrastructure
+        KS[Kiri Studio<br/>Pyodide/WASM]
+        BD[Binder<br/>Cloud Server]
+        CL[Colab<br/>GPU Power]
     end
     
     U --> NT
     NT --> AI
-    AI --> |Lane A| WC
+    AI --> |Lane A| KS
     AI --> |Lane B| GS --> BD
     AI --> |Lane C| GS --> CL
 ```
 
-## Lane Classification
+## Lane Logic
 
-| Lane | Badge | Criteria | Infrastructure |
-|------|-------|----------|----------------|
-| **A** | 🟢 Instant Run | React, Vue, Node.js, static sites | **Kiri Studio** (Built-in IDE) |
-| **B** | 🟠 Cloud Boot | Django, Flask, FastAPI, Docker | [mybinder.org](https://mybinder.org) |
-| **C** | 🔴 GPU Powered | PyTorch, TensorFlow, Transformers | [Google Colab](https://colab.research.google.com) |
+| Lane | Badge | Best For | Runner |
+|------|-------|----------|--------|
+| **A** | 🟢 Instant Run | React, Static, Python Scripts | **Kiri Studio** |
+| **B** | 🟠 Cloud Boot | Django, Flask, Backends | [mybinder.org](https://mybinder.org) |
+| **C** | 🔴 GPU Powered | ML Models, PyTorch, JAX | [Google Colab](https://colab.research.google.com) |
+
+## Multi-Tier AI Fallback Chain
+Kiri rotates through 15+ models to ensure 100% classification uptime:
+1. **Tier 1 (Groq/Free)**: Moonshot (Kimi K2 Instruct), Llama 4 (Scout/Maverick), GPT OSS (120B/20B), Qwen 3.
+2. **Tier 2 (Gemini/Paid)**: Gemini 3 Flash, Gemini 2.5 Flash, Gemini 3 Pro.
+3. **Tier 3 (Last Resort)**: Llama 3.1 8B Instant.
 
 ## Files
 
@@ -45,6 +51,20 @@ flowchart LR
 | `projects/gist_service.py` | GitHub Gist creation for Binder/Colab |
 | `projects/models.py` | `lane`, `execution_url`, `gist_id` fields |
 | `kiri_project/tasks.py` | `classify_project_lane()` background task |
+
+## Technical request flow
+1. **Fetch**: `GitHubService` retrieves the repository file tree and key meta-files (`package.json`, `requirements.txt`).
+2. **Rotation**: `AIService` sends the context to the fallback chain. It rotates through providers (Groq -> Gemini) until a valid JSON response is received.
+3. **Heuristics**: If all AI models fail, `AIService._heuristic_classification` provides a regex-based fallback.
+4. **Provisioning**: 
+    - **Lane A**: Generates a Studio link with the repo context.
+    - **Lane B/C**: `GistService` creates a bridge Gist containing the necessary environment configs (`environment.yml` or `.ipynb`).
+
+## Testing
+Verify the controller via:
+```bash
+uv run python manage.py test projects.tests
+```
 
 ## API Keys Required
 
@@ -57,29 +77,12 @@ KIRI_BOT_USERNAME=...     # GitHub username for bot
 ```
 
 ## Request Flow
-
-```mermaid
-sequenceDiagram
-    participant U as User
-    participant K as Kiri
-    participant G as GitHub
-    participant AI as Gemini/Groq
-    participant GH as Gists
-    
-    U->>K: Submit project URL
-    K->>G: Fetch repo structure
-    K->>AI: Classify lane
-    AI-->>K: {lane, reason, command}
-    
-    alt Lane B or C
-        K->>AI: Generate config
-        K->>GH: Create Gist
-        GH-->>K: Gist ID
-        K->>K: Build URL
-    end
-    
-    K->>U: Project with badge + launch button
-```
+1. **Submission**: User submits a GitHub URL.
+2. **Analysis**: AI analyzes the repository file structure (tree).
+3. **Classification**: AI returns the optimal "Lane" and specific execution commands.
+4. **Provisioning**: 
+    - Lane A: Loads environment in Kiri Studio.
+    - Lane B/C: Kiri Bot creates a bridge Gist and prepares the redirect.
 
 ## URL Formats
 
@@ -104,7 +107,7 @@ https://colab.research.google.com/gist/{username}/{gist_id}/demo.ipynb
 | GitHub Gists | Unlimited |
 
 ## Testing
-
+Verify the controller via:
 ```bash
-uv run python test_traffic_controller.py
+uv run python manage.py test projects.tests
 ```

@@ -1,9 +1,9 @@
 # Kiri Studio - Technical Reference
 
-> **v1.0 (Beta)** | Client-Side IDE for "Vibe Coding"
+> **v1.2 (Stable)** | Client-Side IDE for "Vibe Coding"
 
 ## Overview
-Kiri Studio is a zero-server, client-side IDE integrated into the Kiri platform. It leverages **WebAssembly (WASM)** and **WebContainers** to provide a full execution environment directly in the user's browser, eliminating the need for backend container orchestration (Docker/Kubernetes).
+Kiri Studio is a zero-server, client-side IDE integrated into the Kiri platform. It leverages **WebAssembly (WASM)** and **Pyodide** to provide a full Python execution environment directly in the user's browser, eliminating the need for backend container orchestration.
 
 ## Core Architecture
 
@@ -17,7 +17,7 @@ flowchart TD
         
         subgraph Runtimes
             PY[Pyodide (WASM)]
-            WC[WebContainer (Node.js)]
+            WC[WebContainer (Draft)]
         end
         
         FS[Virtual File System]
@@ -27,46 +27,37 @@ flowchart TD
     
     User --> UI
     UI -->|Code| FS
-    FS -->|Mount| WC
     FS -->|Read| PY
     
-    WC -->|Output| Term
     PY -->|Output| Term
-    
-    Backend -->|Context| KiriStudio
 ```
 
-## Supported Runtimes
+## Features
 
-### 1. Python (Pyodide)
-*   **Engine:** CPython compiled to WebAssembly (v0.25.0).
-*   **Capabilities:** Standard library, `pip` install (pure python wheels), async/await.
-*   **Use Case:** Data analysis, scripts, algorithm demos.
-*   **Memory:** Runs within browser tab limit (~1-2GB).
+### 1. Python Runtime (Pyodide)
+*   **Engine:** CPython compiled to WebAssembly.
+*   **Capabilities:** Standard library, custom package loading, and SharedArrayBuffer for high performance.
+*   **Isolation:** Runs entirely in a Web Worker (`pyodide_worker.js`) to keep the UI thread responsive.
 
-### 2. Node.js (WebContainers)
-*   **Engine:** Node.js running directly in browser via StackBlitz engine.
-*   **Capabilities:** Full Node.js API, `npm install`, network stack, HTTP servers.
-*   **Use Case:** React apps, Express servers, full-stack JS demos (Lane A projects).
-*   **Security:** Requires `COOP: same-origin` and `COEP: require-corp` headers (handled by `SecurityHeadersMiddleware`).
+### 2. Live Preview
+*   **Static Assets**: Instant rendering of HTML/CSS/JS files.
+*   **Hot Reload**: Virtual FS changes trigger immediate preview updates.
 
-## Backend Integration
+## Backend & Security Integration
 
-### 1. Security Headers (`middleware.py`)
-To enable `SharedArrayBuffer` for WebContainers, the `/studio/` path is protected by stricter isolation headers:
-```python
-Cross-Origin-Opener-Policy: same-origin
-Cross-Origin-Embedder-Policy: require-corp
-```
+### 1. Security Headers
+To satisfy the requirements for `SharedArrayBuffer` and cross-origin resource fetching, Kiri implements:
+- **Global CORP**: `Cross-Origin-Resource-Policy: cross-origin` allows fetching external assets.
+- **Path-Specific COOP/COEP**: Applied to `/studio/` via `SecurityHeadersMiddleware`:
+    - `Cross-Origin-Opener-Policy: same-origin`
+    - `Cross-Origin-Embedder-Policy: require-corp`
 
-### 2. Database Cache (`settings.py`)
-To maximize available RAM for the client-side runtimes, the Django backend uses `DatabaseCache` (SQLite) instead of RAM-heavy `LocMemCache`.
+### 2. Service Worker
+The PWA Service Worker is **COEP-aware**, ensuring that cached responses are served with the proper headers to maintain the isolated context required for WASM.
 
-### 3. URL Structure
-*   **Path:** `/studio/`
-*   **Arguments:** `?repo=username/repo` (Loads project context)
-
-## Future Roadmap
-*   [ ] GitHub Gist Sync (Save functionality)
-*   [ ] Multi-file support in Pyodide
-*   [ ] Persist virtual FS to IndexedDB
+## Roadmap
+*   [x] COEP-aware Service Worker [x]
+*   [x] Path-specific COOP/COEP isolation [x]
+*   [x] SharedArrayBuffer performance [x]
+*   [ ] Persistent Virtual FS to IndexedDB
+*   [ ] Multi-file Pyodide support

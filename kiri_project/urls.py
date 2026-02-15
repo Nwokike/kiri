@@ -15,6 +15,7 @@ urlpatterns = [
     path("serviceworker.js", core_views.serviceworker, name="serviceworker"),
     path("manifest.json", core_views.pwa_manifest, name="pwa_manifest"),
     path("studio/stackframe.js", core_views.silent_asset, {'filename': 'stackframe.js'}),
+    path(".well-known/appspecific/com.chrome.devtools.json", core_views.silent_asset, {'filename': 'devtools.json'}),
     path("sitemap.xml", sitemap, {'sitemaps': sitemaps}, name='sitemap'),
     path("robots.txt", TemplateView.as_view(template_name="robots.txt", content_type="text/plain")),
     path("", include("pwa.urls")),

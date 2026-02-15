@@ -10,9 +10,14 @@ class SecurityHeadersMiddleware:
     def __call__(self, request):
         response = self.get_response(request)
         
-        # Only apply strict isolation to the Studio
+        # Cross-Origin Isolation for WASM (Studio only)
         if request.path.startswith('/studio/'):
             response['Cross-Origin-Opener-Policy'] = 'same-origin'
             response['Cross-Origin-Embedder-Policy'] = 'require-corp'
+            
+        # Standardize CORP globally to allow resources to be embedded/fetched
+        # under allow-corp or require-corp policies (critical for Studio AI/Static)
+        if 'Cross-Origin-Resource-Policy' not in response:
+            response['Cross-Origin-Resource-Policy'] = 'cross-origin'
             
         return response

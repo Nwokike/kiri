@@ -53,8 +53,6 @@ INSTALLED_APPS = [
     "allauth.account",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.github",
-    "allauth.socialaccount.providers.gitlab",
-    "allauth.socialaccount.providers.bitbucket_oauth2",
     "users.providers.huggingface",  # Custom Hugging Face provider
     "django_htmx",
     "pwa",

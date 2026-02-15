@@ -313,7 +313,7 @@ class ImportLandingViewTests(TestCase):
         self.client.login(username='importer', password='password')
         response = self.client.get(self.url)
         platforms = response.context['platforms']
-        self.assertEqual(len(platforms), 4)
+        self.assertEqual(len(platforms), 2)
         names = [p['name'] for p in platforms]
         self.assertIn('GitHub', names)
         # Check Hugging Face specifically as it was a pain point

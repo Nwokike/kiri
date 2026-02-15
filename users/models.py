@@ -79,8 +79,6 @@ class UserIntegration(models.Model):
     """
     class Platform(models.TextChoices):
         GITHUB = 'github', 'GitHub'
-        GITLAB = 'gitlab', 'GitLab'
-        BITBUCKET = 'bitbucket', 'Bitbucket'
         HUGGINGFACE = 'huggingface', 'Hugging Face'
     
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='integrations')

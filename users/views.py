@@ -76,22 +76,6 @@ class IntegrationsView(LoginRequiredMixin, TemplateView):
                 'connect_url': '/accounts/github/login/?process=connect',
             },
             {
-                'id': 'gitlab',
-                'name': 'GitLab',
-                'icon': 'fab fa-gitlab',
-                'description': 'Connect your GitLab account to import projects',
-                'connected': connected.get('gitlab'),
-                'connect_url': '/accounts/gitlab/login/?process=connect',
-            },
-            {
-                'id': 'bitbucket',
-                'name': 'Bitbucket',
-                'icon': 'fab fa-bitbucket',
-                'description': 'Connect your Bitbucket account to import repositories',
-                'connected': connected.get('bitbucket'),
-                'connect_url': '/accounts/bitbucket_oauth2/login/?process=connect',
-            },
-            {
                 'id': 'huggingface',
                 'name': 'Hugging Face',
                 'icon': 'fas fa-robot',

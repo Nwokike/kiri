@@ -88,8 +88,6 @@ class ImportLandingView(LoginRequiredMixin, ListView):
         
         platforms = [
             {'name': 'GitHub', 'icon': 'fab fa-github', 'connected': connected_map.get('github'), 'connect_url': '/accounts/github/login/?process=connect'},
-            {'name': 'GitLab', 'icon': 'fab fa-gitlab', 'connected': connected_map.get('gitlab'), 'connect_url': '/accounts/gitlab/login/?process=connect'},
-            {'name': 'Bitbucket', 'icon': 'fab fa-bitbucket', 'connected': connected_map.get('bitbucket'), 'connect_url': '/accounts/bitbucket_oauth2/login/?process=connect'},
             {'name': 'Hugging Face', 'icon': 'fas fa-robot text-[#FFD21E]', 'connected': connected_map.get('huggingface'), 'connect_url': '/accounts/huggingface/login/?process=connect'},
         ]
         context['platforms'] = platforms

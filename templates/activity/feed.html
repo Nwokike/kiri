@@ -28,11 +28,13 @@
                                     <span class="font-medium text-gray-900 dark:text-white">{{ action.user.username
                                         }}</span>
                                     {{ action.verb }}
-                                    {% if action.target %}
-                                    <a href="{{ action.target.get_absolute_url }}"
+                                    {% if action.bulk_target %}
+                                    <a href="{{ action.bulk_target.get_absolute_url }}"
                                         class="font-medium text-gray-900 dark:text-white hover:text-blue-600 dark:hover:text-blue-400">
-                                        {{ action.target }}
+                                        {{ action.bulk_target }}
                                     </a>
+                                    {% elif action.target_id %}
+                                    <span class="text-gray-400 font-italic">#{{ action.target_id }} (deleted)</span>
                                     {% endif %}
                                 </p>
                             </div>

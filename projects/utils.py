@@ -2,19 +2,7 @@ from django.utils import timezone
 from datetime import timedelta
 from .services import GitHubService
 
-def fetch_github_metadata(repo_url):
-    """
-    Deprecated wrapper: Use GitHubService.fetch_repo_data directly.
-    Kept for backward compatibility if needed, but returns subset of data to match old signature.
-    """
-    data = GitHubService.fetch_repo_data(repo_url)
-    if data:
-        return {
-            'stars_count': data['stars_count'],
-            'language': data['language'],
-            'description': data['description']
-        }
-    return None
+# fetch_github_metadata is deprecated. Use GitHubService.fetch_repo_data directly.
 
 def sync_project_metadata(project):
     """

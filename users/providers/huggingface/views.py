@@ -33,6 +33,10 @@ class HuggingFaceOAuth2Adapter(OAuth2Adapter):
         }
         
         response = requests.get(self.profile_url, headers=headers, timeout=15)
+        if not response.ok:
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Hugging Face profile fetch failed: {response.status_code} - {response.text}")
         response.raise_for_status()
         extra_data = response.json()
         

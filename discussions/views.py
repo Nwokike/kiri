@@ -1,32 +1,48 @@
 from django.views.generic import ListView, DetailView, CreateView
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.shortcuts import redirect
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_not_required
+from django.shortcuts import redirect, get_object_or_404
 from django.urls import reverse_lazy
+from django.http import JsonResponse
+from django.db.models import F
 from .models import Topic, Reply
 from .forms import TopicForm, ReplyForm
 
+@method_decorator(login_not_required, name='dispatch')
 class TopicListView(ListView):
     model = Topic
     template_name = 'discussions/topic_list.html'
     paginate_by = 20
     
     def get_queryset(self):
-        qs = super().get_queryset()
+        qs = Topic.objects.all().select_related('author')
         category = self.request.GET.get('category')
         if category:
             qs = qs.filter(category=category)
+        
+        # 4.2: Filter closed topics if needed (default to visible but can toggle)
+        if self.request.GET.get('active_only'):
+            qs = qs.filter(is_closed=False)
+            
         return qs
 
+@method_decorator(login_not_required, name='dispatch')
 class TopicDetailView(DetailView):
     model = Topic
     template_name = 'discussions/topic_detail.html'
     
+    def get_queryset(self):
+        return Topic.objects.all().select_related('author').prefetch_related('replies__author')
+
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
         context['reply_form'] = ReplyForm()
-        # Increment view count
-        self.object.view_count += 1
-        self.object.save(update_fields=['view_count'])
+        
+        # 3.2: Atomic View Count Increment
+        Topic.objects.filter(pk=self.object.pk).update(view_count=F('view_count') + 1)
+        self.object.refresh_from_db(fields=['view_count'])
+        
         return context
         
     def post(self, request, *args, **kwargs):
@@ -55,3 +71,20 @@ class TopicCreateView(LoginRequiredMixin, CreateView):
         from activity.utils import create_action
         create_action(self.request.user, 'started a discussion', self.object)
         return response
+
+def mark_solution_api(request, reply_id):
+    """API view to mark a reply as the solution."""
+    
+    reply = get_object_or_404(Reply, pk=reply_id)
+    
+    # Only the topic author can mark a solution
+    if request.user != reply.topic.author:
+        return JsonResponse({'error': 'Only the author can mark a solution'}, status=403)
+    
+    # Unmark any existing solution for this topic
+    reply.topic.replies.filter(is_solution=True).update(is_solution=False)
+    
+    reply.is_solution = True
+    reply.save()
+    
+    return JsonResponse({'status': 'ok'})

@@ -167,7 +167,8 @@
   author = { {{ publication.author.username|bibtex_escape }} },
   journal = { Kiri Research Labs },
   year = { {{ publication.created_at|date:"Y" }} },
-  url = { {{ request.build_absolute_uri }} }
+  url = { {{ request.build_absolute_uri }} }{% if publication.doi %},
+  doi = { {{ publication.doi|bibtex_escape }} }{% endif %}
 }</pre>
     </div>
 

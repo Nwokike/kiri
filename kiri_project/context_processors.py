@@ -10,5 +10,6 @@ def kiri_settings(request):
     """
     return {
         'GOOGLE_ANALYTICS_ID': os.environ.get('GOOGLE_ANALYTICS_ID', ''),
+        'ADSENSE_CLIENT_ID': os.environ.get('ADSENSE_CLIENT_ID', ''),
         'SITE_URL': os.environ.get('SITE_URL', 'https://kiri.ng'),
     }

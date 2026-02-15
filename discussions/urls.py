@@ -7,4 +7,5 @@ urlpatterns = [
     path('', views.TopicListView.as_view(), name='list'),
     path('create/', views.TopicCreateView.as_view(), name='create'),
     path('<slug:slug>/', views.TopicDetailView.as_view(), name='detail'),
+    path('reply/<int:reply_id>/solution/', views.mark_solution_api, name='mark_solution'),
 ]

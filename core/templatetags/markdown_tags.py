@@ -1,5 +1,5 @@
 import markdown
-import bleach
+import nh3
 from django import template
 from django.utils.safestring import mark_safe
 
@@ -8,7 +8,7 @@ register = template.Library()
 @register.filter
 def render_markdown(value):
     """
-    Renders markdown to HTML with bleach sanitization.
+    Renders markdown to HTML with nh3 sanitization.
     """
     if not value:
         return ""
@@ -28,18 +28,21 @@ def render_markdown(value):
     ]
     
     allowed_attributes = {
-        'a': ['href', 'title', 'target'],
-        'img': ['src', 'alt', 'title'],
-        'code': ['class'],
-        '*': ['class']
+        'a': {'href', 'title', 'target'},
+        'img': {'src', 'alt', 'title'},
+        'code': {'class'},
+        '*': {'class'}
     }
     
+    # Define allowed protocols
+    allowed_protocols = ['http', 'https', 'mailto']
+    
     # Sanitize
-    cleaned_html = bleach.clean(
+    cleaned_html = nh3.clean(
         html_content, 
-        tags=allowed_tags, 
+        tags=set(allowed_tags), 
         attributes=allowed_attributes,
-        strip=True
+        url_schemes=set(allowed_protocols)
     )
     
     return mark_safe(cleaned_html)

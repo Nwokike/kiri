@@ -15,4 +15,8 @@ class Action(models.Model):
         ordering = ('-created',)
 
     def __str__(self):
-        return f'{self.user} {self.verb} {self.target}'
+        try:
+            target = str(self.target) if self.target else ""
+        except Exception:
+            target = f"#{self.target_id} (deleted)"
+        return f'{self.user} {self.verb} {target}'

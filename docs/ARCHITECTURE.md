@@ -30,7 +30,7 @@ To maximize scalability and operate within the constraints of strict cloud envir
 Since some operations (like dependency analysis or building a container) require local files:
 - **Location**: Use system temp directories (e.g., `/tmp/kiri_repos`).
 - **Lifecycle**: Files exist only for the duration of the task.
-- **Garbage Collection**: A periodic Huey task (`cleanup_tmp_files`) runs every 4 hours to forcefully remove any files older than 1 hour.
+- **Garbage Collection**: A periodic native task (`cleanup_tmp_files`) runs via hourly crontab to forcefully remove any files older than 1 hour.
 
 ## 3. Benefits
 1.  **Statelessness**: The app server can be killed/restarted without data loss.
@@ -39,6 +39,6 @@ Since some operations (like dependency analysis or building a container) require
 4.  **Cost**: Drastically reduces Kiri's storage costs (R2/S3 only for backups).
 
 ## 4. Implementation Details
-- **Huey Task**: `kiri_project.tasks.cleanup_tmp_files`
+- **Native Task**: `kiri_project.tasks.cleanup_tmp_files`
 - **Models**: `Publication` has `github_repo_url` field.
 - **API**: Uses `projects.services.GitHubService` for all file interactions.

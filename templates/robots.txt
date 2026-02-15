@@ -3,15 +3,12 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: https://kiri.ng/sitemap.xml
-
-# Crawl-delay for politeness
-Crawl-delay: 1
+Sitemap: {{ SITE_URL }}/sitemap.xml
 
 # Disallow admin and private areas
 Disallow: /admin/
 Disallow: /accounts/
-Disallow: /api/
+Disallow: /projects/api/
 
 # Allow static and media
 Allow: /static/

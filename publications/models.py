@@ -1,6 +1,13 @@
-from django.db import models
+from django.db import models, transaction
 from django.conf import settings
 from django.utils.text import slugify
+from django.urls import reverse
+from django.core.exceptions import ValidationError
+import re
+
+def validate_path_traversal(value):
+    if '..' in value or value.startswith('/') or '//' in value:
+        raise ValidationError("Invalid path: path traversal or absolute paths are not allowed.")
 
 class Publication(models.Model):
     """
@@ -12,8 +19,13 @@ class Publication(models.Model):
     content = models.TextField(help_text="Main content in Markdown.")
     
     # GitHub-First Storage
-    github_repo_url = models.CharField(max_length=255, blank=True, help_text="URL to the GitHub repository storing content.")
-    github_file_path = models.CharField(max_length=255, blank=True, help_text="Path to the markdown file within the repo.")
+    github_repo_url = models.URLField(max_length=255, blank=True, help_text="URL to the GitHub repository storing content.")
+    github_file_path = models.CharField(
+        max_length=255, 
+        blank=True, 
+        validators=[validate_path_traversal],
+        help_text="Path to the markdown file within the repo (e.g. docs/paper.md)."
+    )
     
     # Metadata
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="authored_publications")
@@ -58,20 +70,22 @@ class Publication(models.Model):
         # Version Handling & Revision Creation
         is_new = self.pk is None
         if not is_new:
-            try:
-                old = Publication.objects.get(pk=self.pk)
-                if old.content != self.content:
-                    self.version += 1
-                    # Save Revision
-                    PublicationRevision.objects.create(
-                        publication=self,
-                        version=old.version,
-                        title=old.title,
-                        content=old.content,
-                        created_at=old.updated_at
-                    )
-            except Publication.DoesNotExist:
-                pass
+            with transaction.atomic():
+                try:
+                    # Use select_for_update to handle concurrent edits
+                    old = Publication.objects.select_for_update().get(pk=self.pk)
+                    if old.content != self.content:
+                        self.version = old.version + 1
+                        # Save Revision
+                        PublicationRevision.objects.create(
+                            publication=self,
+                            version=old.version,
+                            title=old.title,
+                            content=old.content,
+                            created_at=old.updated_at
+                        )
+                except Publication.DoesNotExist:
+                    pass
                 
         super().save(*args, **kwargs)
 
@@ -79,7 +93,6 @@ class Publication(models.Model):
         return self.title
     
     def get_absolute_url(self):
-        from django.urls import reverse
         return reverse("publications:detail", kwargs={"slug": self.slug})
 
 
@@ -92,6 +105,9 @@ class PublicationRevision(models.Model):
     
     class Meta:
         ordering = ['-version']
+        constraints = [
+            models.UniqueConstraint(fields=['publication', 'version'], name='unique_publication_version')
+        ]
         
     def __str__(self):
         return f"{self.publication.title} v{self.version}"

@@ -3,6 +3,8 @@ API views for fetching user repositories from connected platforms.
 """
 import logging
 import requests
+import json
+import hashlib
 from django.http import JsonResponse
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_GET
@@ -180,7 +182,7 @@ def user_repos_api(request):
     integrations = UserIntegration.objects.filter(user=request.user)
     
     for integration in integrations:
-        token = integration.access_token
+        token = integration.get_decrypted_access_token()
         if not token:
             continue
         
@@ -205,6 +207,12 @@ def user_repos_api(request):
 @login_required
 def save_gist_api(request):
     """API to save code as a Gist."""
+    # 4.3: Rate limiting (10 per minute per user)
+    rate_key = f"gist_rate_{request.user.id}"
+    if cache.get(rate_key, 0) >= 10:
+        return JsonResponse({"error": "Rate limit exceeded. Please wait a minute."}, status=429)
+    cache.set(rate_key, cache.get(rate_key, 0) + 1, 60)
+
     if request.method != "POST":
         return JsonResponse({"error": "Method not allowed"}, status=405)
         
@@ -233,8 +241,14 @@ def save_gist_api(request):
 
 
 @login_required
-def studio_ai_assist(request):
+async def studio_ai_assist(request):
     """API for Kiri Studio AI assistance (Explain, Debug, Write)."""
+    # 4.3: Rate limiting (10 per minute per user)
+    rate_key = f"ai_assist_rate_{request.user.id}"
+    if cache.get(rate_key, 0) >= 10:
+        return JsonResponse({"error": "Rate limit exceeded. Please wait a minute."}, status=429)
+    cache.set(rate_key, cache.get(rate_key, 0) + 1, 60)
+
     if request.method != "POST":
         return JsonResponse({"error": "Method not allowed"}, status=405)
         
@@ -256,22 +270,17 @@ def studio_ai_assist(request):
         
         prompt = prompts.get(task, f"Analyze this:\n{code}")
         
-        # Reuse the AI Advisor logic if possible, or simple direct call
-        # For speed/simplicity here, we'll try to import the service helper
-        from .ai_advisor import call_ai
-        
-        # We need to await? No, call_ai is async but Django view is sync unless async def
-        # wrapper. Let's make this view async or use async_to_sync
-        from asgiref.sync import async_to_sync
-        response = async_to_sync(call_ai)(prompt)
+        # 3.3: Use unified AI service
+        ai_service = get_ai_service()
+        response = await ai_service.generate_json(prompt)
         
         # Parse JSON if call_ai returns JSON string, or just return text
         try:
-            # call_ai might return a dict or string depending on implementation
-            if isinstance(response, str):
-                return JsonResponse({"result": response})
-            return JsonResponse(response)
-        except:
+            # AIService.generate_json_sync returns a dict or None
+            if response is None:
+                return JsonResponse({"error": "AI service failure"}, status=500)
+            return JsonResponse({"result": response} if isinstance(response, str) else response)
+        except Exception as e:
             return JsonResponse({"result": str(response)})
 
     except Exception as e:
@@ -290,8 +299,12 @@ def repo_files_api(request):
         return JsonResponse({"error": "Missing URL"}, status=400)
     
     from .services import GitHubService
-    # Fetch structure (cached inside service if implemented, or we cache here)
-    cache_key = f"repo_files_{repo_url}"
+    # 4.2: Validate and hash repo_url for cache key
+    if not repo_url.startswith("https://github.com/"):
+        return JsonResponse({"error": "Invalid repository URL. Only GitHub is supported for file listing."}, status=400)
+    
+    url_hash = hashlib.sha256(repo_url.encode()).hexdigest()
+    cache_key = f"repo_files_{url_hash}"
     cached = cache.get(cache_key)
     if cached:
         return JsonResponse({"files": cached})

@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load crispy_forms_tags %}
+
 
 {% block title %}Start Discussion | Kiri{% endblock %}
 
@@ -10,7 +10,9 @@
     <div class="bg-white dark:bg-[#1E1E1E] border border-gray-200 dark:border-[#333] rounded-lg p-6">
         <form method="post">
             {% csrf_token %}
-            {{ form|crispy }}
+            {% for field in form %}
+            {{ field.as_field_group }}
+            {% endfor %}
             <div class="flex justify-end gap-3 mt-6">
                 <a href="{% url 'discussions:list' %}"
                     class="px-4 py-2 text-gray-600 hover:text-gray-800 dark:text-gray-400 dark:hover:text-white">Cancel</a>

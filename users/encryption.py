@@ -14,7 +14,9 @@ def get_encryption_key():
     The SECRET_KEY is hashed to ensure it's exactly 32 bytes (URL-safe base64).
     """
     # Use SHA256 to get 32 bytes from SECRET_KEY
-    key_bytes = hashlib.sha256(settings.SECRET_KEY.encode()).digest()
+    # 5.1: Ensure SECRET_KEY is string before encode
+    secret_key = str(settings.SECRET_KEY)
+    key_bytes = hashlib.sha256(secret_key.encode()).digest()
     # Fernet requires URL-safe base64 encoded 32-byte key
     return base64.urlsafe_b64encode(key_bytes)
 

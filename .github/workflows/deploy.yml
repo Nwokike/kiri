@@ -50,7 +50,6 @@ jobs:
 
           # 8. Restart Services
           echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S systemctl restart kiri
-          echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S systemctl restart kiri-huey
           echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S systemctl restart nginx
 
           # 9. Wait for services to start
@@ -64,7 +63,6 @@ jobs:
             uv run python manage.py migrate
             uv run python manage.py collectstatic --noinput
             echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S systemctl restart kiri
-            echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S systemctl restart kiri-huey
             exit 1
           fi
 

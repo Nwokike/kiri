@@ -1,5 +1,5 @@
 {% load static %}
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const CACHE_NAME = `kiri-${CACHE_VERSION}`;
 const urlsToCache = [
     '/',
@@ -7,12 +7,11 @@ const urlsToCache = [
     '{% static "css/forms.css" %}',
     '{% static "js/htmx.min.js" %}',
     '{% static "js/theme_init.js" %}',
-    '{% static "js/theme_toggle.js" %}',
-    '{% static "js/universal_translator.js" %}',
+    '{% static "js/main.js" %}',
     '{% static "js/pwa_install.js" %}',
     '{% static "images/icons/icon-192x192.png" %}',
     '{% static "images/icons/icon-512x512.png" %}',
-    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css',
+    'https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css',
     'https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Outfit:wght@500;700&display=swap'
 ];
 

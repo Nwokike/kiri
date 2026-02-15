@@ -1,12 +1,15 @@
 from django.views.generic import ListView, CreateView, DetailView
 from django.urls import reverse_lazy
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_not_required
 from django.contrib.contenttypes.models import ContentType
 from .models import Project
 from .forms import ProjectSubmissionForm
 from core.models import Comment
 from core.forms import CommentForm
 
+@method_decorator(login_not_required, name='dispatch')
 class ProjectListView(ListView):
     model = Project
     template_name = 'projects/project_list.html'
@@ -34,6 +37,7 @@ class ProjectListView(ListView):
             
         return qs
 
+@method_decorator(login_not_required, name='dispatch')
 class ProjectDetailView(DetailView):
     model = Project
     template_name = 'projects/project_detail.html'
@@ -122,11 +126,18 @@ class ProjectSubmitView(LoginRequiredMixin, CreateView):
         except Exception:
              pass # Don't block submission if sync fails
         
-        # Trigger lane classification (async via Huey)
+        # Trigger lane classification (async via native tasks)
         try:
             from kiri_project.tasks import classify_project_lane
-            classify_project_lane(self.object.id)
+            classify_project_lane.enqueue(self.object.id)
         except Exception:
             pass  # Don't block submission if classification queuing fails
              
+        # Trigger activity
+        try:
+             from activity.utils import create_action
+             create_action(self.request.user, 'submitted a project', self.object)
+        except Exception:
+             pass
+
         return response

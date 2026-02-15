@@ -60,7 +60,10 @@ class Favorite(models.Model):
         ]
 
     def __str__(self):
-        return f"{self.user.username} ❤️ {self.content_object}"
+        try:
+            return f"{self.user.username} ❤️ {self.content_object}"
+        except:
+            return f"{self.user.username} ❤️ [Deleted Item {self.content_type}/{self.object_id}]"
 
 
 class Notification(models.Model):

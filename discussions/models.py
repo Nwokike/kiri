@@ -31,6 +31,10 @@ class Topic(models.Model):
 
     class Meta:
         ordering = ['-is_pinned', '-created_at']
+        indexes = [
+            models.Index(fields=['category']),
+            models.Index(fields=['-is_pinned', '-created_at']),
+        ]
 
     def save(self, *args, **kwargs):
         if not self.slug:
@@ -38,7 +42,7 @@ class Topic(models.Model):
             # Ensure unique slug
             original_slug = self.slug
             count = 1
-            while Topic.objects.filter(slug=self.slug).exists():
+            while Topic.objects.filter(slug=self.slug).exclude(pk=self.pk).exists():
                 self.slug = f"{original_slug}-{count}"
                 count += 1
         super().save(*args, **kwargs)

@@ -31,6 +31,12 @@ CSRF_TRUSTED_ORIGINS = [
     "https://www.kiri.ng",
 ]
 
+# Audit 4.2: Testing setting
+TESTING = os.environ.get("TESTING", "False") == "True"
+
+# Audit 4.3: Contact Email
+CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "hello@kiri.ng")
+
 # Application definition
 INSTALLED_APPS = [
     "kiri_project.apps.KiriProjectConfig",  # Must be first for SQLite signals
@@ -41,6 +47,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.sites",
+    "django.contrib.sitemaps",
     # Third Party
     "allauth",
     "allauth.account",
@@ -51,7 +58,6 @@ INSTALLED_APPS = [
     "users.providers.huggingface",  # Custom Hugging Face provider
     "django_htmx",
     "pwa",
-    "huey.contrib.djhuey",  # Task Queue
     "storages",             # S3/R2 Storage
     "turnstile",            # Cloudflare Captcha
     # Local
@@ -68,13 +74,15 @@ SITE_ID = 1
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "core.middleware.ExceptionLoggingMiddleware",  # Audit 4.5: Log 500s to ErrorLog
+    "core.middleware.ContentSecurityPolicyMiddleware", # Native 6.0 CSP
     "kiri_project.middleware.SecurityHeadersMiddleware",  # Studio COOP/COEP Headers
-    "csp.middleware.CSPMiddleware",  # Content Security Policy
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "django.contrib.auth.middleware.LoginRequiredMiddleware", # Native 6.0 Global Auth
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "allauth.account.middleware.AccountMiddleware",
@@ -247,21 +255,28 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 SOCIALACCOUNT_LOGIN_ON_GET = True
 SOCIALACCOUNT_STORE_TOKENS = True
-SOCIALACCOUNT_ADAPTER = 'users.adapter.KiriSocialAccountAdapter'
+ACCOUNT_SOCIALACCOUNT_ADAPTER = 'users.adapter.KiriSocialAccountAdapter'
+ACCOUNT_FORMS = {
+    'login': 'users.forms.CustomLoginForm',
+    'signup': 'users.forms.CustomSignupForm',
+}
 
 # Cloudflare Turnstile Settings
 TURNSTILE_SITEKEY = os.environ.get("TURNSTILE_SITEKEY", "1x00000000000000000000AA") # Test key
-TURNSTILE_SECRET = os.environ.get("TURNSTILE_SECRET", "1x0000000000000000000000000000000AA") # Test key
+TURNSTILE_SECRETKEY = os.environ.get("TURNSTILE_SECRETKEY", "1x0000000000000000000000000000000AA") # Test key
 
-# Huey Configuration (Separate SQLite for task queue - reduces lock contention)
-HUEY = {
-    'huey_class': 'huey.SqliteHuey',
-    'name': 'kiri_tasks',
-    'results': True,
-    'store_none': False,
-    'immediate': DEBUG,
-    'utc': True,
-    'filename': str(BASE_DIR / 'huey.sqlite3'),
+# AI Settings
+AI_MODEL_NAME_GEMINI = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
+
+if not DEBUG and TURNSTILE_SITEKEY == "1x00000000000000000000AA":
+    import logging
+    logging.getLogger(__name__).warning("TURNSTILE_SITEKEY is set to test key in production!")
+
+# Django 6.0 Native Tasks Configuration
+TASKS = {
+    "default": {
+        "BACKEND": "django.tasks.backends.immediate.ImmediateBackend",
+    },
 }
 
 # Email
@@ -278,9 +293,11 @@ else:
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@kiri.ng")
 SITE_URL = os.environ.get("SITE_URL", "https://kiri.ng")
 
-# Security settings for production
-if not DEBUG:
-    SECURE_SSL_REDIRECT = True
+import sys
+TESTING = 'test' in sys.argv
+
+if not DEBUG or TESTING:
+    SECURE_SSL_REDIRECT = not TESTING  
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
     X_FRAME_OPTIONS = "DENY"
@@ -313,20 +330,14 @@ if not DEBUG:
     )
     CSP_IMG_SRC = ("'self'", "data:", "https:")
     CSP_CONNECT_SRC = ("'self'", "https://cdn.jsdelivr.net", "https://huggingface.co")
+    CSP_FRAME_SRC = ("'self'", "https://challenges.cloudflare.com", "https://www.youtube-nocookie.com")
+    CSP_OBJECT_SRC = ("'none'",)
     
     # Performance
     CONN_MAX_AGE = 60
     DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
     FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
     
-    # Simple in-memory cache for 1GB RAM constraint
-    CACHES = {
-        "default": {
-            "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-            "LOCATION": "kiri-cache",
-            "OPTIONS": {"MAX_ENTRIES": 5000},  # ~20MB max
-        }
-    }
     
     # CSRF Cookie settings
     CSRF_COOKIE_HTTPONLY = True

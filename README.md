@@ -30,7 +30,6 @@ Kiri is a platform that democratizes access to research tools and knowledge, bri
 | Document | Description |
 |----------|-------------|
 | [Architecture](docs/ARCHITECTURE.md) | System design overview |
-| [Deployment](docs/DEPLOYMENT.md) | Server setup guide |
 | [Traffic Controller](docs/TRAFFIC_CONTROLLER.md) | Project preview system |
 | [Kiri Studio](docs/KIRI_STUDIO.md) | Client-side IDE technical reference |
 
@@ -43,7 +42,7 @@ Kiri is a platform that democratizes access to research tools and knowledge, bri
 | Backend | Django 6.0, HTMX |
 | Frontend | Tailwind CSS v4 |
 | Database | SQLite + R2 backups |
-| Task Queue | Huey |
+| Task Queue | Native tasks (Django 6.0) |
 | Hosting | Debian + Nginx |
 
 ---

@@ -6,6 +6,7 @@ from django.conf import settings
 from django.core.cache import cache
 from django.utils import timezone
 import logging
+import hashlib
 
 logger = logging.getLogger(__name__)
 
@@ -116,6 +117,34 @@ class GitHubService:
             return None
             
         return None
+
+    @classmethod
+    def fetch_raw_file(cls, owner: str, repo: str, path: str, limit: int = 40000) -> str:
+        """
+        Fetches the raw content of a file from GitHub.
+        Includes 5-minute caching to prevent rate limiting.
+        """
+        # 3.2: Cache key for the raw file
+        cache_key = f"github_raw_{owner}_{repo}_{hashlib.sha256(path.encode()).hexdigest()}"
+        cached_content = cache.get(cache_key)
+        if cached_content:
+            return cached_content
+            
+        try:
+            # Use raw.githubusercontent.com for file content
+            url = f"https://raw.githubusercontent.com/{owner}/{repo}/HEAD/{path}"
+            headers = {'User-Agent': 'Kiri-Research-Labs-Bot'}
+            response = requests.get(url, headers=headers, timeout=15)
+            if response.status_code == 200:
+                content = response.text[:limit]
+                cache.set(cache_key, content, 300) # 5 minute cache
+                return content
+            else:
+                logger.warning(f"Failed to fetch raw file {path} from {owner}/{repo}: {response.status_code}")
+        except Exception as e:
+            logger.error(f"Error fetching raw file {path}: {e}")
+            
+        return ''
 
     @classmethod
     def fetch_structure(cls, repo_url):

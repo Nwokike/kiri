@@ -11,7 +11,7 @@ flowchart LR
     end
     
     subgraph Kiri Backend
-        H[Huey Task Queue]
+        NT[Native Task Queue]
         AI[AI Classifier]
         GS[Gist Service]
     end
@@ -22,8 +22,8 @@ flowchart LR
         CL[Colab<br/>Google GPU]
     end
     
-    U --> H
-    H --> AI
+    U --> NT
+    NT --> AI
     AI --> |Lane A| WC
     AI --> |Lane B| GS --> BD
     AI --> |Lane C| GS --> CL

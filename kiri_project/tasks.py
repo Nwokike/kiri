@@ -4,16 +4,15 @@ import requests
 import hashlib
 import time
 import logging
-from huey.contrib.djhuey import periodic_task, task, HUEY as huey
+from django.tasks import task
 import boto3
 from django.conf import settings
 from django.utils import timezone
-import shutil
 
 # Configure logging
 logger = logging.getLogger(__name__)
 
-# Huey is configured via djhuey settings - HUEY imported above
+# Native tasks configured via settings.TASKS
 
 def calculate_file_md5(filepath):
     """Calculates MD5 hash of a file efficiently."""
@@ -48,7 +47,7 @@ def update_project_hot_status():
     
     logger.info(f"Updated {updated_count} projects to HOT at {timezone.now()}")
 
-@periodic_task(huey.crontab(hour=3, minute=0)) # Run at 3 AM daily
+@task()
 def backup_db_to_r2():
     """
     Backups the SQLite database to Cloudflare R2 daily with verification.
@@ -61,46 +60,57 @@ def backup_db_to_r2():
         logger.error("Database file not found!")
         return
 
-    # 1. Prepare backup
-    timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-    backup_name = f"backup_{timestamp}.sqlite3"
-    
-    # Calculate checksum before upload
-    local_md5 = calculate_file_md5(db_path)
-    logger.info(f"Local database MD5: {local_md5}")
-    
-    s3 = boto3.client(
-        's3',
-        endpoint_url=settings.AWS_S3_ENDPOINT_URL,
-        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-        region_name='auto' 
-    )
-    
-    try:
-        # Upload with standard S3/R2 put_object behavior
-        with open(db_path, 'rb') as f:
-            s3.upload_fileobj(
-                f, 
-                settings.AWS_STORAGE_BUCKET_NAME, 
-                f"backups/{backup_name}",
-                ExtraArgs={'ContentType': 'application/x-sqlite3'}
-            )
+        # 1. Prepare backup
+        timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+        backup_name = f"backup_{timestamp}.sqlite3"
         
-        # 2. Verify Upload
-        metadata = s3.head_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=f"backups/{backup_name}")
-        remote_etag = metadata.get('ETag', '').strip('"')
+        # Calculate checksum before upload
+        local_md5 = calculate_file_md5(db_path)
+        logger.info(f"Local database MD5: {local_md5}")
         
-        if remote_etag == local_md5:
-            logger.info(f"Backup {backup_name} verified successfully (ETag match).")
-        else:
-            logger.error(f"Backup verification FAILED for {backup_name}. Local: {local_md5}, Remote: {remote_etag}")
-            # Optional: Delete corrupted backup or alert admin
-            return
+        # 5.3: R2 credential checks
+        required_settings = ['AWS_S3_ENDPOINT_URL', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_STORAGE_BUCKET_NAME']
+        for s in required_settings:
+            if not getattr(settings, s, None):
+                logger.error(f"Missing required setting for backup: {s}")
+                return
 
-    except Exception as e:
-        logger.error(f"Failed to upload backup: {e}")
-        return
+        s3 = boto3.client(
+            's3',
+            endpoint_url=settings.AWS_S3_ENDPOINT_URL,
+            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+            region_name='auto' 
+        )
+        
+        try:
+            db_size = db_path.stat().st_size
+            # Upload with standard S3/R2 put_object behavior
+            with open(db_path, 'rb') as f:
+                s3.upload_fileobj(
+                    f, 
+                    settings.AWS_STORAGE_BUCKET_NAME, 
+                    f"backups/{backup_name}",
+                    ExtraArgs={'ContentType': 'application/x-sqlite3'}
+                )
+            
+            # 2. Verify Upload
+            metadata = s3.head_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=f"backups/{backup_name}")
+            remote_etag = metadata.get('ETag', '').strip('"')
+            
+            # 3.4: Handle multipart ETag (boto3 uses multipart for files > 8MB by default)
+            # If the ETag contains a hyphen, it's a multipart upload and won't match MD5
+            if '-' in remote_etag or db_size > 8 * 1024 * 1024:
+                logger.info(f"Backup {backup_name} uploaded. Skipping ETag match for large/multipart file.")
+            elif remote_etag == local_md5:
+                logger.info(f"Backup {backup_name} verified successfully (ETag match).")
+            else:
+                logger.error(f"Backup verification FAILED for {backup_name}. Local: {local_md5}, Remote: {remote_etag}")
+                return
+
+        except Exception as e:
+            logger.error(f"Failed to upload backup: {e}")
+            return
 
     # 3. Cleanup old backups (Keep last 3)
     try:
@@ -132,7 +142,7 @@ def backup_db_to_r2():
     except Exception as e:
         logger.error(f"Failed to cleanup old backups: {e}")
 
-@periodic_task(huey.crontab(minute='*/30')) # Run every 30 mins
+@task()
 def sync_github_stats():
     """
     Syncs stars, forks, and description from GitHub for all projects.
@@ -144,13 +154,20 @@ def sync_github_stats():
     logger.info("Starting GitHub stats sync...")
     
     # Batch projects to avoid GitHub rate limits (5000/hr)
-    # Each 30-min run processes a different batch
+    # 4.1: Adjust batch offset logic to rotate through all projects
     BATCH_SIZE = 20
-    current_minute = timezone.now().minute
-    batch_offset = (current_minute // 30) * BATCH_SIZE
-    
     total_projects = Project.objects.count()
-    projects = Project.objects.all()[batch_offset:batch_offset + BATCH_SIZE]
+    if total_projects == 0:
+        return
+        
+    num_batches = (total_projects + BATCH_SIZE - 1) // BATCH_SIZE
+    current_hour = timezone.now().hour
+    current_minute = timezone.now().minute
+    # Rotates 48 times a day (every 30 mins)
+    batch_index = (current_hour * 2 + (current_minute // 30)) % num_batches
+    batch_offset = batch_index * BATCH_SIZE
+    
+    projects = Project.objects.all().order_by('id')[batch_offset:batch_offset + BATCH_SIZE]
     
     updated_count = 0
     errors = 0
@@ -300,11 +317,19 @@ def sync_github_star(favorite_id: int):
     
     owner, repo = parsed
     
+    # 3.1: Use decrypted token
+    token = github_integration.get_decrypted_access_token()
+    if not token:
+        logger.error(f"No access token found for user {favorite.user.id}")
+        favorite.sync_failed = True
+        favorite.save(update_fields=['sync_failed'])
+        return
+
     # Star the repository
     try:
         headers = {
             'Accept': 'application/vnd.github.v3+json',
-            'Authorization': f'token {github_integration.access_token}'
+            'Authorization': f'token {token}'
         }
         
         response = requests.put(
@@ -360,6 +385,12 @@ def create_notification(recipient_id: int, notification_type: str, title: str,
         except User.DoesNotExist:
             pass
     
+    # 3.5: Validate notification_type
+    valid_types = [c[0] for c in Notification.Type.choices]
+    if notification_type not in valid_types:
+        logger.warning(f"Invalid notification_type: {notification_type}. Coercing to INFO.")
+        notification_type = Notification.Type.INFO
+
     notification = Notification.objects.create(
         recipient=recipient,
         notification_type=notification_type,
@@ -410,11 +441,11 @@ def analyze_project_task(project_id: int):
             pass
 
 
-@periodic_task(huey.crontab(minute=0, hour='*/4'))  # Run every 4 hours
+@task()
 def cleanup_tmp_files():
     """
     Cleans up temporary files to maintain the "Zero-Local-File" policy.
-    Removes files in /tmp/kiri/ older than 1 hour.
+    Removes files in /tmp/kiri_repos, C:\\Windows\\Temp\\kiri, and BASE_DIR/tmp older than 1 hour.
     """
     import time
     

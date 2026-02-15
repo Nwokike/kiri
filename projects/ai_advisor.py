@@ -1,6 +1,7 @@
 
 import logging
 from django.conf import settings
+from django.utils import timezone
 from core.ai_service import get_ai_service
 from .models import Project, ProjectInsight
 
@@ -9,7 +10,7 @@ logger = logging.getLogger(__name__)
 async def analyze_project(project_id: int):
     """
     Analyze a project using AI to generate key insights.
-    This runs asynchronously (designed for Huey task).
+    This runs asynchronously (designed for the native task framework).
     """
     try:
         project = await Project.objects.aget(pk=project_id)
@@ -70,6 +71,7 @@ async def analyze_project(project_id: int):
         """
         
         # 3. Call AI Service
+        # 3.3: Use unified AI service
         ai_service = get_ai_service()
         response = await ai_service.generate_json(prompt)
         
@@ -87,7 +89,7 @@ async def analyze_project(project_id: int):
                 'complexity_reason': response.get('complexity_reason', ''),
                 'improvements': response.get('improvements', []),
                 'roadmap': response.get('roadmap', []),
-                'ai_model_used': settings.AI_MODEL_NAME_GEMINI  # Default or from service
+                'ai_model_used': response.get('_ai_model', 'unknown-fallback'),
             }
         )
         

@@ -7,7 +7,6 @@ class PublicationAdmin(admin.ModelAdmin):
     list_display = ('title', 'author', 'version', 'created_at', 'is_published')
     list_filter = ('is_published', 'created_at')
     search_fields = ('title', 'abstract')
-    prepopulated_fields = {'slug': ('title',)}
     actions = ['publish', 'unpublish']
     
     @admin.action(description='Publish selected publications')

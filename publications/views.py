@@ -1,5 +1,7 @@
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_not_required
 from django.contrib.contenttypes.models import ContentType
 from django.urls import reverse_lazy
 from .models import Publication
@@ -11,6 +13,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
+@method_decorator(login_not_required, name='dispatch')
 class PublicationListView(ListView):
     model = Publication
     template_name = 'publications/publication_list.html'
@@ -28,12 +31,12 @@ class PublicationListView(ListView):
         if query:
             qs = qs.filter(
                 Q(title__icontains=query) | 
-                Q(abstract__icontains=query) |
-                Q(content__icontains=query)
+                Q(abstract__icontains=query)
             )
             
         return qs.order_by('-created_at')
 
+@method_decorator(login_not_required, name='dispatch')
 class PublicationDetailView(DetailView):
     model = Publication
     template_name = 'publications/publication_detail.html'
@@ -56,29 +59,15 @@ class PublicationDetailView(DetailView):
         
         # Fetch Content from GitHub if configured
         if self.object.github_repo_url and self.object.github_file_path:
-            try:
-                # We reuse the GitHubService to fetch raw file content
-                # Need to parse owner/repo from URL
-                parsed = GitHubService.parse_repo_url(self.object.github_repo_url)
-                if parsed:
-                    owner, repo = parsed
-                    # Using the cached fetch mechanism would be ideal, but for now direct fetch
-                    # We can use the gist_service's helper or add a new one. 
-                    # Let's trust GitHubService has what we need or add a quick fetch here using requests
-                    # actually, let's use the helper we added to GistService or similar.
-                    # GitHubService.fetch_structure is for trees. 
-                    # Let's add simple request here for robustness or use GistService helper if accessible?
-                    # Better: Implement proper fetching in get_context_data
-                    import requests
-                    url = f"https://raw.githubusercontent.com/{owner}/{repo}/HEAD/{self.object.github_file_path}"
-                    resp = requests.get(url, timeout=5)
-                    if resp.status_code == 200:
-                        context['github_content'] = resp.text
-                    else:
-                        context['github_error'] = f"Failed to load content from GitHub ({resp.status_code})"
-            except Exception as e:
-                logger.error(f"Error fetching publication content: {e}")
-                context['github_error'] = "Error loading remote content"
+            # 3.2: Use cached GitHubService.fetch_raw_file
+            parsed = GitHubService.parse_repo_url(self.object.github_repo_url)
+            if parsed:
+                owner, repo = parsed
+                content = GitHubService.fetch_raw_file(owner, repo, self.object.github_file_path)
+                if content:
+                    context['github_content'] = content
+                else:
+                    context['github_error'] = "Failed to load content from GitHub or file is empty."
         
         # Comments context
         content_type = ContentType.objects.get_for_model(Publication)
@@ -112,6 +101,7 @@ class PublicationImportLandingView(LoginRequiredMixin, ListView):
             {'name': 'GitHub', 'icon': 'fab fa-github', 'connected': connected_map.get('github'), 'connect_url': '/accounts/github/login/?process=connect'},
             {'name': 'GitLab', 'icon': 'fab fa-gitlab', 'connected': connected_map.get('gitlab'), 'connect_url': '/accounts/gitlab/login/?process=connect'},
             {'name': 'Bitbucket', 'icon': 'fab fa-bitbucket', 'connected': connected_map.get('bitbucket'), 'connect_url': '/accounts/bitbucket_oauth2/login/?process=connect'},
+            {'name': 'Hugging Face', 'icon': 'fas fa-robot', 'connected': connected_map.get('huggingface'), 'connect_url': '/accounts/huggingface/login/?process=connect'},
         ]
         return context
 
@@ -131,7 +121,14 @@ class PublicationCreateView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         form.instance.author = self.request.user
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        # Trigger activity
+        try:
+            from activity.utils import create_action
+            create_action(self.request.user, 'shared a publication', self.object)
+        except Exception:
+            pass
+        return response
 
 class PublicationUpdateView(LoginRequiredMixin, UserPassesTestMixin, UpdateView):
     model = Publication

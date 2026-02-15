@@ -159,7 +159,7 @@ class TrafficControllerClassificationTests(TestCase):
         # Use heuristic directly to avoid API calls in tests
         result = AIService._heuristic_classification(repo_files)
         self.assertEqual(result['lane'], 'A')
-        self.assertIn('JavaScript', result['reason'])
+        self.assertIn('JS/Node', result['reason'])
     
     def test_django_project_classification(self):
         """Django/Flask projects should be classified as Lane B."""
@@ -177,7 +177,7 @@ class TrafficControllerClassificationTests(TestCase):
         
         result = AIService._heuristic_classification(repo_files)
         self.assertEqual(result['lane'], 'B')
-        self.assertIn('Django', result['reason'])
+        self.assertIn('Python backend', result['reason'])
     
     def test_ml_project_classification(self):
         """PyTorch/TensorFlow projects should be classified as Lane C."""

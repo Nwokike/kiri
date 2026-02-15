@@ -177,6 +177,7 @@ class Contact(models.Model):
     created = models.DateTimeField(auto_now_add=True, db_index=True)
 
     class Meta:
+        unique_together = ('user_from', 'user_to')
         ordering = ('-created',)
         indexes = [
             models.Index(fields=['-created']),

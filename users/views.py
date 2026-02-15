@@ -2,10 +2,13 @@ from django.views.generic import DetailView, TemplateView
 from django.contrib.auth import get_user_model
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import get_object_or_404
+from django.utils.decorators import method_decorator
+from django.contrib.auth.decorators import login_required, login_not_required
 from .models import UserIntegration
 
 User = get_user_model()
 
+@method_decorator(login_not_required, name='dispatch')
 class UserProfileDetailView(DetailView):
     model = User
     template_name = 'users/profile_detail.html'
@@ -14,7 +17,8 @@ class UserProfileDetailView(DetailView):
     slug_url_kwarg = 'username'
 
     def get_queryset(self):
-        # Privacy: Allow owner to view private profile, otherwise only public
+        # 5.3: Staff users can view all profiles for moderation/support.
+        # This bypasses the is_profile_public restriction.
         qs = User.objects.all()
         if self.request.user.is_authenticated and self.request.user.is_staff:
              return qs 
@@ -102,4 +106,38 @@ class IntegrationsView(LoginRequiredMixin, TemplateView):
         context['primary_integration'] = self.request.user.get_primary_integration()
         
         return context
+
+from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
+from django.http import HttpResponse, JsonResponse
+from .models import Contact
+
+@require_POST
+def follow_user(request, username):
+    """HTMX view to follow a user."""
+    user_to_follow = get_object_or_404(User, username=username)
+    if user_to_follow != request.user:
+        _, created = Contact.objects.get_or_create(user_from=request.user, user_to=user_to_follow)
+        if created:
+            try:
+                from activity.utils import create_action
+                create_action(request.user, 'followed', user_to_follow)
+            except Exception:
+                pass
+    
+    if request.htmx:
+        return HttpResponse('<button class="btn btn-secondary" hx-post="' + 
+                            f'/nexus/unfollow/{username}/' + '" hx-swap="outerHTML">Unfollow</button>')
+    return JsonResponse({'status': 'following'})
+
+@require_POST
+def unfollow_user(request, username):
+    """HTMX view to unfollow a user."""
+    user_to_unfollow = get_object_or_404(User, username=username)
+    Contact.objects.filter(user_from=request.user, user_to=user_to_unfollow).delete()
+    
+    if request.htmx:
+        return HttpResponse('<button class="btn btn-primary" hx-post="' + 
+                            f'/nexus/follow/{username}/' + '" hx-swap="outerHTML">Follow</button>')
+    return JsonResponse({'status': 'unfollowed'})
 

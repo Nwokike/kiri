@@ -26,7 +26,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
 
     <!-- Alpine.js for interactive components -->
-    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js"></script>
 
 
     {% block extra_head %}{% endblock %}
@@ -36,19 +36,23 @@
 
     <!-- Theme Init -->
     <script src="{% static 'js/theme_init.js' %}"></script>
-    
+
+    {% if GOOGLE_ANALYTICS_ID %}
     <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-8DSDW7CV38"></script>
+    <script async src="https://www.googletagmanager.com/gtag/js?id={{ GOOGLE_ANALYTICS_ID }}"></script>
     <script>
         window.dataLayer = window.dataLayer || [];
-        function gtag(){dataLayer.push(arguments);}
+        function gtag() { dataLayer.push(arguments); }
         gtag('js', new Date());
-        gtag('config', 'G-8DSDW7CV38');
+        gtag('config', '{{ GOOGLE_ANALYTICS_ID }}');
     </script>
+    {% endif %}
 
+    {% if ADSENSE_CLIENT_ID %}
     <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-5679949845754640"
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ ADSENSE_CLIENT_ID }}"
         crossorigin="anonymous"></script>
+    {% endif %}
 
     {% progressive_web_app_meta %}
 
@@ -146,7 +150,7 @@
         <div class="flex-1 flex justify-center px-4">
             <div class="relative w-full max-w-lg">
                 <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-[#ADB5BD]"></i>
-                <input type="text" placeholder="Search Kiri..."
+                <input type="text" placeholder="Search Kiri..." id="global-search" aria-label="Search across Kiri"
                     class="w-full h-10 pl-10 pr-4 bg-[#F8F9FA] border border-[#DEE2E6] rounded-lg text-sm focus:border-[#0D7C3D] focus:ring-2 focus:ring-[#0D7C3D]/20 focus:bg-white outline-none transition-all dark:bg-[#2D2D2D] dark:border-[#3D3D3D] dark:text-white dark:focus:bg-[#1E1E1E]">
             </div>
         </div>
@@ -286,7 +290,8 @@
                         class="w-full flex items-center h-11 px-4 gap-3 text-[#495057] hover:bg-[#F8F9FA] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA] dark:hover:bg-[#2D2D2D] dark:hover:text-[#0D7C3D]">
                         <i class="fas fa-toolbox w-5 text-center"></i>
                         <span
-                            class="nav-label text-sm font-medium whitespace-nowrap transition-opacity duration-200 flex-1 text-left">Toolkit</span>
+                            class="nav-label text-sm font-medium whitespace-nowrap transition-opacity duration-200 flex-1 text-left">Tools
+                            Hub</span>
                         <i class="fas fa-chevron-down nav-label text-xs transition-transform"
                             :class="open ? 'rotate-180' : ''"></i>
                     </button>
@@ -449,9 +454,9 @@
                 <i class="fas fa-rocket text-lg"></i>
                 <span class="text-[10px] font-medium">Projects</span>
             </a>
-            <a href="{% url 'core:playground' %}"
-                class="flex flex-col items-center justify-center gap-1 {% if 'playground' in request.path %}text-[#0D7C3D]{% else %}text-[#6C757D] dark:text-[#A1A1AA]{% endif %}">
-                <i class="fas fa-code text-lg"></i>
+            <a href="{% url 'tools:index' %}"
+                class="flex flex-col items-center justify-center gap-1 {% if 'tools' in request.path %}text-[#0D7C3D]{% else %}text-[#6C757D] dark:text-[#A1A1AA]{% endif %}">
+                <i class="fas fa-toolbox text-lg"></i>
                 <span class="text-[10px] font-medium">Tools</span>
             </a>
         </div>

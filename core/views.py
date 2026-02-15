@@ -1,15 +1,16 @@
 from django.shortcuts import render, get_object_or_404
-from django.contrib.auth.decorators import login_required
+from django.contrib.auth.decorators import login_required, login_not_required
 from django.contrib.contenttypes.models import ContentType
 from django.http import JsonResponse, HttpResponse
 from django.views.decorators.http import require_POST
 from django.db.models import Case, When, Value, IntegerField
 from django.core.cache import cache
-import bleach
+import nh3
 from .models import Comment, Favorite, Notification
 from .forms import CommentForm
 
 
+@login_not_required
 def home(request):
     """Homepage with fully dynamic content from database."""
     from projects.models import Project
@@ -59,16 +60,19 @@ def home(request):
     })
 
 
+@login_not_required
 def about(request):
     """About page."""
     return render(request, "core/about.html")
 
 
+@login_not_required
 def playground(request):
     """Python/JS playground for code experiments."""
     return render(request, "core/playground.html")
 
 
+@login_not_required
 def studio(request):
     """
     Kiri Studio: Client-side Vibe Coding IDE.
@@ -77,16 +81,19 @@ def studio(request):
     return render(request, "core/kiri_studio.html")
 
 
+@login_not_required
 def privacy(request):
     """Privacy policy page."""
     return render(request, "core/privacy.html")
 
 
+@login_not_required
 def terms(request):
     """Terms of service page."""
     return render(request, "core/terms.html")
 
 
+@login_not_required
 def contact(request):
     """Contact page with email form."""
     from django.core.mail import send_mail
@@ -109,7 +116,7 @@ def contact(request):
                     subject=f"[Kiri Contact] {subject}",
                     message=f"From: {name} <{email}>\n\n{message}",
                     from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=['hello@kiri.ng'],
+                    recipient_list=[settings.CONTACT_EMAIL],
                     fail_silently=False,
                 )
                 success = True
@@ -125,11 +132,13 @@ def contact(request):
     })
 
 
+@login_not_required
 def offline(request):
     """Offline page for PWA."""
     return render(request, "offline.html")
 
 
+@login_not_required
 def health(request):
     """Health check endpoint for deployment verification."""
     return JsonResponse({
@@ -138,6 +147,7 @@ def health(request):
     })
 
 
+@login_not_required
 def serviceworker(request):
     response = render(request, "serviceworker.js")
     response['Content-Type'] = 'application/javascript'
@@ -165,11 +175,10 @@ def add_comment(request, content_type_id, object_id):
         comment = form.save(commit=False)
         
         # Sanitize Content
-        comment.content = bleach.clean(
+        comment.content = nh3.clean(
             comment.content,
-            tags=['b', 'i', 'code', 'pre', 'strong', 'em'],
-            attributes={},
-            strip=True
+            tags={'b', 'i', 'code', 'pre', 'strong', 'em'},
+            attributes={}
         )
         
         comment.author = request.user
@@ -199,7 +208,6 @@ def add_comment(request, content_type_id, object_id):
 # FAVORITES
 # ============================================================================
 
-@login_required
 def favorites_list(request):
     """Display user's favorited items."""
     from django.contrib.contenttypes.prefetch import GenericPrefetch
@@ -232,7 +240,6 @@ def favorites_list(request):
     })
 
 
-@login_required
 @require_POST
 def toggle_favorite(request, content_type_id, object_id):
     """Toggle favorite status for an item. HTMX compatible."""
@@ -254,7 +261,7 @@ def toggle_favorite(request, content_type_id, object_id):
         # Queue GitHub star sync if user has repo scope
         try:
             from kiri_project.tasks import sync_github_star
-            sync_github_star(favorite.id)
+            sync_github_star.enqueue(favorite.id)
         except Exception as e:
             import logging
             logging.getLogger(__name__).warning(f"Failed to queue GitHub star sync: {e}")
@@ -271,14 +278,14 @@ def toggle_favorite(request, content_type_id, object_id):
 # NOTIFICATIONS
 # ============================================================================
 
-@login_required
 def notifications_list(request):
     """Display user's notifications."""
+    # 4.1: Fix unread_count logic to count against full set
+    unread_count = Notification.objects.filter(recipient=request.user, is_read=False).count()
+    
     notifications = Notification.objects.filter(
         recipient=request.user
     ).select_related('actor').order_by('-created_at')[:50]
-    
-    unread_count = notifications.filter(is_read=False).count()
     
     return render(request, 'core/notifications.html', {
         'notifications': notifications,
@@ -286,7 +293,6 @@ def notifications_list(request):
     })
 
 
-@login_required
 @require_POST
 def mark_notification_read(request, pk):
     """Mark a single notification as read."""
@@ -299,7 +305,6 @@ def mark_notification_read(request, pk):
     return JsonResponse({'status': 'ok'})
 
 
-@login_required
 @require_POST
 def mark_all_notifications_read(request):
     """Mark all notifications as read."""

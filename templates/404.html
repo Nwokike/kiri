@@ -8,7 +8,7 @@
     <title>Page Not Found | Kiri</title>
     <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
     <link rel="stylesheet" href="{% static 'css/output.css' %}">
 </head>
 
@@ -22,7 +22,7 @@
         <p class="text-[#6C757D] mb-8 max-w-md mx-auto">
             The page you're looking for doesn't exist or has been moved.
         </p>
-        <a href="/"
+        <a href="{% url 'core:home' %}"
             class="inline-flex items-center gap-2 px-6 py-3 bg-[#0D7C3D] text-white font-semibold rounded-lg hover:bg-[#0A5C2C] transition-colors">
             <i class="fas fa-home"></i>
             Go Home

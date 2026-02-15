@@ -147,6 +147,10 @@ class KiriSocialAccountAdapter(DefaultSocialAccountAdapter):
         elif provider == 'huggingface':
             has_repo_scope = 'read-repos' in configured_scopes
             has_write_scope = 'write-repos' in configured_scopes
+        elif provider == 'bitbucket_oauth2':
+            # Bitbucket scopes: 'repository' is broad, 'repository:admin' is higher
+            has_repo_scope = any(s in configured_scopes for s in ['repository', 'repository:admin'])
+            has_write_scope = any(s in configured_scopes for s in ['repository', 'repository:write'])
         
         # Get platform-specific username, ID, and avatar
         if provider == 'github':

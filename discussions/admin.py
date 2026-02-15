@@ -6,7 +6,6 @@ class TopicAdmin(admin.ModelAdmin):
     list_display = ('title', 'author', 'category', 'is_pinned', 'view_count', 'created_at')
     list_filter = ('category', 'is_pinned', 'is_closed', 'created_at')
     search_fields = ('title', 'content', 'author__username')
-    prepopulated_fields = {'slug': ('title',)}
     date_hierarchy = 'created_at'
 
 @admin.register(Reply)

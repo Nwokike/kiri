@@ -1,6 +1,6 @@
 """
 Django sitemap configuration for SEO.
-Add to urls.py: path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
+Add to urls.py: path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='sitemap'),
 """
 from django.contrib.sitemaps import Sitemap
 from django.urls import reverse

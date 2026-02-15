@@ -205,8 +205,8 @@
                 <button id="profile-dropdown-toggle"
                     class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-[#F8F9FA] dark:hover:bg-[#2D2D2D] transition-colors"
                     title="Profile menu">
-                    {% if user.github_avatar_url %}
-                    <img src="{{ user.github_avatar_url }}" alt="{{ user.username }}" class="w-8 h-8 rounded-full">
+                    {% if user.avatar_url %}
+                    <img src="{{ user.avatar_url }}" alt="{{ user.username }}" class="w-8 h-8 rounded-full">
                     {% else %}
                     <div
                         class="w-8 h-8 rounded-full bg-gradient-to-br from-[#0D7C3D] to-[#0A5C2C] text-white flex items-center justify-center text-xs font-semibold">
@@ -329,12 +329,20 @@
                         </a>
                         <!-- Quick Links to specific tools -->
                         <a href="{% url 'tools:json_formatter' %}"
-                            class="flex items-center h-8 px-4 gap-3 text-xs text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA] pl-8 opacity-75">
+                            class="flex items-center h-8 px-4 gap-3 text-xs text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA] pl-8 opacity-75 {% if 'json' in request.path %}text-[#0D7C3D] opacity-100{% endif %}">
                             <span class="nav-label whitespace-nowrap">JSON Formatter</span>
                         </a>
                         <a href="{% url 'tools:regex_tester' %}"
-                            class="flex items-center h-8 px-4 gap-3 text-xs text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA] pl-8 opacity-75">
+                            class="flex items-center h-8 px-4 gap-3 text-xs text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA] pl-8 opacity-75 {% if 'regex' in request.path %}text-[#0D7C3D] opacity-100{% endif %}">
                             <span class="nav-label whitespace-nowrap">Regex Tester</span>
+                        </a>
+                        <a href="{% url 'tools:base64_converter' %}"
+                            class="flex items-center h-8 px-4 gap-3 text-xs text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA] pl-8 opacity-75 {% if 'base64' in request.path %}text-[#0D7C3D] opacity-100{% endif %}">
+                            <span class="nav-label whitespace-nowrap">Base64 Converter</span>
+                        </a>
+                        <a href="{% url 'tools:diff_viewer' %}"
+                            class="flex items-center h-8 px-4 gap-3 text-xs text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA] pl-8 opacity-75 {% if 'diff' in request.path %}text-[#0D7C3D] opacity-100{% endif %}">
+                            <span class="nav-label whitespace-nowrap">Diff Viewer</span>
                         </a>
                     </div>
                 </div>

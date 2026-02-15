@@ -30,7 +30,7 @@ A curated showcase of compute-optimal tools. Every project is automatically clas
 👉 [See Traffic Controller Docs](docs/TRAFFIC_CONTROLLER.md)
 
 ### 2. Kiri Studio (v1.2 Stable)
-A zero-server, client-side IDE for "Vibe Coding." Powered by **Pyodide** (WASM), it enables full Python execution directly in the browser with strict COOP/COEP isolation.  
+A zero-server, client-side IDE for researcher-centric coding. Powered by **Pyodide** (WASM), it enables full Python execution directly in the browser with strict COOP/COEP isolation.  
 👉 [Explore Kiri Studio Docs](docs/KIRI_STUDIO.md)
 
 ### 3. Intelligence Orchestration

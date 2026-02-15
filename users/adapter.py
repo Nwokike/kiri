@@ -13,6 +13,16 @@ class KiriSocialAccountAdapter(DefaultSocialAccountAdapter):
     Handles user creation and auto-creates UserIntegration records.
     """
     
+    
+    def pre_social_login(self, request, sociallogin):
+        """
+        Invoked before a social login is performed.
+        Ensures UserIntegration is synced even for existing users.
+        """
+        super().pre_social_login(request, sociallogin)
+        if sociallogin.is_existing:
+            self._create_or_update_integration(sociallogin.user, sociallogin)
+
     def populate_user(self, request, sociallogin, data):
         """
         Populate the user instance with data from any social provider.
@@ -32,22 +42,12 @@ class KiriSocialAccountAdapter(DefaultSocialAccountAdapter):
             user.website = extra_data.get('blog') or ''
             user.github_public_repos = extra_data.get('public_repos', 0)
             
-        elif provider == 'gitlab':
-            # GitLab specific fields
-            user.username = extra_data.get('username', data.get('username', ''))
-            user.bio = extra_data.get('bio') or ''
-            user.website = extra_data.get('web_url') or ''
-            
-        elif provider == 'bitbucket_oauth2':
-            # Bitbucket specific fields
-            user.username = extra_data.get('username', data.get('username', ''))
-            user.website = extra_data.get('links', {}).get('html', {}).get('href', '')
             
         elif provider == 'huggingface':
             # Hugging Face specific fields
             user.username = extra_data.get('preferred_username', data.get('username', ''))
             user.bio = ''  # HuggingFace doesn't provide bio in OIDC
-            # HuggingFace avatar is in 'picture' field
+            user.huggingface_avatar_url = extra_data.get('picture', '')
         
         # Default Role for all users
         user.role = User.Role.CONTRIBUTOR
@@ -82,20 +82,10 @@ class KiriSocialAccountAdapter(DefaultSocialAccountAdapter):
                 user.github_public_repos = extra_data.get('public_repos', 0)
                 user.save(update_fields=['github_avatar_url', 'github_username', 'bio', 'website', 'github_public_repos'])
                 
-            elif provider == 'gitlab':
-                user.bio = extra_data.get('bio') or user.bio
-                user.website = extra_data.get('web_url') or user.website
-                user.save(update_fields=['bio', 'website'])
-                
-            elif provider == 'bitbucket_oauth2':
-                website = extra_data.get('links', {}).get('html', {}).get('href', '')
-                if website:
-                    user.website = website
-                    user.save(update_fields=['website'])
                     
             elif provider == 'huggingface':
-                # HuggingFace doesn't provide much profile data
-                pass
+                user.huggingface_avatar_url = extra_data.get('picture', '') or user.huggingface_avatar_url
+                user.save(update_fields=['huggingface_avatar_url'])
                 
         except Exception as e:
             logger.warning(f"Failed to update user profile from {provider}: {e}")
@@ -113,8 +103,6 @@ class KiriSocialAccountAdapter(DefaultSocialAccountAdapter):
         # Map provider to platform enum
         platform_map = {
             'github': UserIntegration.Platform.GITHUB,
-            'gitlab': UserIntegration.Platform.GITLAB,
-            'bitbucket_oauth2': UserIntegration.Platform.BITBUCKET,
             'huggingface': UserIntegration.Platform.HUGGINGFACE,
         }
         
@@ -141,30 +129,15 @@ class KiriSocialAccountAdapter(DefaultSocialAccountAdapter):
         if provider == 'github':
             has_repo_scope = 'public_repo' in configured_scopes or 'repo' in configured_scopes
             has_write_scope = 'repo' in configured_scopes
-        elif provider == 'gitlab':
-            has_repo_scope = 'read_repository' in configured_scopes
-            has_write_scope = 'write_repository' in configured_scopes or 'api' in configured_scopes
         elif provider == 'huggingface':
             has_repo_scope = 'read-repos' in configured_scopes
             has_write_scope = 'write-repos' in configured_scopes
-        elif provider == 'bitbucket_oauth2':
-            # Bitbucket scopes: 'repository' is broad, 'repository:admin' is higher
-            has_repo_scope = any(s in configured_scopes for s in ['repository', 'repository:admin'])
-            has_write_scope = any(s in configured_scopes for s in ['repository', 'repository:write'])
         
         # Get platform-specific username, ID, and avatar
         if provider == 'github':
             platform_username = extra_data.get('login', '')
             platform_user_id = str(extra_data.get('id', ''))
             avatar_url = extra_data.get('avatar_url', '')
-        elif provider == 'gitlab':
-            platform_username = extra_data.get('username', '')
-            platform_user_id = str(extra_data.get('id', ''))
-            avatar_url = extra_data.get('avatar_url', '')
-        elif provider == 'bitbucket_oauth2':
-            platform_username = extra_data.get('username', '')
-            platform_user_id = extra_data.get('uuid', '')
-            avatar_url = extra_data.get('links', {}).get('avatar', {}).get('href', '')
         elif provider == 'huggingface':
             platform_username = extra_data.get('preferred_username', '')
             platform_user_id = str(extra_data.get('sub', ''))

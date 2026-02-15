@@ -176,9 +176,15 @@ def save_gist_api(request):
 @login_not_required
 async def studio_ai_assist(request):
     """API for Kiri Studio AI assistance (Explain, Debug, Write)."""
+    from asgiref.sync import sync_to_async
+    
     # 4.3: Rate limiting (10 per minute per user/IP)
-    if request.user.is_authenticated:
-        rate_key = f"ai_assist_rate_{request.user.id}"
+    # Wrap sync property access in sync_to_async
+    is_authenticated = await sync_to_async(lambda: request.user.is_authenticated)()
+    
+    if is_authenticated:
+        user_id = await sync_to_async(lambda: request.user.id)()
+        rate_key = f"ai_assist_rate_{user_id}"
     else:
         # Get client IP
         x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
@@ -188,10 +194,10 @@ async def studio_ai_assist(request):
             ip = request.META.get('REMOTE_ADDR')
         rate_key = f"ai_assist_rate_ip_{ip}"
         
-    current_count = cache.get(rate_key, 0)
+    current_count = await sync_to_async(cache.get)(rate_key, 0)
     if current_count >= 10:
         return JsonResponse({"error": "Rate limit exceeded. Please wait a minute."}, status=429)
-    cache.set(rate_key, current_count + 1, 60)
+    await sync_to_async(cache.set)(rate_key, current_count + 1, 60)
 
     if request.method != "POST":
         return JsonResponse({"error": "Method not allowed"}, status=405)

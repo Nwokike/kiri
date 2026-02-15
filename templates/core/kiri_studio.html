@@ -1,7 +1,7 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Kiri Studio | Vibe Coding{% endblock %}
+{% block title %}Kiri Studio | Intelligent IDE{% endblock %}
 
 {% block content %}
 <!-- Studio Container (Full Screen) -->
@@ -159,7 +159,7 @@
     let currentLang = 'python';
 
     // Constants
-    const PYTHON_DEFAULT_CODE = `# Welcome to Kiri Studio (Python Mode)\nimport sys\nprint(f"Python {sys.version} running in browser!")\n\ndef hello():\n    print("Hello from Vibe Coding!")\n\nhello()`;
+    const PYTHON_DEFAULT_CODE = `# Welcome to Kiri Studio (Python Mode)\nimport sys\nprint(f"Python {sys.version} running in browser!")\n\ndef hello():\n    print("Hello from Kiri Studio!")\n\nhello()`;
     const WEB_DEFAULT_CODE = `// Welcome to Kiri Studio (Node.js Mode)\n// Files are virtual. 'npm install' & 'npm start' work!\n\nconsole.log("Hello from Node.js " + process.version);`;
 
     // --- Initialization ---

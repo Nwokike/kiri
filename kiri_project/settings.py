@@ -331,9 +331,14 @@ if not DEBUG or TESTING:
     CSP_SCRIPT_SRC = (
         "'self'",
         "'unsafe-inline'",
+        "'unsafe-eval'",  # Required for Alpine.js
         "https://cdn.jsdelivr.net",
         "https://challenges.cloudflare.com",
         "https://cdnjs.cloudflare.com",
+        "https://www.googletagmanager.com",
+        "https://pagead2.googlesyndication.com",
+        "https://static.cloudflareinsights.com",
+        "https://adservice.google.com",
     )
     CSP_STYLE_SRC = (
         "'self'",
@@ -347,7 +352,14 @@ if not DEBUG or TESTING:
         "https://cdnjs.cloudflare.com",
     )
     CSP_IMG_SRC = ("'self'", "data:", "https:")
-    CSP_CONNECT_SRC = ("'self'", "https://cdn.jsdelivr.net", "https://huggingface.co")
+    CSP_CONNECT_SRC = (
+        "'self'", 
+        "https://cdn.jsdelivr.net", 
+        "https://huggingface.co",
+        "https://www.google-analytics.com",
+        "https://region1.google-analytics.com",
+        "https://stats.g.doubleclick.net",
+    )
     CSP_FRAME_SRC = ("'self'", "https://challenges.cloudflare.com", "https://www.youtube-nocookie.com")
     CSP_OBJECT_SRC = ("'none'",)
     

@@ -1,6 +1,6 @@
 # Kiri Studio - Technical Reference
 
-> **v1.2 (Stable)** | Client-Side IDE for "Vibe Coding"
+> **v1.2 (Stable)** | Intelligent IDE for Applied Research
 
 ## Overview
 Kiri Studio is a zero-server, client-side IDE integrated into the Kiri platform. It leverages **WebAssembly (WASM)** and **Pyodide** to provide a full Python execution environment directly in the user's browser, eliminating the need for backend container orchestration.

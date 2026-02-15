@@ -10,7 +10,7 @@ To maximize scalability and operate within the constraints of strict cloud envir
 
 ### 1.1 GitHub-First Storage
 - **Source of Truth**: All user code and publications are stored in GitHub repositories.
-- **Kiri Role**: Acts as a high-fidelity interface for discovery, viewing, and "Vibe Coding."
+- **Kiri Role**: Acts as a high-fidelity interface for discovery, viewing, and intelligent execution.
 
 ### 1.2 Native Task Management
 - **Scheduler**: Kiri uses **Native Django Tasks** (@task) and a custom management command (`run_periodic_tasks.py`).

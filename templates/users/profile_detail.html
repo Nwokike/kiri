@@ -132,8 +132,7 @@
             <div class="flex items-center justify-between border-b border-[#e0e0e0] pb-2 dark:border-[#393939]">
                 <h2 class="text-lg font-semibold text-[#161616] dark:text-white">Projects</h2>
                 <span
-                    class="text-xs font-mono bg-[#f4f4f4] px-2 py-1 text-[#525252] dark:bg-[#393939] dark:text-[#a8a8a8]">{{
-                    projects|length }}</span>
+                    class="text-xs font-mono bg-[#f4f4f4] px-2 py-1 text-[#525252] dark:bg-[#393939] dark:text-[#a8a8a8]">{{projects|length }}</span>
             </div>
 
             {% if projects %}
@@ -146,8 +145,7 @@
                             class="font-medium text-[#161616] group-hover:text-[#0f62fe] transition-colors dark:text-white">
                             {{ project.name }}</h3>
                         <div class="flex items-center gap-2 text-xs text-[#a8a8a8]">
-                            <span class="flex items-center gap-1"><i class="fas fa-star text-[#f1c21b]"></i> {{
-                                project.stars_count }}</span>
+                            <span class="flex items-center gap-1"><i class="fas fa-star text-[#f1c21b]"></i> {{project.stars_count }}</span>
                         </div>
                     </div>
                     <p class="text-sm text-[#525252] line-clamp-2 mb-2 dark:text-[#a8a8a8]">{{ project.description }}
@@ -158,8 +156,7 @@
                             class="text-[10px] font-bold text-[#8e6a00] bg-[#f1c21b]/10 px-1.5 py-0.5 border border-[#f1c21b]/20">Trending</span>
                         {% endif %}
                         <span
-                            class="text-[10px] bg-[#f4f4f4] px-2 py-0.5 text-[#525252] dark:bg-[#393939] dark:text-[#a8a8a8]">{{
-                            project.language }}</span>
+                            class="text-[10px] bg-[#f4f4f4] px-2 py-0.5 text-[#525252] dark:bg-[#393939] dark:text-[#a8a8a8]">{{project.language }}</span>
                     </div>
                 </a>
                 {% endfor %}
@@ -176,8 +173,7 @@
             <div class="flex items-center justify-between border-b border-[#e0e0e0] pb-2 dark:border-[#393939]">
                 <h2 class="text-lg font-semibold text-[#161616] dark:text-white">Publications</h2>
                 <span
-                    class="text-xs font-mono bg-[#f4f4f4] px-2 py-1 text-[#525252] dark:bg-[#393939] dark:text-[#a8a8a8]">{{
-                    publications|length }}</span>
+                    class="text-xs font-mono bg-[#f4f4f4] px-2 py-1 text-[#525252] dark:bg-[#393939] dark:text-[#a8a8a8]">{{publications|length }}</span>
             </div>
 
             {% if publications %}
@@ -191,8 +187,7 @@
                     <p class="text-xs text-[#a8a8a8] mb-2">{{ pub.created_at|date:"M Y" }}</p>
                     <div class="flex items-center gap-2">
                         <span
-                            class="text-[10px] font-mono bg-[#edf5ff] text-[#0f62fe] px-1.5 py-0.5 border border-[#0f62fe]/20">v{{
-                            pub.version }}</span>
+                            class="text-[10px] font-mono bg-[#edf5ff] text-[#0f62fe] px-1.5 py-0.5 border border-[#0f62fe]/20">v{{pub.version }}</span>
                     </div>
                 </a>
                 {% endfor %}
@@ -209,8 +204,7 @@
             <div class="flex items-center justify-between border-b border-[#e0e0e0] pb-2 dark:border-[#393939]">
                 <h2 class="text-lg font-semibold text-[#161616] dark:text-white">Contributions</h2>
                 <span
-                    class="text-xs font-mono bg-[#f4f4f4] px-2 py-1 text-[#525252] dark:bg-[#393939] dark:text-[#a8a8a8]">{{
-                    contributions|length }}</span>
+                    class="text-xs font-mono bg-[#f4f4f4] px-2 py-1 text-[#525252] dark:bg-[#393939] dark:text-[#a8a8a8]">{{contributions|length }}</span>
             </div>
 
             {% if contributions %}

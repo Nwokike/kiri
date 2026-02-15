@@ -66,16 +66,12 @@ def about(request):
     return render(request, "core/about.html")
 
 
-@login_not_required
-def playground(request):
-    """Python/JS playground for code experiments."""
-    return render(request, "core/playground.html")
 
 
 @login_not_required
 def studio(request):
     """
-    Kiri Studio: Client-side Vibe Coding IDE.
+    Kiri Studio: Client-side Intelligent IDE.
     Features: Monaco Editor, Pyodide (WASM), xterm.js, Live Preview.
     """
     return render(request, "core/kiri_studio.html")

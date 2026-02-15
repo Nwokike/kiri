@@ -33,8 +33,20 @@ class CustomUser(AbstractUser):
     bio = models.TextField(max_length=500, blank=True)
     github_username = models.CharField(max_length=100, blank=True)
     github_avatar_url = models.URLField(blank=True, help_text="Avatar URL synced from GitHub")
+    huggingface_avatar_url = models.URLField(blank=True, help_text="Avatar URL synced from Hugging Face")
     github_public_repos = models.IntegerField(default=0, help_text="Number of public repos")
     
+    @property
+    def avatar_url(self):
+        """
+        Get the prioritized avatar URL: GitHub > Hugging Face > Default.
+        """
+        if self.github_avatar_url:
+            return self.github_avatar_url
+        if self.huggingface_avatar_url:
+            return self.huggingface_avatar_url
+        return None
+
     website = models.URLField(
         blank=True,
         validators=[URLValidator(schemes=['http', 'https'])],

@@ -9,7 +9,7 @@ urlpatterns = [
     path('contact/', views.contact, name='contact'),
     path('privacy/', views.privacy, name='privacy'),
     path('terms/', views.terms, name='terms'),
-    path('refund/', views.refund_policy, name='refund'),
+    path('refund/', views.refund_policy, name='refund_policy'),
     
     # --- New Studio Routes ---
     path('studio/py/', views.studio_py, name='studio_py'), # PyStudio

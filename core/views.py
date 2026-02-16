@@ -64,7 +64,7 @@ def home(request):
     try:
         from activity.models import Action
         # For guest/homepage, we show recent public actions
-        community_activity = Action.objects.select_related('user', 'target_ct').order_by('-created_at')[:5]
+        community_activity = Action.objects.select_related('user', 'target_ct').order_by('-created')[:5]
     except ImportError:
         pass
 

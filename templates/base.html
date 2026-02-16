@@ -16,9 +16,9 @@
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="Kiri Research">
     <meta property="og:url" content="{{ request.build_absolute_uri }}">
-    <meta property="og:title" content="{% block og_title %}{% block title %}Kiri{% endblock %}{% endblock %}">
+    <meta property="og:title" content="{% block og_title %}Kiri{% endblock %}">
     <meta property="og:description"
-        content="{% block og_description %}{% block meta_description %}The efficiency frontier of Artificial Intelligence. Smart, Small, Scalable.{% endblock %}{% endblock %}">
+        content="{% block og_description %}The efficiency frontier of Artificial Intelligence. Smart, Small, Scalable.{% endblock %}">
     <meta property="og:image"
         content="{% block og_image %}{{ request.scheme }}://{{ request.get_host }}{% static 'images/logos/logo.png' %}{% endblock %}">
     <meta property="twitter:card" content="summary_large_image">

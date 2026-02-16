@@ -18,7 +18,7 @@ class StaticViewSitemap(Sitemap):
     
     def items(self):
         return [
-            'core:home', 'core:about', 
+            'core:home', 'core:about', 'core:contact', 'core:privacy', 'core:terms', 'core:refund_policy',
             'publications:list', 'projects:list', 'discussions:list', 'tools:index',
             'tools:json_formatter', 'tools:regex_tester', 'tools:base64_converter',
             'tools:diff_viewer', 'tools:url_encoder', 'tools:timestamp_converter',
@@ -27,7 +27,8 @@ class StaticViewSitemap(Sitemap):
             'tools:latex_editor', 'tools:json_to_csv', 'tools:image_to_base64',
             'tools:yaml_json_converter', 'tools:markdown_previewer', 'tools:html_entities',
             'tools:password_generator', 'tools:api_tester', 'tools:data_profiler',
-            'tools:json_schema_validator'
+            'tools:json_schema_validator', 'tools:csv_to_json', 'tools:image_converter',
+            'tools:image_resizer', 'tools:pdf_merger', 'tools:pdf_text_extractor'
         ]
     
     def location(self, item):

@@ -87,7 +87,6 @@ def about(request):
 
 
 
-@login_not_required
 def studio_py(request):
     """
     Renders PyStudio (Python/WASM).

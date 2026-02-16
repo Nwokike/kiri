@@ -58,8 +58,8 @@
     <div class="border-t border-border dark:border-dark-border p-2 min-w-max">
         {% if user.is_authenticated %}
         <div class="flex items-center h-12 px-2 gap-3">
-            {% if user.github_avatar_url %}
-            <img src="{{ user.github_avatar_url }}" alt="Avatar"
+            {% if user.avatar_url %}
+            <img src="{{ user.avatar_url }}" alt="Avatar"
                 class="w-8 h-8 rounded-full border border-border dark:border-dark-border shrink-0">
             {% else %}
             <div

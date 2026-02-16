@@ -1,8 +1,8 @@
 <div class="flex gap-3 group comment-item" id="comment-{{ comment.id }}">
     <!-- Avatar -->
     <div class="shrink-0">
-        {% if comment.author.github_avatar_url %}
-        <img src="{{ comment.author.github_avatar_url }}" class="w-8 h-8 border border-[#e0e0e0] dark:border-[#393939]">
+        {% if comment.author.avatar_url %}
+        <img src="{{ comment.author.avatar_url }}" class="w-8 h-8 border border-[#e0e0e0] dark:border-[#393939]">
         {% else %}
         <div
             class="w-8 h-8 bg-[#f4f4f4] text-[#525252] flex items-center justify-center font-bold text-[10px] dark:bg-[#393939] dark:text-[#a8a8a8]">

@@ -123,8 +123,8 @@
         <div
             class="flex flex-wrap items-center gap-6 mt-6 pt-6 border-t border-[#e0e0e0] dark:border-[#393939] text-sm text-[#525252] dark:text-[#a8a8a8]">
             <div class="flex items-center gap-2">
-                {% if project.submitted_by.github_avatar_url %}
-                <img src="{{ project.submitted_by.github_avatar_url }}" class="w-6 h-6 rounded-full">
+                {% if project.submitted_by.avatar_url %}
+                <img src="{{ project.submitted_by.avatar_url }}" class="w-6 h-6 rounded-full">
                 {% else %}
                 <div
                     class="w-6 h-6 rounded-full bg-[#0f62fe] text-white flex items-center justify-center text-[10px] font-medium">

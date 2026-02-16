@@ -19,12 +19,12 @@ class KiriSocialAccountAdapter(DefaultSocialAccountAdapter):
         Invoked before a social login is performed.
         Ensures UserIntegration is synced even for existing users.
         """
-        super().pre_social_login(request, sociallogin)
         if sociallogin.is_existing:
             # Sync user profile fields (avatar, etc)
             self._update_user_from_social(sociallogin.user, sociallogin)
             # Sync integration record
             self._create_or_update_integration(sociallogin.user, sociallogin)
+        super().pre_social_login(request, sociallogin)
 
     def populate_user(self, request, sociallogin, data):
         """
@@ -79,6 +79,15 @@ class KiriSocialAccountAdapter(DefaultSocialAccountAdapter):
         self._create_or_update_integration(user, sociallogin)
         
         return user
+
+    def save_social_account(self, request, sociallogin):
+        """
+        Invoked when a social account is being saved (e.g. during linking).
+        """
+        super().save_social_account(request, sociallogin)
+        # Ensure profile fields are synced when a new account is linked
+        self._update_user_from_social(sociallogin.user, sociallogin)
+        self._create_or_update_integration(sociallogin.user, sociallogin)
     
     def _create_or_update_integration(self, user, sociallogin):
         """Create or update UserIntegration record from OAuth data."""

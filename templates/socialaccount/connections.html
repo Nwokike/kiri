@@ -76,6 +76,7 @@
     </div>
 
     <!-- Available to Connect -->
+    {% if 'github' not in accounts or 'huggingface' not in accounts %}
     <div
         class="bg-white rounded-2xl border border-[#DEE2E6] shadow-sm overflow-hidden dark:bg-[#1E1E1E] dark:border-[#3D3D3D]">
         <div class="p-5 border-b border-[#DEE2E6] dark:border-[#3D3D3D]">
@@ -113,6 +114,7 @@
             {% endif %}
         </div>
     </div>
+    {% endif %}
 </div>
 
 <div class="h-20 md:hidden"></div>

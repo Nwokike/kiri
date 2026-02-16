@@ -27,8 +27,8 @@
         <a href="{% url 'users:profile' user.username %}"
             class="flex flex-col items-center justify-center gap-0.5 transition-colors
             {% if 'users' in request.path %}text-[#0f62fe]{% else %}text-[#a8a8a8] hover:text-[#161616] dark:hover:text-white{% endif %}">
-            {% if user.github_avatar_url %}
-            <img src="{{ user.github_avatar_url }}" alt="Avatar"
+            {% if user.avatar_url %}
+            <img src="{{ user.avatar_url }}" alt="Avatar"
                 class="w-5 h-5 rounded-full border border-[#e0e0e0] dark:border-[#393939]">
             {% else %}
             <i class="fas fa-user-circle text-lg"></i>

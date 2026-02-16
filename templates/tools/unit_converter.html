@@ -1,41 +1,48 @@
-{% extends "base.html" %}
+{% extends "tools/base_tool.html" %}
 {% load static %}
 
-{% block title %}Unit Converter | Kiri Tools{% endblock %}
-{% block meta_description %}Convert between length, mass, and data units instantly. A high-performance utility for researchers and engineers.{% endblock %}
+{% block tool_name %}Unit Converter{% endblock %}
+{% block tool_icon %}fa-balance-scale{% endblock %}
+{% block tool_title %}Professional Unit Converter{% endblock %}
+{% block tool_description %}
+Rapidly convert between physical and digital units.
+Optimized for scientific research, engineering calculations, and data management.
+{% endblock %}
 
-{% block content %}
-<div class="max-w-4xl mx-auto px-4 py-8" x-data="unitTool()">
-    <nav class="mb-6 text-sm flex items-center text-[#6C757D] dark:text-[#A1A1AA]">
-        <a href="{% url 'tools:index' %}" class="hover:text-[#0D7C3D] transition-colors flex items-center">
-            <i class="fas fa-arrow-left mr-2"></i> Tools
-        </a>
-        <span class="mx-2">/</span>
-        <span class="text-[#212529] dark:text-white font-bold">Unit Converter</span>
-    </nav>
-
-    <div class="bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl p-8 shadow-sm">
-        <div class="mb-8">
-            <label
-                class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest mb-2 block">Category</label>
-            <select x-model="category" @change="reset()"
-                class="w-full p-3 font-bold border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-lg bg-white dark:bg-[#1E1E1E] text-[#212529] dark:text-white outline-none">
-                <template x-for="cat in categories" :key="cat.name">
-                    <option :value="cat.name" x-text="cat.label"></option>
-                </template>
-            </select>
+{% block tool_body %}
+<div class="space-y-8 h-[500px] flex flex-col">
+    <div
+        class="p-8 bg-white dark:bg-[#1A1A1A] rounded-[2.5rem] border border-[#DEE2E6] dark:border-[#3D3D3D] shadow-sm flex-1 flex flex-col gap-8">
+        <!-- Category Selector -->
+        <div class="flex items-center gap-4">
+            <template x-for="cat in categories" :key="cat.name">
+                <button @click="category = cat.name; reset()"
+                    :class="category === cat.name ? 'bg-[#0D7C3D] text-white' : 'bg-[#F8F9FA] dark:bg-[#121212] text-[#6C757D] dark:text-[#A1A1AA] border border-[#DEE2E6] dark:border-[#3D3D3D]'"
+                    class="px-5 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm"
+                    x-text="cat.label">
+                </button>
+            </template>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-            <!-- From -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12 items-center relative">
+            <!-- Swap Icon -->
+            <div class="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 hidden md:block">
+                <button @click="swap()"
+                    class="w-12 h-12 rounded-full bg-white dark:bg-[#2D2D2D] border border-[#DEE2E6] dark:border-[#3D3D3D] shadow-xl flex items-center justify-center text-[#0D7C3D] hover:scale-110 transition-transform active:rotate-180">
+                    <i class="fas fa-exchange-alt"></i>
+                </button>
+            </div>
+
+            <!-- From Column -->
             <div class="space-y-4">
                 <label
-                    class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest block">From</label>
-                <div class="flex gap-2">
+                    class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest block">Input
+                    Value</label>
+                <div class="space-y-3">
                     <input type="number" x-model="fromValue" @input="convert('f')"
-                        class="flex-1 p-4 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl focus:border-[#0D7C3D] focus:ring-4 focus:ring-[#0D7C3D]/10 bg-white dark:bg-[#1E1E1E] text-[#212529] dark:text-white outline-none">
+                        class="w-full p-6 font-mono text-2xl border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[2rem] bg-[#F8F9FA] dark:bg-[#121212] text-[#212529] dark:text-white outline-none focus:border-[#0D7C3D] transition-all shadow-inner">
                     <select x-model="fromUnit" @change="convert('f')"
-                        class="w-24 p-2 text-xs border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl bg-[#F8F9FA] dark:bg-[#252526] text-[#212529] dark:text-white font-bold">
+                        class="w-full p-4 text-sm font-bold border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-2xl bg-white dark:bg-[#1A1A1A] text-[#212529] dark:text-white outline-none cursor-pointer">
                         <template x-for="u in currentUnits" :key="u.code">
                             <option :value="u.code" x-text="u.label"></option>
                         </template>
@@ -43,15 +50,16 @@
                 </div>
             </div>
 
-            <!-- To -->
+            <!-- To Column -->
             <div class="space-y-4">
                 <label
-                    class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest block">To</label>
-                <div class="flex gap-2">
+                    class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest block">Resulting
+                    Value</label>
+                <div class="space-y-3">
                     <input type="number" x-model="toValue" @input="convert('t')"
-                        class="flex-1 p-4 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl focus:border-[#0D7C3D] focus:ring-4 focus:ring-[#0D7C3D]/10 bg-white dark:bg-[#1E1E1E] text-[#212529] dark:text-white outline-none">
+                        class="w-full p-6 font-mono text-2xl border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[2rem] bg-[#0D7C3D]/5 border-[#0D7C3D]/20 text-[#0D7C3D] outline-none focus:border-[#0D7C3D] transition-all shadow-inner">
                     <select x-model="toUnit" @change="convert('f')"
-                        class="w-24 p-2 text-xs border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl bg-[#F8F9FA] dark:bg-[#252526] text-[#212529] dark:text-white font-bold">
+                        class="w-full p-4 text-sm font-bold border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-2xl bg-white dark:bg-[#1A1A1A] text-[#212529] dark:text-white outline-none cursor-pointer">
                         <template x-for="u in currentUnits" :key="u.code">
                             <option :value="u.code" x-text="u.label"></option>
                         </template>
@@ -61,48 +69,120 @@
         </div>
     </div>
 </div>
+{% endblock %}
 
-<script>
-    function unitTool() {
-        return {
-            category: 'length',
-            fromValue: 1,
-            toValue: 1000,
-            fromUnit: 'm',
-            toUnit: 'mm',
-            categories: [
-                { name: 'length', label: 'Length', units: [{ code: 'm', label: 'Meters', f: 1 }, { code: 'km', label: 'KM', f: 0.001 }, { code: 'mm', label: 'MM', f: 1000 }, { code: 'in', label: 'Inch', f: 39.37 }] },
-                { name: 'mass', label: 'Mass', units: [{ code: 'kg', label: 'KG', f: 1 }, { code: 'g', label: 'Grams', f: 1000 }, { code: 'lb', label: 'Lbs', f: 2.20462 }] },
-                { name: 'data', label: 'Data', units: [{ code: 'mb', label: 'MB', f: 1 }, { code: 'kb', label: 'KB', f: 1024 }, { code: 'gb', label: 'GB', f: 1 / 1024 }] }
-            ],
+{% block tool_js_data %}
+{
+category: 'length',
+fromValue: 1,
+toValue: 1000,
+fromUnit: 'm',
+toUnit: 'mm',
+categories: [
+{
+name: 'length',
+label: 'Length',
+units: [
+{ code: 'm', label: 'Meters (m)', f: 1 },
+{ code: 'km', label: 'Kilometers (km)', f: 0.001 },
+{ code: 'mm', label: 'Millimeters (mm)', f: 1000 },
+{ code: 'cm', label: 'Centimeters (cm)', f: 100 },
+{ code: 'mi', label: 'Miles (mi)', f: 0.000621371 },
+{ code: 'ft', label: 'Feet (ft)', f: 3.28084 },
+{ code: 'in', label: 'Inches (in)', f: 39.3701 }
+]
+},
+{
+name: 'mass',
+label: 'Mass',
+units: [
+{ code: 'kg', label: 'Kilograms (kg)', f: 1 },
+{ code: 'g', label: 'Grams (g)', f: 1000 },
+{ code: 'lb', label: 'Pounds (lb)', f: 2.20462 },
+{ code: 'oz', label: 'Ounces (oz)', f: 35.274 },
+{ code: 't', label: 'Tons (t)', f: 0.001 }
+]
+},
+{
+name: 'data',
+label: 'Digital Data',
+units: [
+{ code: 'bytes', label: 'Bytes (B)', f: 1024 * 1024 },
+{ code: 'kb', label: 'Kilobytes (KB)', f: 1024 },
+{ code: 'mb', label: 'Megabytes (MB)', f: 1 },
+{ code: 'gb', label: 'Gigabytes (GB)', f: 1/1024 },
+{ code: 'tb', label: 'Terabytes (TB)', f: 1/(1024*1024) }
+]
+},
+{
+name: 'temp',
+label: 'Temperature',
+units: [{ code: 'c', label: 'Celsius (°C)' }, { code: 'f', label: 'Fahrenheit (°F)' }, { code: 'k', label: 'Kelvin (K)'
+}]
+}
+],
 
-            get currentUnits() {
-                return this.categories.find(c => c.name === this.category).units;
-            },
+get currentUnits() {
+return this.categories.find(c => c.name === this.category).units;
+},
 
-            reset() {
-                const units = this.currentUnits;
-                this.fromUnit = units[0].code;
-                this.toUnit = units[1] ? units[1].code : units[0].code;
-                this.convert('f');
-            },
+reset() {
+const units = this.currentUnits;
+this.fromUnit = units[0].code;
+this.toUnit = units[1] ? units[1].code : units[0].code;
+this.fromValue = 1;
+this.convert('f');
+},
 
-            convert(dir) {
-                const units = this.currentUnits;
-                const fUnit = units.find(u => u.code === this.fromUnit);
-                const tUnit = units.find(u => u.code === this.toUnit);
+swap() {
+const tmpUnit = this.fromUnit;
+const tmpValue = this.fromValue;
+this.fromUnit = this.toUnit;
+this.fromValue = this.toValue;
+this.toUnit = tmpUnit;
+this.toValue = tmpValue;
+this.statusMessage = 'Units swapped';
+},
 
-                if (dir === 'f') {
-                    // from -> base -> to
-                    const base = this.fromValue / fUnit.f;
-                    this.toValue = base * tUnit.f;
-                } else {
-                    // to -> base -> from
-                    const base = this.toValue / tUnit.f;
-                    this.fromValue = base * fUnit.f;
-                }
-            }
-        }
-    }
-</script>
+convert(dir) {
+if (this.category === 'temp') return this.convertTemp(dir);
+
+const units = this.currentUnits;
+const fUnit = units.find(u => u.code === this.fromUnit);
+const tUnit = units.find(u => u.code === this.toUnit);
+
+if (dir === 'f') {
+const base = this.fromValue / fUnit.f;
+this.toValue = Math.round(base * tUnit.f * 1000000) / 1000000;
+} else {
+const base = this.toValue / tUnit.f;
+this.fromValue = Math.round(base * fUnit.f * 1000000) / 1000000;
+}
+this.statusMessage = 'Calculated';
+},
+
+convertTemp(dir) {
+let c;
+if (dir === 'f') {
+if (this.fromUnit === 'c') c = this.fromValue;
+else if (this.fromUnit === 'f') c = (this.fromValue - 32) * 5/9;
+else if (this.fromUnit === 'k') c = this.fromValue - 273.15;
+
+if (this.toUnit === 'c') this.toValue = c;
+else if (this.toUnit === 'f') this.toValue = (c * 9/5) + 32;
+else if (this.toUnit === 'k') this.toValue = c + 273.15;
+} else {
+if (this.toUnit === 'c') c = this.toValue;
+else if (this.toUnit === 'f') c = (this.toValue - 32) * 5/9;
+else if (this.toUnit === 'k') c = this.toValue - 273.15;
+
+if (this.fromUnit === 'c') this.fromValue = c;
+else if (this.fromUnit === 'f') this.fromValue = (c * 9/5) + 32;
+else if (this.fromUnit === 'k') this.fromValue = c + 273.15;
+}
+this.fromValue = Math.round(this.fromValue * 100) / 100;
+this.toValue = Math.round(this.toValue * 100) / 100;
+this.statusMessage = 'Temperature synchronized';
+}
+}
 {% endblock %}

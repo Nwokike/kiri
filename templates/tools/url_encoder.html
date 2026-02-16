@@ -1,88 +1,112 @@
-{% extends "base.html" %}
+{% extends "tools/base_tool.html" %}
 {% load static %}
 
-{% block title %}URL Encoder & Decoder | Kiri Tools{% endblock %}
-{% block meta_description %}Securely encode and decode URL parameters and components. Essential utility for web developers ensuring correct data transmission.{% endblock %}
+{% block tool_name %}URL Encoder{% endblock %}
+{% block tool_icon %}fa-link{% endblock %}
+{% block tool_title %}URL Encoder & Decoder{% endblock %}
+{% block tool_description %}
+Securely encode or decode URL components to ensure safe data transmission across different web systems.
+Ideal for debugging API calls and cleaning up tracking parameters.
+{% endblock %}
 
-{% block content %}
-<div class="max-w-6xl mx-auto px-4 py-8" x-data="urlTool()">
-    <nav class="mb-6 text-sm flex items-center text-[#6C757D] dark:text-[#A1A1AA]">
-        <a href="{% url 'tools:index' %}" class="hover:text-[#0D7C3D] transition-colors flex items-center">
-            <i class="fas fa-arrow-left mr-2"></i> Tools
-        </a>
-        <span class="mx-2">/</span>
-        <span class="text-[#212529] dark:text-white font-bold">URL Encoder & Decoder</span>
-    </nav>
+{% block tool_actions_left %}
+<div class="flex items-center gap-2">
+    <div class="flex bg-white dark:bg-[#1E1E1E] p-1 rounded-xl border border-[#DEE2E6] dark:border-[#3D3D3D] shadow-sm">
+        <button @click="mode = 'encode'; convert()"
+            :class="mode === 'encode' ? 'bg-[#0D7C3D] text-white' : 'text-[#6C757D] dark:text-[#A1A1AA]'"
+            class="px-4 py-1.5 text-[10px] font-bold rounded-lg transition-all">Encode</button>
+        <button @click="mode = 'decode'; convert()"
+            :class="mode === 'decode' ? 'bg-[#0D7C3D] text-white' : 'text-[#6C757D] dark:text-[#A1A1AA]'"
+            class="px-4 py-1.5 text-[10px] font-bold rounded-lg transition-all">Decode</button>
+    </div>
+</div>
+{% endblock %}
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 h-[calc(100vh-250px)]">
-        <div class="flex flex-col h-full">
-            <div class="mb-3 flex justify-between items-center">
-                <label class="text-sm font-bold text-[#212529] dark:text-white uppercase tracking-wider">Input
-                    Text</label>
-                <div class="flex gap-2">
-                    <button @click="sample()"
-                        class="text-[11px] font-bold text-[#0D7C3D] hover:underline uppercase">Sample</button>
-                    <button @click="input = ''"
-                        class="text-[11px] font-bold text-red-500 hover:underline uppercase">Clear</button>
-                </div>
+{% block tool_actions_right %}
+<button @click="download()"
+    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-[#0D7C3D] text-white hover:bg-[#0A5C2C]"
+    x-show="output">
+    <i class="fas fa-download"></i>
+    <span>Save String</span>
+</button>
+{% endblock %}
+
+{% block tool_body %}
+<div class="space-y-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[400px]">
+        <!-- Input Area -->
+        <div class="flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest"
+                    x-text="mode === 'encode' ? 'Raw URL/Text' : 'Encoded String'"></span>
             </div>
-            <textarea x-model="input"
-                class="flex-1 w-full p-6 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl focus:border-[#0D7C3D] focus:ring-4 focus:ring-[#0D7C3D]/10 bg-white dark:bg-[#1E1E1E] text-[#212529] dark:text-white resize-none transition-all outline-none"
-                placeholder="Paste your URL or text here..."></textarea>
+            <textarea x-model="input" @input="convert()"
+                class="flex-1 w-full p-6 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[1.5rem] bg-white dark:bg-[#121212] text-[#212529] dark:text-[#E4E4E7] resize-none shadow-inner"
+                :placeholder="mode === 'encode' ? 'Enter URL to encode...' : 'Enter string to decode...'"></textarea>
         </div>
 
-        <div class="flex flex-col h-full">
-            <div class="mb-3 flex justify-between items-center">
-                <div class="flex gap-4">
-                    <button @click="mode = 'encode'"
-                        :class="mode === 'encode' ? 'text-[#0D7C3D] border-[#0D7C3D]' : 'text-gray-400 border-transparent'"
-                        class="text-sm font-bold uppercase tracking-wider border-b-2 pb-1 transition-all">Encode</button>
-                    <button @click="mode = 'decode'"
-                        :class="mode === 'decode' ? 'text-[#0D7C3D] border-[#0D7C3D]' : 'text-gray-400 border-transparent'"
-                        class="text-sm font-bold uppercase tracking-wider border-b-2 pb-1 transition-all">Decode</button>
-                </div>
-                <button @click="copy()" class="text-[11px] font-bold text-[#0D7C3D] hover:underline uppercase"
-                    x-text="copied ? 'Copied!' : 'Copy Result'"></button>
+        <!-- Output Area -->
+        <div class="flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+                <span
+                    class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest">Result</span>
+                <button @click="copyToClipboard(output)"
+                    class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase flex items-center gap-1.5"
+                    x-show="output">
+                    <i class="fas" :class="copied ? 'fa-check' : 'fa-copy'"></i>
+                    <span x-text="copied ? 'Copied' : 'Copy'"></span>
+                </button>
             </div>
-            <div class="flex-1 relative">
-                <textarea readonly :value="output"
-                    class="w-full h-full p-6 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl bg-[#F8F9FA] dark:bg-[#252526] text-[#6C757D] dark:text-[#A1A1AA] resize-none outline-none"></textarea>
-                <div x-show="error"
-                    class="absolute inset-x-4 bottom-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-xs font-bold">
-                    <i class="fas fa-exclamation-triangle mr-2"></i> <span x-text="error"></span>
-                </div>
+            <div
+                class="flex-1 rounded-[1.5rem] bg-[#F8F9FA] dark:bg-[#121212] border border-[#DEE2E6] dark:border-[#3D3D3D] relative overflow-hidden group">
+                <textarea readonly x-model="output"
+                    class="w-full h-full p-6 font-mono text-sm bg-transparent text-[#212529] dark:text-[#E4E4E7] resize-none outline-none"
+                    placeholder="Output will appear here..."></textarea>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
 
-<script>
-    function urlTool() {
-        return {
-            input: '',
-            mode: 'encode',
-            copied: false,
-            error: '',
-            get output() {
-                this.error = '';
-                if (!this.input) return '';
-                try {
-                    return this.mode === 'encode' ? encodeURIComponent(this.input) : decodeURIComponent(this.input);
-                } catch (e) {
-                    this.error = 'Invalid URL components for decoding.';
-                    return this.input;
-                }
-            },
-            sample() {
-                this.input = this.mode === 'encode' ? 'https://kiri.research/search?q=ai research&lang=en' : 'https%3A%2F%2Fkiri.research%2Fsearch%3Fq%3Dai%20research%26lang%3Den';
-            },
-            copy() {
-                if (!this.output || this.error) return;
-                navigator.clipboard.writeText(this.output);
-                this.copied = true;
-                setTimeout(() => this.copied = false, 2000);
-            }
-        }
-    }
-</script>
+{% block tool_js_data %}
+{
+mode: 'encode',
+
+loadSample() {
+if (this.mode === 'encode') {
+this.input = "https://kiri.ai/search?q=neural networks&category=elite research&verified=true";
+} else {
+this.input = "https%3A%2F%2Fkiri.ai%2Fsearch%3Fq%3Dneural%20networks%26category%3Delite%20research%26verified%3Dtrue";
+}
+this.convert();
+},
+
+convert() {
+this.error = '';
+if (!this.input.trim()) {
+this.output = '';
+this.statusMessage = 'Ready';
+return;
+}
+
+try {
+if (this.mode === 'encode') {
+this.output = encodeURIComponent(this.input);
+this.statusMessage = 'URL encoded successfully';
+} else {
+this.output = decodeURIComponent(this.input);
+this.statusMessage = 'URL decoded successfully';
+}
+} catch (e) {
+this.error = 'Invalid components for ' + this.mode;
+this.output = '';
+this.statusMessage = 'Operation failed';
+}
+},
+
+download() {
+if (!this.output || this.error) return;
+this.downloadFile(this.output, 'url_processed.txt', 'text/plain');
+}
+}
 {% endblock %}

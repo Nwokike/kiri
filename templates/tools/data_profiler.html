@@ -1,221 +1,261 @@
-{% extends "base.html" %}
+{% extends "tools/base_tool.html" %}
 {% load static %}
 
-{% block title %}Data Profiler | Kiri Tools{% endblock %}
-{% block meta_description %}Generate statistical summaries and data quality reports for your CSV datasets. Secure, browser-based data profiling for researchers.{% endblock %}
+{% block tool_name %}Data Profiler{% endblock %}
+{% block tool_icon %}fa-chart-pie{% endblock %}
+{% block tool_title %}CSV Analytical Profiler{% endblock %}
+{% block tool_description %}
+Generate comprehensive statistical blueprints for your tabular datasets.
+Analyze distributions, identify missing data vectors, and visualize quality metrics instantly on your local hardware.
+{% endblock %}
 
-{% block content %}
-<div class="max-w-7xl mx-auto px-4 py-8" x-data="profilerTool()">
-    <nav class="mb-6 text-sm flex items-center text-[#6C757D] dark:text-[#A1A1AA]">
-        <a href="{% url 'tools:index' %}" class="hover:text-[#0D7C3D] transition-colors flex items-center">
-            <i class="fas fa-arrow-left mr-2"></i> Tools
-        </a>
-        <span class="mx-2">/</span>
-        <span class="text-[#212529] dark:text-white font-bold">Data Profiler</span>
-    </nav>
-
-    <div class="mb-10">
-        <h1 class="text-3xl font-extrabold text-[#212529] dark:text-white mb-2">CSV Data Profiler</h1>
-        <p class="text-[#6C757D] dark:text-[#A1A1AA]">Generate quick statistical summaries and data quality reports for
-            your datasets.</p>
-    </div>
-
-    <!-- Upload/Input Area -->
-    <div x-show="!data"
-        class="max-w-3xl mx-auto py-20 border-4 border-dashed border-[#DEE2E6] dark:border-[#333] rounded-3xl flex flex-col items-center justify-center text-center px-8 transition-colors hover:border-[#0D7C3D]/30 group">
-        <input type="file" @change="handleFile" class="hidden" id="csv-upload" accept=".csv">
-        <div
-            class="w-20 h-20 bg-[#F8F9FA] dark:bg-[#1E1E1E] rounded-full flex items-center justify-center text-[#ADB5BD] group-hover:text-[#0D7C3D] mb-6 transition-all">
-            <i class="fas fa-file-csv text-3xl"></i>
-        </div>
-        <h3 class="text-xl font-bold text-[#212529] dark:text-white mb-2">Upload CSV Dataset</h3>
-        <p class="text-sm text-[#6C757D] dark:text-[#A1A1AA] mb-8 max-w-sm">We process everything in your browser. Large
-            files (>5MB) might be slow.</p>
-        <div class="flex gap-4">
-            <label for="csv-upload"
-                class="px-8 py-3 bg-[#0D7C3D] text-white font-bold rounded-xl cursor-pointer hover:bg-[#0A5C2C] transition-all shadow-md">
-                Choose File
-            </label>
-            <button @click="loadSample()"
-                class="px-8 py-3 bg-white dark:bg-[#1E1E1E] text-[#6C757D] font-bold rounded-xl border border-[#DEE2E6] dark:border-[#3D3D3D] hover:bg-gray-50 transition-all">
-                Load Sample
-            </button>
-        </div>
-    </div>
-
-    <!-- Profile Dashboard -->
-    <div x-show="data" class="space-y-8">
-        <div class="flex items-center justify-between pb-6 border-b border-[#DEE2E6] dark:border-[#333]">
-            <div>
-                <h2 class="text-xl font-bold text-[#212529] dark:text-white" x-text="fileName"></h2>
-                <div class="flex gap-4 mt-1">
-                    <span class="text-xs font-bold text-[#6C757D] uppercase">Rows: <span
-                            class="text-[#212529] dark:text-white" x-text="stats.rowCount"></span></span>
-                    <span class="text-xs font-bold text-[#6C757D] uppercase">Columns: <span
-                            class="text-[#212529] dark:text-white" x-text="stats.colCount"></span></span>
-                </div>
+{% block tool_body %}
+<div class="space-y-8">
+    <!-- View Switcher -->
+    <template x-if="!data">
+        <div class="h-96 border-2 border-dashed border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[3rem] flex flex-col items-center justify-center gap-6 bg-[#F8F9FA]/50 dark:bg-[#1A1A1A]/50 hover:bg-white dark:hover:bg-[#1A1A1A] hover:border-[#0D7C3D] transition-all cursor-pointer group"
+            @click="$refs.fileInput.click()">
+            <input type="file" x-ref="fileInput" class="hidden" accept=".csv" @change="handleFile($event)">
+            <div
+                class="w-20 h-20 rounded-[2rem] bg-[#0D7C3D]/10 flex items-center justify-center text-[#0D7C3D] group-hover:rotate-12 transition-transform">
+                <i class="fas fa-file-csv text-3xl"></i>
             </div>
-            <button @click="reset()" class="text-xs font-bold text-red-500 hover:underline uppercase">Reset
-                Tool</button>
-        </div>
-
-        <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
-            <!-- Sidebar: Column List -->
-            <div class="lg:col-span-1 space-y-2">
-                <template x-for="col in columns" :key="col">
-                    <button @click="selectedCol = col"
-                        :class="selectedCol === col ? 'bg-[#0D7C3D] text-white border-[#0D7C3D]' : 'bg-white dark:bg-[#1E1E1E] text-[#6C757D] dark:text-[#A1A1AA] border-[#DEE2E6] dark:border-[#333] hover:border-[#0D7C3D]'"
-                        class="w-full text-left px-5 py-3 rounded-xl border text-sm font-bold transition-all truncate flex justify-between items-center group">
-                        <span x-text="col"></span>
-                        <i class="fas fa-chevron-right text-[10px] opacity-30 group-hover:opacity-100"></i>
-                    </button>
-                </template>
+            <div class="text-center">
+                <p class="text-xs font-black text-[#212529] dark:text-white uppercase tracking-[0.3em]">Ignite Dataset
+                    Analysis</p>
+                <p class="text-[10px] text-[#A1A1AA] mt-2 italic">Supports CSV up to 10MB (Local Processing)</p>
             </div>
+            <button @click.stop="loadSample()"
+                class="text-[10px] font-black text-[#0D7C3D] uppercase hover:underline">Or Load Calibration
+                Sample</button>
+        </div>
+    </template>
 
-            <!-- Main: Statistics -->
-            <div class="lg:col-span-3 space-y-8">
-                <div
-                    class="p-8 bg-white dark:bg-[#1E1E1E] rounded-3xl border border-[#DEE2E6] dark:border-[#333] shadow-sm">
-                    <h3
-                        class="text-lg font-bold text-[#212529] dark:text-white mb-6 uppercase tracking-widest flex items-center gap-2">
-                        <i class="fas fa-chart-bar text-[#0D7C3D]"></i>
-                        Column: <span x-text="selectedCol"></span>
-                    </h3>
-
-                    <div class="grid grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-                        <div class="p-5 bg-gray-50 dark:bg-[#121212] rounded-2xl">
-                            <div class="text-[10px] font-bold text-[#ADB5BD] uppercase mb-1">Distinct</div>
-                            <div class="text-xl font-bold dark:text-white" x-text="columnStats[selectedCol]?.distinct">
-                            </div>
-                        </div>
-                        <div class="p-5 bg-gray-50 dark:bg-[#121212] rounded-2xl">
-                            <div class="text-[10px] font-bold text-[#ADB5BD] uppercase mb-1">Missing</div>
-                            <div class="text-xl font-bold dark:text-white" x-text="columnStats[selectedCol]?.missing">
-                            </div>
-                        </div>
-                        <div class="p-5 bg-gray-50 dark:bg-[#121212] rounded-2xl">
-                            <div class="text-[10px] font-bold text-[#ADB5BD] uppercase mb-1">Mean</div>
-                            <div class="text-xl font-bold dark:text-white"
-                                x-text="columnStats[selectedCol]?.mean || 'N/A'"></div>
-                        </div>
-                        <div class="p-5 bg-gray-50 dark:bg-[#121212] rounded-2xl">
-                            <div class="text-[10px] font-bold text-[#ADB5BD] uppercase mb-1">Max</div>
-                            <div class="text-xl font-bold dark:text-white"
-                                x-text="columnStats[selectedCol]?.max || 'N/A'"></div>
-                        </div>
+    <!-- Dashboard -->
+    <template x-if="data">
+        <div class="space-y-8 animate-fade-in">
+            <!-- Header Info -->
+            <div
+                class="flex items-center justify-between p-6 bg-white dark:bg-[#1A1A1A] rounded-[2rem] border border-[#DEE2E6] dark:border-[#3D3D3D] shadow-sm">
+                <div class="flex items-center gap-6">
+                    <div
+                        class="w-12 h-12 rounded-2xl bg-[#0D7C3D] flex items-center justify-center text-white shadow-lg">
+                        <i class="fas fa-database"></i>
                     </div>
-
-                    <!-- Value Distribution -->
                     <div>
-                        <h4 class="text-xs font-bold text-[#6C757D] uppercase mb-4 tracking-widest">Frequency
-                            Distribution (Top 10)</h4>
-                        <div class="space-y-4">
-                            <template x-for="item in columnStats[selectedCol]?.topValues" :key="item.value">
-                                <div>
-                                    <div class="flex justify-between text-xs font-bold mb-1.5 dark:text-white">
-                                        <span x-text="item.value"></span>
-                                        <span x-text="item.count"></span>
+                        <h2 class="text-sm font-black text-[#212529] dark:text-white truncate max-w-xs"
+                            x-text="fileName"></h2>
+                        <div class="flex gap-4 mt-1">
+                            <span class="text-[9px] font-black text-[#ADB5BD] uppercase tracking-widest">Rows: <span
+                                    class="text-[#0D7C3D]" x-text="stats.rowCount"></span></span>
+                            <span class="text-[9px] font-black text-[#ADB5BD] uppercase tracking-widest">Cols: <span
+                                    class="text-[#0D7C3D]" x-text="stats.colCount"></span></span>
+                        </div>
+                    </div>
+                </div>
+                <button @click="reset()"
+                    class="px-6 py-2.5 bg-red-500/10 text-red-500 text-[10px] font-black rounded-xl hover:bg-red-500 hover:text-white transition-all uppercase tracking-widest border border-red-500/20">Purge
+                    Data</button>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+                <!-- Column Navigation -->
+                <div class="lg:col-span-1 flex flex-col gap-2 max-h-[600px] overflow-auto pr-2 custom-scrollbar">
+                    <span class="text-[9px] font-black text-[#ADB5BD] uppercase tracking-[0.2em] mb-2 ml-2">Data
+                        Vectors</span>
+                    <template x-for="col in columns" :key="col">
+                        <button @click="selectedCol = col"
+                            :class="selectedCol === col ? 'bg-[#121212] border-[#0D7C3D] text-[#0D7C3D]' : 'bg-white dark:bg-[#1A1A1A] text-[#6C757D] dark:text-[#A1A1AA] border-[#DEE2E6] dark:border-[#3D3D3D] hover:border-[#0D7C3D]'"
+                            class="w-full text-left px-5 py-4 rounded-2xl border text-[11px] font-black transition-all truncate flex justify-between items-center group shadow-sm">
+                            <span x-text="col"></span>
+                            <div class="w-2 h-2 rounded-full"
+                                :class="columnStats[col]?.missing > 0 ? 'bg-orange-400' : 'bg-[#0D7C3D]'"></div>
+                        </button>
+                    </template>
+                </div>
+
+                <!-- Analysis Panel -->
+                <div class="lg:col-span-3 space-y-6 overflow-hidden">
+                    <div
+                        class="p-10 bg-white dark:bg-[#121212] rounded-[3rem] border border-[#DEE2E6] dark:border-[#3D3D3D] shadow-sm">
+                        <div class="flex justify-between items-center mb-10">
+                            <h3
+                                class="text-xs font-black text-[#212529] dark:text-white uppercase tracking-[0.2em] flex items-center gap-3">
+                                <i class="fas fa-microscope text-[#0D7C3D]"></i> Analysis: <span x-text="selectedCol"
+                                    class="text-[#0D7C3D]"></span>
+                            </h3>
+                            <div class="px-3 py-1 bg-[#0D7C3D]/10 rounded-lg">
+                                <span class="text-[9px] font-black text-[#0D7C3D] uppercase"
+                                    x-text="columnStats[selectedCol]?.type || 'GENERIC'"></span>
+                            </div>
+                        </div>
+
+                        <!-- Mini Stats Grid -->
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+                            <div
+                                class="p-6 bg-gray-50/50 dark:bg-[#1A1A1A] rounded-2xl border border-[#F1F3F5] dark:border-[#2D2D2D]">
+                                <p class="text-[9px] font-black text-[#ADB5BD] uppercase tracking-tighter mb-2">
+                                    Uniqueness</p>
+                                <p class="text-xl font-black text-[#212529] dark:text-[#E4E4E7]"
+                                    x-text="Math.round(columnStats[selectedCol]?.distinct / stats.rowCount * 100) + '%'">
+                                </p>
+                            </div>
+                            <div
+                                class="p-6 bg-gray-50/50 dark:bg-[#1A1A1A] rounded-2xl border border-[#F1F3F5] dark:border-[#2D2D2D]">
+                                <p class="text-[9px] font-black text-[#ADB5BD] uppercase tracking-tighter mb-2">Missing
+                                </p>
+                                <p class="text-xl font-black"
+                                    :class="columnStats[selectedCol]?.missing > 0 ? 'text-orange-500' : 'text-[#0D7C3D]'"
+                                    x-text="columnStats[selectedCol]?.missing"></p>
+                            </div>
+                            <div
+                                class="p-6 bg-gray-50/50 dark:bg-[#1A1A1A] rounded-2xl border border-[#F1F3F5] dark:border-[#2D2D2D]">
+                                <p class="text-[9px] font-black text-[#ADB5BD] uppercase tracking-tighter mb-2">Mean Val
+                                </p>
+                                <p class="text-xl font-black text-[#212529] dark:text-[#E4E4E7]"
+                                    x-text="columnStats[selectedCol]?.mean || '—'"></p>
+                            </div>
+                            <div
+                                class="p-6 bg-gray-50/50 dark:bg-[#1A1A1A] rounded-2xl border border-[#F1F3F5] dark:border-[#2D2D2D]">
+                                <p class="text-[9px] font-black text-[#ADB5BD] uppercase tracking-tighter mb-2">Max Peak
+                                </p>
+                                <p class="text-xl font-black text-[#212529] dark:text-[#E4E4E7]"
+                                    x-text="columnStats[selectedCol]?.max || '—'"></p>
+                            </div>
+                        </div>
+
+                        <!-- Distribution Chart -->
+                        <div class="space-y-6">
+                            <h4
+                                class="text-[10px] font-black text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-[0.2em] ml-2">
+                                Frequency Distribution</h4>
+                            <div class="space-y-4">
+                                <template x-for="item in columnStats[selectedCol]?.topValues" :key="item.value">
+                                    <div class="group">
+                                        <div class="flex justify-between text-[10px] font-black mb-2 transition-colors">
+                                            <span class="text-[#212529] dark:text-[#E4E4E7]" x-text="item.value"></span>
+                                            <span class="text-[#ADB5BD] group-hover:text-[#0D7C3D]"
+                                                x-text="item.count + ' hits'"></span>
+                                        </div>
+                                        <div
+                                            class="h-1.5 w-full bg-gray-100 dark:bg-[#2D2D2D] rounded-full overflow-hidden">
+                                            <div class="h-full bg-gradient-to-r from-[#0D7C3D] to-[#4ADE80] transition-all duration-700 ease-out"
+                                                :style="'width: ' + (item.count / stats.rowCount * 100) + '%'"></div>
+                                        </div>
                                     </div>
-                                    <div
-                                        class="h-1.5 w-full bg-gray-100 dark:bg-[#2D2D2D] rounded-full overflow-hidden">
-                                        <div class="h-full bg-[#0D7C3D]/40"
-                                            :style="'width: ' + (item.count / stats.rowCount * 100) + '%'"></div>
-                                    </div>
-                                </div>
-                            </template>
+                                </template>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-    </div>
+    </template>
 </div>
+{% endblock %}
 
-<!-- PapaParse for CSV -->
+{% block tool_js_data %}
+{
+data: null,
+fileName: '',
+columns: [],
+selectedCol: '',
+columnStats: {},
+stats: { rowCount: 0, colCount: 0 },
+
+handleFile(e) {
+const file = e.target.files[0];
+if (!file) return;
+this.fileName = file.name;
+this.statusMessage = 'Parsing large CSV asset...';
+
+Papa.parse(file, {
+header: true,
+dynamicTyping: true,
+skipEmptyLines: true,
+complete: (results) => this.processData(results)
+});
+},
+
+loadSample() {
+this.fileName = 'system_diagnostics.csv';
+const sampleText =
+"id,node,load,errors,status\n1,Alpha-01,0.45,0,Stable\n2,Beta-09,0.89,4,Warning\n3,Sigma-12,0.12,0,Stable\n4,Theta-04,0.34,1,Stable\n5,Omega-99,0.99,12,Critical\n6,Delta-05,0.76,0,Stable\n7,Mu-21,0.23,0,Stable\n8,Zeta-11,0.55,2,Stable";
+this.processData(Papa.parse(sampleText, { header: true, dynamicTyping: true }));
+},
+
+processData(results) {
+if (!results.data || !results.data.length) return;
+this.data = results.data;
+this.columns = Object.keys(results.data[0]);
+this.selectedCol = this.columns[0];
+this.stats.rowCount = results.data.length;
+this.stats.colCount = this.columns.length;
+
+const computed = {};
+this.columns.forEach(col => {
+const values = this.data.map(row => row[col]).filter(v => v !== null && v !== undefined);
+const freq = {};
+values.forEach(v => freq[v] = (freq[v] || 0) + 1);
+
+const numbers = values.filter(v => typeof v === 'number');
+const topValues = Object.entries(freq)
+.sort((a, b) => b[1] - a[1])
+.slice(0, 8)
+.map(([value, count]) => ({ value, count }));
+
+computed[col] = {
+distinct: Object.keys(freq).length,
+missing: this.stats.rowCount - values.length,
+topValues,
+type: numbers.length > values.length / 2 ? 'NUMERIC' : 'CATEGORICAL'
+};
+
+if (numbers.length > 0) {
+computed[col].mean = (numbers.reduce((a, b) => a + b, 0) / numbers.length).toFixed(2);
+computed[col].max = Math.max(...numbers).toFixed(2);
+}
+});
+
+this.columnStats = computed;
+this.statusMessage = 'Profile generated';
+},
+
+reset() {
+this.data = null;
+this.statusMessage = 'Ready';
+this.$nextTick(() => {
+if (this.$refs.fileInput) this.$refs.fileInput.value = '';
+});
+}
+}
+{% endblock %}
+
+{% block extra_js_tool %}
 <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+<style>
+    .animate-fade-in {
+        animation: fadeIn 0.4s ease-out;
+    }
 
-<script>
-    function profilerTool() {
-        return {
-            data: null,
-            fileName: '',
-            columns: [],
-            selectedCol: '',
-            columnStats: {},
-            stats: {
-                rowCount: 0,
-                colCount: 0
-            },
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
 
-            handleFile(e) {
-                const file = e.target.files[0];
-                if (!file) return;
-                this.fileName = file.name;
-
-                Papa.parse(file, {
-                    header: true,
-                    dynamicTyping: true,
-                    complete: (results) => {
-                        this.processData(results);
-                    }
-                });
-            },
-
-            loadSample() {
-                this.fileName = 'research_sample.csv';
-                const sampleText = "id,project,stars,citations,status\n1,AI Ethics,450,12,Active\n2,Quantum Sim,890,45,Active\n3,Edge CV,120,3,Beta\n4,RoboPath,340,8,Active\n5,NLP Core,1100,67,Stable\n6,Health ML,900,23,Stable\n7,Privacy Net,230,2,Beta\n8,Auto Pilot,1500,120,Stable";
-                const results = Papa.parse(sampleText, { header: true, dynamicTyping: true });
-                this.processData(results);
-            },
-
-            processData(results) {
-                this.data = results.data;
-                this.columns = Object.keys(results.data[0]);
-                this.selectedCol = this.columns[0];
-                this.stats.rowCount = results.data.length;
-                this.stats.colCount = this.columns.length;
-
-                // Compute stats for each column
-                const stats = {};
-                this.columns.forEach(col => {
-                    const values = results.data.map(row => row[col]).filter(v => v !== null && v !== undefined);
-                    const missing = results.data.length - values.length;
-
-                    const freq = {};
-                    values.forEach(v => freq[v] = (freq[v] || 0) + 1);
-
-                    const topValues = Object.entries(freq)
-                        .sort((a, b) => b[1] - a[1])
-                        .slice(0, 10)
-                        .map(([value, count]) => ({ value, count }));
-
-                    const columnStat = {
-                        distinct: Object.keys(freq).length,
-                        missing: missing,
-                        topValues: topValues
-                    };
-
-                    const numbers = values.filter(v => typeof v === 'number');
-                    if (numbers.length > 0) {
-                        columnStat.mean = Math.round(numbers.reduce((a, b) => a + b, 0) / numbers.length * 100) / 100;
-                        columnStat.max = Math.max(...numbers);
-                        columnStat.min = Math.min(...numbers);
-                    }
-
-                    stats[col] = columnStat;
-                });
-
-                this.columnStats = stats;
-            },
-
-            reset() {
-                this.data = null;
-                this.fileName = '';
-                this.columns = [];
-                this.selectedCol = '';
-                this.columnStats = {};
-            }
+        to {
+            opacity: 1;
+            transform: translateY(0);
         }
     }
-</script>
+
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        @apply bg-[#DEE2E6] dark:bg-[#3D3D3D] rounded-full;
+    }
+</style>
 {% endblock %}

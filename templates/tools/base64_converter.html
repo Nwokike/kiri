@@ -1,73 +1,117 @@
-{% extends "base.html" %}
+{% extends "tools/base_tool.html" %}
+{% load static %}
 
-{% block title %}Base64 Converter | Kiri Tools{% endblock %}
-{% block meta_description %}Encode and decode text to Base64 format securely. Purely client-side conversion for developers and privacy-conscious users.{% endblock %}
+{% block tool_name %}Base64 Converter{% endblock %}
+{% block tool_icon %}fa-exchange-alt{% endblock %}
+{% block tool_title %}Text Base64 Encoder & Decoder{% endblock %}
+{% block tool_description %}
+Fast and secure Base64 conversion for raw text and data.
+Perform encoding and decoding entirely in your browser to maintain data privacy.
+{% endblock %}
 
-{% block content %}
-<div class="max-w-4xl mx-auto px-4 py-8" x-data="base64Converter()">
-    <nav class="mb-6 text-sm">
-        <a href="{% url 'tools:index' %}" class="text-blue-600 hover:underline"><i class="fas fa-arrow-left mr-1"></i>
-            Tools</a>
-        <span class="text-gray-400 mx-2">/</span>
-        <span class="text-gray-600 dark:text-gray-300">Base64 Converter</span>
-    </nav>
+{% block tool_actions_left %}
+<div class="flex items-center gap-2">
+    <div class="flex bg-white dark:bg-[#1E1E1E] p-1 rounded-xl border border-[#DEE2E6] dark:border-[#3D3D3D] shadow-sm">
+        <button @click="mode = 'encode'; convert()"
+            :class="mode === 'encode' ? 'bg-[#0D7C3D] text-white' : 'text-[#6C757D] dark:text-[#A1A1AA]'"
+            class="px-4 py-1.5 text-[10px] font-bold rounded-lg transition-all">Encode</button>
+        <button @click="mode = 'decode'; convert()"
+            :class="mode === 'decode' ? 'bg-[#0D7C3D] text-white' : 'text-[#6C757D] dark:text-[#A1A1AA]'"
+            class="px-4 py-1.5 text-[10px] font-bold rounded-lg transition-all">Decode</button>
+    </div>
+</div>
+{% endblock %}
 
-    <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Base64 Converter</h1>
+{% block tool_actions_right %}
+<button @click="download()"
+    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-[#0D7C3D] text-white hover:bg-[#0A5C2C]"
+    x-show="output">
+    <i class="fas fa-download"></i>
+    <span>Download Result</span>
+</button>
+{% endblock %}
 
-    <div class="bg-white dark:bg-[#1E1E1E] border border-gray-200 dark:border-[#333] rounded-lg p-6">
-
-        <!-- Tabs -->
-        <div class="flex border-b border-gray-200 dark:border-[#333] mb-6">
-            <button @click="mode = 'encode'"
-                :class="{'border-blue-500 text-blue-600': mode === 'encode', 'border-transparent text-gray-500 hover:text-gray-700': mode !== 'encode'}"
-                class="px-4 py-2 border-b-2 font-medium text-sm transition-colors">Encode</button>
-            <button @click="mode = 'decode'"
-                :class="{'border-blue-500 text-blue-600': mode === 'decode', 'border-transparent text-gray-500 hover:text-gray-700': mode !== 'decode'}"
-                class="px-4 py-2 border-b-2 font-medium text-sm transition-colors">Decode</button>
-        </div>
-
-        <!-- Input -->
-        <div class="mb-4">
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
-                x-text="mode === 'encode' ? 'Text to Encode' : 'Base64 to Decode'"></label>
-            <textarea x-model="input" rows="5"
-                class="shadow-sm focus:ring-blue-500 focus:border-blue-500 block w-full sm:text-sm border-gray-300 dark:border-[#444] rounded-md bg-white dark:bg-[#2D2D2D] text-gray-900 dark:text-white font-mono"></textarea>
-        </div>
-
-        <!-- Output -->
-        <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Result</label>
-            <div class="relative">
-                <textarea readonly x-model="output" rows="5"
-                    class="shadow-sm block w-full sm:text-sm border-gray-300 dark:border-[#444] rounded-md bg-gray-50 dark:bg-[#252526] text-gray-900 dark:text-gray-300 font-mono"></textarea>
+{% block tool_body %}
+<div class="space-y-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[400px]">
+        <!-- Input Area -->
+        <div class="flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest"
+                    x-text="mode === 'encode' ? 'Input Text' : 'Base64 String'"></span>
             </div>
-            <p class="mt-1 text-xs text-red-500" x-text="error" x-show="error"></p>
+            <textarea x-model="input" @input="convert()"
+                class="flex-1 w-full p-6 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[1.5rem] bg-white dark:bg-[#121212] text-[#212529] dark:text-[#E4E4E7] resize-none shadow-inner"
+                :placeholder="mode === 'encode' ? 'Enter text to encode...' : 'Enter Base64 to decode...'"></textarea>
+        </div>
+
+        <!-- Output Area -->
+        <div class="flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+                <span
+                    class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest">Conversion
+                    Result</span>
+                <button @click="copyToClipboard(output)"
+                    class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase flex items-center gap-1.5"
+                    x-show="output">
+                    <i class="fas" :class="copied ? 'fa-check' : 'fa-copy'"></i>
+                    <span x-text="copied ? 'Copied' : 'Copy'"></span>
+                </button>
+            </div>
+            <div
+                class="flex-1 rounded-[1.5rem] bg-[#F8F9FA] dark:bg-[#121212] border border-[#DEE2E6] dark:border-[#3D3D3D] relative overflow-hidden group">
+                <textarea readonly x-model="output"
+                    class="w-full h-full p-6 font-mono text-sm bg-transparent text-[#212529] dark:text-[#E4E4E7] resize-none outline-none"
+                    placeholder="Result will appear here..."></textarea>
+            </div>
         </div>
     </div>
 </div>
+{% endblock %}
 
-<script>
-    function base64Converter() {
-        return {
-            mode: 'encode',
-            input: '',
-            error: '',
+{% block tool_js_data %}
+{
+mode: 'encode',
 
-            get output() {
-                this.error = '';
-                if (!this.input) return '';
-                try {
-                    if (this.mode === 'encode') {
-                        return btoa(this.input);
-                    } else {
-                        return atob(this.input);
-                    }
-                } catch (e) {
-                    this.error = 'Invalid input for ' + this.mode;
-                    return '';
-                }
-            }
-        }
-    }
-</script>
+loadSample() {
+if (this.mode === 'encode') {
+this.input = "Kiri Research Labs - Standard for Elite Research Tools";
+} else {
+this.input = "S2lyaSBSZXNlYXJjaCBMYWJzIC0gU3RhbmRhcmQgZm9yIEVsaXRlIFJlc2VhcmNoIFRvb2xz";
+}
+this.convert();
+},
+
+convert() {
+this.error = '';
+if (!this.input.trim()) {
+this.output = '';
+this.statusMessage = 'Ready';
+return;
+}
+
+try {
+if (this.mode === 'encode') {
+// Handle Unicode strings correctly
+this.output = btoa(encodeURIComponent(this.input).replace(/%([0-9A-F]{2})/g, (match, p1) => String.fromCharCode('0x' +
+p1)));
+this.statusMessage = 'Text encoded into Base64';
+} else {
+this.output = decodeURIComponent(atob(this.input).split('').map(c => '%' + ('00' +
+c.charCodeAt(0).toString(16)).slice(-2)).join(''));
+this.statusMessage = 'Base64 decoded successfully';
+}
+} catch (e) {
+this.error = 'Invalid input for ' + this.mode;
+this.output = '';
+this.statusMessage = 'Conversion failed';
+}
+},
+
+download() {
+if (!this.output || this.error) return;
+const filename = this.mode === 'encode' ? 'encoded.b64' : 'decoded.txt';
+this.downloadFile(this.output, filename, 'text/plain');
+}
+}
 {% endblock %}

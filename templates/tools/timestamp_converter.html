@@ -1,102 +1,126 @@
-{% extends "base.html" %}
+{% extends "tools/base_tool.html" %}
 {% load static %}
 
-{% block title %}Unix Timestamp Converter | Kiri Tools{% endblock %}
-{% block meta_description %}Convert Unix timestamps to human-readable dates and vice versa. Support for ISO 8601 and local timezones in your browser.{% endblock %}
+{% block tool_name %}Timestamp Converter{% endblock %}
+{% block tool_icon %}fa-history{% endblock %}
+{% block tool_title %}Unix Timestamp Converter{% endblock %}
+{% block tool_description %}
+Seamlessly translate between Unix timestamps and human-readable dates.
+Supports seconds, milliseconds, and ISO 8601 formatting with local timezone adjustments.
+{% endblock %}
 
-{% block content %}
-<div class="max-w-4xl mx-auto px-4 py-8" x-data="timestampTool()">
-    <nav class="mb-6 text-sm flex items-center text-[#6C757D] dark:text-[#A1A1AA]">
-        <a href="{% url 'tools:index' %}" class="hover:text-[#0D7C3D] transition-colors flex items-center">
-            <i class="fas fa-arrow-left mr-2"></i> Tools
-        </a>
-        <span class="mx-2">/</span>
-        <span class="text-[#212529] dark:text-white font-bold">Unix Timestamp Converter</span>
-    </nav>
+{% block tool_actions_left %}
+<div class="flex items-center gap-3">
+    <div class="px-3 py-1.5 bg-[#0D7C3D]/10 rounded-xl border border-[#0D7C3D]/20 flex items-center gap-2">
+        <span class="w-1.5 h-1.5 rounded-full bg-[#0D7C3D] animate-pulse"></span>
+        <span class="text-[10px] font-bold text-[#0D7C3D] uppercase tracking-widest font-mono" x-text="now"></span>
+    </div>
+</div>
+{% endblock %}
 
-    <div class="bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl p-8 shadow-sm">
-        <div class="mb-12">
-            <h2 class="text-xl font-bold text-[#212529] dark:text-white mb-6 uppercase tracking-wider">Current Time</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div class="p-6 bg-gray-50 dark:bg-[#252526] rounded-xl border border-[#DEE2E6] dark:border-[#3D3D3D]">
-                    <div class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase mb-2">Unix Timestamp
+{% block tool_body %}
+<div class="space-y-8">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+        <!-- Unix to Human -->
+        <div
+            class="p-8 bg-white dark:bg-[#1A1A1A] rounded-[2.5rem] border border-[#DEE2E6] dark:border-[#3D3D3D] shadow-sm flex flex-col gap-6">
+            <h3
+                class="text-xs font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest flex items-center gap-2">
+                <i class="fas fa-arrow-right text-[#0D7C3D]"></i> Unix to Human
+            </h3>
+
+            <div class="space-y-4">
+                <input type="number" x-model="unixInput" @input="convertUnix()"
+                    class="w-full p-6 font-mono text-lg border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-2xl bg-[#F8F9FA] dark:bg-[#121212] text-[#212529] dark:text-white outline-none focus:border-[#0D7C3D] transition-all"
+                    placeholder="1700000000">
+
+                <div class="p-6 bg-[#0D7C3D]/5 border border-[#0D7C3D]/10 rounded-2xl">
+                    <p class="text-[10px] font-bold text-[#0D7C3D] uppercase tracking-widest mb-3">Interpreted Date</p>
+                    <p class="text-sm font-bold text-[#212529] dark:text-[#E4E4E7]"
+                        x-text="unixResult || 'Awaiting input...'"></p>
+                    <div class="mt-4 flex gap-2">
+                        <button @click="copyToClipboard(unixResult)" x-show="unixResult"
+                            class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase">Copy Date</button>
+                        <button @click="unixInput = now"
+                            class="text-[10px] font-bold text-[#6C757D] hover:underline uppercase">Use Current</button>
                     </div>
-                    <div class="text-2xl font-mono font-bold text-[#0D7C3D]" x-text="now"></div>
-                </div>
-                <div class="p-6 bg-gray-50 dark:bg-[#252526] rounded-xl border border-[#DEE2E6] dark:border-[#3D3D3D]">
-                    <div class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase mb-2">ISO 8601</div>
-                    <div class="text-sm font-mono font-bold text-[#212529] dark:text-white"
-                        x-text="new Date().toISOString()"></div>
                 </div>
             </div>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
-            <!-- Unix to Human -->
-            <div>
-                <h3 class="text-sm font-bold text-[#212529] dark:text-white mb-4 uppercase tracking-wider">Unix to Human
-                </h3>
-                <div class="space-y-4">
-                    <input type="number" x-model="unixInput"
-                        class="w-full p-4 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl focus:border-[#0D7C3D] focus:ring-4 focus:ring-[#0D7C3D]/10 bg-white dark:bg-[#1E1E1E] text-[#212529] dark:text-white outline-none"
-                        placeholder="Enter Unix timestamp...">
-                    <div
-                        class="p-4 bg-[#F8F9FA] dark:bg-[#252526] rounded-xl border border-[#DEE2E6] dark:border-[#3D3D3D] min-h-[100px]">
-                        <div class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase mb-2">Readable
-                            Date (Local)</div>
-                        <div class="text-sm font-bold text-[#212529] dark:text-white" x-text="unixToHuman"></div>
-                    </div>
-                </div>
-            </div>
+        <!-- Human to Unix -->
+        <div
+            class="p-8 bg-white dark:bg-[#1A1A1A] rounded-[2.5rem] border border-[#DEE2E6] dark:border-[#3D3D3D] shadow-sm flex flex-col gap-6">
+            <h3
+                class="text-xs font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest flex items-center gap-2">
+                <i class="fas fa-arrow-left text-purple-500"></i> Human to Unix
+            </h3>
 
-            <!-- Human to Unix -->
-            <div>
-                <h3 class="text-sm font-bold text-[#212529] dark:text-white mb-4 uppercase tracking-wider">Human to Unix
-                </h3>
-                <div class="space-y-4">
-                    <input type="datetime-local" x-model="humanInput"
-                        class="w-full p-4 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl focus:border-[#0D7C3D] focus:ring-4 focus:ring-[#0D7C3D]/10 bg-white dark:bg-[#1E1E1E] text-[#212529] dark:text-white outline-none">
-                    <div
-                        class="p-4 bg-[#F8F9FA] dark:bg-[#252526] rounded-xl border border-[#DEE2E6] dark:border-[#3D3D3D] min-h-[100px]">
-                        <div class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase mb-2">Unix
-                            Timestamp</div>
-                        <div class="text-xl font-mono font-bold text-[#0D7C3D]" x-text="humanToUnix"></div>
+            <div class="space-y-4">
+                <input type="datetime-local" x-model="humanInput" @input="convertHuman()"
+                    class="w-full p-6 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-2xl bg-[#F8F9FA] dark:bg-[#121212] text-[#212529] dark:text-white outline-none focus:border-[#0D7C3D] transition-all">
+
+                <div class="p-6 bg-purple-500/5 border border-purple-500/10 rounded-2xl">
+                    <p class="text-[10px] font-bold text-purple-500 uppercase tracking-widest mb-3">Epoch Seconds</p>
+                    <p class="text-2xl font-mono font-bold text-[#212529] dark:text-[#E4E4E7]"
+                        x-text="humanResult || '0'"></p>
+                    <div class="mt-4 flex gap-2">
+                        <button @click="copyToClipboard(humanResult)" x-show="humanResult"
+                            class="text-[10px] font-bold text-purple-500 hover:underline uppercase">Copy
+                            Timestamp</button>
+                        <button @click="setToNow()"
+                            class="text-[10px] font-bold text-[#6C757D] hover:underline uppercase">Set to Now</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
 
-<script>
-    function timestampTool() {
-        return {
-            now: Math.floor(Date.now() / 1000),
-            unixInput: Math.floor(Date.now() / 1000),
-            humanInput: new Date().toISOString().slice(0, 16),
+{% block tool_js_data %}
+{
+now: Math.floor(Date.now() / 1000),
+unixInput: Math.floor(Date.now() / 1000),
+unixResult: '',
+humanInput: '',
+humanResult: '',
 
-            init() {
-                setInterval(() => {
-                    this.now = Math.floor(Date.now() / 1000);
-                }, 1000);
-            },
+init() {
+this.updateNow();
+setInterval(() => this.updateNow(), 1000);
+this.setToNow();
+this.convertUnix();
+},
 
-            get unixToHuman() {
-                if (!this.unixInput) return '-';
-                try {
-                    const date = new Date(this.unixInput * 1000);
-                    return date.toString() !== 'Invalid Date' ? date.toLocaleString() : 'Invalid Timestamp';
-                } catch (e) { return 'Error'; }
-            },
+updateNow() {
+this.now = Math.floor(Date.now() / 1000);
+},
 
-            get humanToUnix() {
-                if (!this.humanInput) return '-';
-                try {
-                    const date = new Date(this.humanInput);
-                    return date.getTime() ? Math.floor(date.getTime() / 1000) : 'Invalid Date';
-                } catch (e) { return 'Error'; }
-            }
-        }
-    }
-</script>
+setToNow() {
+const d = new Date();
+d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+this.humanInput = d.toISOString().slice(0, 16);
+this.convertHuman();
+},
+
+convertUnix() {
+if (!this.unixInput) { this.unixResult = ''; return; }
+try {
+const val = parseInt(this.unixInput);
+// Detect if ms or s
+const multiplier = val > 9999999999 ? 1 : 1000;
+const date = new Date(val * (val > 9999999999 ? 1 : 1000));
+this.unixResult = date.toString() !== 'Invalid Date' ? date.toLocaleString() : 'Invalid Timestamp';
+} catch (e) { this.unixResult = 'Error'; }
+},
+
+convertHuman() {
+if (!this.humanInput) { this.humanResult = '0'; return; }
+try {
+const date = new Date(this.humanInput);
+this.humanResult = date.getTime() ? Math.floor(date.getTime() / 1000) : '0';
+} catch (e) { this.humanResult = '0'; }
+}
+}
 {% endblock %}

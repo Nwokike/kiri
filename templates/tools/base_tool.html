@@ -1,0 +1,226 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8" x-data="toolSetup()">
+    <!-- Breadcrumb -->
+    <nav class="mb-8 text-sm flex items-center text-[#6C757D] dark:text-[#A1A1AA]">
+        <a href="{% url 'tools:index' %}" class="hover:text-[#0D7C3D] transition-colors flex items-center group">
+            <i class="fas fa-arrow-left mr-2 group-hover:-translate-x-1 transition-transform"></i> Tools
+        </a>
+        <span class="mx-3 opacity-30">/</span>
+        <span class="text-[#212529] dark:text-white font-semibold">{% block tool_name %}{% endblock %}</span>
+    </nav>
+
+    <!-- Tool Header -->
+    <div class="mb-10">
+        <div class="flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
+            <div
+                class="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#0D7C3D] to-[#2E9A4F] flex items-center justify-center text-white shadow-lg shadow-[#0D7C3D]/20 shrink-0">
+                <i class="fas {% block tool_icon %}fa-tools{% endblock %} text-2xl"></i>
+            </div>
+            <div>
+                <h1 class="text-3xl font-extrabold text-[#212529] dark:text-white leading-tight tracking-tight">{% block
+                    tool_title %}{% endblock %}</h1>
+                <p class="text-[#6C757D] dark:text-[#A1A1AA] text-sm md:text-base mt-1 max-w-2xl leading-relaxed">
+                    {% block tool_description %}{% endblock %}
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Tool Container -->
+    <div
+        class="bg-white dark:bg-[#1E1E1E] rounded-[2rem] border border-[#DEE2E6] dark:border-[#3D3D3D] shadow-2xl shadow-black/5 overflow-hidden transition-all duration-300">
+        <!-- Control Bar -->
+        <div
+            class="border-b border-[#DEE2E6] dark:border-[#3D3D3D] bg-[#F8F9FA]/50 dark:bg-[#1A1A1A]/50 backdrop-blur-md px-6 py-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            <div class="flex flex-wrap items-center gap-2">
+                {% block tool_actions_left %}{% endblock %}
+                <!-- Standard Upload -->
+                <button @click="$refs.fileInput.click()"
+                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-white dark:bg-[#2D2D2D] text-[#212529] dark:text-white border border-[#DEE2E6] dark:border-[#3D3D3D] hover:bg-[#F1F3F5] dark:hover:bg-[#3D3D3D]">
+                    <i class="fas fa-file-upload text-[#0D7C3D]"></i>
+                    <span>Upload File</span>
+                </button>
+                <input type="file" x-ref="fileInput" class="hidden" @change="handleFileUpload($event)">
+            </div>
+
+            <div class="flex flex-wrap items-center gap-2">
+                {% block tool_actions_right %}{% endblock %}
+                <!-- Standard Sample -->
+                <button @click="loadSample()"
+                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-white dark:bg-[#2D2D2D] text-[#212529] dark:text-white border border-[#DEE2E6] dark:border-[#3D3D3D] hover:bg-[#F1F3F5] dark:hover:bg-[#3D3D3D]">
+                    <i class="fas fa-vial text-purple-500"></i>
+                    <span>Load Sample</span>
+                </button>
+                <!-- Standard Reset -->
+                <button @click="resetTool()"
+                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-white dark:bg-[#2D2D2D] text-red-500 border border-[#DEE2E6] dark:border-[#3D3D3D] hover:bg-red-50 dark:hover:bg-red-900/10">
+                    <i class="fas fa-undo"></i>
+                    <span>Reset</span>
+                </button>
+            </div>
+        </div>
+
+        <!-- Tool Body -->
+        <div class="p-6 md:p-8">
+            {% block tool_body %}{% endblock %}
+        </div>
+
+        <!-- Tool Footer/Status -->
+        <div
+            class="bg-[#F8F9FA]/50 dark:bg-[#1A1A1A]/50 border-t border-[#DEE2E6] dark:border-[#3D3D3D] px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-4 text-[11px] font-medium text-[#6C757D] dark:text-[#A1A1AA]">
+                <span class="flex items-center gap-1.5 px-2 py-1 bg-[#0D7C3D]/10 text-[#0D7C3D] rounded-lg">
+                    <i class="fas fa-user-shield"></i> 100% Private Tool
+                </span>
+                <span class="w-1 h-1 bg-[#DEE2E6] dark:bg-[#3D3D3D] rounded-full hidden md:block"></span>
+                <span x-text="statusMessage || 'Ready for processing'" class="italic"></span>
+            </div>
+            <div class="flex items-center gap-3">
+                {% block tool_footer_right %}{% endblock %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Error Toast -->
+    <template x-if="error">
+        <div class="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 animate-bounce-in">
+            <div class="bg-red-500 text-white px-6 py-3 rounded-2xl shadow-2xl flex items-center gap-3">
+                <i class="fas fa-exclamation-triangle"></i>
+                <span x-text="error" class="text-sm font-bold"></span>
+                <button @click="error = ''" class="ml-2 opacity-50 hover:opacity-100 transition-opacity"><i
+                        class="fas fa-times"></i></button>
+            </div>
+        </div>
+    </template>
+</div>
+
+<style>
+    @keyframes bounce-in {
+        0% {
+            transform: translate(-50%, 2rem);
+            opacity: 0;
+        }
+
+        60% {
+            transform: translate(-50%, -0.5rem);
+            opacity: 1;
+        }
+
+        100% {
+            transform: translate(-50%, 0);
+            opacity: 1;
+        }
+    }
+
+    .animate-bounce-in {
+        animation: bounce-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+    }
+
+    textarea,
+    input[type="text"],
+    input[type="number"] {
+        @apply focus:border-[#0D7C3D] focus:ring-4 focus:ring-[#0D7C3D]/10 transition-all outline-none rounded-xl;
+    }
+
+    /* Premium Scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        @apply bg-[#DEE2E6] dark:bg-[#3D3D3D] rounded-full;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        @apply bg-[#ADB5BD] dark:bg-[#525252];
+    }
+</style>
+
+<script>
+    function toolSetup() {
+        return {
+            input: '',
+            output: '',
+            error: '',
+            statusMessage: '',
+            copied: false,
+
+            async handleFileUpload(event) {
+                const file = event.target.files[0];
+                if (!file) return;
+
+                this.statusMessage = `Reading ${file.name}...`;
+                this.error = '';
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.input = e.target.result;
+                    this.statusMessage = `${file.name} loaded`;
+                    if (typeof this.convert === 'function') this.convert();
+                };
+                reader.onerror = () => {
+                    this.error = 'Failed to read file';
+                    this.statusMessage = 'Load error';
+                };
+                reader.readAsText(file);
+            },
+
+            downloadFile(content, filename, mimeType) {
+                if (!content) return;
+                try {
+                    const blob = new Blob([content], { type: mimeType });
+                    const url = URL.createObjectURL(blob);
+                    const link = document.createElement("a");
+                    link.setAttribute("href", url);
+                    link.setAttribute("download", filename);
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                    this.statusMessage = 'File downloaded';
+                } catch (err) {
+                    this.error = 'Download failed';
+                }
+            },
+
+            async copyToClipboard(text) {
+                if (!text) return;
+                try {
+                    await navigator.clipboard.writeText(text);
+                    this.copied = true;
+                    const oldMsg = this.statusMessage;
+                    this.statusMessage = '✓ Copied to clipboard';
+                    setTimeout(() => {
+                        this.copied = false;
+                        this.statusMessage = oldMsg;
+                    }, 2000);
+                } catch (err) {
+                    this.error = 'Copy failed';
+                }
+            },
+
+            resetTool() {
+                this.input = '';
+                this.output = '';
+                this.error = '';
+                this.statusMessage = 'Ready';
+                if (this.$refs.fileInput) this.$refs.fileInput.value = '';
+                // Optional: trigger tool-specific reset
+                if (typeof this.onReset === 'function') this.onReset();
+            },
+
+            // Expected overrides from tool logic
+            ...({% block tool_js_data %} { } {% endblock %})
+        }
+    }
+</script>
+{% block extra_js_tool %}{% endblock %}
+{% endblock %}

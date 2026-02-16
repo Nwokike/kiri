@@ -1,85 +1,175 @@
-{% extends "base.html" %}
+{% extends "tools/base_tool.html" %}
 {% load static %}
 
-{% block title %}Diff Viewer | Kiri Tools{% endblock %}
-{% block meta_description %}Compare two text snippets side-by-side or line-by-line with our professional diff viewer.
-High-performance, secure, and privacy-focused text comparison tool.{% endblock %}
+{% block tool_name %}Diff Viewer{% endblock %}
+{% block tool_icon %}fa-columns{% endblock %}
+{% block tool_title %}Professional Diff Viewer{% endblock %}
+{% block tool_description %}
+Compare two text snippets side-by-side or line-by-line.
+Ideal for code review, version comparison, and identifying subtle changes in documents.
+{% endblock %}
 
-{% block content %}
-<div class="max-w-7xl mx-auto px-4 py-8" x-data="diffTool()">
-    <!-- Navigation -->
-    <nav class="mb-6 text-sm flex items-center text-[#6C757D] dark:text-[#A1A1AA]">
-        <a href="{% url 'tools:index' %}" class="hover:text-[#0D7C3D] transition-colors flex items-center">
-            <i class="fas fa-arrow-left mr-2"></i> Tools
-        </a>
-        <span class="mx-2">/</span>
-        <span class="text-[#212529] dark:text-white font-bold">Diff Viewer</span>
-    </nav>
-
-    <div class="mb-6 flex justify-between items-center">
-        <h1 class="text-2xl font-bold text-[#212529] dark:text-white">Diff Viewer</h1>
-        <div class="flex gap-4 items-center">
-            <div
-                class="flex bg-[#F8F9FA] dark:bg-[#2D2D2D] p-1 rounded-lg border border-[#DEE2E6] dark:border-[#3D3D3D]">
-                <button @click="outputFormat = 'line-by-line'"
-                    :class="outputFormat === 'line-by-line' ? 'bg-white dark:bg-[#1E1E1E] shadow-sm text-[#0D7C3D]' : 'text-[#6C757D] dark:text-[#A1A1AA]'"
-                    class="px-3 py-1 text-xs font-bold rounded-md transition-all">Line-by-Line</button>
-                <button @click="outputFormat = 'side-by-side'"
-                    :class="outputFormat === 'side-by-side' ? 'bg-white dark:bg-[#1E1E1E] shadow-sm text-[#0D7C3D]' : 'text-[#6C757D] dark:text-[#A1A1AA]'"
-                    class="px-3 py-1 text-xs font-bold rounded-md transition-all">Side-by-Side</button>
-            </div>
-            <button @click="sample()" class="text-xs font-bold text-[#0D7C3D] hover:underline uppercase">Sample</button>
-        </div>
+{% block tool_actions_left %}
+<div class="flex items-center gap-2">
+    <div class="flex bg-white dark:bg-[#1E1E1E] p-1 rounded-xl border border-[#DEE2E6] dark:border-[#3D3D3D] shadow-sm">
+        <button @click="outputFormat = 'line-by-line'; updateDiff()"
+            :class="outputFormat === 'line-by-line' ? 'bg-[#0D7C3D] text-white' : 'text-[#6C757D] dark:text-[#A1A1AA] hover:bg-[#F1F3F5] dark:hover:bg-[#2D2D2D]'"
+            class="px-3 py-1.5 text-[10px] font-bold rounded-lg transition-all">Line-by-Line</button>
+        <button @click="outputFormat = 'side-by-side'; updateDiff()"
+            :class="outputFormat === 'side-by-side' ? 'bg-[#0D7C3D] text-white' : 'text-[#6C757D] dark:text-[#A1A1AA] hover:bg-[#F1F3F5] dark:hover:bg-[#2D2D2D]'"
+            class="px-3 py-1.5 text-[10px] font-bold rounded-lg transition-all">Side-by-Side</button>
     </div>
+</div>
+{% endblock %}
 
-    <!-- Inputs -->
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-        <div class="flex flex-col">
-            <label class="text-xs font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest mb-3">Original
-                Version</label>
-            <textarea x-model="original" rows="8"
-                class="w-full p-4 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl bg-white dark:bg-[#1E1E1E] text-[#212529] dark:text-white focus:border-[#0D7C3D] outline-none transition-all resize-none"
+{% block tool_body %}
+<div class="space-y-8">
+    <!-- Dual Inputs -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div class="flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+                <span
+                    class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest flex items-center gap-2">
+                    <i class="fas fa-file-alt text-gray-400"></i> Original Version
+                </span>
+                <button @click="$refs.fileInput1.click()"
+                    class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase flex items-center gap-1.5">
+                    <i class="fas fa-upload"></i> Upload
+                </button>
+                <input type="file" x-ref="fileInput1" class="hidden" @change="uploadToField($event, 'input')">
+            </div>
+            <textarea x-model="input" @input="updateDiff()"
+                class="w-full h-48 p-4 font-mono text-xs border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-2xl bg-white dark:bg-[#121212] text-[#212529] dark:text-[#E4E4E7] transition-all resize-none shadow-inner"
                 placeholder="Paste original text..."></textarea>
         </div>
-        <div class="flex flex-col">
-            <label class="text-xs font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest mb-3">Modified
-                Version</label>
-            <textarea x-model="modified" rows="8"
-                class="w-full p-4 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl bg-white dark:bg-[#1E1E1E] text-[#212529] dark:text-white focus:border-[#0D7C3D] outline-none transition-all resize-none"
+
+        <div class="flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+                <span
+                    class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest flex items-center gap-2">
+                    <i class="fas fa-file-edit text-[#0D7C3D]"></i> Modified Version
+                </span>
+                <button @click="$refs.fileInput2.click()"
+                    class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase flex items-center gap-1.5">
+                    <i class="fas fa-upload"></i> Upload
+                </button>
+                <input type="file" x-ref="fileInput2" class="hidden" @change="uploadToField($event, 'modified')">
+            </div>
+            <textarea x-model="modified" @input="updateDiff()"
+                class="w-full h-48 p-4 font-mono text-xs border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-2xl bg-white dark:bg-[#121212] text-[#212529] dark:text-[#E4E4E7] transition-all resize-none shadow-inner"
                 placeholder="Paste modified text..."></textarea>
         </div>
     </div>
 
-    <!-- Result -->
-    <div x-show="original || modified" class="space-y-4">
-        <div class="flex items-center justify-between">
-            <h3 class="text-sm font-bold text-[#212529] dark:text-white uppercase tracking-wider">Comparison Result</h3>
+    <!-- Comparison Result -->
+    <div x-show="input || modified" class="animate-fade-in">
+        <div class="flex items-center gap-3 mb-4">
+            <div class="h-px flex-1 bg-gradient-to-r from-transparent to-[#DEE2E6] dark:to-[#3D3D3D]"></div>
+            <span class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-[0.2em]">Comparison
+                Result</span>
+            <div class="h-px flex-1 bg-gradient-to-l from-transparent to-[#DEE2E6] dark:to-[#3D3D3D]"></div>
         </div>
+
         <div id="diff-output"
-            class="bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl overflow-hidden shadow-sm">
+            class="bg-white dark:bg-[#1E1E1E] rounded-2xl border border-[#DEE2E6] dark:border-[#3D3D3D] overflow-hidden shadow-inner min-h-[300px]">
             <!-- Diff2Html will render here -->
         </div>
     </div>
 </div>
+{% endblock %}
 
-<!-- Diff2Html & JsDiff CDNs -->
+{% block tool_js_data %}
+{
+modified: '',
+outputFormat: 'side-by-side',
+
+uploadToField(event, field) {
+const file = event.target.files[0];
+if (!file) return;
+const reader = new FileReader();
+reader.onload = (e) => {
+this[field] = e.target.result;
+this.statusMessage = `${file.name} uploaded to ${field === 'input' ? 'original' : 'modified'}`;
+this.updateDiff();
+};
+reader.readAsText(file);
+},
+
+loadSample() {
+this.input = "def fast_power(base, power):\n result = 1\n while power > 0:\n if power % 2 == 1:\n result *= base\n base
+*= base\n power //= 2\n return result";
+this.modified = "def fast_power(base, power):\n \"\"\"Calculates base^power efficiently.\"\"\"\n result = 1\n while
+power > 0:\n # Check if current power is odd\n if power % 2 != 0:\n result *= base\n base *= base\n power = power // 2\n
+return result";
+this.statusMessage = 'Sample loaded';
+this.updateDiff();
+},
+
+updateDiff() {
+if (!this.input && !this.modified) return;
+this.$nextTick(() => {
+try {
+const diffString = Diff.createTwoFilesPatch('Original', 'Modified', this.input, this.modified);
+const targetElement = document.getElementById('diff-output');
+const diff2htmlUi = new Diff2HtmlUI(targetElement, diffString, {
+drawFileList: false,
+matching: 'lines',
+outputFormat: this.outputFormat,
+highlight: true,
+renderNothingWhenEmpty: true
+});
+diff2htmlUi.draw();
+this.statusMessage = 'Comparison computed';
+} catch (err) {
+this.error = 'Diff computation failed';
+}
+});
+},
+
+onReset() {
+this.modified = '';
+setTimeout(() => {
+const el = document.getElementById('diff-output');
+if (el) el.innerHTML = '';
+}, 10);
+}
+}
+{% endblock %}
+
+{% block extra_js_tool %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/diff2html/bundles/css/diff2html.min.css">
 <script src="https://cdn.jsdelivr.net/npm/diff2html/bundles/js/diff2html-ui.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsdiff/5.1.0/diff.min.js"></script>
 
 <style>
+    .animate-fade-in {
+        animation: fadeIn 0.5s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+            transform: translateY(10px);
+        }
+
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+
     .d2h-file-header {
         display: none;
     }
 
-    /* Hide the fake filename header */
     .d2h-wrapper {
-        font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
+        font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace !important;
         border: none !important;
     }
 
     .dark .d2h-file-wrapper {
-        border-color: #333 !important;
+        border-color: #3D3D3D !important;
+        bg-color: transparent !important;
     }
 
     .dark .d2h-code-line-ctn {
@@ -87,60 +177,26 @@ High-performance, secure, and privacy-focused text comparison tool.{% endblock %
     }
 
     .dark .d2h-info {
-        background-color: #1E1E1E !important;
+        background-color: #1A1A1A !important;
         border-color: #333 !important;
     }
 
     .dark .d2h-ins {
-        background-color: rgba(13, 124, 61, 0.2) !important;
+        background-color: rgba(74, 222, 128, 0.15) !important;
         color: #4ade80 !important;
     }
 
     .dark .d2h-del {
-        background-color: rgba(220, 38, 38, 0.2) !important;
+        background-color: rgba(248, 113, 113, 0.15) !important;
         color: #f87171 !important;
     }
 
     .dark .d2h-code-line {
-        color: #e4e4e7 !important;
+        color: #E4E4E7 !important;
+    }
+
+    .d2h-code-side-empty-placeholder {
+        background-color: transparent !important;
     }
 </style>
-
-<script>
-    function diffTool() {
-        return {
-            original: '',
-            modified: '',
-            outputFormat: 'side-by-side',
-
-            init() {
-                this.$watch('original', () => this.updateDiff());
-                this.$watch('modified', () => this.updateDiff());
-                this.$watch('outputFormat', () => this.updateDiff());
-            },
-
-            updateDiff() {
-                if (!this.original && !this.modified) return;
-
-                const diffString = Diff.createTwoFilesPatch('Original', 'Modified', this.original, this.modified);
-
-                const targetElement = document.getElementById('diff-output');
-                const diff2htmlUi = new Diff2HtmlUI(targetElement, diffString, {
-                    drawFileList: false,
-                    matching: 'lines',
-                    outputFormat: this.outputFormat,
-                    highlight: true,
-                    renderNothingWhenEmpty: true
-                });
-
-                diff2htmlUi.draw();
-            },
-
-            sample() {
-                this.original = "def fast_power(base, power):\n    result = 1\n    while power > 0:\n        if power % 2 == 1:\n            result *= base\n        base *= base\n        power //= 2\n    return result";
-                this.modified = "def fast_power(base, power):\n    \"\"\"Calculates base^power efficiently.\"\"\"\n    result = 1\n    while power > 0:\n        # Check if current power is odd\n        if power % 2 != 0:\n            result *= base\n        base *= base\n        power = power // 2\n    return result";
-            }
-        }
-    }
-</script>
 {% endblock %}

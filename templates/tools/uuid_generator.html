@@ -1,84 +1,131 @@
-{% extends "base.html" %}
+{% extends "tools/base_tool.html" %}
 {% load static %}
 
-{% block title %}UUID Generator | Kiri Tools{% endblock %}
-{% block meta_description %}Bulk generate secure Version 4 UUIDs (Universally Unique Identifiers) for your projects. Fast, purely client-side, and privacy-focused.{% endblock %}
+{% block tool_name %}UUID Generator{% endblock %}
+{% block tool_icon %}fa-fingerprint{% endblock %}
+{% block tool_title %}Bulk UUID v4 Generator{% endblock %}
+{% block tool_description %}
+Generate secure Version 4 Universally Unique Identifiers (UUIDs) for your database,
+API development, or distributed systems research.
+{% endblock %}
 
-{% block content %}
-<div class="max-w-4xl mx-auto px-4 py-8" x-data="uuidTool()">
-    <nav class="mb-6 text-sm flex items-center text-[#6C757D] dark:text-[#A1A1AA]">
-        <a href="{% url 'tools:index' %}" class="hover:text-[#0D7C3D] transition-colors flex items-center">
-            <i class="fas fa-arrow-left mr-2"></i> Tools
-        </a>
-        <span class="mx-2">/</span>
-        <span class="text-[#212529] dark:text-white font-bold">UUID Generator</span>
-    </nav>
+{% block tool_actions_left %}
+<div class="flex items-center gap-2">
+    <div class="flex bg-white dark:bg-[#1E1E1E] p-1 rounded-xl border border-[#DEE2E6] dark:border-[#3D3D3D] shadow-sm">
+        <button @click="uppercase = false; generate()"
+            :class="!uppercase ? 'bg-[#0D7C3D] text-white' : 'text-[#6C757D]'"
+            class="px-3 py-1.5 text-[10px] font-bold rounded-lg transition-all">Lowercase</button>
+        <button @click="uppercase = true; generate()" :class="uppercase ? 'bg-[#0D7C3D] text-white' : 'text-[#6C757D]'"
+            class="px-3 py-1.5 text-[10px] font-bold rounded-lg transition-all">Uppercase</button>
+    </div>
+</div>
+{% endblock %}
 
-    <div class="bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl p-8 shadow-sm">
-        <div class="flex flex-col md:flex-row gap-8 items-start">
-            <div class="w-full md:w-1/3 space-y-6">
+{% block tool_actions_right %}
+<button @click="download()"
+    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-[#0D7C3D] text-white hover:bg-[#0A5C2C]"
+    x-show="uuids.length">
+    <i class="fas fa-download"></i>
+    <span>Export List</span>
+</button>
+{% endblock %}
+
+{% block tool_body %}
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 h-[500px]">
+    <!-- Configuration -->
+    <div class="space-y-6">
+        <div class="p-6 bg-[#F8F9FA] dark:bg-[#1A1A1A] rounded-[2rem] border border-[#DEE2E6] dark:border-[#3D3D3D]">
+            <h3 class="text-xs font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest mb-6">Generation
+                Rules</h3>
+            <div class="space-y-4">
                 <div>
-                    <label
-                        class="text-xs font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest mb-2 block">Quantity</label>
-                    <input type="number" x-model="count" min="1" max="100"
-                        class="w-full p-3 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-lg focus:border-[#0D7C3D] focus:ring-4 focus:ring-[#0D7C3D]/10 bg-white dark:bg-[#1E1E1E] text-[#212529] dark:text-white outline-none transition-all">
+                    <label class="text-[10px] font-bold text-[#A1A1AA] uppercase mb-2 block">Quantity (1-100)</label>
+                    <input type="number" x-model.number="count" min="1" max="100"
+                        class="w-full p-4 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-2xl bg-white dark:bg-[#121212] text-[#212529] dark:text-white outline-none focus:border-[#0D7C3D] transition-all">
                 </div>
                 <div class="flex items-center gap-3">
-                    <input type="checkbox" id="uppercase" x-model="uppercase"
-                        class="rounded border-gray-300 text-[#0D7C3D] focus:ring-[#0D7C3D]">
-                    <label for="uppercase" class="text-sm font-medium text-[#212529] dark:text-white">Uppercase</label>
+                    <input type="checkbox" x-model="noHyphens" @change="generate()"
+                        class="w-4 h-4 text-[#0D7C3D] border-gray-300 rounded focus:ring-[#0D7C3D]">
+                    <span class="text-sm text-[#6C757D] dark:text-[#E4E4E7]">Strip Hyphens</span>
                 </div>
                 <button @click="generate()"
-                    class="w-full py-3 bg-[#0D7C3D] text-white font-bold rounded-lg hover:bg-[#0B6A34] transition-all shadow-sm">
-                    Generate UUIDs
+                    class="w-full py-4 bg-[#0D7C3D] text-white font-bold rounded-2xl hover:bg-[#0A5C2C] transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2">
+                    <i class="fas fa-magic"></i>
+                    Generate
                 </button>
             </div>
+        </div>
 
-            <div class="flex-1 w-full space-y-4">
-                <div class="flex justify-between items-center">
-                    <span
-                        class="text-xs font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest">Results</span>
-                    <button @click="copyAll()" class="text-[11px] font-bold text-[#0D7C3D] hover:underline uppercase"
-                        x-text="copied ? 'Copied All!' : 'Copy All'"></button>
-                </div>
-                <div
-                    class="p-6 bg-gray-50 dark:bg-[#252526] rounded-xl border border-[#DEE2E6] dark:border-[#3D3D3D] min-h-[300px]">
-                    <template x-for="uuid in uuids" :key="uuid">
-                        <div class="font-mono text-sm text-[#212529] dark:text-white py-1" x-text="uuid"></div>
-                    </template>
-                    <div x-show="uuids.length === 0" class="text-gray-400 text-sm italic">Click generate to start...
+        <!-- Quick Insight -->
+        <div class="p-6 bg-[#0D7C3D]/5 border border-[#0D7C3D]/10 rounded-[2rem] text-center">
+            <p class="text-[10px] font-bold text-[#0D7C3D] uppercase tracking-widest mb-1">Uniqueness Probability</p>
+            <p class="text-xs text-[#0D7C3D]/70 italic leading-relaxed">Collisions are statistically impossible with
+                current computing power.</p>
+        </div>
+    </div>
+
+    <!-- Results Display -->
+    <div class="lg:col-span-2 flex flex-col gap-3">
+        <div class="flex items-center justify-between px-2">
+            <span class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest">Generated
+                Output</span>
+            <button @click="copyToClipboard(uuids.join('\n'))" x-show="uuids.length"
+                class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase flex items-center gap-1.5">
+                <i class="fas" :class="copied ? 'fa-check' : 'fa-copy'"></i>
+                <span x-text="copied ? 'Copied All' : 'Copy All'"></span>
+            </button>
+        </div>
+        <div
+            class="flex-1 rounded-[2rem] bg-white dark:bg-[#121212] border border-[#DEE2E6] dark:border-[#3D3D3D] overflow-hidden flex flex-col">
+            <div class="flex-1 overflow-auto p-8 custom-scrollbar bg-dots-grid">
+                <template x-for="(uuid, i) in uuids" :key="i">
+                    <div class="flex items-center gap-4 py-2 group">
+                        <span class="text-[9px] font-bold text-[#ADB5BD] w-6" x-text="i+1"></span>
+                        <span class="font-mono text-sm text-[#212529] dark:text-[#4ADE80] flex-1 break-all"
+                            x-text="uuid"></span>
+                        <button @click="copyToClipboard(uuid)"
+                            class="opacity-0 group-hover:opacity-100 transition-opacity text-[#A1A1AA] hover:text-[#0D7C3D]"><i
+                                class="fas fa-copy text-xs"></i></button>
                     </div>
+                </template>
+                <div x-show="!uuids.length"
+                    class="h-full flex flex-col items-center justify-center text-gray-300 dark:text-gray-700">
+                    <i class="fas fa-fingerprint text-5xl mb-4 opacity-20"></i>
+                    <p class="text-sm font-bold uppercase tracking-widest opacity-50">Awaiting Generation</p>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<script>
-    function uuidTool() {
-        return {
-            count: 10,
-            uppercase: false,
-            uuids: [],
-            copied: false,
-
-            generate() {
-                const results = [];
-                for (let i = 0; i < Math.min(this.count, 100); i++) {
-                    let uuid = crypto.randomUUID();
-                    if (this.uppercase) uuid = uuid.toUpperCase();
-                    results.push(uuid);
-                }
-                this.uuids = results;
-            },
-
-            copyAll() {
-                if (this.uuids.length === 0) return;
-                navigator.clipboard.writeText(this.uuids.join('\n'));
-                this.copied = true;
-                setTimeout(() => this.copied = false, 2000);
-            }
-        }
-    }
-</script>
 {% endblock %}
+
+{% block tool_js_data %}
+{
+count: 10,
+uppercase: false,
+noHyphens: false,
+uuids: [],
+
+loadSample() {
+this.generate();
+},
+
+generate() {
+const results = [];
+const limit = Math.max(1, Math.min(this.count, 100));
+for (let i = 0; i < limit; i++) { let uuid=crypto.randomUUID(); if (this.noHyphens) uuid=uuid.replace(/-/g, '' ); if
+    (this.uppercase) uuid=uuid.toUpperCase(); results.push(uuid); } this.uuids=results;
+    this.statusMessage=`${results.length} UUIDs generated`; }, download() { if (!this.uuids.length) return;
+    this.downloadFile(this.uuids.join('\n'), 'kiri_uuids.txt' , 'text/plain' ); } } {% endblock %} {% block
+    extra_js_tool %} <style>
+    .bg-dots-grid {
+    background-image: radial-gradient(#DEE2E6 1px, transparent 1px);
+    background-size: 20px 20px;
+    }
+    .dark .bg-dots-grid {
+    background-image: radial-gradient(#2D2D2D 1px, transparent 1px);
+    }
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { @apply bg-[#DEE2E6] dark:bg-[#3D3D3D] rounded-full; }
+    </style>
+    {% endblock %}

@@ -1,115 +1,143 @@
-{% extends "base.html" %}
+{% extends "tools/base_tool.html" %}
 {% load static %}
 
-{% block title %}JWT Parser | Kiri Tools{% endblock %}
-{% block meta_description %}Decode and inspect JSON Web Tokens (JWT) payload and header values. Secure, local parsing without sending your data to any server.{% endblock %}
+{% block tool_name %}JWT Parser{% endblock %}
+{% block tool_icon %}fa-shield-halved{% endblock %}
+{% block tool_title %}JSON Web Token Inspector{% endblock %}
+{% block tool_description %}
+Decode and inspect JSON Web Tokens (JWT) header and payload data.
+Identify claims, expiration times, and signature algorithms entirely in your browser.
+{% endblock %}
 
-{% block content %}
-<div class="max-w-5xl mx-auto px-4 py-8" x-data="jwtTool()">
-    <nav class="mb-6 text-sm flex items-center text-[#6C757D] dark:text-[#A1A1AA]">
-        <a href="{% url 'tools:index' %}" class="hover:text-[#0D7C3D] transition-colors flex items-center">
-            <i class="fas fa-arrow-left mr-2"></i> Tools
-        </a>
-        <span class="mx-2">/</span>
-        <span class="text-[#212529] dark:text-white font-bold">JWT Parser</span>
-    </nav>
+{% block tool_actions_right %}
+<button @click="download()"
+    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-[#0D7C3D] text-white hover:bg-[#0A5C2C]"
+    x-show="input">
+    <i class="fas fa-download"></i>
+    <span>Save Decoded</span>
+</button>
+{% endblock %}
 
-    <div class="mb-8">
-        <h1 class="text-3xl font-extrabold text-[#212529] dark:text-white mb-2">JWT Parser & Decoder</h1>
-        <p class="text-[#6C757D] dark:text-[#A1A1AA]">Decode JSON Web Tokens and inspect their headers and payloads
-            locally.</p>
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 h-[calc(100vh-320px)]">
-        <!-- Input -->
-        <div class="flex flex-col h-full">
-            <div class="mb-3 flex justify-between items-center">
-                <label class="text-xs font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest">Encoded
-                    Token</label>
-                <div class="flex gap-4">
-                    <button @click="sample()"
-                        class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase">Sample</button>
-                    <button @click="input = ''"
-                        class="text-[10px] font-bold text-red-500 hover:underline uppercase">Clear</button>
-                </div>
+{% block tool_body %}
+<div class="space-y-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 h-[500px]">
+        <!-- Input Token Area -->
+        <div class="flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+                <span
+                    class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest flex items-center gap-2">
+                    <i class="fas fa-key text-yellow-500"></i> Encoded Token (JWT)
+                </span>
+                <span class="text-[10px] text-[#A1A1AA]" x-text="input.length ? input.length + ' chars' : ''"></span>
             </div>
-            <textarea x-model="input"
-                class="flex-1 w-full p-6 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl focus:border-[#0D7C3D] focus:ring-4 focus:ring-[#0D7C3D]/10 bg-white dark:bg-[#1E1E1E] text-[#212529] dark:text-white resize-none transition-all outline-none break-all"
-                placeholder="Paste JWT here..."></textarea>
+            <textarea x-model="input" @input="decode()"
+                class="flex-1 w-full p-6 font-mono text-xs border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[1.5rem] bg-white dark:bg-[#121212] text-[#212529] dark:text-[#E4E4E7] resize-none shadow-inner break-all"
+                placeholder="Paste your JWT here..."></textarea>
         </div>
 
-        <!-- Decoded Output -->
-        <div class="flex flex-col h-full overflow-hidden">
-            <div class="mb-3">
-                <label class="text-xs font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest">Decoded
-                    Data</label>
+        <!-- Decoded Panels -->
+        <div class="flex flex-col gap-6 overflow-hidden">
+            <!-- Header -->
+            <div class="flex flex-col gap-3 flex-1 h-1/3">
+                <div class="flex items-center justify-between">
+                    <span class="text-[10px] font-bold text-rose-500 uppercase tracking-widest flex items-center gap-2">
+                        <i class="fas fa-cog"></i> Header (Algorithm & Typ)
+                    </span>
+                    <button @click="copyToClipboard(headerText)" x-show="headerText"
+                        class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase flex items-center gap-1.5">
+                        <i class="fas" :class="copied ? 'fa-check' : 'fa-copy'"></i>
+                        <span x-text="copied ? 'Copied' : 'Copy'"></span>
+                    </button>
+                </div>
+                <div class="flex-1 rounded-2xl bg-[#121212] border border-[#3D3D3D] overflow-auto p-4 custom-scrollbar">
+                    <pre><code class="language-json" x-text="headerText || '...' "></code></pre>
+                </div>
             </div>
 
-            <div class="flex-1 flex flex-col gap-4 overflow-auto pr-2">
-                <!-- Header -->
-                <div class="p-6 bg-white dark:bg-[#1E1E1E] rounded-xl border border-[#DEE2E6] dark:border-[#333]">
-                    <div class="text-[10px] font-bold text-rose-500 uppercase mb-3 tracking-tighter">Header: Algorithm &
-                        Token Type</div>
-                    <pre class="text-xs text-[#212529] dark:text-[#E4E4E7] font-mono"
-                        x-text="headerText || 'No header decoded'"></pre>
+            <!-- Payload -->
+            <div class="flex flex-col gap-3 flex-[2] h-2/3">
+                <div class="flex items-center justify-between">
+                    <span class="text-[10px] font-bold text-blue-500 uppercase tracking-widest flex items-center gap-2">
+                        <i class="fas fa-database"></i> Payload (Data & Claims)
+                    </span>
+                    <button @click="copyToClipboard(payloadText)" x-show="payloadText"
+                        class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase flex items-center gap-1.5">
+                        <i class="fas" :class="copied ? 'fa-check' : 'fa-copy'"></i>
+                        <span x-text="copied ? 'Copied' : 'Copy'"></span>
+                    </button>
                 </div>
-
-                <!-- Payload -->
-                <div class="p-6 bg-white dark:bg-[#1E1E1E] rounded-xl border border-[#DEE2E6] dark:border-[#333]">
-                    <div class="text-[10px] font-bold text-blue-500 uppercase mb-3 tracking-tighter">Payload: Data &
-                        Claims</div>
-                    <pre class="text-xs text-[#212529] dark:text-[#E4E4E7] font-mono"
-                        x-text="payloadText || 'No payload decoded'"></pre>
-                </div>
-
-                <div x-show="error"
-                    class="p-4 bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 rounded-lg text-xs font-bold border border-red-100 dark:border-red-900/20">
-                    <i class="fas fa-exclamation-triangle mr-2"></i> <span x-text="error"></span>
+                <div class="flex-1 rounded-2xl bg-[#121212] border border-[#3D3D3D] overflow-auto p-4 custom-scrollbar">
+                    <pre><code class="language-json" x-text="payloadText || '...' "></code></pre>
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
 
-<!-- jwt-decode CDN -->
+{% block tool_js_data %}
+{
+headerText: '',
+payloadText: '',
+
+loadSample() {
+this.input =
+"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE4OTM0NTYwMDAsInJvbGUiOiJyZXNlYXJjaGVyIiwicGxhdGZvcm0iOiJraXJpIn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
+this.decode();
+},
+
+decode() {
+this.error = '';
+this.headerText = '';
+this.payloadText = '';
+
+if (!this.input.trim()) {
+this.statusMessage = 'Ready';
+return;
+}
+
+try {
+// jwt-decode auto-handles parts
+const decodedPayload = jwt_decode(this.input);
+const decodedHeader = jwt_decode(this.input, { header: true });
+
+this.headerText = JSON.stringify(decodedHeader, null, 4);
+this.payloadText = JSON.stringify(decodedPayload, null, 4);
+this.statusMessage = 'Token decoded successfully';
+
+this.$nextTick(() => Prism.highlightAll());
+} catch (e) {
+this.error = 'Invalid JWT: ' + e.message;
+this.statusMessage = 'Error decoding token';
+}
+},
+
+download() {
+if (!this.payloadText) return;
+const out = `HEADER:\n${this.headerText}\n\nPAYLOAD:\n${this.payloadText}`;
+this.downloadFile(out, 'decoded_jwt.txt', 'text/plain');
+}
+}
+{% endblock %}
+
+{% block extra_js_tool %}
 <script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
-
-<script>
-    function jwtTool() {
-        return {
-            input: '',
-            headerText: '',
-            payloadText: '',
-            error: '',
-
-            init() {
-                this.$watch('input', () => this.decode());
-            },
-
-            decode() {
-                this.error = '';
-                this.headerText = '';
-                this.payloadText = '';
-
-                if (!this.input.trim()) return;
-
-                try {
-                    // jwt-decode library
-                    const decodedPayload = jwt_decode(this.input);
-                    const decodedHeader = jwt_decode(this.input, { header: true });
-
-                    this.headerText = JSON.stringify(decodedHeader, null, 4);
-                    this.payloadText = JSON.stringify(decodedPayload, null, 4);
-                } catch (e) {
-                    this.error = 'Invalid JWT: ' + e.message;
-                }
-            },
-
-            sample() {
-                // A valid-ish looking sample JWT for demo (no signature validation done here)
-                this.input = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE4OTM0NTYwMDAsInJvbGUiOiJyZXNlYXJjaGVyIiwicGxhdGZvcm0iOiJraXJpIn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
-            }
-        }
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+<style>
+    pre[class*="language-"],
+    code[class*="language-"] {
+        @apply bg-transparent !important;
+        text-shadow: none !important;
     }
-</script>
+
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        @apply bg-[#3D3D3D] rounded-full;
+    }
+</style>
 {% endblock %}

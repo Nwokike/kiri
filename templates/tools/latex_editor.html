@@ -1,90 +1,153 @@
-{% extends "base.html" %}
+{% extends "tools/base_tool.html" %}
 {% load static %}
 
-{% block title %}LaTeX Equation Editor | Kiri Tools{% endblock %}
-{% block meta_description %}Real-time LaTeX equation editor and previewer using MathJax. Write, preview, and copy mathematical formulas for your research docs.{% endblock %}
-
-{% block extra_head %}
-<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+{% block tool_name %}LaTeX Editor{% endblock %}
+{% block tool_icon %}fa-square-root-variable{% endblock %}
+{% block tool_title %}LaTeX Equation Editor{% endblock %}
+{% block tool_description %}
+Compose beautiful mathematical formulas with real-time rendering.
+Ideal for researchers writing papers, students solving complex equations, and technical documentation.
 {% endblock %}
 
-{% block content %}
-<div class="max-w-6xl mx-auto px-4 py-8" x-data="latexTool()">
-    <nav class="mb-6 text-sm flex items-center text-[#6C757D] dark:text-[#A1A1AA]">
-        <a href="{% url 'tools:index' %}" class="hover:text-[#0D7C3D] transition-colors flex items-center">
-            <i class="fas fa-arrow-left mr-2"></i> Tools
-        </a>
-        <span class="mx-2">/</span>
-        <span class="text-[#212529] dark:text-white font-bold">LaTeX Equation Editor</span>
-    </nav>
+{% block tool_actions_right %}
+<button @click="copyForMarkdown()"
+    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-[#0D7C3D] text-white hover:bg-[#0A5C2C]">
+    <i class="fas fa-copy"></i>
+    <span>Copy for MD</span>
+</button>
+{% endblock %}
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 h-[calc(100vh-250px)]">
-        <div class="flex flex-col h-full">
-            <div class="mb-3 flex justify-between items-center">
-                <label class="text-sm font-bold text-[#212529] dark:text-white uppercase tracking-wider">LaTeX
-                    Input</label>
+{% block tool_body %}
+<div class="space-y-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 h-[550px]">
+        <!-- Editor Column -->
+        <div class="flex flex-col gap-4">
+            <div class="flex items-center justify-between">
+                <span
+                    class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest flex items-center gap-2">
+                    <i class="fas fa-keyboard text-gray-400"></i> TeX/LaTeX Source
+                </span>
                 <div class="flex gap-2">
-                    <button @click="sample()"
-                        class="text-[11px] font-bold text-[#0D7C3D] hover:underline uppercase">Sample</button>
-                    <button @click="input = ''"
-                        class="text-[11px] font-bold text-red-500 hover:underline uppercase">Clear</button>
+                    <button @click="insert('\\frac{}{}')"
+                        class="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-[9px] font-bold hover:bg-[#0D7C3D] hover:text-white transition-colors">Frac</button>
+                    <button @click="insert('\\sqrt{}')"
+                        class="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-[9px] font-bold hover:bg-[#0D7C3D] hover:text-white transition-colors">Sqrt</button>
+                    <button @click="insert('\\int_{}^{}')"
+                        class="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-[9px] font-bold hover:bg-[#0D7C3D] hover:text-white transition-colors">Int</button>
                 </div>
             </div>
-            <textarea x-model="input" @input.debounce.300ms="render()"
-                class="flex-1 w-full p-6 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl focus:border-[#0D7C3D] focus:ring-4 focus:ring-[#0D7C3D]/10 bg-white dark:bg-[#1E1E1E] text-[#212529] dark:text-white resize-none transition-all outline-none"
-                placeholder="Type LaTeX here... (e.g., E=mc^2)"></textarea>
+            <textarea x-model="input" @input.debounce.250ms="render()" x-ref="textarea"
+                class="flex-1 w-full p-8 font-mono text-base border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[2rem] bg-white dark:bg-[#121212] text-[#212529] dark:text-[#E4E4E7] resize-none shadow-inner outline-none focus:border-[#0D7C3D] transition-all"
+                placeholder="E = mc^2"></textarea>
+
+            <div class="grid grid-cols-2 gap-4">
+                <button @click="sample('\\nabla \\cdot \\mathbf{E} = \\frac{\\rho}{\\epsilon_0}')"
+                    class="p-3 bg-[#F8F9FA] dark:bg-[#1A1A1A] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl text-[10px] font-bold uppercase hover:border-[#0D7C3D] transition-all">Maxwell's
+                    Eq</button>
+                <button
+                    @click="sample('i\\hbar\\frac{\\partial}{\\partial t}\\Psi(\\mathbf{r},t) = \\hat{H}\\Psi(\\mathbf{r},t)')"
+                    class="p-3 bg-[#F8F9FA] dark:bg-[#1A1A1A] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl text-[10px] font-bold uppercase hover:border-[#0D7C3D] transition-all">Schrödinger</button>
+            </div>
         </div>
 
-        <div class="flex flex-col h-full">
-            <div class="mb-3 flex justify-between items-center">
-                <label class="text-sm font-bold text-[#212529] dark:text-white uppercase tracking-wider">Preview</label>
-                <button @click="copy()" class="text-[11px] font-bold text-[#0D7C3D] hover:underline uppercase"
-                    x-text="copied ? 'Copied!' : 'Copy Code'"></button>
+        <!-- Preview Column -->
+        <div class="flex flex-col gap-4">
+            <div class="flex items-center justify-between">
+                <span
+                    class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest flex items-center gap-2">
+                    <i class="fas fa-eye text-[#0D7C3D]"></i> Equation Preview
+                </span>
+                <span class="text-[9px] font-bold text-[#A1A1AA] italic">Rendered via MathJax 3</span>
             </div>
             <div
-                class="flex-1 bg-white dark:bg-[#252526] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl p-8 flex items-center justify-center overflow-auto">
-                <div id="latex-preview" class="text-3xl text-[#212529] dark:text-white" x-text="preview"></div>
+                class="flex-1 rounded-[2rem] bg-white dark:bg-[#1A1A1A] border border-[#DEE2E6] dark:border-[#3D3D3D] relative flex items-center justify-center p-12 overflow-auto shadow-sm group">
+                <div id="latex-preview" class="text-4xl text-[#212529] dark:text-white transition-all duration-500">
+                </div>
+
+                <!-- Reset Overlay -->
+                <button @click="onReset()"
+                    class="absolute top-4 right-4 text-[#ADB5BD] hover:text-red-500 transition-colors">
+                    <i class="fas fa-trash-alt"></i>
+                </button>
+            </div>
+
+            <div class="p-6 bg-[#0D7C3D]/5 border border-[#0D7C3D]/10 rounded-2xl flex items-center gap-4">
+                <div
+                    class="w-10 h-10 rounded-full bg-white dark:bg-[#2D2D2D] flex items-center justify-center shadow-sm">
+                    <i class="fas fa-lightbulb text-[#C4992E]"></i>
+                </div>
+                <p class="text-xs text-[#6C757D] dark:text-[#A1A1AA] leading-relaxed">
+                    <strong class="text-[#212529] dark:text-white">Pro Tip:</strong> Use <code
+                        class="bg-gray-100 dark:bg-gray-800 px-1 rounded">\\text{...}</code> for embedded fonts.
+                </p>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
 
-<script>
-    function latexTool() {
-        return {
-            input: 'e^{i\\pi} + 1 = 0',
-            copied: false,
+{% block tool_js_data %}
+{
+init() {
+this.input = 'e^{i\\pi} + 1 = 0';
+this.$nextTick(() => this.render());
+},
 
-            init() {
-                this.render();
-            },
+insert(val) {
+const area = this.$refs.textarea;
+const start = area.selectionStart;
+const end = area.selectionEnd;
+this.input = this.input.substring(0, start) + val + this.input.substring(end);
+area.focus();
+this.$nextTick(() => this.render());
+},
 
-            render() {
-                const preview = document.getElementById('latex-preview');
-                preview.innerHTML = '$$' + (this.input || '') + '$$';
-                if (window.MathJax) {
-                    MathJax.typesetPromise([preview]).catch((err) => console.log(err.message));
-                }
-            },
+sample(val) {
+this.input = val;
+this.render();
+this.statusMessage = 'Sample loaded';
+},
 
-            sample() {
-                const samples = [
-                    '\\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}',
-                    '\\int_{a}^{b} f(x) dx',
-                    '\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}',
-                    '\\sum_{i=1}^{n} i^2 = \\frac{n(n+1)(2n+1)}{6}'
-                ];
-                this.input = samples[Math.floor(Math.random() * samples.length)];
-                this.render();
-            },
+render() {
+const preview = document.getElementById('latex-preview');
+if (!preview) return;
 
-            copy() {
-                navigator.clipboard.writeText(this.input);
-                this.copied = true;
-                setTimeout(() => this.copied = false, 2000);
-            }
-        }
+if (!this.input.trim()) {
+preview.innerHTML = '<span class="opacity-20 text-xs uppercase tracking-widest font-bold">Awaiting Input</span>';
+return;
+}
+
+preview.innerHTML = '$$' + this.input + '$$';
+if (window.MathJax) {
+MathJax.typesetPromise([preview]).then(() => {
+this.statusMessage = 'Equation rendered';
+}).catch((err) => {
+this.error = 'Latex error: ' + err.message;
+});
+}
+},
+
+copyForMarkdown() {
+this.copyToClipboard('$$' + this.input + '$$');
+},
+
+onReset() {
+this.input = '';
+this.render();
+}
+}
+{% endblock %}
+
+{% block extra_js_tool %}
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+<style>
+    .MathJax {
+        outline: none !important;
     }
-</script>
+
+    #latex-preview td {
+        border: none !important;
+    }
+</style>
 {% endblock %}

@@ -1,112 +1,153 @@
-{% extends "base.html" %}
+{% extends "tools/base_tool.html" %}
 {% load static %}
 
-{% block title %}Markdown Previewer | Kiri Tools{% endblock %}
-{% block meta_description %}Write and preview GitHub Flavored Markdown in real-time. Secure, client-side rendering for your technical documentation.{% endblock %}
+{% block tool_name %}MD Preview{% endblock %}
+{% block tool_icon %}fa-file-lines{% endblock %}
+{% block tool_title %}Markdown Live Previewer{% endblock %}
+{% block tool_description %}
+Draft and visualize your documentation with our high-performance Markdown engine.
+Supports GitHub Flavored Markdown (GFM), syntax highlighting, and secure sanitized rendering.
+{% endblock %}
 
-{% block content %}
-<div class="max-w-7xl mx-auto px-4 py-8" x-data="markdownTool()">
-    <nav class="mb-6 text-sm flex items-center text-[#6C757D] dark:text-[#A1A1AA]">
-        <a href="{% url 'tools:index' %}" class="hover:text-[#0D7C3D] transition-colors flex items-center">
-            <i class="fas fa-arrow-left mr-2"></i> Tools
-        </a>
-        <span class="mx-2">/</span>
-        <span class="text-[#212529] dark:text-white font-bold">Markdown Previewer</span>
-    </nav>
+{% block tool_actions_right %}
+<button @click="downloadHtml()"
+    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-[#0D7C3D] text-white hover:bg-[#0A5C2C]"
+    x-show="input">
+    <i class="fas fa-code"></i>
+    <span>Export HTML</span>
+</button>
+{% endblock %}
 
-    <div class="mb-6 flex justify-between items-center">
-        <h1 class="text-2xl font-bold text-[#212529] dark:text-white">Markdown Previewer</h1>
-        <button @click="sample()" class="text-xs font-bold text-[#0D7C3D] hover:underline uppercase">Load
-            Sample</button>
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 h-[calc(100vh-280px)]">
+{% block tool_body %}
+<div class="space-y-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 h-[600px]">
         <!-- Editor -->
-        <div class="flex flex-col h-full">
-            <div class="mb-3 flex justify-between items-center">
-                <label class="text-xs font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest">Markdown
-                    Source</label>
-                <button @click="input = ''"
-                    class="text-[10px] font-bold text-red-500 hover:underline uppercase">Clear</button>
+        <div class="flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+                <span
+                    class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest flex items-center gap-2">
+                    <i class="fab fa-markdown text-blue-500"></i> Markdown Source
+                </span>
+                <span class="text-[10px] text-[#A1A1AA]" x-text="input.length ? input.length + ' chars' : ''"></span>
             </div>
-            <textarea x-model="input"
-                class="flex-1 w-full p-6 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl focus:border-[#0D7C3D] focus:ring-4 focus:ring-[#0D7C3D]/10 bg-white dark:bg-[#1E1E1E] text-[#212529] dark:text-white resize-none transition-all outline-none"
+            <textarea x-model="input" @input="render()"
+                class="flex-1 w-full p-6 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[2rem] bg-white dark:bg-[#121212] text-[#212529] dark:text-[#E4E4E7] resize-none shadow-inner outline-none focus:border-[#0D7C3D] transition-all"
                 placeholder="Type your markdown here..."></textarea>
         </div>
 
         <!-- Preview -->
-        <div class="flex flex-col h-full">
-            <div class="mb-3">
-                <label class="text-xs font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest">Live
-                    Preview</label>
+        <div class="flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+                <span
+                    class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest flex items-center gap-2">
+                    <i class="fas fa-eye text-[#0D7C3D]"></i> Live Preview
+                </span>
+                <button @click="copyToClipboard(rendered)" x-show="rendered"
+                    class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase flex items-center gap-1.5">
+                    <i class="fas" :class="copied ? 'fa-check' : 'fa-copy'"></i>
+                    <span x-text="copied ? 'Copied HTML' : 'Copy HTML'"></span>
+                </button>
             </div>
             <div
-                class="flex-1 relative overflow-hidden rounded-xl border border-[#DEE2E6] dark:border-[#3D3D3D] bg-white dark:bg-[#1E1E1E]">
-                <div id="markdown-output" class="prose dark:prose-invert max-w-none w-full h-full overflow-auto p-8"
+                class="flex-1 rounded-[2rem] bg-white dark:bg-[#1A1A1A] border border-[#DEE2E6] dark:border-[#3D3D3D] relative overflow-hidden shadow-sm">
+                <div id="markdown-output"
+                    class="prose dark:prose-invert max-w-none w-full h-full overflow-auto p-10 custom-scrollbar"
                     x-html="rendered">
-                    <!-- Marked.js will render here -->
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
 
-<!-- Marked.js CDN -->
+{% block tool_js_data %}
+{
+rendered: '',
+
+init() {
+this.render();
+},
+
+loadSample() {
+this.input = "# Kiri Tool Suite\n\nWelcome to the **Premium Tools Hub**. We specialize in high-performance, client-side
+research utilities.\n\n## Core Principles\n1. **Privacy First**: 100% local processing.\n2. **Elite UI**:
+State-of-the-art aesthetics.\n3. **Speed**: Instant reactivity with Alpine.js.\n\n### Featured
+Code\n```python\n@kiri_secure\ndef process_data(payload):\n # This is handled entirely in your hardware\n return
+transform(payload)\n```\n\n> \"Building tools that empower researchers to scale their intuition.\"\n\n| Tool | Category
+| Status |\n| :--- | :--- | :--- |\n| SQL Formatter | Pro | Done |\n| MD Previewer | Utility | Active |";
+this.render();
+},
+
+render() {
+if (!this.input.trim()) {
+this.rendered = '';
+this.statusMessage = 'Ready';
+return;
+}
+
+try {
+const rawHtml = marked.parse(this.input);
+this.rendered = DOMPurify.sanitize(rawHtml);
+this.statusMessage = 'Rendered GFM';
+} catch (e) {
+this.error = 'Render error';
+}
+},
+
+downloadHtml() {
+if (!this.rendered) return;
+this.downloadFile(this.rendered, 'preview.html', 'text/html');
+}
+}
+{% endblock %}
+
+{% block extra_js_tool %}
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-<!-- DOMPurify for security -->
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
 
 <style>
-    /* Styling the preview output to look professional */
     #markdown-output h1 {
-        @apply text-2xl font-extrabold mb-4 border-b pb-2 border-gray-100 dark:border-gray-800;
+        @apply text-3xl font-black mb-6 pb-4 border-b border-gray-100 dark:border-gray-800;
     }
 
     #markdown-output h2 {
-        @apply text-xl font-bold mb-3 mt-6;
+        @apply text-xl font-bold mt-10 mb-4 text-[#0D7C3D];
     }
 
     #markdown-output code {
-        @apply bg-gray-100 dark:bg-gray-800 px-1 rounded text-sm font-mono text-rose-500;
+        @apply bg-gray-100 dark:bg-[#2D2D2D] px-1.5 py-0.5 rounded text-sm font-mono text-[#0D7C3D];
     }
 
     #markdown-output pre {
-        @apply bg-gray-50 dark:bg-[#121212] p-4 rounded-lg border border-gray-100 dark:border-gray-800 overflow-x-auto;
+        @apply bg-[#121212] p-6 rounded-2xl border border-gray-800 overflow-x-auto my-6 shadow-xl;
     }
 
     #markdown-output ul {
-        @apply list-disc ml-6 space-y-1;
+        @apply list-disc ml-6 space-y-2 my-4;
     }
 
     #markdown-output blockquote {
-        @apply border-l-4 border-[#0D7C3D] pl-4 italic text-gray-600 dark:text-gray-400;
+        @apply border-l-4 border-[#0D7C3D] pl-6 py-2 italic text-[#6C757D] dark:text-[#A1A1AA] bg-[#0D7C3D]/5 rounded-r-xl my-6;
+    }
+
+    #markdown-output table {
+        @apply w-full border-collapse my-6 text-sm;
+    }
+
+    #markdown-output th {
+        @apply border-b border-gray-200 dark:border-gray-700 p-3 text-left font-black uppercase tracking-widest text-[#ADB5BD];
+    }
+
+    #markdown-output td {
+        @apply border-b border-gray-100 dark:border-gray-800 p-3;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        @apply bg-[#DEE2E6] dark:bg-[#3D3D3D] rounded-full;
     }
 </style>
-
-<script>
-    function markdownTool() {
-        return {
-            input: '',
-            rendered: '',
-
-            init() {
-                this.$watch('input', () => this.render());
-                this.sample(); // Load sample by default
-            },
-
-            render() {
-                if (!this.input.trim()) {
-                    this.rendered = '';
-                    return;
-                }
-                const rawHtml = marked.parse(this.input);
-                this.rendered = DOMPurify.sanitize(rawHtml);
-            },
-
-            sample() {
-                this.input = "# Welcome to Kiri Markdown\n\nThis is a professional **Live Previewer**.\n\n## Features\n- **Fast**: Rendered client-side instantly.\n- **Secure**: Sanitized output via DOMPurify.\n- **Modern**: Supports GFM (GitHub Flavored Markdown).\n\n### Code Blocks\n```python\ndef greet(name):\n    return f\"Hello, {name}! Welcome to Kiri.\"\n```\n\n### Blockquotes\n> Building the future of research tools, one line at a time.\n\n### Tables\n| Tool | Category | Status |\n| :--- | :--- | :--- |\n| SQL Formatter | Programming | Done |\n| Diff Viewer | Programming | Done |\n| Markdown | Utility | Live |";
-            }
-        }
-    }
-</script>
 {% endblock %}

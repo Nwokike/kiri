@@ -1,83 +1,95 @@
-{% extends "base.html" %}
+{% extends "tools/base_tool.html" %}
 {% load static %}
 
-{% block title %}JSON Schema Validator | Kiri Tools{% endblock %}
-{% block meta_description %}High-performance JSON Schema validation using the Ajv library. Validate your data structures
-against industry standards locally in your browser.{% endblock %}
+{% block tool_name %}Schema Verifier{% endblock %}
+{% block tool_icon %}fa-microchip{% endblock %}
+{% block tool_title %}JSON Schema Validator{% endblock %}
+{% block tool_description %}
+Enforce structural integrity on your data payloads using the elite Ajv validation engine.
+Strict compliance checks against draft-07, 2019-09, and 2020-12 standards entirely in your browser.
+{% endblock %}
 
-{% block content %}
-<div class="max-w-7xl mx-auto px-4 py-8" x-data="schemaTool()">
-    <nav class="mb-6 text-sm flex items-center text-[#6C757D] dark:text-[#A1A1AA]">
-        <a href="{% url 'tools:index' %}" class="hover:text-[#0D7C3D] transition-colors flex items-center">
-            <i class="fas fa-arrow-left mr-2"></i> Tools
-        </a>
-        <span class="mx-2">/</span>
-        <span class="text-[#212529] dark:text-white font-bold">Schema Validator</span>
-    </nav>
-
-    <div class="mb-8">
-        <h1 class="text-3xl font-extrabold text-[#212529] dark:text-white mb-2">JSON Schema Validator</h1>
-        <p class="text-[#6C757D] dark:text-[#A1A1AA]">Validate JSON data against high-performance schema standards
-            (Ajv).</p>
-    </div>
-
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 h-[calc(100vh-320px)] lg:h-[700px]">
+{% block tool_body %}
+<div class="space-y-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 h-[600px]">
         <!-- JSON Input -->
-        <div class="flex flex-col h-[50%] lg:h-full">
-            <div class="mb-3 flex justify-between items-center">
-                <label class="text-xs font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest">JSON
-                    Input</label>
-                <button @click="sample()" class="text-[10px] font-bold text-[#0D7C3D] uppercase hover:underline">Load
-                    Full Sample</button>
+        <div class="flex flex-col gap-3">
+            <div class="flex items-center justify-between px-2">
+                <span
+                    class="text-[10px] font-black text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest flex items-center gap-2">
+                    <i class="fas fa-file-code text-blue-500"></i> Local Data (JSON)
+                </span>
+                <button @click="sample()"
+                    class="text-[10px] font-black text-[#0D7C3D] hover:underline uppercase">Hydrate Sample</button>
             </div>
-            <textarea x-model="jsonInput"
-                class="flex-1 p-6 font-mono text-xs border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl bg-white dark:bg-[#1E1E1E] text-[#212529] dark:text-white focus:border-[#0D7C3D] outline-none transition-all resize-none shadow-sm"
-                placeholder="Paste JSON data to validate..."></textarea>
+            <textarea x-model="input" @input="validate()"
+                class="flex-1 w-full p-8 font-mono text-xs border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[2.5rem] bg-white dark:bg-[#121212] text-[#212529] dark:text-[#E4E4E7] resize-none shadow-inner outline-none focus:border-[#0D7C3D] transition-all"
+                placeholder="Paste object data here..."></textarea>
         </div>
 
-        <!-- Schema Input & Result -->
-        <div class="flex flex-col h-[50%] lg:h-full gap-8">
-            <div class="flex flex-col flex-1">
-                <div class="mb-3">
-                    <label class="text-xs font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest">JSON
-                        Schema</label>
+        <!-- Schema Input & Validation Overlay -->
+        <div class="flex flex-col gap-8 h-full">
+            <div class="flex flex-col flex-1 gap-3">
+                <div class="flex items-center justify-between px-2">
+                    <span
+                        class="text-[10px] font-black text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest flex items-center gap-2">
+                        <i class="fas fa-project-diagram text-[#0D7C3D]"></i> Target Schema
+                    </span>
                 </div>
-                <textarea x-model="schemaInput"
-                    class="flex-1 p-6 font-mono text-xs border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl bg-gray-50 dark:bg-[#121212] text-[#212529] dark:text-gray-400 focus:border-[#0D7C3D] outline-none transition-all resize-none"
-                    placeholder="Paste your JSON Schema here..."></textarea>
+                <div class="flex-1 relative">
+                    <textarea x-model="schemaInput" @input="validate()"
+                        class="w-full h-full p-8 font-mono text-xs border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[2.5rem] bg-white dark:bg-[#121212] text-[#212529] dark:text-[#E4E4E7] resize-none shadow-inner outline-none focus:border-[#0D7C3D] transition-all"
+                        placeholder="Paste JSON Schema here..."></textarea>
+                </div>
             </div>
 
-            <!-- Result Box -->
-            <div class="p-8 rounded-2xl border flex flex-col items-center justify-center transition-all shadow-sm"
-                :class="valid === null ? 'bg-white dark:bg-[#1E1E1E] border-[#DEE2E6] dark:border-[#333]' : (valid ? 'bg-green-50 dark:bg-green-950/20 border-green-200 text-green-700' : 'bg-red-50 dark:bg-red-950/20 border-red-200 text-red-700')">
+            <!-- Validation Result Dashboard -->
+            <div class="p-8 rounded-[2.5rem] border-2 transition-all duration-500 shadow-xl overflow-hidden"
+                :class="valid === null ? 'bg-white dark:bg-[#1A1A1A] border-[#DEE2E6] dark:border-[#3D3D3D] grayscale' : (valid ? 'bg-[#0D7C3D]/5 border-[#0D7C3D] text-[#0D7C3D]' : 'bg-red-500/5 border-red-500 text-red-500')">
+
                 <template x-if="valid === null">
-                    <div class="text-center">
-                        <i class="fas fa-microchip text-2xl text-gray-200 mb-2"></i>
-                        <p class="text-xs font-bold text-gray-400 uppercase tracking-widest">Waiting for input...</p>
+                    <div class="h-full flex flex-col items-center justify-center py-6 opacity-30">
+                        <i class="fas fa-shield-halved text-4xl mb-4"></i>
+                        <p class="text-[10px] font-black uppercase tracking-widest">Awaiting Manifest</p>
                     </div>
                 </template>
+
                 <template x-if="valid === true">
-                    <div class="text-center">
-                        <i class="fas fa-check-circle text-3xl mb-3"></i>
-                        <h4 class="text-xl font-bold mb-1">JSON is Valid!</h4>
-                        <p class="text-xs opacity-70">Matches schema definitions perfectly.</p>
+                    <div class="flex flex-col items-center justify-center text-center py-4 animate-scale-up">
+                        <div
+                            class="w-16 h-16 rounded-full bg-[#0D7C3D] text-white flex items-center justify-center shadow-lg mb-6">
+                            <i class="fas fa-check text-2xl"></i>
+                        </div>
+                        <h4 class="text-lg font-black uppercase tracking-[0.2em] mb-2">Structural Integrity Confirmed
+                        </h4>
+                        <p class="text-[9px] font-bold opacity-60 uppercase tracking-widest">Payload matches provided
+                            schema exactly.</p>
                     </div>
                 </template>
+
                 <template x-if="valid === false">
-                    <div class="w-full">
-                        <div class="flex items-center gap-3 mb-4">
-                            <i class="fas fa-times-circle text-3xl"></i>
+                    <div class="animate-shake">
+                        <div class="flex items-center gap-4 mb-6">
+                            <div
+                                class="w-12 h-12 rounded-2xl bg-red-500 text-white flex items-center justify-center shadow-lg">
+                                <i class="fas fa-times text-xl"></i>
+                            </div>
                             <div>
-                                <h4 class="text-xl font-bold">Validation Failed</h4>
-                                <p class="text-xs opacity-70">Encountered <span x-text="errors.length"></span>
-                                    violations.</p>
+                                <h4 class="text-sm font-black uppercase tracking-widest">Validation Rupture</h4>
+                                <p class="text-[9px] font-bold opacity-60 uppercase tracking-widest"
+                                    x-text="errors.length + ' structural violations detected'"></p>
                             </div>
                         </div>
-                        <div class="space-y-2 max-h-40 overflow-auto pr-2">
-                            <template x-for="err in errors" :key="err.instancePath">
-                                <div class="p-3 bg-red-100 dark:bg-red-950/40 rounded-lg text-xs font-bold font-mono">
-                                    <span class="opacity-60" x-text="err.instancePath || 'root'"></span>: <span
-                                        x-text="err.message"></span>
+                        <div class="space-y-2 max-h-32 overflow-auto pr-2 custom-scrollbar">
+                            <template x-for="err in errors" :key="err.instancePath + err.message">
+                                <div
+                                    class="p-4 bg-red-500/10 border border-red-500/20 rounded-xl flex items-start gap-3">
+                                    <i class="fas fa-bug text-[10px] mt-1 shrink-0"></i>
+                                    <div>
+                                        <p class="text-[10px] font-mono leading-none mb-1"><span class="opacity-50"
+                                                x-text="err.instancePath || 'root'"></span></p>
+                                        <p class="text-[10px] font-black" x-text="err.message"></p>
+                                    </div>
                                 </div>
                             </template>
                         </div>
@@ -87,62 +99,120 @@ against industry standards locally in your browser.{% endblock %}
         </div>
     </div>
 </div>
+{% endblock %}
 
-<!-- Ajv Library for Schema Validation -->
+{% block tool_js_data %}
+{
+schemaInput: '',
+valid: null,
+errors: [],
+ajv: null,
+
+init() {
+this.ajv = new ajv7();
+this.validate();
+},
+
+validate() {
+if (!this.input.trim() || !this.schemaInput.trim()) {
+this.valid = null;
+return;
+}
+
+try {
+const data = JSON.parse(this.input);
+const schema = JSON.parse(this.schemaInput);
+
+const validateFn = this.ajv.compile(schema);
+this.valid = validateFn(data);
+this.errors = validateFn.errors || [];
+this.statusMessage = this.valid ? 'Validation passed' : 'Validation failed';
+} catch (e) {
+this.valid = false;
+this.errors = [{ instancePath: 'SYNTAX', message: e.message }];
+this.statusMessage = 'Syntax Error';
+}
+},
+
+sample() {
+this.schemaInput = JSON.stringify({
+type: "object",
+properties: {
+id: { type: "number" },
+tier: { enum: ["PRO", "LITE", "RESEARCH"] },
+metadata: {
+type: "object",
+required: ["origin"],
+properties: { origin: { type: "string" } }
+}
+},
+required: ["id", "tier"]
+}, null, 4);
+
+this.input = JSON.stringify({
+id: 1024,
+tier: "RESEARCH",
+metadata: { origin: "Kiri-Core" }
+}, null, 4);
+
+this.validate();
+}
+}
+{% endblock %}
+
+{% block extra_js_tool %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/ajv/8.12.0/ajv7.bundle.js"></script>
+<style>
+    .animate-scale-up {
+        animation: scaleUp 0.5s ease-out;
+    }
 
-<script>
-    function schemaTool() {
-        return {
-            jsonInput: '',
-            schemaInput: '',
-            valid: null,
-            errors: [],
-            ajv: null,
+    .animate-shake {
+        animation: shake 0.5s cubic-bezier(.36, .07, .19, .97) both;
+    }
 
-            init() {
-                this.ajv = new ajv7();
-                this.$watch('jsonInput', () => this.validate());
-                this.$watch('schemaInput', () => this.validate());
-            },
+    @keyframes scaleUp {
+        from {
+            transform: scale(0.9);
+            opacity: 0;
+        }
 
-            validate() {
-                if (!this.jsonInput.trim() || !this.schemaInput.trim()) {
-                    this.valid = null;
-                    return;
-                }
-
-                try {
-                    const data = JSON.parse(this.jsonInput);
-                    const schema = JSON.parse(this.schemaInput);
-
-                    const validate = this.ajv.compile(schema);
-                    this.valid = validate(data);
-                    this.errors = validate.errors || [];
-                } catch (e) {
-                    this.valid = false;
-                    this.errors = [{ instancePath: 'Syntax', message: e.message }];
-                }
-            },
-
-            sample() {
-                this.schemaInput = JSON.stringify({
-                    type: "object",
-                    properties: {
-                        name: { type: "string" },
-                        age: { type: "number", minimum: 18 },
-                        tags: { type: "array", items: { type: "string" } }
-                    },
-                    required: ["name", "age"]
-                }, null, 4);
-
-                this.jsonInput = JSON.stringify({
-                    name: "Kiri Researcher",
-                    age: 25,
-                    tags: ["AI", "Tools"]
-                }, null, 4);
-            }
+        to {
+            transform: scale(1);
+            opacity: 1;
         }
     }
-</script>
+
+    @keyframes shake {
+
+        10%,
+        90% {
+            transform: translate3d(-1px, 0, 0);
+        }
+
+        20%,
+        80% {
+            transform: translate3d(2px, 0, 0);
+        }
+
+        30%,
+        50%,
+        70% {
+            transform: translate3d(-4px, 0, 0);
+        }
+
+        40%,
+        60% {
+            transform: translate3d(4px, 0, 0);
+        }
+    }
+
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 4px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        @apply bg-[#DEE2E6] dark:bg-[#3D3D3D] rounded-full;
+    }
+</style>
 {% endblock %}

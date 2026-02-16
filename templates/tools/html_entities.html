@@ -1,96 +1,121 @@
-{% extends "base.html" %}
+{% extends "tools/base_tool.html" %}
 {% load static %}
 
-{% block title %}HTML Entities Converter | Kiri Tools{% endblock %}
-{% block meta_description %}Encode and decode HTML entities securely. Perfect for web developers ensuring proper
-character rendering and security against XSS.{% endblock %}
+{% block tool_name %}HTML Entities{% endblock %}
+{% block tool_icon %}fa-code{% endblock %}
+{% block tool_title %}HTML Entity Encoder & Decoder{% endblock %}
+{% block tool_description %}
+Securely transform special characters into HTML entities or restore them to plain text.
+Essential for neutralizing XSS vulnerabilities and ensuring correct character rendering in templates.
+{% endblock %}
 
-{% block content %}
-<div class="max-w-5xl mx-auto px-4 py-8" x-data="htmlTool()">
-    <nav class="mb-6 text-sm flex items-center text-[#6C757D] dark:text-[#A1A1AA]">
-        <a href="{% url 'tools:index' %}" class="hover:text-[#0D7C3D] transition-colors flex items-center">
-            <i class="fas fa-arrow-left mr-2"></i> Tools
-        </a>
-        <span class="mx-2">/</span>
-        <span class="text-[#212529] dark:text-white font-bold">HTML Entities</span>
-    </nav>
-
-    <div class="mb-12 text-center">
-        <h1 class="text-3xl font-extrabold text-[#212529] dark:text-white mb-2">HTML Entity Encoder/Decoder</h1>
-        <p class="text-[#6C757D] dark:text-[#A1A1AA]">Securely encode special characters to HTML entities or decode them
-            back to plain text.</p>
+{% block tool_actions_left %}
+<div class="flex items-center gap-2">
+    <div class="flex bg-white dark:bg-[#1E1E1E] p-1 rounded-xl border border-[#DEE2E6] dark:border-[#3D3D3D] shadow-sm">
+        <button @click="mode = 'encode'; convert()"
+            :class="mode === 'encode' ? 'bg-[#0D7C3D] text-white' : 'text-[#6C757D] dark:text-[#A1A1AA]'"
+            class="px-4 py-1.5 text-[10px] font-bold rounded-lg transition-all">Encode</button>
+        <button @click="mode = 'decode'; convert()"
+            :class="mode === 'decode' ? 'bg-[#0D7C3D] text-white' : 'text-[#6C757D] dark:text-[#A1A1AA]'"
+            class="px-4 py-1.5 text-[10px] font-bold rounded-lg transition-all">Decode</button>
     </div>
+</div>
+{% endblock %}
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-10">
-        <!-- Encoder -->
-        <div class="p-8 bg-white dark:bg-[#1E1E1E] rounded-2xl border border-[#DEE2E6] dark:border-[#333] shadow-sm">
-            <div class="flex items-center gap-3 mb-6">
-                <div class="w-10 h-10 bg-[#0D7C3D]/10 rounded-lg flex items-center justify-center text-[#0D7C3D]">
-                    <i class="fas fa-lock"></i>
-                </div>
-                <h3 class="text-lg font-bold text-[#212529] dark:text-white">Encoder</h3>
+{% block tool_actions_right %}
+<button @click="download()"
+    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-[#0D7C3D] text-white hover:bg-[#0A5C2C]"
+    x-show="output">
+    <i class="fas fa-download"></i>
+    <span>Save Text</span>
+</button>
+{% endblock %}
+
+{% block tool_body %}
+<div class="space-y-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[400px]">
+        <!-- Input Area -->
+        <div class="flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+                <span class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest"
+                    x-text="mode === 'encode' ? 'Raw Text' : 'HTML Entities'"></span>
+                <span class="text-[10px] text-[#A1A1AA]" x-text="input.length ? input.length + ' chars' : ''"></span>
             </div>
-            <textarea x-model="toEncode" rows="5"
-                class="w-full p-4 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl bg-[#F8F9FA] dark:bg-[#121212] text-[#212529] dark:text-white focus:border-[#0D7C3D] outline-none transition-all resize-none mb-4"
-                placeholder="Paste text to encode (e.g. <html>)"></textarea>
-            <div class="p-4 bg-gray-50 dark:bg-[#252526] rounded-xl border border-dashed border-gray-200 dark:border-[#444] min-h-[100px] break-all font-mono text-sm text-[#0D7C3D]"
-                x-text="encodedOutput || 'Encoded result will appear here...'"></div>
-            <button @click="copy(encodedOutput)"
-                class="mt-4 w-full py-2 text-xs font-bold text-[#0D7C3D] hover:bg-[#0D7C3D]/5 rounded-lg transition-colors border border-transparent hover:border-[#0D7C3D]/20">
-                Copy Encoded Result
-            </button>
+            <textarea x-model="input" @input="convert()"
+                class="flex-1 w-full p-6 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[1.5rem] bg-white dark:bg-[#121212] text-[#212529] dark:text-[#E4E4E7] resize-none shadow-inner"
+                :placeholder="mode === 'encode' ? 'Enter text to encode...' : 'Enter entities to decode...'"></textarea>
         </div>
 
-        <!-- Decoder -->
-        <div class="p-8 bg-white dark:bg-[#1E1E1E] rounded-2xl border border-[#DEE2E6] dark:border-[#333] shadow-sm">
-            <div class="flex items-center gap-3 mb-6">
-                <div class="w-10 h-10 bg-blue-500/10 rounded-lg flex items-center justify-center text-blue-500">
-                    <i class="fas fa-unlock"></i>
-                </div>
-                <h3 class="text-lg font-bold text-[#212529] dark:text-white">Decoder</h3>
+        <!-- Output Area -->
+        <div class="flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+                <span
+                    class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest">Processed
+                    Output</span>
+                <button @click="copyToClipboard(output)"
+                    class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase flex items-center gap-1.5"
+                    x-show="output">
+                    <i class="fas" :class="copied ? 'fa-check' : 'fa-copy'"></i>
+                    <span x-text="copied ? 'Copied' : 'Copy'"></span>
+                </button>
             </div>
-            <textarea x-model="toDecode" rows="5"
-                class="w-full p-4 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl bg-[#F8F9FA] dark:bg-[#121212] text-[#212529] dark:text-white focus:border-blue-500 outline-none transition-all resize-none mb-4"
-                placeholder="Paste entities to decode (e.g. &lt;html&gt;)"></textarea>
-            <div class="p-4 bg-gray-50 dark:bg-[#252526] rounded-xl border border-dashed border-gray-200 dark:border-[#444] min-h-[100px] break-all font-mono text-sm text-blue-500"
-                x-text="decodedOutput || 'Decoded result will appear here...'"></div>
-            <button @click="copy(decodedOutput)"
-                class="mt-4 w-full py-2 text-xs font-bold text-blue-500 hover:bg-blue-500/5 rounded-lg transition-colors border border-transparent hover:border-blue-500/20">
-                Copy Decoded Result
-            </button>
+            <div
+                class="flex-1 rounded-[1.5rem] bg-[#F8F9FA] dark:bg-[#121212] border border-[#DEE2E6] dark:border-[#3D3D3D] relative overflow-hidden group">
+                <textarea readonly x-model="output"
+                    class="w-full h-full p-6 font-mono text-sm bg-transparent text-[#212529] dark:text-[#E4E4E7] resize-none outline-none"
+                    placeholder="Result will appear here..."></textarea>
+            </div>
         </div>
     </div>
 </div>
+{% endblock %}
 
-<!-- he.js for robust HTML entities -->
+{% block tool_js_data %}
+{
+mode: 'encode',
+
+loadSample() {
+if (this.mode === 'encode') {
+this.input = "<html>\n
+
+<body>\n <p>Welcome to \"Kiri\" & the team!</p>\n </body>\n
+
+</html>";
+} else {
+this.input = "&lt;html&gt;\n &lt;body&gt;\n &lt;p&gt;Welcome to &quot;Kiri&quot; &amp; the team!&lt;/p&gt;\n
+&lt;/body&gt;\n&lt;/html&gt;";
+}
+this.convert();
+},
+
+convert() {
+if (!this.input.trim()) {
+this.output = '';
+this.statusMessage = 'Ready';
+return;
+}
+
+try {
+if (this.mode === 'encode') {
+this.output = he.encode(this.input, { 'useNamedReferences': true });
+this.statusMessage = 'Text encoded for HTML';
+} else {
+this.output = he.decode(this.input);
+this.statusMessage = 'Entities decoded to text';
+}
+} catch (e) {
+this.error = 'Encoding error: ' + e.message;
+this.output = '';
+}
+},
+
+download() {
+if (!this.output) return;
+this.downloadFile(this.output, `processed_${this.mode}.txt`, 'text/plain');
+}
+}
+{% endblock %}
+
+{% block extra_js_tool %}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/he/1.2.0/he.min.js"></script>
-
-<script>
-    function htmlTool() {
-        return {
-            toEncode: '',
-            toDecode: '',
-
-            get encodedOutput() {
-                if (!this.toEncode) return '';
-                return he.encode(this.toEncode, { 'useNamedReferences': true });
-            },
-
-            get decodedOutput() {
-                if (!this.toDecode) return '';
-                try {
-                    return he.decode(this.toDecode);
-                } catch (e) {
-                    return 'Invalid input';
-                }
-            },
-
-            copy(text) {
-                if (!text) return;
-                navigator.clipboard.writeText(text);
-                // No notification for simplicity here, user sees UX feedback in behavior
-            }
-        }
-    }
-</script>
 {% endblock %}

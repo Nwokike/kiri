@@ -48,12 +48,22 @@ class AIService:
     ]
 
     @classmethod
-    def generate_json_sync(cls, prompt: str, simple_task: bool = False) -> Optional[dict]:
+    def generate_json_sync(cls, prompt: str, requested_model: Optional[str] = None, simple_task: bool = False) -> Optional[dict]:
         """
         Rotates through models until a valid JSON response is received.
+        If requested_model is provided, it tries that first.
         """
         model_list = cls.AI_MODELS
-        
+        if requested_model and requested_model != 'auto':
+            # Create a localized list with the requested model at the front
+            # We don't know the provider, so we'll try to find it or guess
+            req_cfg = next((m for m in cls.AI_MODELS if m['model'] == requested_model), None)
+            if req_cfg:
+                model_list = [req_cfg] + [m for m in cls.AI_MODELS if m['model'] != requested_model]
+            else:
+                # If it's a model not in our list (e.g. whisper), we try it as a groq model by default
+                model_list = [{"provider": "groq", "model": requested_model}] + cls.AI_MODELS
+
         for model_cfg in model_list:
             provider = model_cfg['provider']
             model_id = model_cfg['model']
@@ -75,9 +85,9 @@ class AIService:
         return None
 
     @classmethod
-    async def generate_json(cls, prompt: str, simple_task: bool = False) -> Optional[dict]:
+    async def generate_json(cls, prompt: str, requested_model: Optional[str] = None, simple_task: bool = False) -> Optional[dict]:
         """Async wrapper for generate_json_sync."""
-        return await sync_to_async(cls.generate_json_sync)(prompt, simple_task=simple_task)
+        return await sync_to_async(cls.generate_json_sync)(prompt, requested_model=requested_model, simple_task=simple_task)
     
     # Classification prompt - Updated for Dual-Studio Architecture (PyStudio vs JS Studio)
     CLASSIFICATION_PROMPT = """Analyze this GitHub repository to determine the best execution environment.
@@ -276,6 +286,32 @@ README excerpt: {readme}
             logger.error(f"Groq {model} failure: {e}")
             return None
     
+    @classmethod
+    async def transcribe_audio(cls, audio_file, model: str = "whisper-large-v3-turbo") -> Optional[str]:
+        """Transcribe audio using Groq Whisper."""
+        api_key = os.environ.get('GROQ_API_KEY')
+        if not api_key: return None
+        
+        try:
+            # We need to run this in a thread because requests is sync
+            def _call():
+                files = {'file': (audio_file.name, audio_file.read(), audio_file.content_type)}
+                response = requests.post(
+                    "https://api.groq.com/openai/v1/audio/transcriptions",
+                    headers={"Authorization": f"Bearer {api_key}"},
+                    files=files,
+                    data={"model": model},
+                    timeout=30
+                )
+                if response.status_code == 200:
+                    return response.json().get('text')
+                return None
+            
+            return await sync_to_async(_call)()
+        except Exception as e:
+            logger.error(f"Transcription failure: {e}")
+            return None
+
     @classmethod
     def _heuristic_classification(cls, repo_files: dict) -> dict:
         """Fallback heuristic when all AI services fail."""

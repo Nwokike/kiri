@@ -244,35 +244,54 @@ async def studio_ai_assist(request):
         return JsonResponse({"error": "Method not allowed"}, status=405)
         
     try:
-        data = json.loads(request.body)
-        task = data.get("task") # 'explain', 'debug', 'write'
-        code = data.get("code")
-        context = data.get("context", "")
+        # Check if it's a multipart (file upload) or JSON
+        if request.content_type == 'application/json':
+            data = json.loads(request.body)
+            task = data.get("task")
+            code = data.get("code")
+            context = data.get("context", "")
+            data_sample = data.get("data", "")
+            language = data.get("language", "python")
+            requested_model = data.get("requested_model")
+        else:
+            task = request.POST.get("task")
+            requested_model = request.POST.get("requested_model")
+            # For transcription, we handle FILES
+            if task == 'transcribe' and 'file' in request.FILES:
+                audio_file = request.FILES['file']
+                ai_service = get_ai_service()
+                # AIService doesn't have _call_whisper yet, we'll proxy it to Groq
+                # For now, let's assume we handle it in AIService
+                transcription = await ai_service.transcribe_audio(audio_file, model=requested_model)
+                return JsonResponse({"text": transcription} if transcription else {"error": "Transcription failed"})
+            return JsonResponse({"error": "Unsupported media type"}, status=415)
         
-        if not code or not task:
-            return JsonResponse({"error": "Missing code or task"}, status=400)
+        if not task:
+            return JsonResponse({"error": "Missing task"}, status=400)
             
-        # Construct primitive prompt for now (Phase 2.1 had better logic, reusing simple fallback)
         prompts = {
             "explain": f"Explain this code concisely:\n\n{code}",
             "debug": f"Find bugs in this code and suggest fixes:\n\n{code}\nContext: {context}",
-            "write": f"Write code based on this request:\n\n{context}\n\nexisting code context:\n{code}"
+            "write": f"Write code based on this request:\n\n{context}\n\nexisting code context:\n{code}",
+            "autocomplete": f"Continue the following {language} code. Return ONLY the code needed to complete the current line or block, no explanations:\n\n{code}",
+            "analyze_data": f"Analyze this dataset sample and return a JSON object with 'summary' (string) and 'suggestions' (list of {{'label': str, 'code': str}} objects for pandas analysis):\n\n{data_sample}"
         }
         
-        prompt = prompts.get(task, f"Analyze this:\n{code}")
+        prompt = prompts.get(task, f"Analyze this:\n{code or context or data_sample}")
         
-        # 3.3: Use unified AI service
+        # 3.3: Use unified AI service with orchestration support
         ai_service = get_ai_service()
-        response = await ai_service.generate_json(prompt)
+        response = await ai_service.generate_json(prompt, requested_model=requested_model)
         
-        # Parse JSON if call_ai returns JSON string, or just return text
-        try:
-            # AIService.generate_json_sync returns a dict or None
-            if response is None:
-                return JsonResponse({"error": "AI service failure"}, status=500)
-            return JsonResponse({"result": response} if isinstance(response, str) else response)
-        except Exception as e:
-            return JsonResponse({"result": str(response)})
+        if response is None:
+            return JsonResponse({"error": "AI service failure"}, status=500)
+        
+        # If it was an autocomplete task, we should ensure we return a 'code' field even if AI returned raw string
+        if task == 'autocomplete' and isinstance(response, dict) and 'code' not in response:
+            # Sometime AI returns {"result": "..."} instead of {"code": "..."}
+            response['code'] = response.get('result', response.get('text', ''))
+
+        return JsonResponse(response)
 
     except Exception as e:
         return JsonResponse({"error": str(e)}, status=500)

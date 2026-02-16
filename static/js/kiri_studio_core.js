@@ -8,7 +8,7 @@
 let editor, term, fitAddon, worker;
 let isRunning = false;
 let currentFile = 'main.py';
-let fileCache = {}; 
+let fileCache = {};
 let connectedRepo = null;
 let contextTargetFile = null;
 
@@ -26,14 +26,14 @@ function initWorker() {
         term.writeln('\x1b[31mError: Web Workers not supported in this browser.\x1b[0m');
         return;
     }
-    
+
     const isPy = window.KIRI_CONFIG.studioType === 'py';
     const workerPath = isPy ? window.KIRI_CONFIG.workerPyUrl : window.KIRI_CONFIG.workerJsUrl;
-    
+
     // CRITICAL FIX: Pyodide needs 'classic' (for importScripts),
     // WebContainers / ESM-based workers need 'module'.
     const workerType = isPy ? 'classic' : 'module';
-        
+
     try {
         worker = new Worker(workerPath, { type: workerType });
     } catch (e) {
@@ -51,16 +51,26 @@ function initWorker() {
         else if (type === 'status') updateStatus(msg);
         else if (type === 'ready') handleReady();
         else if (type === 'files') renderFileList(files);
-        else if (type === 'file_content') updateEditor(filename, content);
+        else if (type === 'file_content') {
+            updateEditor(filename, content);
+            if (window.pendingDataLensFile === filename && window.dataLens) {
+                window.dataLens.open(filename, content);
+                window.pendingDataLensFile = null;
+            }
+        }
         else if (type === 'sync_files_ready') performSync(e.data.files);
-        else if (type === 'repo_loaded') { 
-            term.writeln('\x1b[32m✔ Repository Loaded.\x1b[0m'); 
-            worker.postMessage({cmd: 'list_files'}); 
+        else if (type === 'repo_loaded') {
+            term.writeln('\x1b[32m✔ Repository Loaded.\x1b[0m');
+            worker.postMessage({ cmd: 'list_files' });
+            // --- PHASE 6: SEMANTIC INDEXING ---
+            if (window.semanticSearch && e.data.files) {
+                window.semanticSearch.indexRepository(e.data.files);
+            }
         }
         else if (type === 'finish') setRunState(false);
         else if (type === 'start') setRunState(true);
     };
-    
+
     worker.onerror = (e) => {
         // Some browsers provide lineno; fall back gracefully.
         const lineno = e.lineno || e.lineNumber || 'unknown';
@@ -72,7 +82,7 @@ function initWorker() {
 // --- Preview & Plot Logic ---
 function handlePreview(url) {
     const container = document.getElementById('plots-container');
-    container.innerHTML = ''; 
+    container.innerHTML = '';
     const iframe = document.createElement('iframe');
     iframe.src = url;
     iframe.className = 'w-full h-full bg-white rounded shadow-lg border border-gray-700';
@@ -107,7 +117,7 @@ function updateGitHubUI() {
 function syncToGitHub(isNew) {
     document.getElementById('gh-loading').classList.remove('hidden');
     window.pendingSyncIsNew = isNew;
-    worker.postMessage({ cmd: 'get_sync_files' }); 
+    worker.postMessage({ cmd: 'get_sync_files' });
 }
 
 async function performSync(files) {
@@ -127,7 +137,7 @@ async function performSync(files) {
             })
         });
         const data = await resp.json();
-        
+
         if (data.status === 'success') {
             const full_name = data.repo_url.split('github.com/')[1];
             connectedRepo = full_name;
@@ -150,7 +160,7 @@ function renderFileList(files) {
         const div = document.createElement('div');
         // Mobile-friendly row with explicit Action Button
         div.className = `group flex items-center justify-between px-3 py-2.5 text-sm cursor-pointer border-b border-[#333]/30 hover:bg-[#2D2D2D] transition-colors ${file === currentFile ? 'bg-[#37373D] text-white' : 'text-[#CCCCCC]'}`;
-        
+
         div.innerHTML = `
             <div class="flex items-center gap-3 overflow-hidden flex-1" onclick="openFile('${file}')">
                 <i class="far fa-file text-[#A1A1AA]"></i>
@@ -168,6 +178,15 @@ function openFile(file) {
     currentFile = file;
     worker.postMessage({ cmd: 'read', filename: file });
     worker.postMessage({ cmd: 'list_files' }); // Refresh highlighting
+
+    // --- PHASE 6: DATA LENS HOOK ---
+    const ext = file.split('.').pop().toLowerCase();
+    if (['csv', 'json'].includes(ext) && window.dataLens) {
+        // We need the content to open Data Lens. 
+        // We'll wait for the 'file_content' message from the worker.
+        window.pendingDataLensFile = file;
+    }
+
     // On mobile, auto-close sidebar after selection
     if (window.innerWidth < 768) toggleSidebar();
 }
@@ -176,18 +195,18 @@ function showFileMenu(e, filename) {
     e.preventDefault();
     e.stopPropagation();
     contextTargetFile = filename;
-    
+
     const menu = document.getElementById('file-action-menu');
     const btnRect = e.currentTarget.getBoundingClientRect();
-    
+
     // Position menu near the button (Popover style)
     // Prevent going off-screen bottom
-    const menuHeight = 160; 
+    const menuHeight = 160;
     let top = btnRect.bottom + 5;
     if (top + menuHeight > window.innerHeight) {
         top = btnRect.top - menuHeight - 5;
     }
-    
+
     menu.style.left = `${btnRect.left - 180}px`; // Align to right of button roughly
     menu.style.top = `${top}px`;
     menu.classList.remove('hidden');
@@ -197,16 +216,16 @@ async function handleContextAction(action) {
     if (!contextTargetFile) return;
     const menu = document.getElementById('file-action-menu');
     menu.classList.add('hidden');
-    
+
     if (action === 'run') {
         openFile(contextTargetFile);
         setTimeout(() => {
-             worker.postMessage({ cmd: 'run', code: editor.getValue(), filename: contextTargetFile });
-             switchTab('terminal');
+            worker.postMessage({ cmd: 'run', code: editor.getValue(), filename: contextTargetFile });
+            switchTab('terminal');
         }, 300);
-        
+
     } else if (action === 'delete') {
-        if(confirm(`Delete ${contextTargetFile}?`)) {
+        if (confirm(`Delete ${contextTargetFile}?`)) {
             worker.postMessage({ cmd: 'delete', filename: contextTargetFile });
         }
     } else if (action === 'rename') {
@@ -226,14 +245,14 @@ async function handleContextAction(action) {
 async function submitPublication() {
     const title = document.getElementById('pub-title').value;
     const attachCode = document.getElementById('pub-attach-code').checked;
-    const content = editor.getValue(); 
-    
+    const content = editor.getValue();
+
     try {
         const resp = await fetch(window.KIRI_CONFIG.apiPublishUrl, {
             method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json', 
-                'X-CSRFToken': window.KIRI_CONFIG.csrfToken 
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': window.KIRI_CONFIG.csrfToken
             },
             body: JSON.stringify({
                 title: title,
@@ -242,22 +261,22 @@ async function submitPublication() {
                 script_content: attachCode ? content : ''
             })
         });
-        
+
         const data = await resp.json();
-        if(data.status === 'success') {
-            if(confirm('Draft created! Open in editor?')) window.open(data.url, '_blank');
+        if (data.status === 'success') {
+            if (confirm('Draft created! Open in editor?')) window.open(data.url, '_blank');
             document.getElementById('publish-modal').classList.add('hidden');
         } else {
             alert('Error: ' + data.error);
         }
-    } catch(err) { alert('Network error: ' + err); }
+    } catch (err) { alert('Network error: ' + err); }
 }
 
 // --- Repo Loading ---
 async function checkRepoParam() {
     const params = new URLSearchParams(window.location.search);
     const repo = params.get('repo');
-    
+
     if (repo) {
         connectedRepo = repo.replace('https://github.com/', '');
         updateGitHubUI();
@@ -303,6 +322,32 @@ function handleReady() {
     updateStatus('Ready');
     term.writeln(`\x1b[32m✔ Environment Ready.\x1b[0m`);
     document.getElementById('run-btn').disabled = false;
+
+    // --- PHASE 6: INITIALIZE SERVICES ---
+    if (window.voiceCoding) window.voiceCoding.init();
+    if (window.magicBar) window.magicBar.init();
+
+    const searchInput = document.getElementById('ai-search-input');
+    if (searchInput && window.semanticSearch) {
+        searchInput.addEventListener('keypress', async (e) => {
+            if (e.key === 'Enter') {
+                const query = searchInput.value;
+                if (!query) return;
+
+                term.writeln(`\r\n\x1b[35m🔍 Semantic Search: "${query}"...\x1b[0m`);
+                const results = await window.semanticSearch.search(query);
+
+                if (results.length > 0) {
+                    term.writeln(`\x1b[32mTop Matches:\x1b[0m`);
+                    results.forEach(r => {
+                        term.writeln(` - ${r.filename} (Similarity: ${(r.score * 100).toFixed(1)}%)`);
+                    });
+                } else {
+                    term.writeln(`\x1b[31mNo relevant code found.\x1b[0m`);
+                }
+            }
+        });
+    }
 }
 
 function setRunState(running) {
@@ -321,7 +366,7 @@ function switchTab(tab) {
     document.getElementById('view-terminal').classList.add('hidden');
     document.getElementById('view-plots').classList.add('hidden');
     document.getElementById(`view-${tab}`).classList.remove('hidden');
-    
+
     document.querySelectorAll('.tab-btn').forEach(b => {
         b.classList.remove('text-white', 'border-[#0D7C3D]');
         b.classList.add('text-[#A1A1AA]', 'border-transparent');
@@ -329,13 +374,13 @@ function switchTab(tab) {
     document.getElementById(`tab-${tab}`).classList.add('text-white', 'border-[#0D7C3D]');
     document.getElementById(`tab-${tab}`).classList.remove('text-[#A1A1AA]', 'border-transparent');
 
-    if(tab === 'terminal' && fitAddon) fitAddon.fit();
+    if (tab === 'terminal' && fitAddon) fitAddon.fit();
 }
 
 function toggleSidebar() {
     const s = document.getElementById('sidebar');
     const o = document.getElementById('sidebar-overlay');
-    
+
     if (s.classList.contains('-translate-x-full')) {
         s.classList.remove('-translate-x-full');
         o.classList.remove('hidden');
@@ -348,7 +393,7 @@ function toggleSidebar() {
 function createNewFile() {
     const defaultName = window.KIRI_CONFIG.studioType === 'py' ? "script.py" : "index.js";
     const name = prompt("Filename:", defaultName);
-    if(name) worker.postMessage({cmd: 'save', filename: name, content: ''});
+    if (name) worker.postMessage({ cmd: 'save', filename: name, content: '' });
 }
 
 // --- Init Libs ---
@@ -358,26 +403,72 @@ function initTerminal() {
     term.loadAddon(fitAddon);
     term.open(document.getElementById('terminal'));
     fitAddon.fit();
-    window.addEventListener('resize', () => fitAddon.fit());
+    window.addEventListener('resize', () => {
+        setTimeout(() => {
+            if (fitAddon) fitAddon.fit();
+        }, 100);
+    });
 }
 
 function initMonaco() {
     require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
     require(['vs/editor/editor.main'], function () {
         editor = monaco.editor.create(document.getElementById('monaco-editor'), {
-            value: "", language: window.KIRI_CONFIG.studioType === 'py' ? 'python' : 'javascript', theme: 'vs-dark', fontSize: 14, fontFamily: '"JetBrains Mono", monospace', automaticLayout: true, minimap: { enabled: false }
+            value: "",
+            language: window.KIRI_CONFIG.studioType === 'py' ? 'python' : 'javascript',
+            theme: 'vs-dark',
+            fontSize: 14,
+            fontFamily: '"JetBrains Mono", monospace',
+            automaticLayout: true,
+            minimap: { enabled: false }
         });
+
         let saveTimeout;
         editor.onDidChangeModelContent(() => {
             document.getElementById('unsaved-indicator').classList.remove('hidden');
             clearTimeout(saveTimeout);
             saveTimeout = setTimeout(() => {
-                if(worker && currentFile) {
+                if (worker && currentFile) {
                     worker.postMessage({ cmd: 'save', filename: currentFile, content: editor.getValue() });
                     document.getElementById('unsaved-indicator').classList.add('hidden');
                 }
             }, 1000);
         });
+
+        // --- PHASE 6: GHOST TEXT INTEGRATION ---
+        if (window.studioAI) {
+            monaco.languages.registerInlineCompletionsProvider(window.KIRI_CONFIG.studioType === 'py' ? 'python' : 'javascript', {
+                provideInlineCompletions: async function (model, position, context, token) {
+                    // Extract context: lines leading up to the cursor
+                    const textUntilPosition = model.getValueInRange({
+                        startLineNumber: Math.max(1, position.lineNumber - 30),
+                        startColumn: 1,
+                        endLineNumber: position.lineNumber,
+                        endColumn: position.column
+                    });
+
+                    // Basic sanity check: don't trigger on tiny inputs
+                    if (textUntilPosition.trim().length < 5) return { items: [] };
+
+                    // Call the AI Orchestrator (Ghost Lane)
+                    const prediction = await window.studioAI.completeCode(textUntilPosition, window.KIRI_CONFIG.studioType);
+
+                    if (prediction && prediction.result && prediction.result.code) {
+                        return {
+                            items: [{
+                                insertText: prediction.result.code,
+                                range: new monaco.Range(
+                                    position.lineNumber, position.column,
+                                    position.lineNumber, position.column
+                                )
+                            }]
+                        };
+                    }
+                    return { items: [] };
+                },
+                freeInlineCompletions: true
+            });
+        }
     });
 }
 
@@ -385,10 +476,18 @@ function setupEventListeners() {
     document.getElementById('run-btn').addEventListener('click', () => {
         if (!worker || isRunning) return;
         term.clear();
-        switchTab('terminal'); 
+        switchTab('terminal');
         worker.postMessage({ cmd: 'run', code: editor.getValue(), filename: currentFile });
     });
-    
+
+    // Update cursor position in UI
+    if (editor) {
+        editor.onDidChangeCursorPosition((e) => {
+            const pos = document.getElementById('cursor-pos');
+            if (pos) pos.innerText = `${e.position.lineNumber}:${e.position.column}`;
+        });
+    }
+
     // Bind Globals
     window.switchTab = switchTab;
     window.toggleSidebar = toggleSidebar;
@@ -400,7 +499,17 @@ function setupEventListeners() {
     window.handleContextAction = handleContextAction;
     window.openFile = openFile;
     window.submitPublication = submitPublication;
-    
+    window.runStudioTests = () => {
+        if (window.studioTest) {
+            switchTab('terminal');
+            window.studioTest.results = [];
+            window.studioTest.runAll();
+        }
+    };
+
     // Close menu on click elsewhere
-    document.addEventListener('click', () => document.getElementById('file-action-menu').classList.add('hidden'));
+    document.addEventListener('click', () => {
+        const menu = document.getElementById('file-action-menu');
+        if (menu) menu.classList.add('hidden');
+    });
 }

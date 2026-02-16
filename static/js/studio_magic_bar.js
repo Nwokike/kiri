@@ -12,6 +12,8 @@ class MagicBar {
     }
 
     init() {
+        if (typeof window === 'undefined') return;
+
         window.addEventListener('keydown', (e) => {
             if (e.ctrlKey && e.key === 'k') {
                 e.preventDefault();
@@ -19,25 +21,31 @@ class MagicBar {
             }
             if (e.key === 'Escape' && this.isOpen) this.close();
         });
-        this._createUI();
+
+        // Ensure UI is created after DOM load
+        if (document.readyState === 'loading') {
+            document.addEventListener('DOMContentLoaded', () => this._createUI());
+        } else {
+            this._createUI();
+        }
     }
 
     _createUI() {
+        if (document.getElementById('magic-bar-overlay')) return;
+
         this.overlay = document.createElement('div');
         this.overlay.className = 'fixed inset-0 bg-black/60 backdrop-blur-md z-[100] hidden flex items-start justify-center pt-[15vh] transition-all duration-300';
         this.overlay.id = 'magic-bar-overlay';
 
         this.overlay.innerHTML = `
-            <div class="w-full max-w-2xl bg-[#252526] border border-[#333] shadow-2xl rounded-xl overflow-hidden animate-in fade-in zoom-in duration-200">
+            <div class="w-full max-w-2xl bg-[#252526] border border-[#333] shadow-2xl rounded-xl overflow-hidden">
                 <div class="flex items-center px-4 py-3 bg-[#1e1e1e] border-b border-[#333]">
                     <i class="fas fa-magic text-[#0D7C3D] mr-3"></i>
                     <input type="text" id="magic-bar-input" placeholder="What magic do you want to perform?" 
                         class="flex-1 bg-transparent border-none outline-none text-sm text-white placeholder-gray-500 font-sans">
                     <span class="text-[10px] text-gray-500 font-mono bg-[#333] px-2 py-0.5 rounded ml-2">ESC to close</span>
                 </div>
-                <div id="magic-bar-results" class="max-h-[60vh] overflow-y-auto p-2 space-y-1 hidden">
-                    <!-- Suggestions will appear here -->
-                </div>
+                <div id="magic-bar-results" class="max-h-[60vh] overflow-y-auto p-2 space-y-1 hidden"></div>
                 <div id="magic-bar-loading" class="p-8 text-center hidden">
                     <i class="fas fa-circle-notch fa-spin text-[#0D7C3D] text-2xl"></i>
                     <p class="text-xs text-gray-400 mt-2">Invoking AI agents...</p>
@@ -48,9 +56,11 @@ class MagicBar {
         document.body.appendChild(this.overlay);
         this.input = document.getElementById('magic-bar-input');
 
-        this.input.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter') this.execute();
-        });
+        if (this.input) {
+            this.input.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter') this.execute();
+            });
+        }
     }
 
     toggle() {
@@ -59,15 +69,18 @@ class MagicBar {
     }
 
     open() {
+        if (!this.overlay) this._createUI();
         this.isOpen = true;
-        this.overlay.classList.remove('hidden');
-        this.input.focus();
-        this.input.value = '';
+        if (this.overlay) this.overlay.classList.remove('hidden');
+        if (this.input) {
+            this.input.focus();
+            this.input.value = '';
+        }
     }
 
     close() {
         this.isOpen = false;
-        this.overlay.classList.add('hidden');
+        if (this.overlay) this.overlay.classList.add('hidden');
     }
 
     async execute() {

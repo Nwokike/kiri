@@ -362,32 +362,66 @@ function setRunState(running) {
     }
 }
 
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebar-overlay');
+
+    if (window.innerWidth < 1280) {
+        const isHidden = sidebar.classList.contains('-translate-x-full');
+        if (isHidden) {
+            sidebar.classList.remove('-translate-x-full');
+            overlay.classList.remove('hidden');
+            setTimeout(() => overlay.classList.add('opacity-100'), 10);
+        } else {
+            sidebar.classList.add('-translate-x-full');
+            overlay.classList.remove('opacity-100');
+            setTimeout(() => overlay.classList.add('hidden'), 300);
+        }
+    } else {
+        sidebar.classList.toggle('collapsed');
+        setTimeout(() => {
+            if (editor) editor.layout();
+        }, 300);
+    }
+}
+
+function toggleSidePanel() {
+    const panel = document.getElementById('side-panel');
+    panel.classList.toggle('collapsed');
+    panel.classList.toggle('active');
+
+    setTimeout(() => {
+        if (editor) editor.layout();
+        if (fitAddon) fitAddon.fit();
+    }, 300);
+}
+
 function switchTab(tab) {
+    const sidePanel = document.getElementById('side-panel');
+    if (sidePanel) {
+        sidePanel.classList.remove('collapsed');
+        sidePanel.classList.add('active');
+    }
+
     document.getElementById('view-terminal').classList.add('hidden');
     document.getElementById('view-plots').classList.add('hidden');
     document.getElementById(`view-${tab}`).classList.remove('hidden');
 
     document.querySelectorAll('.tab-btn').forEach(b => {
-        b.classList.remove('text-white', 'border-[#0D7C3D]');
+        b.classList.remove('text-[#0D7C3D]', 'border-[#0D7C3D]');
         b.classList.add('text-[#A1A1AA]', 'border-transparent');
     });
-    document.getElementById(`tab-${tab}`).classList.add('text-white', 'border-[#0D7C3D]');
-    document.getElementById(`tab-${tab}`).classList.remove('text-[#A1A1AA]', 'border-transparent');
+
+    const activeTab = document.getElementById(`tab-${tab}`);
+    if (activeTab) {
+        activeTab.classList.add('text-[#0D7C3D]', 'border-[#0D7C3D]');
+        activeTab.classList.remove('text-[#A1A1AA]', 'border-transparent');
+    }
 
     if (tab === 'terminal' && fitAddon) fitAddon.fit();
-}
-
-function toggleSidebar() {
-    const s = document.getElementById('sidebar');
-    const o = document.getElementById('sidebar-overlay');
-
-    if (s.classList.contains('-translate-x-full')) {
-        s.classList.remove('-translate-x-full');
-        o.classList.remove('hidden');
-    } else {
-        s.classList.add('-translate-x-full');
-        o.classList.add('hidden');
-    }
+    setTimeout(() => {
+        if (editor) editor.layout();
+    }, 300);
 }
 
 function createNewFile() {
@@ -499,13 +533,6 @@ function setupEventListeners() {
     window.handleContextAction = handleContextAction;
     window.openFile = openFile;
     window.submitPublication = submitPublication;
-    window.runStudioTests = () => {
-        if (window.studioTest) {
-            switchTab('terminal');
-            window.studioTest.results = [];
-            window.studioTest.runAll();
-        }
-    };
 
     // Close menu on click elsewhere
     document.addEventListener('click', () => {

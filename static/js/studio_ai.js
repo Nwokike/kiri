@@ -12,9 +12,6 @@ class StudioAI {
         // The "Efficiency Frontier" Matrix - Based on User Model List
         this.LANES = {
             GHOST: {
-                primary: "llama-3.1-8b-instant",      // 14.4K RPD (Volume King)
-                fallback: "openai/gpt-oss-20b",       // 8K RPD (Speed Demon)
-                tertiary: "meta-llama/llama-4-scout-17b-16e-instruct", // 1K RPD (Smart Fast)
                 models: ['llama-3.1-8b-instant', 'meta-llama/llama-4-scout-17b-16e-instruct', 'openai/gpt-oss-20b', 'openai/gpt-oss-safeguard-20b'],
                 strategy: 'Ultra-low latency'
             },
@@ -73,12 +70,12 @@ class StudioAI {
      */
     async _executeLane(laneName, payload) {
         const lane = this.LANES[laneName];
-        const models = [lane.primary, lane.fallback, lane.tertiary, lane.quaternary].filter(Boolean);
+        const models = lane.models || [lane.primary, lane.fallback, lane.tertiary].filter(Boolean);
 
         for (const model of models) {
             try {
                 console.log(`[StudioAI] Attempting ${laneName} request with ${model}`);
-                const result = await this._callAPI(model, payload);
+                const result = await this._callBackend(payload.prompt || payload.context, payload.task, model);
                 if (result && !result.error) {
                     return result;
                 }
@@ -88,9 +85,9 @@ class StudioAI {
             }
         }
 
-        // Final "Panic Button" Fallback: Automatic backend choice (Paid Gemini)
-        console.warn(`[StudioAI] All Groq models hit limit for ${laneName}. Switching to Paid tier.`);
-        return await this._callBackend(payload.prompt, payload.task, 'auto'); // Updated to _callBackend
+        // Final "Panic Button" Fallback: Automatic backend choice
+        console.warn(`[StudioAI] All models in ${laneName} lane failed. Switching to Auto-Orchestration.`);
+        return await this._callBackend(payload.prompt || payload.context, payload.task, 'auto');
     }
 
     async _callBackend(prompt, task, modelOverride = null) {
@@ -102,7 +99,7 @@ class StudioAI {
         const requested_model = modelOverride || this.LANES[lane]?.models[0] || 'auto';
 
         const controller = new AbortController();
-        const timeoutId = setTimeout(() => controller.abort(), 10000); // 10s timeout
+        const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s timeout
 
         try {
             const resp = await fetch(window.KIRI_CONFIG.apiAiAssistUrl, {

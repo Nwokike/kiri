@@ -15,6 +15,7 @@ class DataLens {
      * Initialize the Data Lens interface
      */
     async open(filename, content) {
+        this.activeGrid = false;
         const extension = filename.split('.').pop().toLowerCase();
 
         // Switch to Plots/Data tab
@@ -52,8 +53,10 @@ class DataLens {
                 pagination: "local",
                 paginationSize: 20,
                 placeholder: "No Data Available",
-                theme: "dark"
+                theme: "dark",
+                responsiveLayout: "collapse"
             });
+            this.activeGrid = true;
 
             // Trigger AI Analysis proactively
             this._runAIAnalysis(filename, data.slice(0, 10));

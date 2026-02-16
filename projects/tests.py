@@ -2,7 +2,8 @@ from django.test import TestCase, override_settings
 from django.contrib.auth import get_user_model
 from django.urls import reverse
 from django.utils import timezone
-from unittest.mock import patch
+from unittest.mock import patch, MagicMock
+import json
 from .models import Project
 from .forms import ProjectSubmissionForm
 
@@ -371,3 +372,46 @@ class RepoFilesApiTests(TestCase):
         self.client.login(username='importer', password='password')
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 400)
+
+class StudioAITestCase(TestCase):
+    def setUp(self):
+        self.url = reverse('projects:api_studio_ai_assist')
+
+    @patch('core.ai_service.AIService.generate_json_sync')
+    def test_ai_assist_endpoint_success(self, mock_gen):
+        """Test that the AI assist endpoint returns correct structured data."""
+        mock_gen.return_value = {"message": "Hello from AI", "code": "print('hi')"}
+        
+        payload = {
+            "prompt": "write a print statement",
+            "task": "write",
+            "code": "",
+            "requested_model": "auto"
+        }
+        
+        response = self.client.post(self.url, data=json.dumps(payload), content_type='application/json')
+        
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertEqual(data['message'], "Hello from AI")
+        self.assertEqual(data['code'], "print('hi')")
+
+    def test_orchestrator_lane_mapping(self):
+        """Verify that AI_MODELS are correctly configured in AIService."""
+        from core.ai_service import AIService
+        self.assertTrue(len(AIService.AI_MODELS) > 0)
+        providers = [m['provider'] for m in AIService.AI_MODELS]
+        self.assertIn("groq", providers)
+        self.assertIn("gemini", providers)
+
+    @patch('core.ai_service.AIService._call_groq')
+    def test_model_fallback_logic(self, mock_groq):
+        """Test that the system falls back when a model fails."""
+        # First call fails (None), second succeeds
+        mock_groq.side_effect = [None, {"choices": [{"message": {"content": "{\"res\": \"ok\"}"}}]}]
+        
+        from core.ai_service import AIService
+        result = AIService.generate_json_sync("test prompt")
+        
+        self.assertIsNotNone(result)
+        self.assertTrue(mock_groq.call_count >= 1)

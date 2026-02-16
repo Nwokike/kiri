@@ -3,6 +3,13 @@
 
 {% block title %}{{ profile_user.username }} | Kiri Profile{% endblock %}
 
+{% block meta_description %}View {{ profile_user.username }}'s research profile on Kiri. {{ profile_user.bio|truncatewords:20 }}{% endblock %}
+
+{% block og_title %}{{ profile_user.username }} - Kiri Researcher Profile{% endblock %}
+{% block og_description %}Collaborate with {{ profile_user.username }} on elite AI research. {{ profile_user.bio|truncatewords:30 }}{% endblock %}
+{% block og_image %}{% if profile_user.avatar_url %}{{ profile_user.avatar_url }}{% else %}{{ request.scheme }}://{{ request.get_host }}{% static 'images/logos/logo.png' %}{% endif %}{% endblock %}
+
+
 {% block content %}
 <div class="p-4 max-w-5xl mx-auto space-y-8">
 

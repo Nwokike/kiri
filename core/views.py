@@ -413,3 +413,17 @@ def mark_all_notifications_read(request):
     return JsonResponse({'status': 'ok'})
 
 
+@login_required
+@require_POST
+def delete_comment(request, pk):
+    """HTMX View to delete a comment."""
+    comment = get_object_or_404(Comment, pk=pk)
+    
+    # Permission Check: Author or Staff
+    if comment.author == request.user or request.user.is_staff:
+        comment.delete()
+        if request.htmx:
+            return HttpResponse('<div class="text-xs text-gray-500 italic p-2 bg-gray-50 dark:bg-[#2D2D2D] border border-dashed border-gray-200 dark:border-[#333] rounded">Comment deleted</div>')
+        return JsonResponse({'status': 'ok'})
+    
+    return HttpResponse("You don't have permission to delete this comment.", status=403)

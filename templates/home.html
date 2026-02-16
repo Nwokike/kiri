@@ -3,8 +3,16 @@
 
 {% block title %}Kiri - Intelligence on the Edge{% endblock %}
 
+{% block meta_description %}The efficiency frontier of Artificial Intelligence. Empowering researchers with state-of-the-art specialized SLMs and Hierarchical Architectures.{% endblock %}
+
+{% block og_title %}Kiri | Intelligence Scalable to Zero{% endblock %}
+{% block og_description %}Unlocking the power of specialized SLMs and compute-optimal AI research. Explore our projects, library, and community discussions.{% endblock %}
+{% block og_image %}{{ request.scheme }}://{{ request.get_host }}{% static 'images/logos/logo.png' %}{% endblock %}
+
+
 {% block content %}
-<div class="max-w-7xl mx-auto px-6 py-8">
+<div class="max-w-7xl mx-auto px-4 md:px-6 py-8">
+
 
     <!-- Hero Section -->
     {% include "partials/home/hero.html" %}

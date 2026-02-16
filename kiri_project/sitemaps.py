@@ -74,10 +74,27 @@ class TopicSitemap(Sitemap):
         return reverse('discussions:detail', kwargs={'slug': obj.slug})
 
 
+class UserSitemap(Sitemap):
+    """Sitemap for public user profiles."""
+    changefreq = 'weekly'
+    priority = 0.6
+    
+    def items(self):
+        # Only index public profiles
+        from django.contrib.auth import get_user_model
+        User = get_user_model()
+        return User.objects.filter(is_active=True, is_profile_public=True)
+    
+    def lastmod(self, obj):
+        return obj.updated_at
+
+
 # Register sitemaps for urls.py
 sitemaps = {
     'static': StaticViewSitemap,
     'projects': ProjectSitemap,
     'publications': PublicationSitemap,
     'discussions': TopicSitemap,
+    'users': UserSitemap,
 }
+

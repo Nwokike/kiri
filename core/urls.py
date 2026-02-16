@@ -13,8 +13,8 @@ urlpatterns = [
     path('health/', views.health, name='health'),
     
     # --- New Studio Routes ---
-    path('studio/py/', views.studio_py, name='studio_py'), # PyStudio
-    path('studio/js/', views.studio_js, name='studio_js'), # JS Studio
+    path('studio/py/', views.studio_py, name='studio_py'),  
+    path('studio/js/', views.studio_js, name='studio_js'),
     
     # Notifications & Favorites
     path('notifications/', views.notifications_list, name='notifications'),
@@ -25,5 +25,5 @@ urlpatterns = [
     
     # Comments
     path('comments/post/<int:content_type_id>/<int:object_id>/', views.add_comment, name='add_comment'),
-    # path('comments/delete/<int:pk>/', views.delete_comment, name='delete_comment'), # Missing in views.py
+    path('comments/delete/<int:pk>/', views.delete_comment, name='delete_comment'),
 ]

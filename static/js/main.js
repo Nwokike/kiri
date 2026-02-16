@@ -87,8 +87,11 @@ function initSidebar() {
             if (!sidebar.dataset.pinned) {
                 sidebar.classList.remove('expanded');
                 if (mainContent) mainContent.style.paddingLeft = '56px';
+                // Dispatch event to close tool lists
+                window.dispatchEvent(new CustomEvent('sidebar-collapsed'));
             }
         });
+
     }
 }
 

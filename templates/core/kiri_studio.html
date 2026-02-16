@@ -3,6 +3,14 @@
 
 {% block title %}{{ page_title }}{% endblock %}
 
+{% block meta_description %}Interactive {{ studio_type|upper }} research environment on Kiri. Build, test, and publish
+specialized AI models and tools directly from your browser.{% endblock %}
+
+{% block og_title %}{{ page_title }} | Kiri Interactive Studio{% endblock %}
+{% block og_description %}Unleash the power of the {{ studio_type|upper }} ecosystem. A cloud-powered IDE for
+researchers and TinyML enthusiasts.{% endblock %}
+
+
 {% block content %}
 <div class="fixed inset-0 top-14 bg-[#1E1E1E] flex flex-col z-40 font-sans text-[#CCCCCC]">
 

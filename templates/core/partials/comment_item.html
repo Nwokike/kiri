@@ -22,7 +22,17 @@
                 class="text-xs text-[#a8a8a8] hover:text-[#0f62fe] ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
                 <i class="fas fa-reply"></i> Reply
             </button>
+
+            {% if comment.author == user or user.is_staff %}
+            <button hx-post="{% url 'core:delete_comment' comment.id %}"
+                hx-confirm="Are you sure you want to delete this comment?" hx-target="#comment-{{ comment.id }}"
+                hx-swap="outerHTML"
+                class="text-xs text-[#a8a8a8] hover:text-[#da1e28] ml-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                <i class="fas fa-trash"></i> Delete
+            </button>
             {% endif %}
+            {% endif %}
+
         </div>
 
         <div class="text-sm text-[#525252] dark:text-[#a8a8a8] mb-3 prose dark:prose-invert max-w-none">

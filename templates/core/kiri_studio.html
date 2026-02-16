@@ -13,10 +13,11 @@
                 class="md:hidden p-2 text-[#A1A1AA] hover:text-white active:bg-[#333] rounded">
                 <i class="fas fa-bars text-lg"></i>
             </button>
-            <a href="{% url 'home' %}" class="text-[#A1A1AA] hover:text-white transition hidden sm:inline">
-                <i class="fas fa-arrow-left"></i>
+            <a href="{% url 'core:home' %}"
+                class="flex items-center gap-2 text-[#495057] dark:text-[#A1A1AA] hover:text-[#0D7C3D] transition-colors">
+                <i class="fas fa-arrow-left text-xs"></i>
+                <span class="text-xs font-bold uppercase tracking-wider">Back to Home</span>
             </a>
-
             <div class="flex items-center gap-2">
                 <span class="font-bold text-gray-200 tracking-tight">Kiri Studio</span>
                 {% if studio_type == 'py' %}

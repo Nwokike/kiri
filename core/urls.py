@@ -10,6 +10,7 @@ urlpatterns = [
     path('privacy/', views.privacy, name='privacy'),
     path('terms/', views.terms, name='terms'),
     path('refund/', views.refund_policy, name='refund_policy'),
+    path('health/', views.health, name='health'),
     
     # --- New Studio Routes ---
     path('studio/py/', views.studio_py, name='studio_py'), # PyStudio
@@ -23,6 +24,6 @@ urlpatterns = [
     path('favorite/toggle/<int:content_type_id>/<int:object_id>/', views.toggle_favorite, name='toggle_favorite'),
     
     # Comments
-    path('comments/post/<int:content_type_id>/<int:object_id>/', views.add_comment, name='post_comment'),
+    path('comments/post/<int:content_type_id>/<int:object_id>/', views.add_comment, name='add_comment'),
     # path('comments/delete/<int:pk>/', views.delete_comment, name='delete_comment'), # Missing in views.py
 ]

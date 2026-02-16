@@ -1,75 +1,171 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}Developer Tools | Kiri{% endblock %}
+{% block title %}Tools Hub | Kiri Research{% endblock %}
 
 {% block content %}
-<div class="px-4 py-8 max-w-7xl mx-auto">
-    <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900 dark:text-white mb-2">Developer Tools</h1>
-        <p class="text-gray-600 dark:text-gray-400">Essential client-side utilities for everyday tasks.</p>
+<div class="px-4 py-8 md:py-12 max-w-7xl mx-auto">
+    <!-- Header -->
+    <div class="mb-12">
+        <nav class="flex text-sm text-[#6C757D] dark:text-[#A1A1AA] mb-4" aria-label="Breadcrumb">
+            <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                <li class="inline-flex items-center">
+                    <a href="/" class="hover:text-[#0D7C3D] transition-colors">Home</a>
+                </li>
+                <li>
+                    <div class="flex items-center">
+                        <i class="fas fa-chevron-right text-[10px] mx-2"></i>
+                        <span class="text-[#212529] dark:text-white font-bold">Tools Hub</span>
+                    </div>
+                </li>
+            </ol>
+        </nav>
+        <h1 class="text-4xl font-extrabold text-[#212529] dark:text-white mb-3">Tools Hub</h1>
+        <p class="text-lg text-[#6C757D] dark:text-[#A1A1AA] max-w-2xl">Essential, privacy-focused utilities for
+            researchers, data scientists, and developers. Everything runs locally in your browser.</p>
     </div>
 
-    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <!-- JSON Formatter -->
-        <a href="{% url 'tools:json_formatter' %}" class="block group">
-            <div
-                class="h-full p-6 bg-white dark:bg-[#1E1E1E] border border-gray-200 dark:border-[#333] rounded-lg hover:border-blue-500 transition-colors">
-                <div
-                    class="w-10 h-10 mb-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-center text-blue-600 dark:text-blue-400">
-                    <i class="fas fa-code text-xl"></i>
-                </div>
-                <h3
-                    class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-blue-500 transition-colors">
-                    JSON Formatter</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Validate, format, and minify JSON data.</p>
+    <!-- Category: Programming Essentials -->
+    <section class="mb-16">
+        <div class="flex items-center gap-3 mb-8">
+            <div class="w-10 h-10 bg-[#0D7C3D]/10 rounded-lg flex items-center justify-center text-[#0D7C3D]">
+                <i class="fas fa-code"></i>
             </div>
-        </a>
+            <h2 class="text-2xl font-bold text-[#212529] dark:text-white">Programming Essentials</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- JSON Formatter -->
+            {% include "tools/partials/tool_card.html" with name="JSON Formatter" url="tools:json_formatter"
+            icon="fa-code" color="blue" desc="Validate, format, and minify JSON data." %}
+            <!-- SQL Formatter -->
+            {% include "tools/partials/tool_card.html" with name="SQL Formatter" url="tools:sql_formatter"
+            icon="fa-database" color="indigo" desc="Beautify and format SQL queries." %}
+            <!-- Diff Viewer -->
+            {% include "tools/partials/tool_card.html" with name="Diff Viewer" url="tools:diff_viewer" icon="fa-columns"
+            color="orange" desc="Compare text snippets side-by-side." %}
+            <!-- Regex Tester -->
+            {% include "tools/partials/tool_card.html" with name="Regex Tester" url="tools:regex_tester"
+            icon="fa-asterisk" color="green" desc="Test regular expressions in real-time." %}
+            <!-- Base64 Converter -->
+            {% include "tools/partials/tool_card.html" with name="Base64 Converter" url="tools:base64_converter"
+            icon="fa-exchange-alt" color="purple" desc="Encode/decode text and binary to Base64." %}
+            <!-- URL Encoder -->
+            {% include "tools/partials/tool_card.html" with name="URL Encoder" url="tools:url_encoder" icon="fa-link"
+            color="cyan" desc="Safe URL encoding and decoding." %}
+            <!-- JWT Parser -->
+            {% include "tools/partials/tool_card.html" with name="JWT Parser" url="tools:jwt_parser" icon="fa-id-card"
+            color="pink" desc="Decode and inspect JWT payloads." %}
+            <!-- Image to Base64 -->
+            {% include "tools/partials/tool_card.html" with name="Image to Base64" url="tools:image_to_base64"
+            icon="fa-image" color="rose" desc="Convert images to Base64 strings." %}
+            <!-- YAML to JSON -->
+            {% include "tools/partials/tool_card.html" with name="YAML to JSON" url="tools:yaml_json_converter"
+            icon="fa-file-code" color="orange" desc="Convert YAML configurations to JSON." %}
+            <!-- Markdown Previewer -->
+            {% include "tools/partials/tool_card.html" with name="Markdown Preview" url="tools:markdown_previewer"
+            icon="fa-file-alt" color="blue" desc="Live GFM markdown editor and preview." %}
+            <!-- HTML Entities -->
+            {% include "tools/partials/tool_card.html" with name="HTML Entities" url="tools:html_entities"
+            icon="fa-brackets-curly" color="cyan" desc="Encode and decode HTML entities securely." %}
+        </div>
+    </section>
 
-        <!-- Regex Tester -->
-        <a href="{% url 'tools:regex_tester' %}" class="block group">
-            <div
-                class="h-full p-6 bg-white dark:bg-[#1E1E1E] border border-gray-200 dark:border-[#333] rounded-lg hover:border-green-500 transition-colors">
-                <div
-                    class="w-10 h-10 mb-4 bg-green-50 dark:bg-green-900/20 rounded-lg flex items-center justify-center text-green-600 dark:text-green-400">
-                    <i class="fas fa-asterisk text-xl"></i>
-                </div>
-                <h3
-                    class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-green-500 transition-colors">
-                    Regex Tester</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Test regular expressions against text.</p>
+    <!-- Category: Data & Research -->
+    <section class="mb-16">
+        <div class="flex items-center gap-3 mb-8">
+            <div class="w-10 h-10 bg-[#C4992E]/10 rounded-lg flex items-center justify-center text-[#C4992E]">
+                <i class="fas fa-microscope"></i>
             </div>
-        </a>
+            <h2 class="text-2xl font-bold text-[#212529] dark:text-white">Data & Research</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- LaTeX Editor -->
+            {% include "tools/partials/tool_card.html" with name="LaTeX Editor" url="tools:latex_editor"
+            icon="fa-square-root-alt" color="neutral" desc="Live LaTeX equation preview and editor." %}
+            <!-- CSV to JSON -->
+            {% include "tools/partials/tool_card.html" with name="CSV to JSON" url="tools:csv_to_json"
+            icon="fa-file-code" color="emerald" desc="Convert CSV datasets to structured JSON." %}
+            <!-- JSON to CSV -->
+            {% include "tools/partials/tool_card.html" with name="JSON to CSV" url="tools:json_to_csv"
+            icon="fa-file-csv" color="emerald" desc="Convert complex JSON to flat CSV files." %}
+            <!-- Unit Converter -->
+            {% include "tools/partials/tool_card.html" with name="Unit Converter" url="tools:unit_converter"
+            icon="fa-balance-scale" color="yellow" desc="Scientific and digital unit conversions." %}
+            <!-- Unix Timestamp -->
+            {% include "tools/partials/tool_card.html" with name="Unix Timestamp" url="tools:timestamp_converter"
+            icon="fa-clock" color="gray" desc="Convert Unix epoch to human dates." %}
+            <!-- Data Profiler -->
+            {% include "tools/partials/tool_card.html" with name="Data Profiler" url="tools:data_profiler"
+            icon="fa-chart-pie" color="rose" desc="Generate statistical summaries of datasets." %}
+            <!-- JSON Schema -->
+            {% include "tools/partials/tool_card.html" with name="JSON Schema" url="tools:json_schema_validator"
+            icon="fa-project-diagram" color="indigo" desc="Validate JSON against schema standards." %}
+        </div>
+    </section>
 
-        <!-- Base64 Converter -->
-        <a href="{% url 'tools:base64_converter' %}" class="block group">
-            <div
-                class="h-full p-6 bg-white dark:bg-[#1E1E1E] border border-gray-200 dark:border-[#333] rounded-lg hover:border-purple-500 transition-colors">
-                <div
-                    class="w-10 h-10 mb-4 bg-purple-50 dark:bg-purple-900/20 rounded-lg flex items-center justify-center text-purple-600 dark:text-purple-400">
-                    <i class="fas fa-exchange-alt text-xl"></i>
-                </div>
-                <h3
-                    class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-purple-500 transition-colors">
-                    Base64 Converter</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Encode and decode Base64 strings.</p>
+    <!-- Category: Security & Systems -->
+    <section class="mb-16">
+        <div class="flex items-center gap-3 mb-8">
+            <div class="w-10 h-10 bg-red-500/10 rounded-lg flex items-center justify-center text-red-500">
+                <i class="fas fa-shield-alt"></i>
             </div>
-        </a>
+            <h2 class="text-2xl font-bold text-[#212529] dark:text-white">Security & Systems</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- Hash Generator -->
+            {% include "tools/partials/tool_card.html" with name="Hash Generator" url="tools:hash_generator"
+            icon="fa-fingerprint" color="red" desc="Generate MD5, SHA-1, SHA-256 hashes." %}
+            <!-- UUID Generator -->
+            {% include "tools/partials/tool_card.html" with name="UUID Generator" url="tools:uuid_generator"
+            icon="fa-id-badge" color="slate" desc="Bulk generate Version 4 UUIDs." %}
+            <!-- Password Generator -->
+            {% include "tools/partials/tool_card.html" with name="Password Gen" url="tools:password_generator"
+            icon="fa-key" color="green" desc="Securely generate high-entropy passwords." %}
+            <!-- API Tester -->
+            {% include "tools/partials/tool_card.html" with name="API Tester (Lite)" url="tools:api_tester"
+            icon="fa-plug" color="teal" desc="Debug and test HTTP endpoints locally." %}
+            <!-- Cron Generator -->
+            {% include "tools/partials/tool_card.html" with name="Cron Generator" url="tools:cron_generator"
+            icon="fa-calendar-alt" color="sky" desc="Generate cron schedules with ease." %}
+        </div>
+    </section>
 
-        <!-- Diff Viewer -->
-        <a href="{% url 'tools:diff_viewer' %}" class="block group">
-            <div
-                class="h-full p-6 bg-white dark:bg-[#1E1E1E] border border-gray-200 dark:border-[#333] rounded-lg hover:border-orange-500 transition-colors">
-                <div
-                    class="w-10 h-10 mb-4 bg-orange-50 dark:bg-orange-900/20 rounded-lg flex items-center justify-center text-orange-600 dark:text-orange-400">
-                    <i class="fas fa-columns text-xl"></i>
-                </div>
-                <h3
-                    class="text-lg font-semibold text-gray-900 dark:text-white mb-2 group-hover:text-orange-500 transition-colors">
-                    Diff Viewer</h3>
-                <p class="text-sm text-gray-500 dark:text-gray-400">Compare two text snippets side-by-side.</p>
+    <!-- Category: Document & Image Utils -->
+    <section class="mb-16">
+        <div class="flex items-center gap-3 mb-8">
+            <div class="w-10 h-10 bg-purple-500/10 rounded-lg flex items-center justify-center text-purple-500">
+                <i class="fas fa-file-image"></i>
             </div>
-        </a>
+            <h2 class="text-2xl font-bold text-[#212529] dark:text-white">Document & Image Utils</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            <!-- PDF Merger -->
+            {% include "tools/partials/tool_card.html" with name="PDF Merger" url="tools:pdf_merger"
+            icon="fa-layer-group" color="red" desc="Merge multiple PDF files into one." %}
+            <!-- PDF Text Extractor -->
+            {% include "tools/partials/tool_card.html" with name="PDF Text Extractor" url="tools:pdf_text_extractor"
+            icon="fa-file-alt" color="orange" desc="Extract plain text from PDF documents." %}
+            <!-- Image Resizer -->
+            {% include "tools/partials/tool_card.html" with name="Image Resizer" url="tools:image_resizer"
+            icon="fa-compress-arrows-alt" color="blue" desc="Change image dimensions locally." %}
+            <!-- Image Converter -->
+            {% include "tools/partials/tool_card.html" with name="Image Converter" url="tools:image_converter"
+            icon="fa-sync-alt" color="green" desc="Convert between PNG, JPG, and WebP." %}
+        </div>
+    </section>
 
+    <!-- Security Note -->
+    <div
+        class="mt-16 p-6 bg-[#0D7C3D]/5 border border-[#0D7C3D]/10 rounded-xl flex flex-col md:flex-row items-center gap-6">
+        <div
+            class="w-16 h-16 bg-white dark:bg-[#1E1E1E] rounded-full shadow-sm flex items-center justify-center text-[#0D7C3D] text-2xl shrink-0">
+            <i class="fas fa-user-shield"></i>
+        </div>
+        <div>
+            <h4 class="text-lg font-bold text-[#212529] dark:text-white mb-1">Privacy Focused</h4>
+            <p class="text-[#6C757D] dark:text-[#A1A1AA] text-sm">All processing happens locally in your browser. Your
+                data never leaves your computer and is never sent to our servers.</p>
+        </div>
     </div>
 </div>
 {% endblock %}

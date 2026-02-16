@@ -7,6 +7,7 @@ from django.core.cache import cache
 from django.utils import timezone
 import logging
 import hashlib
+import json
 
 logger = logging.getLogger(__name__)
 
@@ -22,12 +23,6 @@ class GitHubService:
     def parse_repo_url(url):
         """
         Parses a GitHub URL and returns (owner, repo_name).
-        Handles various formats:
-        - https://github.com/owner/repo
-        - https://github.com/owner/repo.git
-        - git@github.com:owner/repo.git
-        
-        Returns None if invalid.
         """
         if not url:
             return None
@@ -62,16 +57,12 @@ class GitHubService:
     def fetch_repo_data(cls, repo_url):
         """
         Fetches metadata for a repo.
-        Returns dict with keys: stars_count, forks_count, language, description, topics.
-        Uses caching to prevent abusing API limits.
         """
         parsed = cls.parse_repo_url(repo_url)
         if not parsed:
             return None
             
         owner, repo = parsed
-        
-        # Cache Check (1 hour cache)
         cache_key = f"github_meta_{owner}_{repo}"
         cached_data = cache.get(cache_key)
         if cached_data:
@@ -82,20 +73,13 @@ class GitHubService:
             'Accept': 'application/vnd.github.v3+json',
             'User-Agent': 'Kiri-Research-Labs-Bot'
         }
-        # Note: Public repos don't need auth. For user-specific actions,
-        # pass user's OAuth token from UserIntegration model.
             
         try:
             response = requests.get(api_url, headers=headers, timeout=10)
             
-            # Rate Limit Handling
             if response.status_code in [403, 429]:
-                remaining = response.headers.get('X-RateLimit-Remaining')
-                if remaining == '0':
-                    reset_time = int(response.headers.get('X-RateLimit-Reset', 0))
-                    wait_sec = max(reset_time - time.time(), 0)
-                    logger.warning(f"GitHub Rate Limit Hit. Reset in {wait_sec}s")
-                    return None
+                logger.warning(f"GitHub Rate Limit Hit.")
+                return None
             
             if response.status_code == 200:
                 data = response.json()
@@ -107,8 +91,6 @@ class GitHubService:
                     'topics': data.get('topics', []),
                     'last_updated': timezone.now().isoformat()
                 }
-                
-                # Cache successful result
                 cache.set(cache_key, result, 3600)
                 return result
                 
@@ -122,25 +104,20 @@ class GitHubService:
     def fetch_raw_file(cls, owner: str, repo: str, path: str, limit: int = 40000) -> str:
         """
         Fetches the raw content of a file from GitHub.
-        Includes 5-minute caching to prevent rate limiting.
         """
-        # 3.2: Cache key for the raw file
         cache_key = f"github_raw_{owner}_{repo}_{hashlib.sha256(path.encode()).hexdigest()}"
         cached_content = cache.get(cache_key)
         if cached_content:
             return cached_content
             
         try:
-            # Use raw.githubusercontent.com for file content
             url = f"https://raw.githubusercontent.com/{owner}/{repo}/HEAD/{path}"
             headers = {'User-Agent': 'Kiri-Research-Labs-Bot'}
             response = requests.get(url, headers=headers, timeout=15)
             if response.status_code == 200:
                 content = response.text[:limit]
-                cache.set(cache_key, content, 300) # 5 minute cache
+                cache.set(cache_key, content, 300)
                 return content
-            else:
-                logger.warning(f"Failed to fetch raw file {path} from {owner}/{repo}: {response.status_code}")
         except Exception as e:
             logger.error(f"Error fetching raw file {path}: {e}")
             
@@ -149,24 +126,13 @@ class GitHubService:
     @classmethod
     def fetch_structure(cls, repo_url):
         """
-        Fetches repository structure and key files from GitHub.
-        
-        Returns:
-            Dict with comprehensive repo info for AI analysis:
-            - file_list: List of file paths in the repo
-            - package_json: contents of package.json (Node.js)
-            - requirements_txt: contents of requirements.txt (Python)
-            - pyproject_toml: contents of pyproject.toml (Python)
-            - dockerfile: contents of Dockerfile (Docker)
-            - main_file: contents of main entry point (app.py, main.py, etc.)
-            - readme: first 2000 chars of README for context
+        Fetches repository structure and key files.
         """
         parsed = cls.parse_repo_url(repo_url)
         if not parsed:
             return None
         
         owner, repo = parsed
-        
         result = {
             'file_list': [],
             'package_json': '',
@@ -177,25 +143,18 @@ class GitHubService:
             'readme': ''
         }
         
-        # Get file tree (first 150 files)
         try:
             tree_url = f"{cls.BASE_API_URL}/{owner}/{repo}/git/trees/HEAD?recursive=1"
             headers = {'Accept': 'application/vnd.github.v3+json'}
-            # Note: fetch_structure doesn't need auth for public repos
-            # For private repos, pass token via calling code
-            
             response = requests.get(tree_url, headers=headers, timeout=15)
             if response.status_code == 200:
                 tree = response.json().get('tree', [])
-                # Filter for blobs (files) only
                 result['file_list'] = [item['path'] for item in tree[:150] if item['type'] == 'blob']
         except Exception as e:
             logger.warning(f"Failed to fetch file tree: {e}")
         
         def fetch_file(filepath: str, limit: int = 4000) -> str:
-            """Helper to fetch a single file from the repo."""
             try:
-                # Use raw.githubusercontent.com for file content
                 url = f"https://raw.githubusercontent.com/{owner}/{repo}/HEAD/{filepath}"
                 resp = requests.get(url, timeout=10)
                 if resp.status_code == 200:
@@ -204,28 +163,139 @@ class GitHubService:
                 pass
             return ''
         
-        # Fetch key dependency/config files
         result['package_json'] = fetch_file('package.json')
         result['requirements_txt'] = fetch_file('requirements.txt')
         result['pyproject_toml'] = fetch_file('pyproject.toml')
         result['dockerfile'] = fetch_file('Dockerfile', limit=2000)
         
-        # Try to find and fetch main entry point
         entry_points = ['app.py', 'main.py', 'run.py', 'server.py', 'manage.py', 'index.js', 'src/index.js', 'src/main.py']
         for entry in entry_points:
-            # Check if file exists in the file list we fetched
             if entry in result['file_list'] or f'src/{entry}' in result['file_list']:
-                # If we found it in the list (or just blindly try fetching)
                 content = fetch_file(entry, limit=2000)
                 if content:
                     result['main_file'] = content
                     break
         
-        # Fetch README for additional context
-        for readme_name in ['README.md', 'readme.md', 'README.rst', 'README']:
-            readme = fetch_file(readme_name, limit=5000) # Increased limit for better AI context
-            if readme:
-                result['readme'] = readme
-                break
-        
+        result['readme'] = fetch_file('README.md', limit=5000)
         return result
+
+    # --- NEW WRITE CAPABILITIES (Phase 2) ---
+
+    @classmethod
+    def create_repository(cls, user, name, description, private=False):
+        """
+        Creates a new repository for the user.
+        Returns: (repo_data, error_message)
+        """
+        try:
+            # Get user's token
+            integration = user.integrations.filter(platform="github").first()
+            if not integration:
+                return None, "GitHub account not connected."
+
+            token = integration.get_decrypted_access_token()
+            headers = {
+                "Authorization": f"token {token}",
+                "Accept": "application/vnd.github.v3+json"
+            }
+            
+            payload = {
+                "name": name,
+                "description": description,
+                "private": private,
+                "auto_init": True  # Create with README so we can commit immediately
+            }
+            
+            resp = requests.post("https://api.github.com/user/repos", json=payload, headers=headers)
+            
+            if resp.status_code == 201:
+                return resp.json(), None
+            elif resp.status_code == 422:
+                return None, "Repository name already exists."
+            else:
+                return None, f"GitHub Error: {resp.status_code}"
+        except Exception as e:
+            logger.error(f"Create Repo Error: {e}")
+            return None, str(e)
+
+    @classmethod
+    def commit_files(cls, user, repo_full_name, files, commit_message="Update from Kiri Studio"):
+        """
+        Commits multiple files to a repo using the Git Tree API.
+        files: dict of {'filename': 'content'}
+        """
+        try:
+            integration = user.integrations.filter(platform="github").first()
+            if not integration:
+                return None, "GitHub not connected"
+            
+            token = integration.get_decrypted_access_token()
+            headers = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3+json"}
+            base_url = f"https://api.github.com/repos/{repo_full_name}"
+
+            # 1. Get reference to HEAD
+            ref_resp = requests.get(f"{base_url}/git/ref/heads/main", headers=headers)
+            if ref_resp.status_code != 200:
+                ref_resp = requests.get(f"{base_url}/git/ref/heads/master", headers=headers)
+            
+            if ref_resp.status_code != 200:
+                # If fresh empty repo, getting ref might fail. 
+                # But we used auto_init=True, so main should exist.
+                return None, "Could not find branch (main/master)"
+            
+            latest_commit_sha = ref_resp.json()["object"]["sha"]
+
+            # 2. Create Blobs (Files)
+            tree_items = []
+            for filename, content in files.items():
+                blob_resp = requests.post(f"{base_url}/git/blobs", json={
+                    "content": content,
+                    "encoding": "utf-8"
+                }, headers=headers)
+                
+                if blob_resp.status_code == 201:
+                    tree_items.append({
+                        "path": filename,
+                        "mode": "100644",
+                        "type": "blob",
+                        "sha": blob_resp.json()["sha"]
+                    })
+            
+            # 3. Create Tree
+            tree_resp = requests.post(f"{base_url}/git/trees", json={
+                "base_tree": latest_commit_sha,
+                "tree": tree_items
+            }, headers=headers)
+            
+            if tree_resp.status_code != 201:
+                return None, "Failed to create git tree"
+                
+            new_tree_sha = tree_resp.json()["sha"]
+
+            # 4. Create Commit
+            commit_resp = requests.post(f"{base_url}/git/commits", json={
+                "message": commit_message,
+                "tree": new_tree_sha,
+                "parents": [latest_commit_sha]
+            }, headers=headers)
+            
+            if commit_resp.status_code != 201:
+                return None, "Failed to create commit"
+                
+            new_commit_sha = commit_resp.json()["sha"]
+
+            # 5. Update Reference (Push)
+            branch_ref = ref_resp.json()['ref'].replace('refs/', '')
+            
+            push_resp = requests.patch(f"{base_url}/git/refs/{branch_ref}", json={
+                "sha": new_commit_sha
+            }, headers=headers)
+            
+            if push_resp.status_code == 200:
+                return push_resp.json(), None
+            else:
+                return None, "Failed to push commit"
+
+        except Exception as e:
+            logger.error(f"Commit Error: {e}")
+            return None, str(e)

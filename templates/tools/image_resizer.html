@@ -1,0 +1,162 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Image Resizer | Kiri Tools{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8" x-data="imageResizerTool()">
+    <nav class="mb-6 text-sm flex items-center text-[#6C757D] dark:text-[#A1A1AA]">
+        <a href="{% url 'tools:index' %}" class="hover:text-[#0D7C3D] transition-colors flex items-center">
+            <i class="fas fa-arrow-left mr-2"></i> Tools
+        </a>
+        <span class="mx-2">/</span>
+        <span class="text-[#212529] dark:text-white font-bold">Image Resizer</span>
+    </nav>
+
+    <div class="bg-white border border-[#DEE2E6] dark:bg-[#1E1E1E] dark:border-[#3D3D3D] rounded-xl p-8 shadow-sm">
+        <h1 class="text-2xl font-bold text-[#212529] dark:text-white mb-2">Resize Image</h1>
+        <p class="text-[#6C757D] dark:text-[#A1A1AA] mb-8">Reduce image dimensions quickly without uploading to any
+            server.</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <!-- Upload Area -->
+            <div class="border-2 border-dashed border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl p-12 text-center hover:border-[#0D7C3D] transition-all cursor-pointer relative flex flex-col items-center justify-center min-h-[300px]"
+                @click="$refs.fileInput.click()" @dragover.prevent="dragging = true"
+                @dragleave.prevent="dragging = false" @drop.prevent="handleDrop($event)"
+                :class="{'border-[#0D7C3D] bg-[#E8F5ED]/20': dragging}">
+                <template x-if="!previewUrl">
+                    <div>
+                        <input type="file" x-ref="fileInput" class="hidden" accept="image/*"
+                            @change="handleFiles($event.target.files)">
+                        <i class="fas fa-image text-4xl text-[#0D7C3D] mb-4"></i>
+                        <p class="text-sm font-bold text-[#212529] dark:text-white uppercase tracking-wider">Upload
+                            Image</p>
+                    </div>
+                </template>
+                <template x-if="previewUrl">
+                    <div class="w-full h-full flex items-center justify-center">
+                        <img :src="previewUrl" class="max-w-full max-h-64 rounded shadow-sm">
+                    </div>
+                </template>
+            </div>
+
+            <!-- Controls -->
+            <div class="space-y-6">
+                <div x-show="originalWidth"
+                    class="p-4 bg-[#F8F9FA] dark:bg-[#2D2D2D] rounded-lg border border-[#DEE2E6] dark:border-[#3D3D3D]">
+                    <p class="text-[10px] font-bold text-[#A1A1AA] uppercase tracking-widest mb-1">Original Dimensions
+                    </p>
+                    <p class="text-sm font-bold text-[#212529] dark:text-white"
+                        x-text="originalWidth + ' x ' + originalHeight + ' px'"></p>
+                </div>
+
+                <div class="space-y-4">
+                    <label class="block text-xs font-bold text-[#6C757D] uppercase tracking-widest">Resizing
+                        Options</label>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div>
+                            <label class="text-[10px] font-bold text-[#A1A1AA] uppercase ml-1">Width (px)</label>
+                            <input type="number" x-model.number="targetWidth" @input="maintainAspect('width')"
+                                class="w-full mt-1 p-2 bg-white dark:bg-[#121212] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-lg text-sm outline-none focus:border-[#0D7C3D] dark:text-white">
+                        </div>
+                        <div>
+                            <label class="text-[10px] font-bold text-[#A1A1AA] uppercase ml-1">Height (px)</label>
+                            <input type="number" x-model.number="targetHeight" @input="maintainAspect('height')"
+                                class="w-full mt-1 p-2 bg-white dark:bg-[#121212] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-lg text-sm outline-none focus:border-[#0D7C3D] dark:text-white">
+                        </div>
+                    </div>
+
+                    <div class="flex items-center gap-2 pt-2">
+                        <input type="checkbox" id="lockAspect" x-model="lockAspect"
+                            class="w-4 h-4 text-[#0D7C3D] border-[#DEE2E6] rounded focus:ring-[#0D7C3D]">
+                        <label for="lockAspect" class="text-xs text-[#212529] dark:text-[#A1A1AA] font-bold">Lock Aspect
+                            Ratio</label>
+                    </div>
+                </div>
+
+                <button @click="resizeImage()"
+                    class="w-full py-3 bg-[#0D7C3D] text-white font-bold rounded-lg hover:bg-[#0A5C2C] transition-all shadow-md mt-4 disabled:opacity-50"
+                    :disabled="!previewUrl || isProcessing">
+                    <i class="fas fa-compress-arrows-alt mr-2" x-show="!isProcessing"></i>
+                    <i class="fas fa-spinner fa-spin mr-2" x-show="isProcessing"></i>
+                    <span x-text="isProcessing ? 'Processing...' : 'Download Resized Image'"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function imageResizerTool() {
+        return {
+            file: null,
+            previewUrl: '',
+            dragging: false,
+            isProcessing: false,
+            originalWidth: 0,
+            originalHeight: 0,
+            targetWidth: 0,
+            targetHeight: 0,
+            aspectRatio: 1,
+            lockAspect: true,
+
+            handleFiles(files) {
+                if (files.length > 0 && files[0].type.startsWith('image/')) {
+                    this.file = files[0];
+                    const reader = new FileReader();
+                    reader.onload = (e) => {
+                        this.previewUrl = e.target.result;
+                        const img = new Image();
+                        img.onload = () => {
+                            this.originalWidth = img.width;
+                            this.originalHeight = img.height;
+                            this.targetWidth = img.width;
+                            this.targetHeight = img.height;
+                            this.aspectRatio = img.width / img.height;
+                        };
+                        img.src = e.target.result;
+                    };
+                    reader.readAsDataURL(this.file);
+                }
+            },
+
+            maintainAspect(changed) {
+                if (!this.lockAspect) return;
+                if (changed === 'width') {
+                    this.targetHeight = Math.round(this.targetWidth / this.aspectRatio);
+                } else {
+                    this.targetWidth = Math.round(this.targetHeight * this.aspectRatio);
+                }
+            },
+
+            resizeImage() {
+                if (!this.file) return;
+                this.isProcessing = true;
+
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = this.targetWidth;
+                    canvas.height = this.targetHeight;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, this.targetWidth, this.targetHeight);
+
+                    canvas.toBlob((blob) => {
+                        const link = document.createElement('a');
+                        link.href = URL.createObjectURL(blob);
+                        link.download = 'resized_' + this.file.name;
+                        link.click();
+                        this.isProcessing = false;
+                    }, this.file.type);
+                };
+                img.src = this.previewUrl;
+            },
+
+            handleDrop(e) {
+                this.dragging = false;
+                this.handleFiles(e.dataTransfer.files);
+            }
+        }
+    }
+</script>
+{% endblock %}

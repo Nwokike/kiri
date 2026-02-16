@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Unit Converter | Kiri Tools{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8" x-data="unitTool()">
+    <nav class="mb-6 text-sm flex items-center text-[#6C757D] dark:text-[#A1A1AA]">
+        <a href="{% url 'tools:index' %}" class="hover:text-[#0D7C3D] transition-colors flex items-center">
+            <i class="fas fa-arrow-left mr-2"></i> Tools
+        </a>
+        <span class="mx-2">/</span>
+        <span class="text-[#212529] dark:text-white font-bold">Unit Converter</span>
+    </nav>
+
+    <div class="bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl p-8 shadow-sm">
+        <div class="mb-8">
+            <label
+                class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest mb-2 block">Category</label>
+            <select x-model="category" @change="reset()"
+                class="w-full p-3 font-bold border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-lg bg-white dark:bg-[#1E1E1E] text-[#212529] dark:text-white outline-none">
+                <template x-for="cat in categories" :key="cat.name">
+                    <option :value="cat.name" x-text="cat.label"></option>
+                </template>
+            </select>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <!-- From -->
+            <div class="space-y-4">
+                <label
+                    class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest block">From</label>
+                <div class="flex gap-2">
+                    <input type="number" x-model="fromValue" @input="convert('f')"
+                        class="flex-1 p-4 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl focus:border-[#0D7C3D] focus:ring-4 focus:ring-[#0D7C3D]/10 bg-white dark:bg-[#1E1E1E] text-[#212529] dark:text-white outline-none">
+                    <select x-model="fromUnit" @change="convert('f')"
+                        class="w-24 p-2 text-xs border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl bg-[#F8F9FA] dark:bg-[#252526] text-[#212529] dark:text-white font-bold">
+                        <template x-for="u in currentUnits" :key="u.code">
+                            <option :value="u.code" x-text="u.label"></option>
+                        </template>
+                    </select>
+                </div>
+            </div>
+
+            <!-- To -->
+            <div class="space-y-4">
+                <label
+                    class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest block">To</label>
+                <div class="flex gap-2">
+                    <input type="number" x-model="toValue" @input="convert('t')"
+                        class="flex-1 p-4 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl focus:border-[#0D7C3D] focus:ring-4 focus:ring-[#0D7C3D]/10 bg-white dark:bg-[#1E1E1E] text-[#212529] dark:text-white outline-none">
+                    <select x-model="toUnit" @change="convert('f')"
+                        class="w-24 p-2 text-xs border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl bg-[#F8F9FA] dark:bg-[#252526] text-[#212529] dark:text-white font-bold">
+                        <template x-for="u in currentUnits" :key="u.code">
+                            <option :value="u.code" x-text="u.label"></option>
+                        </template>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function unitTool() {
+        return {
+            category: 'length',
+            fromValue: 1,
+            toValue: 1000,
+            fromUnit: 'm',
+            toUnit: 'mm',
+            categories: [
+                { name: 'length', label: 'Length', units: [{ code: 'm', label: 'Meters', f: 1 }, { code: 'km', label: 'KM', f: 0.001 }, { code: 'mm', label: 'MM', f: 1000 }, { code: 'in', label: 'Inch', f: 39.37 }] },
+                { name: 'mass', label: 'Mass', units: [{ code: 'kg', label: 'KG', f: 1 }, { code: 'g', label: 'Grams', f: 1000 }, { code: 'lb', label: 'Lbs', f: 2.20462 }] },
+                { name: 'data', label: 'Data', units: [{ code: 'mb', label: 'MB', f: 1 }, { code: 'kb', label: 'KB', f: 1024 }, { code: 'gb', label: 'GB', f: 1 / 1024 }] }
+            ],
+
+            get currentUnits() {
+                return this.categories.find(c => c.name === this.category).units;
+            },
+
+            reset() {
+                const units = this.currentUnits;
+                this.fromUnit = units[0].code;
+                this.toUnit = units[1] ? units[1].code : units[0].code;
+                this.convert('f');
+            },
+
+            convert(dir) {
+                const units = this.currentUnits;
+                const fUnit = units.find(u => u.code === this.fromUnit);
+                const tUnit = units.find(u => u.code === this.toUnit);
+
+                if (dir === 'f') {
+                    // from -> base -> to
+                    const base = this.fromValue / fUnit.f;
+                    this.toValue = base * tUnit.f;
+                } else {
+                    // to -> base -> from
+                    const base = this.toValue / tUnit.f;
+                    this.fromValue = base * fUnit.f;
+                }
+            }
+        }
+    }
+</script>
+{% endblock %}

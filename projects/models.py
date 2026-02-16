@@ -45,10 +45,11 @@ class Project(models.Model):
     
     # Traffic Controller: Execution Lane Classification
     class Lane(models.TextChoices):
-        LANE_A = 'A', 'Client-Side (WebContainer)'
-        LANE_B = 'B', 'Cloud Container (Binder)'
-        LANE_C = 'C', 'GPU Cluster (Colab)'
-        PENDING = 'P', 'Pending Classification'
+        PY_STUDIO = 'P', 'PyStudio (Python/WASM)'
+        JS_STUDIO = 'J', 'JS Studio (Node/WebContainer)'
+        BINDER = 'B', 'Cloud Container (Binder)'
+        COLAB = 'C', 'GPU Cluster (Colab)'
+        PENDING = '?', 'Pending Classification'
     
     lane = models.CharField(max_length=1, choices=Lane.choices, default=Lane.PENDING)
     execution_url = models.URLField(blank=True, null=True, help_text="Magic link for Binder/Colab")
@@ -76,8 +77,6 @@ class Project(models.Model):
             base_slug = slugify(self.name)
             slug = base_slug
             counter = 1
-            # Check for collision (excluding self if updating, though rare to change slug on update)
-            # Actually, standard pattern for create is enough.
             while Project.objects.filter(slug=slug).exclude(pk=self.pk).exists():
                 slug = f"{base_slug}-{counter}"
                 counter += 1

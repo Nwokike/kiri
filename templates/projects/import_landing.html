@@ -4,159 +4,159 @@
 {% block title %}New Project | Kiri{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto px-4 py-8" x-data="projectImport()">
-    <div class="mb-8 text-center">
-        <h1 class="text-3xl font-bold text-[#212529] dark:text-white mb-2">Import a Repository</h1>
-        <p class="text-[#6C757D] dark:text-[#A1A1AA]">
-            Select a repository from your connected accounts to create a project in seconds.
-        </p>
-    </div>
+<div class="p-4 md:p-8 max-w-7xl mx-auto" x-data="projectImport([
+    {% for p in platforms %}
+        {id: '{{ p.id }}', name: '{{ p.name }}', icon: '{{ p.icon }}', connected: {{ p.connected|yesno:'true,false' }}, connect_url: '{{ p.connect_url }}'}{% if not forloop.last %},{% endif %}
+    {% endfor %}
+])">
 
-    <!-- Integrations Status -->
-    <div class="flex items-center justify-center gap-4 mb-8">
-        {% for platform in platforms %}
-        <div
-            class="flex items-center gap-2 px-4 py-2 rounded-full border {% if platform.connected %}bg-[#E8F5ED] border-[#0D7C3D]/20 text-[#0D7C3D] dark:bg-[#0D7C3D]/20{% else %}bg-white border-[#DEE2E6] text-[#6C757D] dark:bg-[#1E1E1E] dark:border-[#3D3D3D]{% endif %}">
-            <i class="{{ platform.icon }}"></i>
-            <span class="text-xs font-medium">{{ platform.name }}</span>
-            {% if not platform.connected %}
-            <a href="{{ platform.connect_url }}"
-                class="ml-2 w-5 h-5 flex items-center justify-center rounded-full bg-[#E9ECEF] hover:bg-[#DEE2E6] text-[#495057] transition-colors">
-                <i class="fas fa-plus text-[10px]"></i>
-            </a>
-            {% endif %}
+    <!-- Breadcrumbs / Selection Header -->
+    <div class="mb-8 flex flex-col md:flex-row md:items-end md:justify-between gap-4">
+        <div>
+            <nav class="flex text-sm text-[#6C757D] dark:text-[#A1A1AA] mb-2" aria-label="Breadcrumb">
+                <ol class="inline-flex items-center space-x-1 md:space-x-3">
+                    <li class="inline-flex items-center">
+                        <a href="{% url 'projects:list' %}" class="hover:text-[#0D7C3D] transition-colors">Projects</a>
+                    </li>
+                    <li x-show="selectedPlatform">
+                        <div class="flex items-center">
+                            <i class="fas fa-chevron-right text-[10px] mx-2"></i>
+                            <button @click="reset()" class="hover:text-[#0D7C3D] transition-colors">Import</button>
+                        </div>
+                    </li>
+                    <li x-show="selectedPlatform">
+                        <div class="flex items-center">
+                            <i class="fas fa-chevron-right text-[10px] mx-2"></i>
+                            <span class="text-[#212529] dark:text-white font-medium"
+                                x-text="activePlatform?.name"></span>
+                        </div>
+                    </li>
+                </ol>
+            </nav>
+            <h1 class="text-3xl font-bold text-[#212529] dark:text-white mb-2"
+                x-text="selectedPlatform ? 'Select Repository' : 'Import a Project'"></h1>
+            <p class="text-[#6C757D] dark:text-[#A1A1AA]" x-show="!selectedPlatform">Choose a platform to import your
+                research from.</p>
+            <p class="text-[#6C757D] dark:text-[#A1A1AA]" x-show="selectedPlatform">Showing repositories from <span
+                    x-text="activePlatform?.name"></span>.</p>
         </div>
-        {% endfor %}
-    </div>
 
-    <!-- Search & Filter -->
-    <div
-        class="flex items-center gap-4 mb-6 bg-white dark:bg-[#1E1E1E] p-4 rounded-xl border border-[#DEE2E6] dark:border-[#3D3D3D]">
-        <div class="relative flex-1">
-            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-[#ADB5BD]"></i>
-            <input type="text" x-model="search" placeholder="Search your repositories..."
-                class="w-full pl-10 pr-4 py-2 bg-[#F8F9FA] dark:bg-[#2D2D2D] border-none rounded-lg focus:ring-2 focus:ring-[#0D7C3D]/50 text-[#212529] dark:text-white">
+        <div class="flex items-center gap-3" x-show="selectedPlatform">
+            <button @click="fetchRepos(true)" :disabled="loading"
+                class="flex items-center gap-2 px-4 py-2 bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-lg text-sm font-medium hover:bg-[#F8F9FA] dark:hover:bg-[#2D2D2D] transition-colors disabled:opacity-50">
+                <i class="fas fa-sync-alt" :class="loading ? 'animate-spin' : ''"></i>
+                Refresh
+            </button>
+            <button @click="reset()"
+                class="px-4 py-2 text-sm font-medium text-[#6C757D] hover:text-[#212529] dark:hover:text-white transition-colors">
+                Change Platform
+            </button>
         </div>
-        <button @click="fetchRepos()"
-            class="p-2 text-[#0D7C3D] hover:bg-[#E8F5ED] dark:hover:bg-[#0D7C3D]/20 rounded-lg transition-colors"
-            title="Refresh">
-            <i class="fas fa-sync-alt" :class="{'fa-spin': loading}"></i>
-        </button>
     </div>
 
-    <!-- Repo Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" x-show="!loading">
-        <template x-for="repo in filteredRepos" :key="repo.id">
-            <div
-                class="group relative bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl p-5 hover:border-[#0D7C3D] transition-colors">
-                <div class="flex items-start justify-between mb-3">
-                    <div class="flex items-center gap-2">
-                        <i :class="getIcon(repo.platform)" class="text-lg"></i>
-                        <span
-                            class="text-xs font-medium px-2 py-0.5 rounded-full bg-[#F8F9FA] dark:bg-[#2D2D2D] text-[#6C757D] dark:text-[#A1A1AA]"
-                            x-text="repo.platform"></span>
-                        <template x-if="repo.private">
-                            <i class="fas fa-lock text-[#6C757D] text-xs" title="Private"></i>
-                        </template>
+    <!-- Step 1: Platform Selection -->
+    <div x-show="!selectedPlatform" x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0 transform -translate-y-4"
+        x-transition:enter-end="opacity-100 transform translate-y-0"
+        class="grid grid-cols-1 md:grid-cols-2 gap-6 max-w-4xl mx-auto py-12">
+
+        <template x-for="platform in platforms" :key="platform.id">
+            <div @click="selectPlatform(platform.id)"
+                class="group relative bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-2xl p-8 hover:border-[#0D7C3D] hover:shadow-xl transition-all cursor-pointer">
+
+                <div class="flex items-center justify-between mb-6">
+                    <div class="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl transition-transform group-hover:scale-110"
+                        :class="platform.id === 'github' ? 'bg-[#24292F] text-white' : 'bg-[#FF9D00]/10 text-[#FF9D00]'">
+                        <i :class="platform.icon"></i>
                     </div>
-                    <div class="flex items-center gap-1 text-[#F1C21B]">
-                        <i class="fas fa-star text-xs"></i>
-                        <span class="text-xs font-medium" x-text="repo.stars"></span>
+                    <div x-show="platform.connected"
+                        class="flex items-center gap-1.5 text-xs font-bold text-[#0D7C3D] bg-[#0D7C3D]/10 px-3 py-1 rounded-full">
+                        <i class="fas fa-check-circle"></i> CONNECTED
                     </div>
                 </div>
 
-                <h3 class="font-semibold text-[#212529] dark:text-white truncate mb-1" x-text="repo.name"></h3>
-                <p class="text-xs text-[#6C757D] dark:text-[#A1A1AA] line-clamp-2 mb-4 h-8"
-                    x-text="repo.description || 'No description'"></p>
+                <h3 class="text-xl font-bold text-[#212529] dark:text-white mb-2" x-text="platform.name"></h3>
+                <p class="text-[#6C757D] dark:text-[#A1A1AA] text-sm mb-6">
+                    Import your <span
+                        x-text="platform.id === 'github' ? 'code repositories and organizations' : 'models, datasets, and spaces'"></span>
+                    seamlessly.
+                </p>
 
-                <button @click="importRepo(repo)"
-                    class="w-full py-2 bg-[#F8F9FA] dark:bg-[#2D2D2D] hover:bg-[#0D7C3D] hover:text-white text-[#495057] dark:text-[#D1D5DB] font-medium text-sm rounded-lg transition-colors flex items-center justify-center gap-2 group-hover:bg-[#0D7C3D] group-hover:text-white">
-                    <span>Import</span>
-                    <i class="fas fa-arrow-right text-xs"></i>
+                <button class="w-full py-3 rounded-xl text-sm font-bold transition-all"
+                    :class="platform.connected ? 'bg-[#0D7C3D] hover:bg-[#0A5C2C] text-white' : 'bg-[#F8F9FA] dark:bg-[#2D2D2D] text-[#212529] dark:text-white border border-[#DEE2E6] dark:border-[#3D3D3D] group-hover:border-[#0D7C3D] group-hover:bg-[#0D7C3D] group-hover:text-white'">
+                    <span x-text="platform.connected ? 'Select Repository' : 'Connect ' + platform.name"></span>
                 </button>
             </div>
         </template>
+    </div>
 
-        <!-- Empty State -->
-        <div x-show="filteredRepos.length === 0" class="col-span-full text-center py-12">
-            <div
-                class="w-16 h-16 bg-[#F8F9FA] dark:bg-[#2D2D2D] rounded-full flex items-center justify-center mx-auto mb-4">
-                <i class="fas fa-code-branch text-[#ADB5BD] text-2xl"></i>
-            </div>
-            <p class="text-[#6C757D] dark:text-[#A1A1AA]">No repositories found matching your search.</p>
+    <!-- Step 2: Repository List -->
+    <div x-show="selectedPlatform" x-transition:enter="transition ease-out duration-300"
+        x-transition:enter-start="opacity-0 transform translate-y-4"
+        x-transition:enter-end="opacity-100 transform translate-y-0">
+
+        <!-- Search & FilterBar -->
+        <div class="mb-6 relative">
+            <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-[#ADB5BD]"></i>
+            <input type="text" x-model="search" placeholder="Search your repositories..."
+                class="w-full bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl pl-12 pr-4 py-4 text-[#212529] dark:text-white focus:border-[#0D7C3D] focus:ring-1 focus:ring-[#0D7C3D] outline-none transition-all">
         </div>
-    </div>
 
-    <!-- Loading State -->
-    <div x-show="loading" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        <template x-for="i in 6">
-            <div class="h-40 bg-[#F8F9FA] dark:bg-[#2D2D2D] rounded-xl animate-pulse"></div>
-        </template>
-    </div>
+        <div x-show="loading" class="py-20 text-center">
+            <div
+                class="inline-block w-12 h-12 border-4 border-[#0D7C3D] border-t-transparent rounded-full animate-spin mb-4">
+            </div>
+            <p class="text-[#6C757D] dark:text-[#A1A1AA] font-medium">Fetching from <span
+                    x-text="activePlatform?.name"></span>...</p>
+        </div>
 
-    <!-- Manual Creation Link -->
-    <div class="mt-12 text-center">
-        <p class="text-sm text-[#6C757D] dark:text-[#A1A1AA]">
-            Want to start from scratch?
-            <a href="{% url 'projects:create_manual' %}" class="text-[#0D7C3D] font-medium hover:underline">Create blank
-                project</a>
-        </p>
+        <div x-show="!loading && filteredRepos.length === 0"
+            class="py-20 text-center bg-white dark:bg-[#1E1E1E] border border-dashed border-[#DEE2E6] dark:border-[#3D3D3D] rounded-2xl">
+            <div
+                class="w-16 h-16 mx-auto mb-4 bg-[#F8F9FA] dark:bg-[#2D2D2D] rounded-full flex items-center justify-center text-2xl text-[#6C757D]">
+                <i class="fas fa-folder-open"></i>
+            </div>
+            <h3 class="text-lg font-bold text-[#212529] dark:text-white mb-1">No repositories found</h3>
+            <p class="text-[#6C757D] dark:text-[#A1A1AA]">Try a different search or refresh your list.</p>
+        </div>
+
+        <div x-show="!loading && filteredRepos.length > 0" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <template x-for="repo in filteredRepos" :key="repo.id">
+                <div @click="importRepo(repo)"
+                    class="group bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl p-5 hover:border-[#0D7C3D] hover:shadow-lg transition-all cursor-pointer">
+
+                    <div class="flex items-start justify-between mb-3">
+                        <div class="flex items-center gap-2">
+                            <i :class="getPlatformIcon(repo.platform)" class="text-sm"></i>
+                            <span
+                                class="text-[10px] font-bold uppercase tracking-wider text-[#6C757D] dark:text-[#A1A1AA]"
+                                x-text="repo.platform"></span>
+                        </div>
+                        <div class="flex items-center gap-1.5 text-xs text-[#6C757D] font-medium"
+                            x-show="repo.stars > 0">
+                            <i class="fas fa-star text-yellow-500"></i>
+                            <span x-text="repo.stars"></span>
+                        </div>
+                    </div>
+
+                    <h3 class="font-bold text-[#212529] dark:text-white mb-1 truncate" x-text="repo.name"></h3>
+                    <p class="text-xs text-[#6C757D] dark:text-[#A1A1AA] line-clamp-2 mb-4 h-8"
+                        x-text="repo.description || 'No description provided'"></p>
+
+                    <div
+                        class="flex items-center justify-between mt-auto pt-4 border-t border-[#DEE2E6]/50 dark:border-[#3D3D3D]/50">
+                        <span
+                            class="text-[10px] font-mono bg-[#F8F9FA] dark:bg-[#2D2D2D] px-2 py-0.5 rounded text-[#6C757D]"
+                            x-text="repo.language || 'Code'"></span>
+                        <span
+                            class="text-xs font-bold text-[#0D7C3D] opacity-0 group-hover:opacity-100 transition-opacity">Import
+                            <i class="fas fa-chevron-right ml-1"></i></span>
+                    </div>
+                </div>
+            </template>
+        </div>
     </div>
 </div>
 
-<script>
-    function projectImport() {
-        return {
-            loading: true,
-            search: '',
-            repos: [],
-
-            init() {
-                this.fetchRepos();
-            },
-
-            fetchRepos() {
-                this.loading = true;
-                fetch('/projects/api/user-repos/')
-                    .then(res => res.json())
-                    .then(data => {
-                        this.repos = data.repos;
-                        this.loading = false;
-                    })
-                    .catch(err => {
-                        console.error(err);
-                        this.loading = false;
-                    });
-            },
-
-            get filteredRepos() {
-                if (!this.search) return this.repos;
-                const q = this.search.toLowerCase();
-                return this.repos.filter(r =>
-                    r.name.toLowerCase().includes(q) ||
-                    r.full_name.toLowerCase().includes(q)
-                );
-            },
-
-            getIcon(platform) {
-                const icons = {
-                    'github': 'fab fa-github',
-                    'huggingface': 'fas fa-robot text-[#FFD21E]'
-                };
-                return icons[platform] || 'fas fa-code-branch';
-            },
-
-            importRepo(repo) {
-                // Redirect to create form with pre-filled data
-                const params = new URLSearchParams({
-                    repo_url: repo.url,
-                    name: repo.name,
-                    description: repo.description,
-                    import_mode: 'true'
-                });
-                window.location.href = "{% url 'projects:create_manual' %}?" + params.toString();
-            }
-        }
-    }
-</script>
+<script src="{% static 'js/project_import.js' %}"></script>
 {% endblock %}

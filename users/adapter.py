@@ -21,6 +21,9 @@ class KiriSocialAccountAdapter(DefaultSocialAccountAdapter):
         """
         super().pre_social_login(request, sociallogin)
         if sociallogin.is_existing:
+            # Sync user profile fields (avatar, etc)
+            self._update_user_from_social(sociallogin.user, sociallogin)
+            # Sync integration record
             self._create_or_update_integration(sociallogin.user, sociallogin)
 
     def populate_user(self, request, sociallogin, data):
@@ -70,25 +73,7 @@ class KiriSocialAccountAdapter(DefaultSocialAccountAdapter):
         user = super().save_user(request, sociallogin, form)
         
         # Update user fields on every login (for all providers)
-        provider = sociallogin.account.provider
-        extra_data = sociallogin.account.extra_data
-        
-        try:
-            if provider == 'github':
-                user.github_avatar_url = extra_data.get('avatar_url', '') or user.github_avatar_url
-                user.github_username = extra_data.get('login', '') or user.github_username
-                user.bio = extra_data.get('bio') or user.bio
-                user.website = extra_data.get('blog') or user.website
-                user.github_public_repos = extra_data.get('public_repos', 0)
-                user.save(update_fields=['github_avatar_url', 'github_username', 'bio', 'website', 'github_public_repos'])
-                
-                    
-            elif provider == 'huggingface':
-                user.huggingface_avatar_url = extra_data.get('picture', '') or user.huggingface_avatar_url
-                user.save(update_fields=['huggingface_avatar_url'])
-                
-        except Exception as e:
-            logger.warning(f"Failed to update user profile from {provider}: {e}")
+        self._update_user_from_social(user, sociallogin)
         
         # Create or update UserIntegration
         self._create_or_update_integration(user, sociallogin)
@@ -171,3 +156,51 @@ class KiriSocialAccountAdapter(DefaultSocialAccountAdapter):
         except Exception as e:
             logger.error(f"Failed to create/update integration for {provider}: {e}")
             return None
+
+    def _update_user_from_social(self, user, sociallogin):
+        """
+        Update CustomUser fields (avatar, bio, etc) from provider data.
+        """
+        provider = sociallogin.account.provider
+        extra_data = sociallogin.account.extra_data
+        update_fields = []
+
+        try:
+            if provider == 'github':
+                github_avatar = extra_data.get('avatar_url', '')
+                if github_avatar and user.github_avatar_url != github_avatar:
+                    user.github_avatar_url = github_avatar
+                    update_fields.append('github_avatar_url')
+                
+                github_login = extra_data.get('login', '')
+                if github_login and user.github_username != github_login:
+                    user.github_username = github_login
+                    update_fields.append('github_username')
+                
+                bio = extra_data.get('bio') or ''
+                if bio and user.bio != bio:
+                    user.bio = bio
+                    update_fields.append('bio')
+                
+                website = extra_data.get('blog') or ''
+                if website and user.website != website:
+                    user.website = website
+                    update_fields.append('website')
+                
+                repos = extra_data.get('public_repos', 0)
+                if repos != user.github_public_repos:
+                    user.github_public_repos = repos
+                    update_fields.append('github_public_repos')
+                    
+            elif provider == 'huggingface':
+                hf_avatar = extra_data.get('picture', '')
+                if hf_avatar and user.huggingface_avatar_url != hf_avatar:
+                    user.huggingface_avatar_url = hf_avatar
+                    update_fields.append('huggingface_avatar_url')
+            
+            if update_fields:
+                user.save(update_fields=update_fields)
+                logger.info(f"Updated profile fields {update_fields} for {user.username} from {provider}")
+                
+        except Exception as e:
+            logger.warning(f"Failed to sync profile fields for {user.username} from {provider}: {e}")

@@ -54,42 +54,6 @@ class UserProfileDetailView(DetailView):
         return context
 
 
-class IntegrationsView(LoginRequiredMixin, TemplateView):
-    """User integrations settings page."""
-    template_name = 'users/integrations.html'
-    
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        
-        # Get user's connected integrations
-        integrations = UserIntegration.objects.filter(user=self.request.user)
-        connected = {i.platform: i for i in integrations}
-        
-        # Define all available platforms
-        platforms = [
-            {
-                'id': 'github',
-                'name': 'GitHub',
-                'icon': 'fab fa-github',
-                'description': 'Connect your GitHub account to import repos and sync stars',
-                'connected': connected.get('github'),
-                'connect_url': '/accounts/github/login/?process=connect',
-            },
-            {
-                'id': 'huggingface',
-                'name': 'Hugging Face',
-                'icon': 'fas fa-robot',
-                'description': 'Connect your Hugging Face account for ML models',
-                'connected': connected.get('huggingface'),
-                'connect_url': '/accounts/huggingface/login/?process=connect',
-            },
-        ]
-        
-        context['platforms'] = platforms
-        context['integrations'] = integrations
-        context['primary_integration'] = self.request.user.get_primary_integration()
-        
-        return context
 
 from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST

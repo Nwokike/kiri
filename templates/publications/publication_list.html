@@ -16,8 +16,8 @@
 
             {% if user.is_authenticated %}
             <a href="{% url 'publications:create' %}"
-                class="px-5 py-2.5 bg-[#0D7C3D] text-white text-sm font-semibold rounded-lg hover:bg-[#0A5C2C] transition-colors">
-                <i class="fas fa-plus mr-2"></i>New Publication
+                class="px-4 py-2 bg-[#0D7C3D] text-white text-sm font-bold rounded-lg hover:bg-[#0A5C2C] transition-all shadow-sm">
+                <i class="fas fa-plus mr-2 text-[10px]"></i>New Publication
             </a>
             {% endif %}
         </div>
@@ -25,9 +25,9 @@
         <!-- Search -->
         <div class="mt-6">
             <div class="relative max-w-md">
-                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-[#ADB5BD]"></i>
+                <i class="fas fa-search absolute left-4 top-1/2 -translate-y-1/2 text-[#ADB5BD] text-xs"></i>
                 <input type="text" placeholder="Search publications..."
-                    class="w-full h-12 pl-12 pr-4 bg-white border border-[#DEE2E6] rounded-lg text-sm focus:border-[#0D7C3D] focus:ring-2 focus:ring-[#0D7C3D]/20 outline-none transition-all dark:bg-[#1E1E1E] dark:border-[#3D3D3D] dark:text-white">
+                    class="w-full h-10 pl-10 pr-4 bg-white border border-[#DEE2E6] rounded-lg text-xs focus:border-[#0D7C3D] focus:ring-2 focus:ring-[#0D7C3D]/20 outline-none transition-all dark:bg-[#1E1E1E] dark:border-[#333] dark:text-white">
             </div>
         </div>
     </header>
@@ -36,31 +36,33 @@
     <div class="space-y-4">
         {% for publication in publications %}
         <article
-            class="bg-white rounded-xl border border-[#DEE2E6] p-6 hover:shadow-lg hover:border-[#0D7C3D] transition-all dark:bg-[#1E1E1E] dark:border-[#3D3D3D] dark:hover:border-[#0D7C3D] group">
-            <div class="flex gap-5">
+            class="bg-white rounded-xl border border-[#DEE2E6] p-5 hover:border-[#0D7C3D] hover:shadow-md transition-all dark:bg-[#1E1E1E] dark:border-[#333] dark:hover:border-[#0D7C3D] group">
+            <div class="flex gap-4">
                 <!-- Icon -->
                 <div
-                    class="w-14 h-14 shrink-0 bg-gradient-to-br from-[#0D7C3D] to-[#0A5C2C] rounded-lg flex items-center justify-center text-white">
-                    <i class="fas fa-file-alt text-xl"></i>
+                    class="w-10 h-10 shrink-0 bg-[#E8F5ED] dark:bg-[#0D7C3D]/10 rounded-lg flex items-center justify-center text-[#0D7C3D]">
+                    <i class="fas fa-file-alt"></i>
                 </div>
 
                 <!-- Content -->
                 <div class="flex-1 min-w-0">
                     <h3
-                        class="text-lg font-semibold text-[#212529] dark:text-white mb-1 group-hover:text-[#0D7C3D] transition-colors">
+                        class="text-base font-bold text-[#212529] dark:text-white mb-1 group-hover:text-[#0D7C3D] transition-colors">
                         <a href="{% url 'publications:detail' publication.slug %}">{{ publication.title }}</a>
                     </h3>
-                    <p class="text-sm text-[#6C757D] dark:text-[#A1A1AA] mb-3">
+                    <p class="text-[13px] text-[#6C757D] dark:text-[#ADB5BD] mb-3">
                         {{ publication.author.username }} · {{ publication.created_at|date:"M d, Y" }}
                     </p>
 
                     <!-- Tags -->
                     <div class="flex flex-wrap gap-2">
-                        <span class="px-2 py-1 text-[10px] font-semibold bg-[#E8F5ED] text-[#0D7C3D] rounded">
-                            v{{ publication.version }}
+                        <span
+                            class="px-2 py-0.5 text-[9px] font-bold bg-[#E8F5ED] text-[#0D7C3D] rounded uppercase tracking-wider dark:bg-[#0D7C3D]/10">
+
                         </span>
                         {% if publication.arxiv_id %}
-                        <span class="px-2 py-1 text-[10px] font-semibold bg-[#FDF5E6] text-[#C4992E] rounded">
+                        <span
+                            class="px-2 py-0.5 text-[9px] font-bold bg-[#FDF5E6] text-[#C4992E] rounded uppercase tracking-wider dark:bg-[#C4992E]/10">
                             arXiv
                         </span>
                         {% endif %}
@@ -69,7 +71,7 @@
 
                 <!-- Arrow -->
                 <i
-                    class="fas fa-chevron-right text-[#DEE2E6] group-hover:text-[#0D7C3D] self-center transition-colors"></i>
+                    class="fas fa-chevron-right text-[10px] text-[#DEE2E6] group-hover:text-[#0D7C3D] self-center transition-colors"></i>
             </div>
         </article>
         {% empty %}

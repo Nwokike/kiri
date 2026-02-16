@@ -51,9 +51,28 @@ def home(request):
         is_approved=True
     ).order_by('-view_count')[:3]
 
+    # Get latest discussions (Topics)
+    latest_topics = []
+    try:
+        from discussions.models import Topic
+        latest_topics = Topic.objects.order_by('-created_at')[:4]
+    except ImportError:
+        pass
+
+    # Get community activity (Recently favorite/notifications or Action app)
+    community_activity = []
+    try:
+        from activity.models import Action
+        # For guest/homepage, we show recent public actions
+        community_activity = Action.objects.select_related('user', 'target_ct').order_by('-created_at')[:5]
+    except ImportError:
+        pass
+
     return render(request, "home.html", {
         "featured_projects": featured_projects,
         "latest_publications": latest_publications,
+        "latest_topics": latest_topics,
+        "community_activity": community_activity,
         "stats": stats,
         "categories": categories,
         "trending_projects": trending_projects,
@@ -69,13 +88,27 @@ def about(request):
 
 
 @login_not_required
-def studio(request):
+def studio_py(request):
     """
-    Kiri Studio: Client-side Intelligent IDE.
-    Features: Monaco Editor, Pyodide (WASM), xterm.js, Live Preview.
+    Renders PyStudio (Python/WASM).
+    Passes 'studio_type': 'py' to context.
     """
-    return render(request, "core/kiri_studio.html")
+    context = {
+        'studio_type': 'py',
+        'page_title': 'PyStudio | Research Environment'
+    }
+    return render(request, 'core/kiri_studio.html', context)
 
+def studio_js(request):
+    """
+    Renders JS Studio (Node/WebContainer).
+    Passes 'studio_type': 'js' to context.
+    """
+    context = {
+        'studio_type': 'js',
+        'page_title': 'JS Studio | Web Environment'
+    }
+    return render(request, 'core/kiri_studio.html', context)
 
 @login_not_required
 def privacy(request):

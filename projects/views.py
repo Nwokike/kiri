@@ -87,8 +87,8 @@ class ImportLandingView(LoginRequiredMixin, ListView):
         connected_map = {i.platform: i for i in integrations}
         
         platforms = [
-            {'name': 'GitHub', 'icon': 'fab fa-github', 'connected': connected_map.get('github'), 'connect_url': '/accounts/github/login/?process=connect'},
-            {'name': 'Hugging Face', 'icon': 'fas fa-robot text-[#FFD21E]', 'connected': connected_map.get('huggingface'), 'connect_url': '/accounts/huggingface/login/?process=connect'},
+            {'id': 'github', 'name': 'GitHub', 'icon': 'fab fa-github', 'connected': bool(connected_map.get('github')), 'connect_url': '/accounts/github/login/?process=connect'},
+            {'id': 'huggingface', 'name': 'Hugging Face', 'icon': 'fas fa-robot text-[#FFD21E]', 'connected': bool(connected_map.get('huggingface')), 'connect_url': '/accounts/huggingface/login/?process=connect'},
         ]
         context['platforms'] = platforms
         return context

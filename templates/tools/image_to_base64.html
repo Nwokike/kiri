@@ -1,0 +1,119 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Image to Base64 | Kiri Tools{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8" x-data="imageTool()">
+    <nav class="mb-6 text-sm flex items-center text-[#6C757D] dark:text-[#A1A1AA]">
+        <a href="{% url 'tools:index' %}" class="hover:text-[#0D7C3D] transition-colors flex items-center">
+            <i class="fas fa-arrow-left mr-2"></i> Tools
+        </a>
+        <span class="mx-2">/</span>
+        <span class="text-[#212529] dark:text-white font-bold">Image to Base64</span>
+    </nav>
+
+    <div class="bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl p-8 shadow-sm">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <!-- Drop Zone -->
+            <div class="space-y-4">
+                <label
+                    class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest block">Upload
+                    Image</label>
+                <div @dragover.prevent="over = true" @dragleave.prevent="over = false"
+                    @drop.prevent="handleDrop($event)"
+                    :class="over ? 'border-[#0D7C3D] bg-[#0D7C3D]/5' : 'border-gray-300 dark:border-[#3D3D3D]'"
+                    class="h-64 border-2 border-dashed rounded-xl flex flex-col items-center justify-center p-6 text-center transition-all cursor-pointer relative group"
+                    @click="$refs.fileInput.click()">
+
+                    <input type="file" x-ref="fileInput" class="hidden" accept="image/*" @change="handleFile($event)">
+
+                    <div x-show="!preview" class="space-y-3">
+                        <i
+                            class="fas fa-cloud-upload-alt text-4xl text-gray-400 group-hover:text-[#0D7C3D] transition-colors"></i>
+                        <p class="text-sm font-medium text-gray-600 dark:text-gray-400">Drag & drop or <span
+                                class="text-[#0D7C3D]">browse</span></p>
+                        <p class="text-[10px] text-gray-400 uppercase tracking-tighter">PNG, JPG, GIF, WebP (Max 5MB)
+                        </p>
+                    </div>
+
+                    <img x-show="preview" :src="preview" class="max-h-full max-w-full rounded-lg shadow-sm">
+                </div>
+            </div>
+
+            <!-- result -->
+            <div class="flex flex-col h-full space-y-4">
+                <div class="flex justify-between items-center">
+                    <label
+                        class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest">Base64
+                        String</label>
+                    <button @click="copy()" x-show="base64"
+                        class="text-[11px] font-bold text-[#0D7C3D] hover:underline uppercase"
+                        x-text="copied ? 'Copied!' : 'Copy String'"></button>
+                </div>
+                <textarea readonly x-model="base64"
+                    class="flex-1 w-full p-6 font-mono text-[10px] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl bg-[#F8F9FA] dark:bg-[#252526] text-[#6C757D] dark:text-[#A1A1AA] resize-none outline-none break-all"
+                    placeholder="Result will appear here..."></textarea>
+                <div x-show="base64" class="text-[10px] text-gray-400">
+                    Size: <span x-text="formatSize(base64.length)"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function imageTool() {
+        return {
+            over: false,
+            preview: '',
+            base64: '',
+            copied: false,
+
+            handleFile(e) {
+                const file = e.target.files[0];
+                if (file) this.process(file);
+            },
+
+            handleDrop(e) {
+                this.over = false;
+                const file = e.dataTransfer.files[0];
+                if (file) this.process(file);
+            },
+
+            process(file) {
+                if (!file.type.startsWith('image/')) {
+                    alert('Please select an image file.');
+                    return;
+                }
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('File too large (max 5MB).');
+                    return;
+                }
+
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    this.preview = e.target.result;
+                    this.base64 = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            },
+
+            formatSize(bytes) {
+                if (bytes === 0) return '0 B';
+                const k = 1024;
+                const sizes = ['B', 'KB', 'MB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            },
+
+            copy() {
+                if (!this.base64) return;
+                navigator.clipboard.writeText(this.base64);
+                this.copied = true;
+                setTimeout(() => this.copied = false, 2000);
+            }
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,185 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}PDF Text Extractor | Kiri Tools{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8" x-data="pdfExtractorTool()">
+    <nav class="mb-6 text-sm flex items-center text-[#6C757D] dark:text-[#A1A1AA]">
+        <a href="{% url 'tools:index' %}" class="hover:text-[#0D7C3D] transition-colors flex items-center">
+            <i class="fas fa-arrow-left mr-2"></i> Tools
+        </a>
+        <span class="mx-2">/</span>
+        <span class="text-[#212529] dark:text-white font-bold">PDF Text Extractor</span>
+    </nav>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <!-- Sidebar: Upload & Progress -->
+        <div class="lg:col-span-1 space-y-6">
+            <div
+                class="bg-white border border-[#DEE2E6] dark:bg-[#1E1E1E] dark:border-[#3D3D3D] rounded-xl p-6 shadow-sm">
+                <h2 class="text-lg font-bold text-[#212529] dark:text-white mb-4">Extract Text</h2>
+
+                <div class="border-2 border-dashed border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl p-8 text-center hover:border-[#0D7C3D] transition-all cursor-pointer mb-6"
+                    @click="$refs.fileInput.click()" @dragover.prevent="dragging = true"
+                    @dragleave.prevent="dragging = false" @drop.prevent="handleDrop($event)"
+                    :class="{'border-[#0D7C3D] bg-[#E8F5ED]/20': dragging}">
+                    <input type="file" x-ref="fileInput" class="hidden" accept="application/pdf"
+                        @change="handleFiles($event.target.files)">
+                    <i class="fas fa-file-alt text-3xl text-[#0D7C3D] mb-2"></i>
+                    <p class="text-sm font-bold text-[#212529] dark:text-white">Upload PDF</p>
+                </div>
+
+                <div x-show="file" class="space-y-4">
+                    <div
+                        class="p-3 bg-[#F8F9FA] dark:bg-[#2D2D2D] rounded-lg border border-[#DEE2E6] dark:border-[#3D3D3D] flex items-center gap-3">
+                        <i class="fas fa-file-pdf text-red-500"></i>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-xs font-bold text-[#212529] dark:text-white truncate" x-text="file.name"></p>
+                            <p class="text-[10px] text-[#A1A1AA]" x-text="formatSize(file.size)"></p>
+                        </div>
+                    </div>
+
+                    <button @click="extract()"
+                        class="w-full py-2.5 bg-[#0D7C3D] text-white font-bold rounded-lg hover:bg-[#0A5C2C] transition-all disabled:opacity-50"
+                        :disabled="isProcessing">
+                        <i class="fas fa-bolt mr-2" x-show="!isProcessing"></i>
+                        <i class="fas fa-spinner fa-spin mr-2" x-show="isProcessing"></i>
+                        <span x-text="isProcessing ? 'Extracting...' : 'Start Extraction'"></span>
+                    </button>
+                </div>
+
+                <div x-show="error" class="mt-4 p-3 bg-red-100 text-red-700 rounded-lg text-xs border border-red-200">
+                    <i class="fas fa-exclamation-circle mr-2"></i> <span x-text="error"></span>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="bg-white border border-[#DEE2E6] dark:bg-[#1E1E1E] dark:border-[#3D3D3D] rounded-xl p-6 shadow-sm"
+                x-show="extractedText">
+                <h3 class="text-xs font-bold text-[#6C757D] uppercase tracking-widest mb-4">Stats</h3>
+                <div class="grid grid-cols-2 gap-4">
+                    <div class="flex flex-col">
+                        <span class="text-xl font-bold text-[#212529] dark:text-white" x-text="wordCount"></span>
+                        <span class="text-[10px] text-[#A1A1AA] uppercase font-bold">Words</span>
+                    </div>
+                    <div class="flex flex-col">
+                        <span class="text-xl font-bold text-[#212529] dark:text-white" x-text="charCount"></span>
+                        <span class="text-[10px] text-[#A1A1AA] uppercase font-bold">Chars</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Output -->
+        <div class="lg:col-span-2 flex flex-col h-[calc(100vh-280px)]">
+            <div
+                class="bg-white border border-[#DEE2E6] dark:bg-[#1E1E1E] dark:border-[#3D3D3D] rounded-xl flex-1 flex flex-col overflow-hidden shadow-sm">
+                <div
+                    class="p-4 border-b border-[#DEE2E6] dark:border-[#3D3D3D] flex justify-between items-center bg-[#F8F9FA] dark:bg-[#2D2D2D]">
+                    <span class="text-xs font-bold text-[#212529] dark:text-white uppercase tracking-widest">Extracted
+                        Text</span>
+                    <div class="flex gap-4">
+                        <button @click="download()"
+                            class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase"
+                            x-show="extractedText">Download .txt</button>
+                        <button @click="copy()" class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase"
+                            x-text="copied ? 'Copied!' : 'Copy Result'"></button>
+                    </div>
+                </div>
+                <textarea readonly x-model="extractedText"
+                    class="flex-1 p-8 font-mono text-sm dark:bg-[#1E1E1E] text-[#212529] dark:text-white resize-none outline-none leading-relaxed"
+                    placeholder="Extraction result will appear here..."></textarea>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- pdf.js CDN -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.min.js"></script>
+
+<script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.4.120/pdf.worker.min.js';
+
+    function pdfExtractorTool() {
+        return {
+            file: null,
+            dragging: false,
+            isProcessing: false,
+            extractedText: '',
+            error: '',
+            copied: false,
+
+            get wordCount() {
+                return this.extractedText ? this.extractedText.trim().split(/\s+/).length : 0;
+            },
+
+            get charCount() {
+                return this.extractedText.length;
+            },
+
+            handleFiles(files) {
+                if (files.length > 0 && files[0].type === 'application/pdf') {
+                    this.file = files[0];
+                    this.error = '';
+                    this.extractedText = '';
+                }
+            },
+
+            handleDrop(e) {
+                this.dragging = false;
+                this.handleFiles(e.dataTransfer.files);
+            },
+
+            formatSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + ['Bytes', 'KB', 'MB'][i];
+            },
+
+            async extract() {
+                if (!this.file) return;
+                this.isProcessing = true;
+                this.error = '';
+                this.extractedText = '';
+
+                try {
+                    const arrayBuffer = await this.file.arrayBuffer();
+                    const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
+                    let fullText = '';
+
+                    for (let i = 1; i <= pdf.numPages; i++) {
+                        const page = await pdf.getPage(i);
+                        const content = await page.getTextContent();
+                        const pageText = content.items.map(item => item.str).join(' ');
+                        fullText += `--- Page ${i} ---\n${pageText}\n\n`;
+                    }
+
+                    this.extractedText = fullText;
+                } catch (e) {
+                    this.error = "Failed to extract text: " + e.message;
+                } finally {
+                    this.isProcessing = false;
+                }
+            },
+
+            copy() {
+                if (!this.extractedText) return;
+                navigator.clipboard.writeText(this.extractedText);
+                this.copied = true;
+                setTimeout(() => this.copied = false, 2000);
+            },
+
+            download() {
+                if (!this.extractedText) return;
+                const blob = new Blob([this.extractedText], { type: 'text/plain;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = this.file.name.replace('.pdf', '_text.txt');
+                link.click();
+            }
+        }
+    }
+</script>
+{% endblock %}

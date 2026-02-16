@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}UUID Generator | Kiri Tools{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8" x-data="uuidTool()">
+    <nav class="mb-6 text-sm flex items-center text-[#6C757D] dark:text-[#A1A1AA]">
+        <a href="{% url 'tools:index' %}" class="hover:text-[#0D7C3D] transition-colors flex items-center">
+            <i class="fas fa-arrow-left mr-2"></i> Tools
+        </a>
+        <span class="mx-2">/</span>
+        <span class="text-[#212529] dark:text-white font-bold">UUID Generator</span>
+    </nav>
+
+    <div class="bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl p-8 shadow-sm">
+        <div class="flex flex-col md:flex-row gap-8 items-start">
+            <div class="w-full md:w-1/3 space-y-6">
+                <div>
+                    <label
+                        class="text-xs font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest mb-2 block">Quantity</label>
+                    <input type="number" x-model="count" min="1" max="100"
+                        class="w-full p-3 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-lg focus:border-[#0D7C3D] focus:ring-4 focus:ring-[#0D7C3D]/10 bg-white dark:bg-[#1E1E1E] text-[#212529] dark:text-white outline-none transition-all">
+                </div>
+                <div class="flex items-center gap-3">
+                    <input type="checkbox" id="uppercase" x-model="uppercase"
+                        class="rounded border-gray-300 text-[#0D7C3D] focus:ring-[#0D7C3D]">
+                    <label for="uppercase" class="text-sm font-medium text-[#212529] dark:text-white">Uppercase</label>
+                </div>
+                <button @click="generate()"
+                    class="w-full py-3 bg-[#0D7C3D] text-white font-bold rounded-lg hover:bg-[#0B6A34] transition-all shadow-sm">
+                    Generate UUIDs
+                </button>
+            </div>
+
+            <div class="flex-1 w-full space-y-4">
+                <div class="flex justify-between items-center">
+                    <span
+                        class="text-xs font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest">Results</span>
+                    <button @click="copyAll()" class="text-[11px] font-bold text-[#0D7C3D] hover:underline uppercase"
+                        x-text="copied ? 'Copied All!' : 'Copy All'"></button>
+                </div>
+                <div
+                    class="p-6 bg-gray-50 dark:bg-[#252526] rounded-xl border border-[#DEE2E6] dark:border-[#3D3D3D] min-h-[300px]">
+                    <template x-for="uuid in uuids" :key="uuid">
+                        <div class="font-mono text-sm text-[#212529] dark:text-white py-1" x-text="uuid"></div>
+                    </template>
+                    <div x-show="uuids.length === 0" class="text-gray-400 text-sm italic">Click generate to start...
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function uuidTool() {
+        return {
+            count: 10,
+            uppercase: false,
+            uuids: [],
+            copied: false,
+
+            generate() {
+                const results = [];
+                for (let i = 0; i < Math.min(this.count, 100); i++) {
+                    let uuid = crypto.randomUUID();
+                    if (this.uppercase) uuid = uuid.toUpperCase();
+                    results.push(uuid);
+                }
+                this.uuids = results;
+            },
+
+            copyAll() {
+                if (this.uuids.length === 0) return;
+                navigator.clipboard.writeText(this.uuids.join('\n'));
+                this.copied = true;
+                setTimeout(() => this.copied = false, 2000);
+            }
+        }
+    }
+</script>
+{% endblock %}

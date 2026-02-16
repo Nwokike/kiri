@@ -4,24 +4,31 @@
 
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 py-8">
-    <div class="flex justify-between items-center mb-6">
+    <div class="flex justify-between items-end mb-8">
         <div>
-            <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Discussions</h1>
-            <p class="text-gray-600 dark:text-gray-400">Join the conversation with the community.</p>
+            <h1 class="text-2xl font-bold text-[#212529] dark:text-white tracking-tight">Community Forum</h1>
+            <p class="text-sm text-[#6C757D] dark:text-[#A1A1AA] mt-1">Join technical discussions with the community.
+            </p>
         </div>
         <a href="{% url 'discussions:create' %}"
-            class="bg-[#0D7C3D] text-white px-4 py-2 rounded-lg hover:bg-[#0A6230]">
-            <i class="fas fa-plus mr-2"></i>New Topic
+            class="px-4 py-2 bg-[#0D7C3D] text-white text-sm font-bold rounded-lg hover:bg-[#0A5C2C] transition-all shadow-sm">
+            <i class="fas fa-plus mr-2 text-[10px]"></i>New Topic
         </a>
     </div>
 
     <!-- Filters -->
-    <div class="flex gap-2 mb-6 overflow-x-auto pb-2">
+    <div class="flex gap-2 mb-8 overflow-x-auto pb-2">
         <a href="{% url 'discussions:list' %}"
-            class="px-3 py-1 rounded-full bg-gray-100 dark:bg-[#333] text-gray-700 dark:text-gray-300 hover:bg-gray-200 text-sm">All</a>
+            class="px-3.5 py-1.5 rounded-lg text-xs font-bold transition-all
+            {% if not request.GET.category %}bg-[#0D7C3D] text-white shadow-sm{% else %}bg-white text-[#6C757D] border border-[#DEE2E6] hover:bg-[#F8F9FA] dark:bg-[#1E1E1E] dark:border-[#333] dark:text-[#A1A1AA]{% endif %}">
+            ALL TOPICS
+        </a>
         {% for cat_val, cat_label in category_choices %}
         <a href="?category={{ cat_val }}"
-            class="px-3 py-1 rounded-full border border-gray-200 dark:border-[#444] text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-[#2D2D2D] text-sm whitespace-nowrap">{{cat_label }}</a>
+            class="px-3.5 py-1.5 rounded-lg border border-[#DEE2E6] text-xs font-bold text-[#6C757D] hover:bg-[#F8F9FA] whitespace-nowrap transition-all dark:border-[#333] dark:bg-[#1E1E1E] dark:text-[#A1A1AA] dark:hover:bg-[#2D2D2D]
+            {% if request.GET.category == cat_val %}bg-[#E8F5ED] text-[#0D7C3D] border-[#0D7C3D]/20 dark:bg-[#0D7C3D]/10 dark:text-[#0D7C3D]{% endif %}">
+            {{ cat_label|upper }}
+        </a>
         {% endfor %}
     </div>
 

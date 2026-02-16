@@ -17,12 +17,12 @@
             <div class="flex items-center gap-3">
                 {% if user.is_authenticated %}
                 <a href="{% url 'projects:create' %}"
-                    class="px-5 py-2.5 bg-[#0D7C3D] text-white text-sm font-semibold rounded-lg hover:bg-[#0A5C2C] transition-colors">
-                    <i class="fas fa-plus mr-2"></i>New Project
+                    class="px-4 py-2 bg-[#0D7C3D] text-white text-sm font-bold rounded-lg hover:bg-[#0A5C2C] transition-all shadow-sm">
+                    <i class="fas fa-plus mr-2 text-[10px]"></i>New Project
                 </a>
                 {% else %}
                 <a href="{% url 'account_login' %}?next={{ request.path }}"
-                    class="px-5 py-2.5 border border-[#0D7C3D] text-[#0D7C3D] text-sm font-semibold rounded-lg hover:bg-[#E8F5ED] transition-colors">
+                    class="px-4 py-2 border border-[#DEE2E6] text-[#6C757D] text-sm font-bold rounded-lg hover:bg-[#F8F9FA] dark:border-[#333] dark:text-[#A1A1AA] transition-all">
                     Login to Submit
                 </a>
                 {% endif %}
@@ -32,29 +32,29 @@
         <!-- Filters -->
         <div class="flex flex-wrap items-center gap-2 mt-6">
             <a href="{% url 'projects:list' %}"
-                class="px-4 py-2 text-sm font-medium rounded-lg transition-colors
-                {% if not request.GET.category and not request.GET.hot %}bg-[#0D7C3D] text-white{% else %}bg-white text-[#495057] border border-[#DEE2E6] hover:bg-[#F8F9FA] dark:bg-[#1E1E1E] dark:border-[#3D3D3D] dark:text-[#A1A1AA]{% endif %}">
+                class="px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all
+                {% if not request.GET.category and not request.GET.hot %}bg-[#0D7C3D] text-white shadow-sm{% else %}bg-white text-[#6C757D] border border-[#DEE2E6] hover:bg-[#F8F9FA] dark:bg-[#1E1E1E] dark:border-[#333] dark:text-[#A1A1AA]{% endif %}">
                 All
             </a>
             <a href="?category=ai_nlp"
-                class="px-4 py-2 text-sm font-medium rounded-lg transition-colors
-                {% if request.GET.category == 'ai_nlp' %}bg-[#0D7C3D] text-white{% else %}bg-white text-[#495057] border border-[#DEE2E6] hover:bg-[#F8F9FA] dark:bg-[#1E1E1E] dark:border-[#3D3D3D] dark:text-[#A1A1AA]{% endif %}">
+                class="px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all
+                {% if request.GET.category == 'ai_nlp' %}bg-[#0D7C3D] text-white shadow-sm{% else %}bg-white text-[#6C757D] border border-[#DEE2E6] hover:bg-[#F8F9FA] dark:bg-[#1E1E1E] dark:border-[#333] dark:text-[#A1A1AA]{% endif %}">
                 AI / NLP
             </a>
             <a href="?category=ai_vision"
-                class="px-4 py-2 text-sm font-medium rounded-lg transition-colors
-                {% if request.GET.category == 'ai_vision' %}bg-[#0D7C3D] text-white{% else %}bg-white text-[#495057] border border-[#DEE2E6] hover:bg-[#F8F9FA] dark:bg-[#1E1E1E] dark:border-[#3D3D3D] dark:text-[#A1A1AA]{% endif %}">
+                class="px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all
+                {% if request.GET.category == 'ai_vision' %}bg-[#0D7C3D] text-white shadow-sm{% else %}bg-white text-[#6C757D] border border-[#DEE2E6] hover:bg-[#F8F9FA] dark:bg-[#1E1E1E] dark:border-[#333] dark:text-[#A1A1AA]{% endif %}">
                 Computer Vision
             </a>
             <a href="?hot=true"
-                class="px-4 py-2 text-sm font-medium rounded-lg transition-colors
-                {% if request.GET.hot %}bg-[#C4992E] text-white{% else %}bg-white text-[#495057] border border-[#DEE2E6] hover:bg-[#F8F9FA] dark:bg-[#1E1E1E] dark:border-[#3D3D3D] dark:text-[#A1A1AA]{% endif %}">
+                class="px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all
+                {% if request.GET.hot %}bg-[#C4992E] text-white shadow-sm{% else %}bg-white text-[#6C757D] border border-[#DEE2E6] hover:bg-[#F8F9FA] dark:bg-[#1E1E1E] dark:border-[#333] dark:text-[#A1A1AA]{% endif %}">
                 <i class="fas fa-fire mr-1"></i> Trending
             </a>
 
             <div class="ml-auto">
                 <select onchange="window.location.href=this.value"
-                    class="px-4 py-2 bg-white border border-[#DEE2E6] rounded-lg text-sm text-[#495057] focus:outline-none focus:border-[#0D7C3D] dark:bg-[#1E1E1E] dark:border-[#3D3D3D] dark:text-[#A1A1AA]">
+                    class="px-3 py-1.5 bg-white border border-[#DEE2E6] rounded-lg text-xs font-bold text-[#6C757D] focus:outline-none focus:border-[#0D7C3D] dark:bg-[#1E1E1E] dark:border-[#333] dark:text-[#A1A1AA] appearance-none cursor-pointer">
                     <option value="?sort=-created_at">Newest</option>
                     <option value="?sort=-stars_count">Most Stars</option>
                 </select>
@@ -69,41 +69,44 @@
     <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {% for project in projects %}
         <article
-            class="bg-white rounded-xl border border-[#DEE2E6] hover:shadow-lg hover:border-[#0D7C3D] transition-all dark:bg-[#1E1E1E] dark:border-[#3D3D3D] dark:hover:border-[#0D7C3D] group">
+            class="bg-white rounded-xl border border-[#DEE2E6] hover:border-[#0D7C3D] hover:shadow-md transition-all dark:bg-[#1E1E1E] dark:border-[#333] dark:hover:border-[#0D7C3D] group">
             <div class="p-5">
                 <div class="flex items-start justify-between mb-3">
-                    <span class="px-2 py-1 text-[10px] font-semibold bg-[#E8F5ED] text-[#0D7C3D] rounded uppercase">
+                    <span
+                        class="px-2 py-1 text-[9px] font-bold bg-[#E8F5ED] text-[#0D7C3D] rounded uppercase tracking-wider dark:bg-[#0D7C3D]/10">
                         {{ project.language|default:"Project" }}
                     </span>
                     {% if project.is_hot %}
-                    <span class="flex items-center gap-1 text-[10px] font-semibold text-[#C4992E]">
+                    <span class="flex items-center gap-1 text-[9px] font-bold text-[#C4992E] uppercase tracking-wider">
                         <i class="fas fa-fire"></i> HOT
                     </span>
                     {% endif %}
                 </div>
 
-                <h3 class="text-[#0D7C3D] font-semibold mb-2 group-hover:underline">
+                <h3
+                    class="text-base font-bold text-[#212529] dark:text-white mb-2 group-hover:text-[#0D7C3D] transition-colors">
                     <a href="{% url 'projects:detail' project.slug %}">{{ project.name }}</a>
                 </h3>
 
-                <p class="text-sm text-[#6C757D] dark:text-[#A1A1AA] line-clamp-2 mb-4">
+                <p class="text-[13px] text-[#6C757D] dark:text-[#A1A1AA] line-clamp-2 mb-4 leading-relaxed">
                     {{ project.description }}
                 </p>
 
-                <div class="flex items-center justify-between text-xs text-[#6C757D] dark:text-[#A1A1AA]">
+                <div
+                    class="flex items-center justify-between text-[11px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-tighter">
                     <div class="flex items-center gap-3">
                         <span class="flex items-center gap-1">
-                            <i class="fas fa-star text-[#C4992E]"></i>
+                            <i class="fas fa-star text-[#C4992E] text-[10px]"></i>
                             {{ project.stars_count }}
                         </span>
                         <span class="flex items-center gap-1">
-                            <i class="fas fa-code-branch"></i>
+                            <i class="fas fa-code-branch text-[10px]"></i>
                             {{ project.forks_count }}
                         </span>
                     </div>
                     <a href="{{ project.github_repo_url }}" target="_blank"
-                        class="hover:text-[#0D7C3D] transition-colors">
-                        <i class="fab fa-github text-lg"></i>
+                        class="text-[#ADB5BD] hover:text-[#0D7C3D] transition-colors">
+                        <i class="fab fa-github text-base"></i>
                     </a>
                 </div>
             </div>

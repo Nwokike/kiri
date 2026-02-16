@@ -1,15 +1,20 @@
 """
 API views for fetching user repositories from connected platforms.
+And providing Studio sync capabilities.
 """
 import logging
 import requests
 import json
 import hashlib
-from django.http import JsonResponse
+from django.http import JsonResponse, StreamingHttpResponse, HttpResponse
 from django.contrib.auth.decorators import login_required, login_not_required
-from django.views.decorators.http import require_GET
+from django.views.decorators.http import require_POST, require_GET
 from django.core.cache import cache
+from django.utils import timezone
 from users.models import UserIntegration
+from .services import GitHubService
+from .models import Project
+from core.ai_service import get_ai_service
 
 logger = logging.getLogger(__name__)
 
@@ -22,13 +27,16 @@ def fetch_github_repos(token):
             "Authorization": f"token {token}",
             "Accept": "application/vnd.github+json",
         }
+        # Broaden affiliation to catch more repos
         response = requests.get(
-            "https://api.github.com/user/repos?per_page=50&sort=updated&affiliation=owner",
+            "https://api.github.com/user/repos?per_page=100&sort=updated&affiliation=owner,collaborator,organization_member",
             headers=headers,
             timeout=10
         )
         if response.ok:
-            for repo in response.json():
+            data = response.json()
+            logger.info(f"GitHub API returned {len(data)} repositories.")
+            for repo in data:
                 repos.append({
                     "id": f"github:{repo['full_name']}",
                     "platform": "github",
@@ -41,12 +49,10 @@ def fetch_github_repos(token):
                     "private": repo.get("private", False),
                 })
         else:
-            logger.warning(f"GitHub API returned {response.status_code}")
+            logger.warning(f"GitHub API returned status {response.status_code}: {response.text}")
     except Exception as e:
         logger.error(f"Failed to fetch GitHub repos: {e}")
     return repos
-
-
 
 
 def fetch_huggingface_repos(token):
@@ -107,28 +113,63 @@ def fetch_huggingface_repos(token):
 def user_repos_api(request):
     """
     API endpoint to fetch all repositories from user's connected platforms.
-    Returns a JSON list of repositories.
+    Supports ?platform=github or ?platform=huggingface filtering.
     """
+    platform_filter = request.GET.get("platform")
+    refresh = request.GET.get("refresh")
+    
     # Check cache first
-    cache_key = f"user_repos:{request.user.id}"
+    cache_key = f"user_repos:{request.user.id}:{platform_filter or 'all'}"
     cached = cache.get(cache_key)
-    if cached and not request.GET.get("refresh"):
+    if cached and not refresh:
         return JsonResponse({"repos": cached, "cached": True})
     
     all_repos = []
+    
+    # Audit 4.1: Self-healing integration sync
+    from allauth.socialaccount.models import SocialToken, SocialAccount
+    from allauth.socialaccount.models import SocialLogin
+    from users.adapter import KiriSocialAccountAdapter
+    
+    adapter = KiriSocialAccountAdapter()
+    
+    # Filter social accounts based on requested platform
+    accounts = SocialAccount.objects.filter(user=request.user)
+    if platform_filter:
+        accounts = accounts.filter(provider=platform_filter)
+    
+    for account in accounts:
+        # Check if UserIntegration exists
+        integration = UserIntegration.objects.filter(user=request.user, platform=account.provider).first()
+        if not integration:
+            logger.info(f"Self-healing: Creating missing integration for {account.provider}")
+            sl = SocialLogin(user=request.user, account=account)
+            st = SocialToken.objects.filter(account=account).first()
+            if st:
+                sl.token = st
+                adapter._create_or_update_integration(request.user, sl)
+    
+    # Fetch integrations after potential healing
     integrations = UserIntegration.objects.filter(user=request.user)
+    if platform_filter:
+        integrations = integrations.filter(platform=platform_filter)
+
+    logger.info(f"Fetching repos for {integrations.count()} platforms for {request.user.username}")
     
     for integration in integrations:
         token = integration.get_decrypted_access_token()
         if not token:
+            logger.warning(f"No token found for {integration.platform} integration of {request.user.username}")
             continue
         
         if integration.platform == "github":
-            all_repos.extend(fetch_github_repos(token))
+            github_repos = fetch_github_repos(token)
+            all_repos.extend(github_repos)
         elif integration.platform == "huggingface":
-            all_repos.extend(fetch_huggingface_repos(token))
+            hf_repos = fetch_huggingface_repos(token)
+            all_repos.extend(hf_repos)
     
-    # Sort by most recently starred (as a proxy for importance)
+    # Sort by stars
     all_repos.sort(key=lambda x: x.get("stars", 0), reverse=True)
     
     # Cache for 5 minutes
@@ -271,3 +312,125 @@ def repo_files_api(request):
     except Exception as e:
         logger.error(f"Repo Files API Error: {e}")
         return JsonResponse({"error": str(e)}, status=500)
+
+# --- NEW STUDIO SYNC API (Phase 2) ---
+
+@login_required
+@require_POST
+def studio_github_sync(request):
+    """
+    Unified endpoint to Sync Studio with GitHub.
+    Handles:
+    1. Creating new repos (create_new=True)
+    2. Pushing to existing repos
+    3. Auto-creating/Updating Kiri Projects
+    """
+    try:
+        data = json.loads(request.body)
+        files = data.get('files', {})
+        repo_name = data.get('repo_name') # For creation
+        repo_full_name = data.get('repo_full_name') # For syncing existing
+        description = data.get('description', 'Created with Kiri Studio')
+        is_private = data.get('private', False)
+        create_new = data.get('create_new', False)
+        studio_type = data.get('studio_type', 'py') # 'py' or 'js'
+
+        if not files:
+            return JsonResponse({"error": "No files to sync"}, status=400)
+
+        # A. Create New Repo Flow
+        if create_new:
+            if not repo_name:
+                return JsonResponse({"error": "Repository name required"}, status=400)
+            
+            repo_data, error = GitHubService.create_repository(request.user, repo_name, description, is_private)
+            if error:
+                return JsonResponse({"error": error}, status=400)
+            
+            repo_full_name = repo_data['full_name']
+            import time
+            time.sleep(1)
+
+        # B. Push Code Flow
+        if not repo_full_name:
+             return JsonResponse({"error": "Target repository not specified"}, status=400)
+
+        result, error = GitHubService.commit_files(request.user, repo_full_name, files)
+        if error:
+             return JsonResponse({"error": error}, status=400)
+
+        # C. Automatic Platform Project Sync
+        github_url = f"https://github.com/{repo_full_name}"
+        
+        # Decide Lane based on Studio Type
+        lane = Project.Lane.PY_STUDIO if studio_type == 'py' else Project.Lane.JS_STUDIO
+        
+        project, created = Project.objects.update_or_create(
+            github_repo_url=github_url,
+            defaults={
+                'name': repo_name or repo_full_name.split('/')[-1],
+                'description': description,
+                'submitted_by': request.user,
+                'last_synced_at': timezone.now(),
+                'lane': lane,
+                'is_approved': True
+            }
+        )
+
+        return JsonResponse({
+            "status": "success",
+            "repo_url": github_url,
+            "project_slug": project.slug,
+            "message": "Repository created and Project synced!" if create_new else "Code pushed and Project updated!"
+        })
+
+    except Exception as e:
+        logger.error(f"Studio Sync Error: {e}")
+        return JsonResponse({"error": str(e)}, status=500)
+
+@login_required
+@require_GET
+def studio_proxy_repo(request):
+    """
+    Proxies a GitHub Repo ZIP download to avoid CORS issues in PyStudio.
+    """
+    repo_url = request.GET.get('repo')
+    if not repo_url:
+        return HttpResponse("Missing repo", status=400)
+    
+    parsed = GitHubService.parse_repo_url(repo_url)
+    if not parsed:
+        return HttpResponse("Invalid repo URL", status=400)
+        
+    owner, repo = parsed
+    
+    # Get user token
+    token = None
+    integration = request.user.integrations.filter(platform="github").first()
+    if integration:
+        token = integration.get_decrypted_access_token()
+    
+    # URL for zipball
+    zip_url = f"https://api.github.com/repos/{owner}/{repo}/zipball/main" # Try main first
+    headers = {'Accept': 'application/vnd.github.v3+json'}
+    if token:
+        headers['Authorization'] = f"token {token}"
+        
+    try:
+        # Stream the response
+        r = requests.get(zip_url, headers=headers, stream=True)
+        if r.status_code == 404:
+             # Try master
+             zip_url = f"https://api.github.com/repos/{owner}/{repo}/zipball/master"
+             r = requests.get(zip_url, headers=headers, stream=True)
+        
+        if r.status_code != 200:
+            return HttpResponse(f"GitHub Error: {r.status_code}", status=r.status_code)
+
+        resp = StreamingHttpResponse(r.iter_content(chunk_size=8192), content_type="application/zip")
+        resp['Content-Disposition'] = f'attachment; filename="{repo}.zip"'
+        return resp
+        
+    except Exception as e:
+        logger.error(f"Proxy Error: {e}")
+        return HttpResponse("Proxy Error", status=500)

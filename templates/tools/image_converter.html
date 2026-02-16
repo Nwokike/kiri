@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Image Converter | Kiri Tools{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8" x-data="imageConverterTool()">
+    <nav class="mb-6 text-sm flex items-center text-[#6C757D] dark:text-[#A1A1AA]">
+        <a href="{% url 'tools:index' %}" class="hover:text-[#0D7C3D] transition-colors flex items-center">
+            <i class="fas fa-arrow-left mr-2"></i> Tools
+        </a>
+        <span class="mx-2">/</span>
+        <span class="text-[#212529] dark:text-white font-bold">Image Converter</span>
+    </nav>
+
+    <div class="bg-white border border-[#DEE2E6] dark:bg-[#1E1E1E] dark:border-[#3D3D3D] rounded-xl p-8 shadow-sm">
+        <h1 class="text-2xl font-bold text-[#212529] dark:text-white mb-2">Convert Image Format</h1>
+        <p class="text-[#6C757D] dark:text-[#A1A1AA] mb-8">Change image formats (PNG, JPG, WebP) instantly in your
+            browser.</p>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <!-- Upload Area -->
+            <div class="border-2 border-dashed border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl p-12 text-center hover:border-[#0D7C3D] transition-all cursor-pointer relative flex flex-col items-center justify-center min-h-[300px]"
+                @click="$refs.fileInput.click()" @dragover.prevent="dragging = true"
+                @dragleave.prevent="dragging = false" @drop.prevent="handleDrop($event)"
+                :class="{'border-[#0D7C3D] bg-[#E8F5ED]/20': dragging}">
+                <template x-if="!previewUrl">
+                    <div>
+                        <input type="file" x-ref="fileInput" class="hidden" accept="image/*"
+                            @change="handleFiles($event.target.files)">
+                        <i class="fas fa-sync-alt text-4xl text-[#0D7C3D] mb-4"></i>
+                        <p class="text-sm font-bold text-[#212529] dark:text-white uppercase tracking-wider">Upload
+                            Image</p>
+                    </div>
+                </template>
+                <template x-if="previewUrl">
+                    <div class="w-full h-full flex items-center justify-center">
+                        <img :src="previewUrl" class="max-w-full max-h-64 rounded shadow-sm">
+                    </div>
+                </template>
+            </div>
+
+            <!-- Controls -->
+            <div class="space-y-6">
+                <div x-show="file"
+                    class="p-4 bg-[#F8F9FA] dark:bg-[#2D2D2D] rounded-lg border border-[#DEE2E6] dark:border-[#3D3D3D]">
+                    <p class="text-[10px] font-bold text-[#A1A1AA] uppercase tracking-widest mb-1">Source Format</p>
+                    <p class="text-sm font-bold text-[#212529] dark:text-white truncate" x-text="file.type"></p>
+                </div>
+
+                <div class="space-y-4">
+                    <label class="block text-xs font-bold text-[#6C757D] uppercase tracking-widest">Target
+                        Format</label>
+                    <div class="grid grid-cols-3 gap-2">
+                        <template x-for="fmt in formats">
+                            <button @click="targetFormat = fmt"
+                                class="py-3 px-2 border rounded-lg text-xs font-bold transition-all"
+                                :class="targetFormat === fmt ? 'bg-[#0D7C3D] text-white border-[#0D7C3D]' : 'bg-white dark:bg-[#1E1E1E] text-[#495057] dark:text-[#A1A1AA] border-[#DEE2E6] dark:border-[#3D3D3D] hover:border-[#0D7C3D]'"
+                                x-text="fmt.split('/')[1].toUpperCase()"></button>
+                        </template>
+                    </div>
+                </div>
+
+                <button @click="convertImage()"
+                    class="w-full py-3 bg-[#0D7C3D] text-white font-bold rounded-lg hover:bg-[#0A5C2C] transition-all shadow-md mt-4 disabled:opacity-50"
+                    :disabled="!previewUrl || isProcessing">
+                    <i class="fas fa-file-export mr-2" x-show="!isProcessing"></i>
+                    <i class="fas fa-spinner fa-spin mr-2" x-show="isProcessing"></i>
+                    <span x-text="isProcessing ? 'Converting...' : 'Convert & Download'"></span>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function imageConverterTool() {
+        return {
+            file: null,
+            previewUrl: '',
+            dragging: false,
+            isProcessing: false,
+            targetFormat: 'image/png',
+            formats: ['image/png', 'image/jpeg', 'image/webp'],
+
+            handleFiles(files) {
+                if (files.length > 0 && files[0].type.startsWith('image/')) {
+                    this.file = files[0];
+                    const reader = new FileReader();
+                    reader.onload = (e) => this.previewUrl = e.target.result;
+                    reader.readAsDataURL(this.file);
+                }
+            },
+
+            convertImage() {
+                if (!this.file) return;
+                this.isProcessing = true;
+
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    canvas.width = img.width;
+                    canvas.height = img.height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0);
+
+                    canvas.toBlob((blob) => {
+                        const link = document.createElement('a');
+                        link.href = URL.createObjectURL(blob);
+                        const ext = this.targetFormat.split('/')[1];
+                        link.download = this.file.name.split('.')[0] + '.' + (ext === 'jpeg' ? 'jpg' : ext);
+                        link.click();
+                        this.isProcessing = false;
+                    }, this.targetFormat, 0.9);
+                };
+                img.src = this.previewUrl;
+            },
+
+            handleDrop(e) {
+                this.dragging = false;
+                this.handleFiles(e.dataTransfer.files);
+            }
+        }
+    }
+</script>
+{% endblock %}

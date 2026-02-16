@@ -1,46 +1,54 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}JSON Formatter | Kiri Tools{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto px-4 py-8" x-data="jsonFormatter()">
-    <nav class="mb-6 text-sm">
-        <a href="{% url 'tools:index' %}" class="text-blue-600 hover:underline"><i class="fas fa-arrow-left mr-1"></i>
-            Tools</a>
-        <span class="text-gray-400 mx-2">/</span>
-        <span class="text-gray-600 dark:text-gray-300">JSON Formatter</span>
+<div class="max-w-7xl mx-auto px-4 py-8" x-data="jsonTool()">
+    <nav class="mb-6 text-sm flex items-center text-[#6C757D] dark:text-[#A1A1AA]">
+        <a href="{% url 'tools:index' %}" class="hover:text-[#0D7C3D] transition-colors flex items-center">
+            <i class="fas fa-arrow-left mr-2"></i> Tools
+        </a>
+        <span class="mx-2">/</span>
+        <span class="text-[#212529] dark:text-white font-bold">JSON Formatter</span>
     </nav>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 h-[calc(100vh-200px)]">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 h-[calc(100vh-280px)]">
         <!-- Input -->
-        <div class="flex flex-col">
-            <div class="mb-2 flex justify-between items-center">
-                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Input JSON</label>
-                <div class="space-x-2">
-                    <button @click="sample()" class="text-xs text-blue-600 hover:text-blue-800">Sample</button>
-                    <button @click="clear()" class="text-xs text-red-600 hover:text-red-800">Clear</button>
+        <div class="flex flex-col h-full">
+            <div class="mb-3 flex justify-between items-center">
+                <label class="text-xs font-bold text-[#212529] dark:text-white uppercase tracking-widest">Raw
+                    JSON</label>
+                <div class="flex gap-4">
+                    <button @click="sample()"
+                        class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase">Sample</button>
+                    <button @click="input = ''"
+                        class="text-[10px] font-bold text-red-500 hover:underline uppercase">Clear</button>
                 </div>
             </div>
             <textarea x-model="input"
-                class="flex-1 w-full p-4 font-mono text-sm border border-gray-300 dark:border-[#444] rounded-lg focus:ring-blue-500 focus:border-blue-500 bg-white dark:bg-[#1E1E1E] text-gray-900 dark:text-white resize-none"
-                placeholder="Paste JSON here..."></textarea>
+                class="flex-1 w-full p-6 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl focus:border-[#0D7C3D] focus:ring-4 focus:ring-[#0D7C3D]/10 bg-white dark:bg-[#1E1E1E] text-[#212529] dark:text-white resize-none transition-all outline-none"
+                placeholder="Paste your JSON here..."></textarea>
         </div>
 
         <!-- Output -->
-        <div class="flex flex-col">
-            <div class="mb-2 flex justify-between items-center">
-                <label class="text-sm font-medium text-gray-700 dark:text-gray-300">Formatted Output</label>
-                <div class="space-x-2">
-                    <button @click="copy()" class="text-xs text-green-600 hover:text-green-800"
-                        x-text="copied ? 'Copied!' : 'Copy'"></button>
+        <div class="flex flex-col h-full">
+            <div class="mb-3 flex justify-between items-center">
+                <label class="text-xs font-bold text-[#212529] dark:text-white uppercase tracking-widest">Formatted
+                    Output</label>
+                <div class="flex gap-4">
+                    <button @click="minify()"
+                        class="text-[10px] font-bold text-[#6C757D] hover:underline uppercase">Minify</button>
+                    <button @click="copy()" class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase"
+                        x-text="copied ? 'Copied!' : 'Copy JSON'"></button>
                 </div>
             </div>
-            <div class="relative flex-1">
-                <textarea readonly x-model="output" :class="{'border-red-500': error}"
-                    class="w-full h-full p-4 font-mono text-sm border border-gray-300 dark:border-[#444] rounded-lg bg-gray-50 dark:bg-[#252526] text-gray-900 dark:text-gray-300 resize-none"></textarea>
-
+            <div class="flex-1 relative overflow-hidden rounded-xl border border-[#DEE2E6] dark:border-[#3D3D3D]">
+                <div id="json-output" class="w-full h-full bg-[#F8F9FA] dark:bg-[#121212] overflow-auto p-6">
+                    <pre><code class="language-json" x-text="formattedOutput"></code></pre>
+                </div>
                 <div x-show="error"
-                    class="absolute bottom-4 left-4 right-4 bg-red-100 text-red-700 px-4 py-2 rounded text-sm border border-red-200">
+                    class="absolute bottom-4 left-4 right-4 bg-red-100 text-red-700 px-4 py-2 rounded-lg text-xs font-bold border border-red-200">
                     <i class="fas fa-exclamation-circle mr-2"></i> <span x-text="error"></span>
                 </div>
             </div>
@@ -48,36 +56,87 @@
     </div>
 </div>
 
+<!-- Prism for Highlighting -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+
+<style>
+    .dark pre[class*="language-"],
+    .dark code[class*="language-"] {
+        background: transparent;
+        color: #E4E4E7;
+        text-shadow: none;
+    }
+
+    .dark .token.property {
+        color: #9CDCFE;
+    }
+
+    .dark .token.string {
+        color: #CE9178;
+    }
+
+    .dark .token.number {
+        color: #B5CEA8;
+    }
+
+    .dark .token.boolean {
+        color: #569CD6;
+    }
+</style>
+
 <script>
-    function jsonFormatter() {
+    function jsonTool() {
         return {
             input: '',
+            formattedOutput: '',
             error: '',
             copied: false,
 
-            get output() {
+            init() {
+                this.$watch('input', () => this.format());
+            },
+
+            format() {
                 this.error = '';
-                if (!this.input.trim()) return '';
+                if (!this.input.trim()) {
+                    this.formattedOutput = '';
+                    return;
+                }
                 try {
                     const parsed = JSON.parse(this.input);
-                    return JSON.stringify(parsed, null, 4);
+                    this.formattedOutput = JSON.stringify(parsed, null, 4);
+                    this.$nextTick(() => Prism.highlightAll());
                 } catch (e) {
-                    this.error = e.message;
-                    return this.input;
+                    this.error = "Invalid JSON: " + e.message;
+                    this.formattedOutput = this.input;
+                }
+            },
+
+            minify() {
+                try {
+                    const parsed = JSON.parse(this.input);
+                    this.formattedOutput = JSON.stringify(parsed);
+                    this.$nextTick(() => Prism.highlightAll());
+                } catch (e) {
+                    this.error = "Invalid JSON for minification";
                 }
             },
 
             sample() {
-                this.input = '{"name": "Kiri", "type": "Platform", "features": ["AI", "Tools"], "active": true}';
-            },
-
-            clear() {
-                this.input = '';
+                this.input = JSON.stringify({
+                    platform: "Kiri",
+                    status: "online",
+                    features: ["Studio", "Research", "Tools"],
+                    stats: { users: 12000, projects: 450, uptime: "99.9%" },
+                    author: { name: "Nwokike", role: "Elite Dev" }
+                });
             },
 
             copy() {
-                if (!this.output || this.error) return;
-                navigator.clipboard.writeText(this.output);
+                if (!this.formattedOutput || this.error) return;
+                navigator.clipboard.writeText(this.formattedOutput);
                 this.copied = true;
                 setTimeout(() => this.copied = false, 2000);
             }

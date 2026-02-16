@@ -1,0 +1,106 @@
+/* Global Theme & PWA Styles */
+
+/* Theme Toggle Icon Visibility */
+#theme-icon-light,
+#theme-icon-dark {
+    display: none;
+}
+
+html:not(.dark) #theme-icon-light {
+    display: flex;
+}
+
+html.dark #theme-icon-dark {
+    display: flex;
+}
+
+/* PWA Button Appearance */
+#pwa-install-btn {
+    transition: transform 0.3s ease, opacity 0.3s ease;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+#pwa-install-btn.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Base Font & Layout Defaults */
+body {
+    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+}
+
+/* Sidebar states - desktop */
+@media (min-width: 768px) {
+    #sidebar {
+        width: 56px;
+    }
+
+    #sidebar.expanded {
+        width: 220px;
+    }
+
+    #sidebar .nav-label {
+        opacity: 0;
+    }
+
+    #sidebar.expanded .nav-label {
+        opacity: 1;
+    }
+}
+
+/* Mobile sidebar - overlay style */
+@media (max-width: 767px) {
+    #sidebar {
+        width: 280px;
+        transform: translateX(-100%);
+    }
+
+    #sidebar.mobile-open {
+        transform: translateX(0);
+    }
+
+    #sidebar .nav-label {
+        opacity: 1;
+    }
+}
+
+/* Dropdown menu styling */
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    color: #495057;
+    transition: background-color 0.15s;
+}
+
+.dropdown-item:hover {
+    background-color: #F8F9FA;
+}
+
+.dark .dropdown-item {
+    color: #A1A1AA;
+}
+
+.dark .dropdown-item:hover {
+    background-color: #2D2D2D;
+}
+
+/* Decorative Blobs for Hero */
+.decorative-blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(80px);
+    z-index: 0;
+}
+
+.blob-gold {
+    background: rgba(196, 153, 46, 0.15);
+}
+
+.blob-white {
+    background: rgba(255, 255, 255, 0.1);
+}

@@ -8,10 +8,8 @@ import os
 import json
 import logging
 import requests
-import json
 from typing import Optional
 from asgiref.sync import sync_to_async
-from typing import Optional
 
 logger = logging.getLogger(__name__)
 
@@ -55,7 +53,6 @@ class AIService:
         Rotates through models until a valid JSON response is received.
         """
         model_list = cls.AI_MODELS
-        # We no longer reorder for simple tasks to ensure the last resort stays last.
         
         for model_cfg in model_list:
             provider = model_cfg['provider']
@@ -70,7 +67,6 @@ class AIService:
                 result = cls._call_gemini(prompt, model=model_id)
                 
             if result:
-                # Store which model was used in the result for tracking
                 if isinstance(result, dict):
                     result['_ai_model'] = model_id
                 return result
@@ -83,13 +79,14 @@ class AIService:
         """Async wrapper for generate_json_sync."""
         return await sync_to_async(cls.generate_json_sync)(prompt, simple_task=simple_task)
     
-    # Classification prompt - carefully crafted for consistent JSON output
+    # Classification prompt - Updated for Dual-Studio Architecture (PyStudio vs JS Studio)
     CLASSIFICATION_PROMPT = """Analyze this GitHub repository to determine the best execution environment.
 
 **Assign to ONE lane:**
-- 'A' (Client-Side/Browser): Static HTML/CSS/JS, Node.js, React, Vue, Angular, Svelte, Vite, simple Python scripts runnable in browser
-- 'B' (Binder/Server): Django, Flask, FastAPI, Express, Docker, Go, Rust servers, databases, complex Python backends
-- 'C' (Colab/GPU): PyTorch, TensorFlow, Transformers, JAX, ML training, LLMs, CUDA, heavy AI workloads
+- 'P' (PyStudio): Pure Python scripts, Data Science (Pandas/Numpy), Matplotlib, Jupyter Notebooks (converted), Algorithm demos. NO heavy servers (Django/Flask). NO GPU.
+- 'J' (JS Studio): Node.js, React, Vue, Svelte, Vite, Next.js, Static HTML/CSS/JS, Express.js (simple). Client-side Node environment (WebContainers).
+- 'B' (Binder/Cloud): Complex Backend Servers (Django, Flask, FastAPI, Rails, Go, Rust), Docker-based projects, Databases (Postgres/Redis required).
+- 'C' (Colab/GPU): Deep Learning, PyTorch, TensorFlow, Transformers, LLMs, CUDA, Heavy AI training.
 
 **Repository Analysis:**
 File Structure: {file_list}
@@ -101,16 +98,16 @@ Main entry file: {main_file}
 README excerpt: {readme}
 
 **Return ONLY valid JSON:**
-{{"lane": "A", "reason": "Brief explanation of why this lane fits", "start_command": "npm run dev"}}
+{{"lane": "P", "reason": "Brief explanation", "start_command": "python main.py"}}
 
 **Decision Rules:**
-1. Has torch/tensorflow/transformers/keras/jax in deps → Lane C
-2. Has django/flask/fastapi/uvicorn in deps → Lane B  
-3. Has Dockerfile with exposed ports → Lane B
-4. Has react/vue/vite/svelte in package.json → Lane A
-5. Pure HTML/CSS/JS with no backend → Lane A
-6. Python with no web framework or ML → Lane A (Pyodide)
-7. Unsure → default to Lane B (safest)"""
+1. Has torch/tensorflow/transformers/jax → Lane C (GPU required)
+2. Has django/flask/fastapi/uvicorn/gunicorn → Lane B (Server required)
+3. Has Dockerfile → Lane B (Container required)
+4. Has package.json + (react/vue/svelte/vite/next) → Lane J (JS Studio)
+5. Has requirements.txt but NO web frameworks/GPU → Lane P (PyStudio)
+6. Pure HTML/CSS/JS → Lane J
+7. Simple Python script → Lane P"""
 
     @classmethod
     def classify_repository_lane(cls, repo_files: dict) -> dict:
@@ -144,23 +141,25 @@ README excerpt: {readme}
     def _validate_classification(cls, result: dict, repo_files: dict) -> dict:
         """Validate AI classification with heuristics to catch obvious mistakes."""
         requirements = repo_files.get('requirements_txt', '').lower()
+        package_json = repo_files.get('package_json', '')
         
-        # If requirements.txt has django/flask but AI said Lane A, correct it
+        # 1. Catch Hidden Backends (Python)
         backend_keywords = ['django', 'flask', 'fastapi', 'uvicorn', 'gunicorn']
-        if any(kw in requirements for kw in backend_keywords) and result.get('lane') == 'A':
-            logger.info("Correcting classification: Python backend detected, switching to Lane B")
-            fallback = cls._heuristic_classification(repo_files)
-            fallback['_ai_model'] = result.get('_ai_model', 'heuristic-corrected')
-            return fallback
-        
-        # If requirements.txt has torch/transformers but AI said Lane A or B, correct it
+        if any(kw in requirements for kw in backend_keywords) and result.get('lane') in ['P', 'J']:
+            logger.info("Correction: Python backend detected -> Lane B")
+            return {'lane': 'B', 'reason': 'Correction: Python backend requires Cloud Container', 'start_command': 'python manage.py runserver'}
+            
+        # 2. Catch Hidden GPU/ML
         gpu_keywords = ['torch', 'tensorflow', 'transformers', 'keras', 'jax']
-        if any(kw in requirements for kw in gpu_keywords) and result.get('lane') in ['A', 'B']:
-            logger.info("Correcting classification: ML/GPU project detected, switching to Lane C")
-            fallback = cls._heuristic_classification(repo_files)
-            fallback['_ai_model'] = result.get('_ai_model', 'heuristic-corrected')
-            return fallback
-        
+        if any(kw in requirements for kw in gpu_keywords) and result.get('lane') in ['P', 'J', 'B']:
+            logger.info("Correction: GPU deps detected -> Lane C")
+            return {'lane': 'C', 'reason': 'Correction: ML workload requires GPU', 'start_command': ''}
+
+        # 3. Catch Node.js sent to Python Lane
+        if package_json and result.get('lane') == 'P':
+             logger.info("Correction: Node.js project -> Lane J")
+             return {'lane': 'J', 'reason': 'Correction: package.json found', 'start_command': 'npm run dev'}
+
         return result
     
     @classmethod
@@ -188,7 +187,7 @@ README excerpt: {readme}
         if not api_key:
             return None
         
-        url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent"
+        url = f"[https://generativelanguage.googleapis.com/v1beta/models/](https://generativelanguage.googleapis.com/v1beta/models/){model}:generateContent"
         
         try:
             response = requests.post(
@@ -292,10 +291,11 @@ README excerpt: {readme}
         if any(kw in requirements for kw in backend_keywords):
             return {'lane': 'B', 'reason': 'Heuristic: Python backend detected', 'start_command': 'python manage.py runserver 0.0.0.0:8000'}
         
-        if package_json or any(f.endswith(('.jsx', '.tsx')) for f in files):
-            return {'lane': 'A', 'reason': 'Heuristic: JS/Node detected', 'start_command': 'npm run dev'}
+        # New Distinction: Node vs Python
+        if package_json or any(f.endswith(('.jsx', '.tsx', '.js')) for f in files):
+            return {'lane': 'J', 'reason': 'Heuristic: JS/Node detected', 'start_command': 'npm run dev'}
         
-        return {'lane': 'A', 'reason': 'Heuristic: Defaulting to Browser mode', 'start_command': ''}
+        return {'lane': 'P', 'reason': 'Heuristic: Defaulting to PyStudio', 'start_command': 'python main.py'}
     
     @classmethod
     def generate_colab_notebook(cls, repo_url: str, entry_point: str = '') -> str:

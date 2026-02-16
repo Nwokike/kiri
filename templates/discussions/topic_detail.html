@@ -1,6 +1,13 @@
+{% extends "base.html" %}
 {% load markdown_tags %}
 
 {% block title %}{{ object.title }} | Discussions{% endblock %}
+
+{% block meta_description %}{{ object.content|truncatewords:25 }}{% endblock %}
+
+{% block og_title %}{{ object.title }} - Community Discussion{% endblock %}
+{% block og_description %}{{ object.content|truncatewords:50 }}{% endblock %}
+{% block og_image %}{{ request.scheme }}://{{ request.get_host }}{% static 'images/logos/logo.png' %}{% endblock %}
 
 {% block content %}
 <div class="max-w-5xl mx-auto px-4 py-8">

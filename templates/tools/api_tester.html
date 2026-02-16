@@ -1,0 +1,217 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}API Tester (Lite) | Kiri Tools{% endblock %}
+{% block meta_description %}Debug and test HTTP endpoints directly from your browser. A privacy-focused, client-side
+alternate to Postman for quick API testing.{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8" x-data="apiTester()">
+    <nav class="mb-6 text-sm flex items-center text-[#6C757D] dark:text-[#A1A1AA]">
+        <a href="{% url 'tools:index' %}" class="hover:text-[#0D7C3D] transition-colors flex items-center">
+            <i class="fas fa-arrow-left mr-2"></i> Tools
+        </a>
+        <span class="mx-2">/</span>
+        <span class="text-[#212529] dark:text-white font-bold">API Tester</span>
+    </nav>
+
+    <div class="mb-10">
+        <h1 class="text-3xl font-extrabold text-[#212529] dark:text-white mb-2">API Tester <span
+                class="text-xs font-bold text-[#0D7C3D] bg-[#E8F5ED] dark:bg-[#0D7C3D]/10 px-2 py-0.5 rounded uppercase ml-2">Lite</span>
+        </h1>
+        <p class="text-[#6C757D] dark:text-[#A1A1AA]">Debug and test HTTP endpoints directly from your browser.
+            Privacy-focused; no middleman server.</p>
+    </div>
+
+    <!-- Request Builder -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-10">
+        <div class="lg:col-span-2 space-y-6">
+            <!-- URL Bar -->
+            <div class="flex gap-2">
+                <select x-model="method"
+                    class="px-4 py-3 bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl font-bold text-sm outline-none focus:border-[#0D7C3D]">
+                    <option>GET</option>
+                    <option>POST</option>
+                    <option>PUT</option>
+                    <option>DELETE</option>
+                    <option>PATCH</option>
+                </select>
+                <input type="text" x-model="url" placeholder="https://api.example.com/data"
+                    class="flex-1 px-6 py-3 bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl font-mono text-sm outline-none focus:border-[#0D7C3D]">
+                <button @click="send()" :disabled="loading"
+                    class="px-8 py-3 bg-[#0D7C3D] text-white font-bold rounded-xl hover:bg-[#0A5C2C] disabled:bg-gray-400 transition-all shadow-md">
+                    <span x-show="!loading">Send</span>
+                    <i x-show="loading" class="fas fa-circle-notch fa-spin"></i>
+                </button>
+            </div>
+
+            <!-- Tabs -->
+            <div
+                class="bg-white dark:bg-[#1E1E1E] rounded-2xl border border-[#DEE2E6] dark:border-[#3D3D3D] overflow-hidden">
+                <div class="flex border-b border-[#DEE2E6] dark:border-[#3D3D3D]">
+                    <button @click="tab = 'headers'"
+                        :class="tab === 'headers' ? 'border-[#0D7C3D] text-[#0D7C3D]' : 'border-transparent text-[#6C757D]'"
+                        class="px-6 py-4 text-xs font-bold uppercase tracking-widest border-b-2 hover:text-[#0D7C3D] transition-all">Headers</button>
+                    <button @click="tab = 'body'"
+                        :class="tab === 'body' ? 'border-[#0D7C3D] text-[#0D7C3D]' : 'border-transparent text-[#6C757D]'"
+                        class="px-6 py-4 text-xs font-bold uppercase tracking-widest border-b-2 hover:text-[#0D7C3D] transition-all"
+                        x-show="method !== 'GET'">Body</button>
+                </div>
+
+                <div class="p-6 h-64 overflow-auto">
+                    <!-- Headers Tab -->
+                    <div x-show="tab === 'headers'">
+                        <div class="space-y-3">
+                            <template x-for="(h, index) in headers" :key="index">
+                                <div class="flex gap-2">
+                                    <input type="text" x-model="h.key" placeholder="Key"
+                                        class="flex-1 px-4 py-2 border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-lg bg-gray-50 dark:bg-[#121212] text-xs font-mono outline-none">
+                                    <input type="text" x-model="h.value" placeholder="Value"
+                                        class="flex-1 px-4 py-2 border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-lg bg-gray-50 dark:bg-[#121212] text-xs font-mono outline-none">
+                                    <button @click="removeHeader(index)"
+                                        class="text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 p-2 rounded-lg transition-colors"><i
+                                            class="fas fa-times"></i></button>
+                                </div>
+                            </template>
+                            <button @click="addHeader()"
+                                class="text-[10px] font-bold text-[#0D7C3D] uppercase hover:underline">+ Add
+                                Header</button>
+                        </div>
+                    </div>
+
+                    <!-- Body Tab -->
+                    <div x-show="tab === 'body'">
+                        <textarea x-model="body"
+                            class="w-full h-full p-4 bg-gray-50 dark:bg-[#121212] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl font-mono text-xs outline-none focus:border-[#0D7C3D] resize-none"
+                            placeholder='{"key": "value"}'></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Meta Info -->
+        <div class="space-y-6">
+            <div class="p-6 bg-[#E8F5ED] dark:bg-[#0D7C3D]/5 border border-[#0D7C3D]/10 rounded-2xl">
+                <h4 class="text-sm font-bold text-[#0D7C3D] mb-3 uppercase tracking-widest">Notice</h4>
+                <p class="text-[11px] text-[#0D7C3D] leading-relaxed opacity-80">
+                    This tool uses the browser's `fetch` API. Requests are subject to **CORS policy**. If the target
+                    server doesn't allow cross-origin requests, the request will fail.
+                </p>
+            </div>
+
+            <div
+                class="p-6 bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-2xl shadow-sm">
+                <div class="flex items-center justify-between mb-4">
+                    <span class="text-xs font-bold text-[#6C757D] uppercase">Status</span>
+                    <span class="px-2 py-1 text-[10px] font-bold rounded" :class="statusClass"
+                        x-text="status || '---'"></span>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-bold text-[#6C757D] uppercase">Time</span>
+                    <span class="text-xs font-bold dark:text-white" x-text="time ? time + 'ms' : '---'"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Response Window -->
+    <div x-show="response" class="space-y-4">
+        <div class="flex items-center justify-between">
+            <h2 class="text-lg font-bold text-[#212529] dark:text-white uppercase tracking-widest">Response Body</h2>
+            <button @click="copyResponse()" class="text-xs font-bold text-[#0D7C3D] hover:underline uppercase"
+                x-text="responseCopied ? 'Copied' : 'Copy Response'"></button>
+        </div>
+        <div
+            class="bg-[#F8F9FA] dark:bg-[#121212] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-2xl p-8 overflow-auto max-h-[600px] relative">
+            <pre><code class="language-json" x-text="response"></code></pre>
+        </div>
+    </div>
+</div>
+
+<!-- Prism for Response Formatting -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+
+<script>
+    function apiTester() {
+        return {
+            method: 'GET',
+            url: '',
+            tab: 'headers',
+            headers: [{ key: 'Content-Type', value: 'application/json' }],
+            body: '',
+            loading: false,
+            response: '',
+            status: null,
+            time: null,
+            responseCopied: false,
+
+            statusClass() {
+                if (!this.status) return 'bg-gray-100 text-gray-400';
+                if (this.status < 300) return 'bg-green-100 text-green-700';
+                if (this.status < 400) return 'bg-blue-100 text-blue-700';
+                return 'bg-red-100 text-red-700';
+            },
+
+            addHeader() {
+                this.headers.push({ key: '', value: '' });
+            },
+
+            removeHeader(index) {
+                this.headers.splice(index, 1);
+            },
+
+            async send() {
+                if (!this.url) return;
+                this.loading = true;
+                this.response = '';
+                this.status = null;
+                this.time = null;
+
+                const start = performance.now();
+                const headersObj = {};
+                this.headers.forEach(h => {
+                    if (h.key) headersObj[h.key] = h.value;
+                });
+
+                try {
+                    const options = {
+                        method: this.method,
+                        headers: headersObj
+                    };
+
+                    if (this.method !== 'GET' && this.body) {
+                        options.body = this.body;
+                    }
+
+                    const res = await fetch(this.url, options);
+                    this.status = res.status;
+                    this.time = Math.round(performance.now() - start);
+
+                    const contentType = res.headers.get('content-type');
+                    if (contentType && contentType.includes('application/json')) {
+                        const json = await res.json();
+                        this.response = JSON.stringify(json, null, 4);
+                    } else {
+                        this.response = await res.text();
+                    }
+
+                    this.$nextTick(() => Prism.highlightAll());
+                } catch (e) {
+                    this.status = 'Error';
+                    this.response = '// Failed to fetch: ' + e.message + '\n\n// This is likely due to CORS restrictions on the target server.';
+                } finally {
+                    this.loading = false;
+                }
+            },
+
+            copyResponse() {
+                navigator.clipboard.writeText(this.response);
+                this.responseCopied = true;
+                setTimeout(() => this.responseCopied = false, 2000);
+            }
+        }
+    }
+</script>
+{% endblock %}

@@ -6,18 +6,23 @@ app_name = 'core'
 urlpatterns = [
     path('', views.home, name='home'),
     path('about/', views.about, name='about'),
+    path('contact/', views.contact, name='contact'),
     path('privacy/', views.privacy, name='privacy'),
     path('terms/', views.terms, name='terms'),
-    path('refund-policy/', views.refund_policy, name='refund_policy'),
-    path('contact/', views.contact, name='contact'),
-    path('offline/', views.offline, name='offline'),
-    path('health/', views.health, name='health'),
-    path('studio/', views.studio, name='studio'),
-    path('comment/add/<int:content_type_id>/<int:object_id>/', views.add_comment, name='add_comment'),
-    # Favorites
-    path('favorites/', views.favorites_list, name='favorites'),
-    path('favorites/toggle/<int:content_type_id>/<int:object_id>/', views.toggle_favorite, name='toggle_favorite'),
-    # Notifications
+    path('refund/', views.refund_policy, name='refund'),
+    
+    # --- New Studio Routes ---
+    path('studio/py/', views.studio_py, name='studio_py'), # PyStudio
+    path('studio/js/', views.studio_js, name='studio_js'), # JS Studio
+    
+    # Notifications & Favorites
     path('notifications/', views.notifications_list, name='notifications'),
-    path('notifications/mark-read/<int:pk>/', views.mark_notification_read, name='mark_notification_read'),
-    path('notifications/mark-all-read/', views.mark_all_notifications_read, name='mark_all_notifications_read'),]
+    path('notifications/read/<int:pk>/', views.mark_notification_read, name='mark_notification_read'),
+    path('notifications/clear/', views.mark_all_notifications_read, name='clear_notifications'),
+    path('favorites/', views.favorites_list, name='favorites'),
+    path('favorite/toggle/<int:content_type_id>/<int:object_id>/', views.toggle_favorite, name='toggle_favorite'),
+    
+    # Comments
+    path('comments/post/<int:content_type_id>/<int:object_id>/', views.add_comment, name='post_comment'),
+    # path('comments/delete/<int:pk>/', views.delete_comment, name='delete_comment'), # Missing in views.py
+]

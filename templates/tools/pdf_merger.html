@@ -1,0 +1,136 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}PDF Merger | Kiri Tools{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8" x-data="pdfMergerTool()">
+    <nav class="mb-6 text-sm flex items-center text-[#6C757D] dark:text-[#A1A1AA]">
+        <a href="{% url 'tools:index' %}" class="hover:text-[#0D7C3D] transition-colors flex items-center">
+            <i class="fas fa-arrow-left mr-2"></i> Tools
+        </a>
+        <span class="mx-2">/</span>
+        <span class="text-[#212529] dark:text-white font-bold">PDF Merger</span>
+    </nav>
+
+    <div class="bg-white border border-[#DEE2E6] dark:bg-[#1E1E1E] dark:border-[#3D3D3D] rounded-xl p-8 shadow-sm">
+        <h1 class="text-2xl font-bold text-[#212529] dark:text-white mb-2">Merge PDF Files</h1>
+        <p class="text-[#6C757D] dark:text-[#A1A1AA] mb-8">Combine multiple PDF documents into a single file securely in
+            your browser.</p>
+
+        <!-- Dropzone -->
+        <div class="border-2 border-dashed border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl p-12 text-center hover:border-[#0D7C3D] dark:hover:border-[#0D7C3D] transition-all cursor-pointer relative"
+            @dragover.prevent="dragging = true" @dragleave.prevent="dragging = false" @drop.prevent="handleDrop($event)"
+            :class="{'border-[#0D7C3D] bg-[#E8F5ED]/20': dragging}" @click="$refs.fileInput.click()">
+            <input type="file" x-ref="fileInput" class="hidden" multiple accept="application/pdf"
+                @change="handleFiles($event.target.files)">
+            <i class="fas fa-file-pdf text-4xl text-[#0D7C3D] mb-4"></i>
+            <p class="text-lg font-bold text-[#212529] dark:text-white">Click or drag PDF files here</p>
+            <p class="text-sm text-[#6C757D] dark:text-[#A1A1AA] mt-1">Files are processed locally and never leave your
+                device.</p>
+        </div>
+
+        <!-- File List -->
+        <div class="mt-8 space-y-3" x-show="files.length > 0">
+            <h3 class="text-xs font-bold text-[#6C757D] uppercase tracking-widest mb-4">Files to Merge</h3>
+            <template x-for="(file, index) in files" :key="index">
+                <div
+                    class="flex items-center justify-between p-4 bg-[#F8F9FA] dark:bg-[#2D2D2D] rounded-lg border border-[#DEE2E6] dark:border-[#3D3D3D]">
+                    <div class="flex items-center gap-3">
+                        <i class="fas fa-file text-[#6C757D]"></i>
+                        <span class="text-sm font-medium text-[#212529] dark:text-white" x-text="file.name"></span>
+                        <span class="text-[10px] text-[#A1A1AA]" x-text="formatSize(file.size)"></span>
+                    </div>
+                    <button @click="removeFile(index)" class="text-red-500 hover:text-red-700 p-1">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+            </template>
+        </div>
+
+        <!-- Actions -->
+        <div class="mt-8 flex justify-end gap-4" x-show="files.length > 1">
+            <button @click="files = []"
+                class="px-6 py-2.5 text-sm font-bold text-red-500 hover:bg-red-50 rounded-lg transition-all uppercase">Clear
+                All</button>
+            <button @click="merge()"
+                class="px-8 py-2.5 bg-[#0D7C3D] text-white font-bold rounded-lg hover:bg-[#0A5C2C] transition-all shadow-md disabled:opacity-50 disabled:cursor-not-allowed"
+                :disabled="isProcessing">
+                <i class="fas fa-layer-group mr-2" x-show="!isProcessing"></i>
+                <i class="fas fa-spinner fa-spin mr-2" x-show="isProcessing"></i>
+                <span x-text="isProcessing ? 'Merging...' : 'Merge PDFs'"></span>
+            </button>
+        </div>
+
+        <div x-show="error" class="mt-6 p-4 bg-red-100 text-red-700 rounded-lg text-sm border border-red-200">
+            <i class="fas fa-exclamation-circle mr-2"></i> <span x-text="error"></span>
+        </div>
+    </div>
+</div>
+
+<!-- pdf-lib CDN -->
+<script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
+
+<script>
+    function pdfMergerTool() {
+        return {
+            files: [],
+            dragging: false,
+            isProcessing: false,
+            error: '',
+
+            handleFiles(incomingFiles) {
+                const pdfs = Array.from(incomingFiles).filter(f => f.type === 'application/pdf');
+                this.files = [...this.files, ...pdfs];
+                this.error = '';
+            },
+
+            handleDrop(e) {
+                this.dragging = false;
+                this.handleFiles(e.dataTransfer.files);
+            },
+
+            removeFile(index) {
+                this.files.splice(index, 1);
+            },
+
+            formatSize(bytes) {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            },
+
+            async merge() {
+                if (this.files.length < 2) return;
+                this.isProcessing = true;
+                this.error = '';
+
+                try {
+                    const mergedPdf = await PDFLib.PDFDocument.create();
+
+                    for (const file of this.files) {
+                        const arrayBuffer = await file.arrayBuffer();
+                        const pdf = await PDFLib.PDFDocument.load(arrayBuffer);
+                        const copiedPages = await mergedPdf.copyPages(pdf, pdf.getPageIndices());
+                        copiedPages.forEach((page) => mergedPdf.addPage(page));
+                    }
+
+                    const pdfBytes = await mergedPdf.save();
+                    const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                    const link = document.createElement('a');
+                    link.href = URL.createObjectURL(blob);
+                    link.download = 'merged_document.pdf';
+                    link.click();
+                } catch (e) {
+                    this.error = "Error merging PDFs: " + e.message;
+                    console.error(e);
+                } finally {
+                    this.isProcessing = false;
+                }
+            }
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Markdown Previewer | Kiri Tools{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8" x-data="markdownTool()">
+    <nav class="mb-6 text-sm flex items-center text-[#6C757D] dark:text-[#A1A1AA]">
+        <a href="{% url 'tools:index' %}" class="hover:text-[#0D7C3D] transition-colors flex items-center">
+            <i class="fas fa-arrow-left mr-2"></i> Tools
+        </a>
+        <span class="mx-2">/</span>
+        <span class="text-[#212529] dark:text-white font-bold">Markdown Previewer</span>
+    </nav>
+
+    <div class="mb-6 flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-[#212529] dark:text-white">Markdown Previewer</h1>
+        <button @click="sample()" class="text-xs font-bold text-[#0D7C3D] hover:underline uppercase">Load
+            Sample</button>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 h-[calc(100vh-280px)]">
+        <!-- Editor -->
+        <div class="flex flex-col h-full">
+            <div class="mb-3 flex justify-between items-center">
+                <label class="text-xs font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest">Markdown
+                    Source</label>
+                <button @click="input = ''"
+                    class="text-[10px] font-bold text-red-500 hover:underline uppercase">Clear</button>
+            </div>
+            <textarea x-model="input"
+                class="flex-1 w-full p-6 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl focus:border-[#0D7C3D] focus:ring-4 focus:ring-[#0D7C3D]/10 bg-white dark:bg-[#1E1E1E] text-[#212529] dark:text-white resize-none transition-all outline-none"
+                placeholder="Type your markdown here..."></textarea>
+        </div>
+
+        <!-- Preview -->
+        <div class="flex flex-col h-full">
+            <div class="mb-3">
+                <label class="text-xs font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest">Live
+                    Preview</label>
+            </div>
+            <div
+                class="flex-1 relative overflow-hidden rounded-xl border border-[#DEE2E6] dark:border-[#3D3D3D] bg-white dark:bg-[#1E1E1E]">
+                <div id="markdown-output" class="prose dark:prose-invert max-w-none w-full h-full overflow-auto p-8"
+                    x-html="rendered">
+                    <!-- Marked.js will render here -->
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Marked.js CDN -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<!-- DOMPurify for security -->
+<script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
+
+<style>
+    /* Styling the preview output to look professional */
+    #markdown-output h1 {
+        @apply text-2xl font-extrabold mb-4 border-b pb-2 border-gray-100 dark:border-gray-800;
+    }
+
+    #markdown-output h2 {
+        @apply text-xl font-bold mb-3 mt-6;
+    }
+
+    #markdown-output code {
+        @apply bg-gray-100 dark:bg-gray-800 px-1 rounded text-sm font-mono text-rose-500;
+    }
+
+    #markdown-output pre {
+        @apply bg-gray-50 dark:bg-[#121212] p-4 rounded-lg border border-gray-100 dark:border-gray-800 overflow-x-auto;
+    }
+
+    #markdown-output ul {
+        @apply list-disc ml-6 space-y-1;
+    }
+
+    #markdown-output blockquote {
+        @apply border-l-4 border-[#0D7C3D] pl-4 italic text-gray-600 dark:text-gray-400;
+    }
+</style>
+
+<script>
+    function markdownTool() {
+        return {
+            input: '',
+            rendered: '',
+
+            init() {
+                this.$watch('input', () => this.render());
+                this.sample(); // Load sample by default
+            },
+
+            render() {
+                if (!this.input.trim()) {
+                    this.rendered = '';
+                    return;
+                }
+                const rawHtml = marked.parse(this.input);
+                this.rendered = DOMPurify.sanitize(rawHtml);
+            },
+
+            sample() {
+                this.input = "# Welcome to Kiri Markdown\n\nThis is a professional **Live Previewer**.\n\n## Features\n- **Fast**: Rendered client-side instantly.\n- **Secure**: Sanitized output via DOMPurify.\n- **Modern**: Supports GFM (GitHub Flavored Markdown).\n\n### Code Blocks\n```python\ndef greet(name):\n    return f\"Hello, {name}! Welcome to Kiri.\"\n```\n\n### Blockquotes\n> Building the future of research tools, one line at a time.\n\n### Tables\n| Tool | Category | Status |\n| :--- | :--- | :--- |\n| SQL Formatter | Programming | Done |\n| Diff Viewer | Programming | Done |\n| Markdown | Utility | Live |";
+            }
+        }
+    }
+</script>
+{% endblock %}

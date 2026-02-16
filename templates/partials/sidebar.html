@@ -1,0 +1,103 @@
+{% load static %}
+<!-- ===== SIDEBAR ===== -->
+<aside id="sidebar"
+    class="fixed top-14 left-0 bottom-0 bg-white border-r border-[#DEE2E6] z-40 transition-all duration-300 overflow-hidden dark:bg-[#1E1E1E] dark:border-[#3D3D3D] hidden md:block">
+    <nav class="py-3 flex flex-col h-full">
+        <!-- Main Navigation -->
+        <div class="flex-1">
+            <div class="px-4 py-3 mb-1">
+                <span
+                    class="text-[10px] font-bold text-[#ADB5BD] uppercase tracking-widest leading-none">Perspective</span>
+            </div>
+            <a href="{% url 'core:home' %}"
+                class="flex items-center h-10 px-4 gap-3 text-[#495057] hover:bg-[#F8F9FA] hover:text-[#0D7C3D] transition-colors {% if request.path == '/' %}bg-[#E8F5ED] text-[#0D7C3D] border-r-2 border-[#0D7C3D]{% endif %} dark:text-[#A1A1AA] dark:hover:bg-[#2D2D2D] dark:hover:text-[#0D7C3D] {% if request.path == '/' %}dark:bg-[#0D7C3D]/10{% endif %}">
+                <i class="fas fa-home w-5 text-center text-sm"></i>
+                <span
+                    class="nav-label text-[13px] font-bold whitespace-nowrap transition-opacity duration-200">Home</span>
+            </a>
+
+            <a href="{% url 'publications:list' %}"
+                class="flex items-center h-10 px-4 gap-3 text-[#495057] hover:bg-[#F8F9FA] hover:text-[#0D7C3D] transition-colors {% if 'library' in request.path %}bg-[#E8F5ED] text-[#0D7C3D] border-r-2 border-[#0D7C3D]{% endif %} dark:text-[#A1A1AA] dark:hover:bg-[#2D2D2D] dark:hover:text-[#0D7C3D] {% if 'library' in request.path %}dark:bg-[#0D7C3D]/10{% endif %}">
+                <i class="fas fa-book w-5 text-center text-sm"></i>
+                <span
+                    class="nav-label text-[13px] font-bold whitespace-nowrap transition-opacity duration-200">Library</span>
+            </a>
+
+            <a href="{% url 'projects:list' %}"
+                class="flex items-center h-10 px-4 gap-3 text-[#495057] hover:bg-[#F8F9FA] hover:text-[#0D7C3D] transition-colors {% if 'projects' in request.path or 'colosseum' in request.path %}bg-[#E8F5ED] text-[#0D7C3D] border-r-2 border-[#0D7C3D]{% endif %} dark:text-[#A1A1AA] dark:hover:bg-[#2D2D2D] dark:hover:text-[#0D7C3D] {% if 'projects' in request.path or 'colosseum' in request.path %}dark:bg-[#0D7C3D]/10{% endif %}">
+                <i class="fas fa-rocket w-5 text-center text-sm"></i>
+                <span
+                    class="nav-label text-[13px] font-bold whitespace-nowrap transition-opacity duration-200">Projects</span>
+            </a>
+
+            <a href="{% url 'discussions:list' %}"
+                class="flex items-center h-10 px-4 gap-3 text-[#495057] hover:bg-[#F8F9FA] hover:text-[#0D7C3D] transition-colors {% if 'discuss' in request.path %}bg-[#E8F5ED] text-[#0D7C3D] border-r-2 border-[#0D7C3D]{% endif %} dark:text-[#A1A1AA] dark:hover:bg-[#2D2D2D] dark:hover:text-[#0D7C3D]">
+                <i class="fas fa-comments w-5 text-center text-sm"></i>
+                <span
+                    class="nav-label text-[13px] font-bold whitespace-nowrap transition-opacity duration-200">Discuss</span>
+            </a>
+
+            <a href="{% url 'activity:feed' %}"
+                class="flex items-center h-10 px-4 gap-3 text-[#495057] hover:bg-[#F8F9FA] hover:text-[#0D7C3D] transition-colors {% if 'feed' in request.path %}bg-[#E8F5ED] text-[#0D7C3D] border-r-2 border-[#0D7C3D]{% endif %} dark:text-[#A1A1AA] dark:hover:bg-[#2D2D2D] dark:hover:text-[#0D7C3D]">
+                <i class="fas fa-stream w-5 text-center text-sm"></i>
+                <span
+                    class="nav-label text-[13px] font-bold whitespace-nowrap transition-opacity duration-200">Activity</span>
+            </a>
+
+            <div class="px-4 py-3 mt-4 mb-1 border-t border-[#DEE2E6] dark:border-[#333]">
+                <span class="text-[10px] font-bold text-[#ADB5BD] uppercase tracking-widest leading-none">Research
+                    Labs</span>
+            </div>
+
+            <a href="{% url 'core:about' %}"
+                class="flex items-center h-10 px-4 gap-3 text-[#495057] hover:bg-[#F8F9FA] hover:text-[#0D7C3D] transition-colors {% if 'about' in request.path %}bg-[#E8F5ED] text-[#0D7C3D] border-r-2 border-[#0D7C3D]{% endif %} dark:text-[#A1A1AA] dark:hover:bg-[#2D2D2D] dark:hover:text-[#0D7C3D]">
+                <i class="fas fa-info-circle w-5 text-center text-sm"></i>
+                <span
+                    class="nav-label text-[13px] font-bold whitespace-nowrap transition-opacity duration-200">About</span>
+            </a>
+
+            <div class="my-2 mx-4 border-t border-[#DEE2E6] dark:border-[#3D3D3D]"></div>
+
+            <!-- Tools Section -->
+            <div class="tools-section" x-data="{ open: false }">
+                <button @click="open = !open"
+                    class="w-full flex items-center h-10 px-4 gap-3 text-[#495057] hover:bg-[#F8F9FA] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA] dark:hover:bg-[#2D2D2D] dark:hover:text-[#0D7C3D]">
+                    <i class="fas fa-toolbox w-5 text-center text-sm"></i>
+                    <span
+                        class="nav-label text-[13px] font-bold whitespace-nowrap transition-opacity duration-200 flex-1 text-left">Tools
+                        Hub</span>
+                    <i class="fas fa-chevron-down nav-label text-[10px] transition-transform"
+                        :class="open ? 'rotate-180' : ''"></i>
+                </button>
+                <div x-show="open" x-transition
+                    class="pl-4 border-l-2 border-gray-100 dark:border-[#333] ml-6 my-1 space-y-1">
+                    <a href="{% url 'core:studio_py' %}"
+                        class="flex items-center h-9 px-4 gap-3 text-[13px] font-bold text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA] {% if 'studio/py' in request.path %}text-[#0D7C3D] dark:text-[#0D7C3D]{% endif %}">
+                        <i class="fab fa-python w-4 text-center text-sm"></i>
+                        <span class="nav-label whitespace-nowrap">Py Studio</span>
+                    </a>
+                    <a href="{% url 'core:studio_js' %}"
+                        class="flex items-center h-9 px-4 gap-3 text-[13px] font-bold text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA] {% if 'studio/js' in request.path %}text-[#0D7C3D] dark:text-[#0D7C3D]{% endif %}">
+                        <i class="fab fa-js w-4 text-center text-sm"></i>
+                        <span class="nav-label whitespace-nowrap">JS Studio</span>
+                    </a>
+                    <a href="{% url 'tools:index' %}"
+                        class="flex items-center h-9 px-4 gap-3 text-[13px] font-bold text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
+                        <i class="fas fa-tools w-4 text-center text-sm"></i>
+                        <span class="nav-label whitespace-nowrap">All Utilities</span>
+                    </a>
+                    <a href="{% url 'tools:pdf_merger' %}"
+                        class="flex items-center h-9 px-4 gap-3 text-[13px] font-bold text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
+                        <i class="fas fa-file-pdf w-4 text-center text-sm"></i>
+                        <span class="nav-label whitespace-nowrap">PDF Tools</span>
+                    </a>
+                    <a href="{% url 'tools:image_resizer' %}"
+                        class="flex items-center h-9 px-4 gap-3 text-[13px] font-bold text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
+                        <i class="fas fa-image w-4 text-center text-sm"></i>
+                        <span class="nav-label whitespace-nowrap">Image Tools</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </nav>
+</aside>

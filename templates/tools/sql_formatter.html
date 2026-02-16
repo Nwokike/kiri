@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}SQL Formatter | Kiri Tools{% endblock %}
+{% block meta_description %}Professional SQL Formatter supporting multiple dialects including MySQL, PostgreSQL, and
+SQLite. Beautify and format your SQL queries locally in your browser.{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8" x-data="sqlTool()">
+    <nav class="mb-6 text-sm flex items-center text-[#6C757D] dark:text-[#A1A1AA]">
+        <a href="{% url 'tools:index' %}" class="hover:text-[#0D7C3D] transition-colors flex items-center">
+            <i class="fas fa-arrow-left mr-2"></i> Tools
+        </a>
+        <span class="mx-2">/</span>
+        <span class="text-[#212529] dark:text-white font-bold">SQL Formatter</span>
+    </nav>
+
+    <div class="mb-8 p-6 bg-white dark:bg-[#1E1E1E] rounded-xl border border-[#DEE2E6] dark:border-[#333] shadow-sm">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 h-[calc(100vh-320px)]">
+            <!-- Input -->
+            <div class="flex flex-col h-full">
+                <div class="mb-3 flex justify-between items-center">
+                    <div class="flex items-center gap-3">
+                        <label class="text-xs font-bold text-[#212529] dark:text-white uppercase tracking-widest">Raw
+                            SQL</label>
+                        <select x-model="dialect"
+                            class="text-[10px] font-bold bg-[#F8F9FA] dark:bg-[#2D2D2D] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded px-2 py-0.5 outline-none focus:border-[#0D7C3D]">
+                            <option value="sql">Standard SQL</option>
+                            <option value="postgresql">PostgreSQL</option>
+                            <option value="mysql">MySQL</option>
+                            <option value="sqlite">SQLite</option>
+                            <option value="tsql">T-SQL (SQL Server)</option>
+                            <option value="oracle">Oracle</option>
+                        </select>
+                    </div>
+                    <div class="flex gap-4">
+                        <button @click="sample()"
+                            class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase tracking-tight">Sample</button>
+                        <button @click="input = ''"
+                            class="text-[10px] font-bold text-red-500 hover:underline uppercase tracking-tight">Clear</button>
+                    </div>
+                </div>
+                <textarea x-model="input"
+                    class="flex-1 w-full p-6 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl focus:border-[#0D7C3D] focus:ring-4 focus:ring-[#0D7C3D]/10 bg-white dark:bg-[#1E1E1E] text-[#212529] dark:text-white resize-none transition-all outline-none"
+                    placeholder="Paste your SQL here..."></textarea>
+            </div>
+
+            <!-- Output -->
+            <div class="flex flex-col h-full">
+                <div class="mb-3 flex justify-between items-center">
+                    <label class="text-xs font-bold text-[#212529] dark:text-white uppercase tracking-widest">Formatted
+                        Output</label>
+                    <button @click="copy()"
+                        class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase tracking-tight"
+                        x-text="copied ? 'Copied!' : 'Copy Result'"></button>
+                </div>
+                <div class="flex-1 relative overflow-hidden rounded-xl border border-[#DEE2E6] dark:border-[#3D3D3D]">
+                    <div id="output-container" class="w-full h-full bg-[#F8F9FA] dark:bg-[#121212] overflow-auto p-6">
+                        <pre><code class="language-sql" x-text="output"></code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Professional SQL Formatter & Highlight -->
+<script src="https://unpkg.com/sql-formatter@latest/dist/sql-formatter.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-sql.min.js"></script>
+
+<style>
+    /* Dark mode support for Prism */
+    .dark pre[class*="language-"],
+    .dark code[class*="language-"] {
+        background: transparent;
+        color: #E4E4E7;
+        text-shadow: none;
+    }
+
+    .dark .token.keyword {
+        color: #569CD6;
+    }
+
+    .dark .token.string {
+        color: #CE9178;
+    }
+
+    .dark .token.number {
+        color: #B5CEA8;
+    }
+
+    .dark .token.function {
+        color: #DCDCAA;
+    }
+</style>
+
+<script>
+    function sqlTool() {
+        return {
+            input: '',
+            dialect: 'sql',
+            copied: false,
+            output: '',
+
+            init() {
+                this.$watch('input', () => this.format());
+                this.$watch('dialect', () => this.format());
+            },
+
+            format() {
+                if (!this.input.trim()) {
+                    this.output = '';
+                    return;
+                }
+                try {
+                    this.output = sqlFormatter.format(this.input, {
+                        language: this.dialect,
+                        uppercase: true,
+                        indent: '  '
+                    });
+
+                    // Re-highlight
+                    this.$nextTick(() => {
+                        Prism.highlightAll();
+                    });
+                } catch (e) {
+                    this.output = this.input;
+                    console.error('SQL Format Error:', e);
+                }
+            },
+
+            sample() {
+                this.input = "SELECT id, name, created_at, (SELECT COUNT(*) FROM tasks WHERE tasks.project_id = projects.id) as task_count FROM projects JOIN users ON projects.owner_id = users.id WHERE projects.status = 'active' AND projects.category IN ('ai', 'research') GROUP BY projects.id ORDER BY projects.stars_count DESC LIMIT 20 OFFSET 0;";
+                this.dialect = 'postgresql';
+            },
+
+            copy() {
+                if (!this.output) return;
+                navigator.clipboard.writeText(this.output);
+                this.copied = true;
+                setTimeout(() => this.copied = false, 2000);
+            }
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,89 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}LaTeX Equation Editor | Kiri Tools{% endblock %}
+
+{% block extra_head %}
+<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+<script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8" x-data="latexTool()">
+    <nav class="mb-6 text-sm flex items-center text-[#6C757D] dark:text-[#A1A1AA]">
+        <a href="{% url 'tools:index' %}" class="hover:text-[#0D7C3D] transition-colors flex items-center">
+            <i class="fas fa-arrow-left mr-2"></i> Tools
+        </a>
+        <span class="mx-2">/</span>
+        <span class="text-[#212529] dark:text-white font-bold">LaTeX Equation Editor</span>
+    </nav>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 h-[calc(100vh-250px)]">
+        <div class="flex flex-col h-full">
+            <div class="mb-3 flex justify-between items-center">
+                <label class="text-sm font-bold text-[#212529] dark:text-white uppercase tracking-wider">LaTeX
+                    Input</label>
+                <div class="flex gap-2">
+                    <button @click="sample()"
+                        class="text-[11px] font-bold text-[#0D7C3D] hover:underline uppercase">Sample</button>
+                    <button @click="input = ''"
+                        class="text-[11px] font-bold text-red-500 hover:underline uppercase">Clear</button>
+                </div>
+            </div>
+            <textarea x-model="input" @input.debounce.300ms="render()"
+                class="flex-1 w-full p-6 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl focus:border-[#0D7C3D] focus:ring-4 focus:ring-[#0D7C3D]/10 bg-white dark:bg-[#1E1E1E] text-[#212529] dark:text-white resize-none transition-all outline-none"
+                placeholder="Type LaTeX here... (e.g., E=mc^2)"></textarea>
+        </div>
+
+        <div class="flex flex-col h-full">
+            <div class="mb-3 flex justify-between items-center">
+                <label class="text-sm font-bold text-[#212529] dark:text-white uppercase tracking-wider">Preview</label>
+                <button @click="copy()" class="text-[11px] font-bold text-[#0D7C3D] hover:underline uppercase"
+                    x-text="copied ? 'Copied!' : 'Copy Code'"></button>
+            </div>
+            <div
+                class="flex-1 bg-white dark:bg-[#252526] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl p-8 flex items-center justify-center overflow-auto">
+                <div id="latex-preview" class="text-3xl text-[#212529] dark:text-white" x-text="preview"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function latexTool() {
+        return {
+            input: 'e^{i\\pi} + 1 = 0',
+            copied: false,
+
+            init() {
+                this.render();
+            },
+
+            render() {
+                const preview = document.getElementById('latex-preview');
+                preview.innerHTML = '$$' + (this.input || '') + '$$';
+                if (window.MathJax) {
+                    MathJax.typesetPromise([preview]).catch((err) => console.log(err.message));
+                }
+            },
+
+            sample() {
+                const samples = [
+                    '\\frac{-b \\pm \\sqrt{b^2 - 4ac}}{2a}',
+                    '\\int_{a}^{b} f(x) dx',
+                    '\\begin{pmatrix} a & b \\\\ c & d \\end{pmatrix}',
+                    '\\sum_{i=1}^{n} i^2 = \\frac{n(n+1)(2n+1)}{6}'
+                ];
+                this.input = samples[Math.floor(Math.random() * samples.length)];
+                this.render();
+            },
+
+            copy() {
+                navigator.clipboard.writeText(this.input);
+                this.copied = true;
+                setTimeout(() => this.copied = false, 2000);
+            }
+        }
+    }
+</script>
+{% endblock %}

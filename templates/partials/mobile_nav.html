@@ -1,0 +1,32 @@
+{% load static %}
+<!-- ===== MOBILE BOTTOM NAV ===== -->
+<nav
+    class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-white border-t border-[#DEE2E6] z-50 dark:bg-[#1E1E1E] dark:border-[#3D3D3D] safe-area-pb shadow-[0_-4px_12px_rgba(0,0,0,0.05)]">
+    <div class="grid grid-cols-5 h-full">
+        <a href="{% url 'projects:list' %}"
+            class="flex flex-col items-center justify-center gap-1 {% if 'projects' in request.path %}text-[#0D7C3D]{% else %}text-[#6C757D] dark:text-[#A1A1AA]{% endif %}">
+            <i class="fas fa-rocket text-lg"></i>
+            <span class="text-[9px] font-bold uppercase tracking-tighter">Explore</span>
+        </a>
+        <a href="{% url 'publications:list' %}"
+            class="flex flex-col items-center justify-center gap-1 {% if 'library' in request.path %}text-[#0D7C3D]{% else %}text-[#6C757D] dark:text-[#A1A1AA]{% endif %}">
+            <i class="fas fa-book text-lg"></i>
+            <span class="text-[9px] font-bold uppercase tracking-tighter">Library</span>
+        </a>
+        <a href="{% url 'activity:feed' %}"
+            class="flex flex-col items-center justify-center gap-1 {% if 'feed' in request.path %}text-[#0D7C3D]{% else %}text-[#6C757D] dark:text-[#A1A1AA]{% endif %}">
+            <i class="fas fa-stream text-lg"></i>
+            <span class="text-[9px] font-bold uppercase tracking-tighter">Feed</span>
+        </a>
+        <a href="{% url 'discussions:list' %}"
+            class="flex flex-col items-center justify-center gap-1 {% if 'discuss' in request.path %}text-[#0D7C3D]{% else %}text-[#6C757D] dark:text-[#A1A1AA]{% endif %}">
+            <i class="fas fa-comments text-lg"></i>
+            <span class="text-[9px] font-bold uppercase tracking-tighter">Forum</span>
+        </a>
+        <a href="{% url 'tools:index' %}"
+            class="flex flex-col items-center justify-center gap-1 {% if 'tools' in request.path %}text-[#0D7C3D]{% else %}text-[#6C757D] dark:text-[#A1A1AA]{% endif %}">
+            <i class="fas fa-toolbox text-lg"></i>
+            <span class="text-[9px] font-bold uppercase tracking-tighter">Tools</span>
+        </a>
+    </div>
+</nav>

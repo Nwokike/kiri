@@ -1,0 +1,19 @@
+{% load static %}
+<!-- Categories -->
+{% if categories %}
+<div class="p-6 bg-white rounded-xl border border-[#DEE2E6] dark:bg-[#1E1E1E] dark:border-[#333]">
+    <h3 class="text-md font-bold text-[#212529] dark:text-white mb-6 flex items-center gap-2">
+        <i class="fas fa-tags text-[#ADB5BD]"></i>
+        Research Areas
+    </h3>
+    <div class="flex flex-wrap gap-2">
+        {% for cat in categories %}
+        <a href="{% url 'projects:list' %}?category={{ cat.category }}"
+            class="px-3 py-1.5 text-xs font-bold bg-[#F8F9FA] dark:bg-[#2D2D2D] text-[#495057] dark:text-[#A1A1AA] rounded-lg hover:bg-[#E8F5ED] hover:text-[#0D7C3D] transition-colors uppercase tracking-tight">
+            {{ cat.category|default:"Other" }}
+            <span class="ml-1 opacity-50">{{ cat.count }}</span>
+        </a>
+        {% endfor %}
+    </div>
+</div>
+{% endif %}

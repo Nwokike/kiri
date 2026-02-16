@@ -1,113 +1,47 @@
-# Traffic Controller: Intelligence Scalable to Zero
+# Kiri Traffic Controller (KTC)
 
-> Enables multi-lane project previews using AI classification and cross-platform infrastructure.
+The Traffic Controller is the "Brain" of Kiri. It analyzes GitHub repositories and routes them to the most efficient execution environment (Lane) based on their contents.
 
-## Architecture
+## The 4-Lane Architecture
 
-```mermaid
-flowchart LR
-    subgraph User
-        U[Submit Project URL]
-    end
-    
-    subgraph Kiri Backend
-        NT[Native Task Queue]
-        AI[Multi-Tier AI Rotation]
-        GS[Gist Service]
-    end
-    
-    subgraph Infrastructure
-        KS[Kiri Studio<br/>Pyodide/WASM]
-        BD[Binder<br/>Cloud Server]
-        CL[Colab<br/>GPU Power]
-    end
-    
-    U --> NT
-    NT --> AI
-    AI --> |Lane A| KS
-    AI --> |Lane B| GS --> BD
-    AI --> |Lane C| GS --> CL
-```
+We have moved away from the generic "Browser Lane" to two specialized engines.
 
-## Lane Logic
+| Lane | Name | Engine | Best For | Start Time |
+| :--- | :--- | :--- | :--- | :--- |
+| **P** | **PyStudio** | **Pyodide (WASM)** | Data Science, Pandas, Numpy, Simple Python Scripts, Algorithms. | Instant |
+| **J** | **JS Studio** | **WebContainer (Node)** | React, Vue, Next.js, Node.js, Static Sites, Vite. | ~5s (Boot) |
+| **B** | **Binder** | **Docker (Cloud)** | Django, Flask, FastAPI, Go, Rust, SQL Databases. | ~60s |
+| **C** | **Colab** | **GPU Cluster** | PyTorch, TensorFlow, Transformers, LLM Training. | ~10s |
 
-| Lane | Badge | Best For | Runner |
-|------|-------|----------|--------|
-| **A** | 🟢 Instant Run | React, Static, Python Scripts | **Kiri Studio** |
-| **B** | 🟠 Cloud Boot | Django, Flask, Backends | [mybinder.org](https://mybinder.org) |
-| **C** | 🔴 GPU Powered | ML Models, PyTorch, JAX | [Google Colab](https://colab.research.google.com) |
+## Classification Logic (AI + Heuristics)
 
-## Multi-Tier AI Fallback Chain
-Kiri rotates through 15+ models to ensure 100% classification uptime:
-1. **Tier 1 (Groq/Free)**: Moonshot (Kimi K2 Instruct), Llama 4 (Scout/Maverick), GPT OSS (120B/20B), Qwen 3.
-2. **Tier 2 (Gemini/Paid)**: Gemini 3 Flash, Gemini 2.5 Flash, Gemini 3 Pro.
-3. **Tier 3 (Last Resort)**: Llama 3.1 8B Instant.
+The classification happens in `core.ai_service.AIService`.
 
-## Files
+### Lane P (PyStudio)
+* **Triggers:**
+    * `requirements.txt` exists but contains NO web frameworks (Django/Flask) and NO GPU libs (Torch).
+    * Simple `.py` files found in root.
+    * `Jupyter Notebooks` (*.ipynb).
+* **Constraints:** No socket binding, no heavy system calls.
 
-| File | Purpose |
-|------|---------|
-| `core/ai_service.py` | Gemini + Groq classification |
-| `projects/gist_service.py` | GitHub Gist creation for Binder/Colab |
-| `projects/models.py` | `lane`, `execution_url`, `gist_id` fields |
-| `kiri_project/tasks.py` | `classify_project_lane()` background task |
+### Lane J (JS Studio)
+* **Triggers:**
+    * `package.json` exists.
+    * Presence of `vite.config.js`, `next.config.js`.
+    * Pure HTML/CSS/JS files.
+* **Constraints:** Runs in-browser Node.js. Can run `npm run dev`.
 
-## Technical request flow
-1. **Fetch**: `GitHubService` retrieves the repository file tree and key meta-files (`package.json`, `requirements.txt`).
-2. **Rotation**: `AIService` sends the context to the fallback chain. It rotates through providers (Groq -> Gemini) until a valid JSON response is received.
-3. **Heuristics**: If all AI models fail, `AIService._heuristic_classification` provides a regex-based fallback.
-4. **Provisioning**: 
-    - **Lane A**: Generates a Studio link with the repo context.
-    - **Lane B/C**: `GistService` creates a bridge Gist containing the necessary environment configs (`environment.yml` or `.ipynb`).
+### Lane B (Cloud Container)
+* **Triggers:**
+    * `dockerfile` exists.
+    * `requirements.txt` contains `django`, `flask`, `fastapi`, `uvicorn`.
+    * Needs a real Linux kernel or specific ports exposed.
 
-## Testing
-Verify the controller via:
-```bash
-uv run python manage.py test projects.tests
-```
+### Lane C (GPU Cluster)
+* **Triggers:**
+    * `requirements.txt` contains `torch`, `tensorflow`, `transformers`, `cuda`.
+    * Deep Learning or LLM workloads.
 
-## API Keys Required
+## Override Mechanism
 
-```bash
-# .env
-GEMINI_API_KEY=...        # aistudio.google.com/apikey
-GROQ_API_KEY=...          # console.groq.com/keys
-KIRI_BOT_GITHUB_TOKEN=... # GitHub PAT with 'gist' scope
-KIRI_BOT_USERNAME=...     # GitHub username for bot
-```
-
-## Request Flow
-1. **Submission**: User submits a GitHub URL.
-2. **Analysis**: AI analyzes the repository file structure (tree).
-3. **Classification**: AI returns the optimal "Lane" and specific execution commands.
-4. **Provisioning**: 
-    - Lane A: Loads environment in Kiri Studio.
-    - Lane B/C: Kiri Bot creates a bridge Gist and prepares the redirect.
-
-## URL Formats
-
-**Binder (Lane B):**
-```
-https://mybinder.org/v2/gist/{username}/{gist_id}/HEAD?urlpath=proxy/{port}/
-```
-
-**Colab (Lane C):**
-```
-https://colab.research.google.com/gist/{username}/{gist_id}/demo.ipynb
-```
-
-## Free Tier Limits
-
-| Service | Limit |
-|---------|-------|
-| Gemini 2.5 Flash | 250 req/day |
-| Groq | 1000 req/day |
-| Binder | 1-2GB RAM, 10min idle |
-| Colab | T4 GPU, ~12hr sessions |
-| GitHub Gists | Unlimited |
-
-## Testing
-Verify the controller via:
-```bash
-uv run python manage.py test projects.tests
-```
+Admins can manually override the Lane in the Django Admin if the AI misclassifies a project (e.g., a "Django" project that is actually just a tutorial script).

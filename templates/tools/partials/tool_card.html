@@ -1,0 +1,28 @@
+<a href="{% url url %}" class="group block h-full">
+    <div
+        class="h-full bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl p-6 hover:border-[#0D7C3D] hover:shadow-lg transition-all relative overflow-hidden flex flex-col">
+        <div
+            class="absolute top-0 right-0 w-24 h-24 bg-{{ color }}-500/5 -mr-12 -mt-12 rounded-full transition-transform group-hover:scale-150">
+        </div>
+
+        <div
+            class="w-12 h-12 mb-5 bg-{{ color }}-50 dark:bg-{{ color }}-900/20 rounded-lg flex items-center justify-center text-{{ color }}-600 dark:text-{{ color }}-400 text-xl group-hover:scale-110 transition-transform">
+            <i class="fas {{ icon }}"></i>
+        </div>
+
+        <h3
+            class="text-lg font-bold text-[#212529] dark:text-white mb-2 group-hover:text-[#0D7C3D] transition-colors line-clamp-1">
+            {{ name }}
+        </h3>
+
+        <p class="text-[#6C757D] dark:text-[#A1A1AA] text-xs leading-relaxed mb-6 line-clamp-2">
+            {{ desc }}
+        </p>
+
+        <div
+            class="mt-auto flex items-center text-xs font-bold text-[#0D7C3D] border-t border-gray-50 dark:border-[#333] pt-4">
+            Launch Tool
+            <i class="fas fa-chevron-right ml-2 group-hover:translate-x-1 transition-transform"></i>
+        </div>
+    </div>
+</a>

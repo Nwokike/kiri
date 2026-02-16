@@ -1,5 +1,5 @@
 from django.urls import path
-from . import views
+from . import views, api
 
 app_name = 'publications'
 
@@ -9,4 +9,6 @@ urlpatterns = [
     path('new/', views.PublicationImportLandingView.as_view(), name='create'),
     path('<slug:slug>/edit/', views.PublicationUpdateView.as_view(), name='update'),
     path('<slug:slug>/', views.PublicationDetailView.as_view(), name='detail'),
+    path('api/studio/publish/', api.studio_publish, name='api_studio_publish'), # NEW
+
 ]

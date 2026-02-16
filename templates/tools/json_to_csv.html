@@ -1,0 +1,127 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}JSON to CSV Converter | Kiri Tools{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8" x-data="csvTool()">
+    <nav class="mb-6 text-sm flex items-center text-[#6C757D] dark:text-[#A1A1AA]">
+        <a href="{% url 'tools:index' %}" class="hover:text-[#0D7C3D] transition-colors flex items-center">
+            <i class="fas fa-arrow-left mr-2"></i> Tools
+        </a>
+        <span class="mx-2">/</span>
+        <span class="text-[#212529] dark:text-white font-bold">JSON to CSV</span>
+    </nav>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 h-[calc(100vh-280px)]">
+        <!-- Input JSON -->
+        <div class="flex flex-col h-full">
+            <div class="mb-3 flex justify-between items-center">
+                <label class="text-xs font-bold text-[#212529] dark:text-white uppercase tracking-widest">Input JSON
+                    Array</label>
+                <div class="flex gap-4">
+                    <button @click="sample()"
+                        class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase">Sample</button>
+                    <button @click="input = ''"
+                        class="text-[10px] font-bold text-red-500 hover:underline uppercase">Clear</button>
+                </div>
+            </div>
+            <textarea x-model="input"
+                class="flex-1 w-full p-6 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl focus:border-[#0D7C3D] focus:ring-4 focus:ring-[#0D7C3D]/10 bg-white dark:bg-[#1E1E1E] text-[#212529] dark:text-white resize-none transition-all outline-none"
+                placeholder="Paste JSON array here..."></textarea>
+        </div>
+
+        <!-- Output CSV -->
+        <div class="flex flex-col h-full">
+            <div class="mb-3 flex justify-between items-center">
+                <label class="text-xs font-bold text-[#212529] dark:text-white uppercase tracking-widest">Output
+                    CSV</label>
+                <div class="flex gap-4">
+                    <button @click="download()" class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase"
+                        x-show="output">Download .csv</button>
+                    <button @click="copy()" class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase"
+                        x-text="copied ? 'Copied!' : 'Copy Result'"></button>
+                </div>
+            </div>
+            <div class="flex-1 relative overflow-hidden rounded-xl border border-[#DEE2E6] dark:border-[#3D3D3D]">
+                <textarea readonly x-model="output"
+                    class="w-full h-full p-6 font-mono text-sm bg-[#F8F9FA] dark:bg-[#121212] text-[#6C757D] dark:text-[#A1A1AA] resize-none outline-none"></textarea>
+                <div x-show="error"
+                    class="absolute bottom-4 left-4 right-4 bg-red-100 text-red-700 px-4 py-2 rounded-lg text-xs font-bold border border-red-200">
+                    <i class="fas fa-exclamation-circle mr-2"></i> <span x-text="error"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- PapaParse CDN -->
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+
+<script>
+    function csvTool() {
+        return {
+            input: '',
+            output: '',
+            error: '',
+            copied: false,
+
+            init() {
+                this.$watch('input', () => this.convert());
+            },
+
+            convert() {
+                this.error = '';
+                if (!this.input.trim()) {
+                    this.output = '';
+                    return;
+                }
+                try {
+                    let parsed = JSON.parse(this.input);
+                    if (!Array.isArray(parsed)) {
+                        // Attempt to wrap if it's a single object
+                        parsed = [parsed];
+                    }
+
+                    this.output = Papa.unparse(parsed, {
+                        header: true,
+                        skipEmptyLines: true
+                    });
+                } catch (e) {
+                    this.error = "Invalid JSON or Structure: " + e.message;
+                    this.output = '';
+                }
+            },
+
+            sample() {
+                this.input = JSON.stringify([
+                    { id: 1, name: "Project Alpha", category: "ML", stars: 156, status: "active" },
+                    { id: 2, name: "Project Beta", category: "NLP", stars: 89, status: "archived" },
+                    { id: 3, name: "Project Gamma", category: "Vision", stars: 245, status: "active" },
+                    { id: 4, name: "Project Delta", category: "Robotics", stars: 412, status: "hot" }
+                ], null, 4);
+            },
+
+            copy() {
+                if (!this.output) return;
+                navigator.clipboard.writeText(this.output);
+                this.copied = true;
+                setTimeout(() => this.copied = false, 2000);
+            },
+
+            download() {
+                if (!this.output) return;
+                const blob = new Blob([this.output], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement("a");
+                const url = URL.createObjectURL(blob);
+                link.setAttribute("href", url);
+                link.setAttribute("download", "kiri_export.csv");
+                link.style.visibility = 'hidden';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+    }
+</script>
+{% endblock %}

@@ -1,0 +1,107 @@
+{% load static %}
+<!-- ===== FOOTER ===== -->
+<footer class="bg-white border-t border-[#DEE2E6] dark:bg-[#1E1E1E] dark:border-[#3D3D3D] mt-auto">
+    <div class="max-w-7xl mx-auto px-6 py-12">
+        <div class="grid grid-cols-3 lg:grid-cols-4 gap-12 lg:gap-8">
+            <!-- Brand & Socials -->
+            <div class="col-span-3 lg:col-span-1">
+                <a href="/" class="flex items-center gap-2 mb-4">
+                    <img src="{% static 'images/logos/logo.png' %}" alt="Kiri" class="h-10 w-auto">
+                </a>
+                <p class="text-sm text-[#6C757D] dark:text-[#A1A1AA] mb-6">
+                    The efficiency frontier of Artificial Intelligence. Smart, Small, Scalable.
+                </p>
+                <!-- Social Links -->
+                <div class="flex gap-3">
+                    <a href="https://github.com/kiri-labs" target="_blank" rel="noopener noreferrer"
+                        class="w-8 h-8 flex items-center justify-center rounded-lg bg-[#F8F9FA] text-[#495057] hover:bg-[#0D7C3D] hover:text-white transition-colors dark:bg-[#2D2D2D] dark:text-[#A1A1AA]"
+                        title="GitHub">
+                        <i class="fab fa-github text-sm"></i>
+                    </a>
+                    <a href="https://x.com/kiri_research" target="_blank" rel="noopener noreferrer"
+                        class="w-8 h-8 flex items-center justify-center rounded-lg bg-[#F8F9FA] text-[#495057] hover:bg-[#0D7C3D] hover:text-white transition-colors dark:bg-[#2D2D2D] dark:text-[#A1A1AA]"
+                        title="X (Twitter)">
+                        <i class="fab fa-x-twitter text-sm"></i>
+                    </a>
+                    <a href="https://facebook.com/kiri.ng.social" target="_blank" rel="noopener noreferrer"
+                        class="w-8 h-8 flex items-center justify-center rounded-lg bg-[#F8F9FA] text-[#495057] hover:bg-[#0D7C3D] hover:text-white transition-colors dark:bg-[#2D2D2D] dark:text-[#A1A1AA]"
+                        title="Facebook">
+                        <i class="fab fa-facebook-f text-sm"></i>
+                    </a>
+                    <a href="https://instagram.com/kiri.ng.social" target="_blank" rel="noopener noreferrer"
+                        class="w-8 h-8 flex items-center justify-center rounded-lg bg-[#F8F9FA] text-[#495057] hover:bg-[#0D7C3D] hover:text-white transition-colors dark:bg-[#2D2D2D] dark:text-[#A1A1AA]"
+                        title="Instagram">
+                        <i class="fab fa-instagram text-sm"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Platform -->
+            <div>
+                <h4 class="font-semibold text-[#212529] dark:text-white mb-4">Platform</h4>
+                <ul class="space-y-3 text-sm">
+                    <li><a href="{% url 'core:studio_py' %}"
+                            class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
+                            Py Studio</a></li>
+                    <li><a href="{% url 'core:studio_js' %}"
+                            class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
+                            JS Studio</a></li>
+                    <li><a href="{% url 'publications:list' %}"
+                            class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">Library</a>
+                    </li>
+                    <li><a href="{% url 'projects:list' %}"
+                            class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">Projects</a>
+                    </li>
+                    <li><a href="{% url 'tools:index' %}"
+                            class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">Tools
+                            Hub</a></li>
+                </ul>
+            </div>
+
+            <!-- Company -->
+            <div>
+                <h4 class="font-semibold text-[#212529] dark:text-white mb-4">Company</h4>
+                <ul class="space-y-3 text-sm">
+                    <li><a href="{% url 'core:about' %}"
+                            class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">About
+                            Us</a></li>
+                    <li><a href="{% url 'core:contact' %}"
+                            class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">Contact</a>
+                    </li>
+                    <li><a href="{% url 'activity:feed' %}"
+                            class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">Social
+                            Feed</a></li>
+                    <li><a href="{% url 'discussions:list' %}"
+                            class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">Community</a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Legal -->
+            <div>
+                <h4 class="font-semibold text-[#212529] dark:text-white mb-4">Legal</h4>
+                <ul class="space-y-3 text-sm">
+                    <li><a href="{% url 'core:privacy' %}"
+                            class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">Privacy
+                            Policy</a></li>
+                    <li><a href="{% url 'core:terms' %}"
+                            class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">Terms
+                            of Service</a></li>
+                    <li><a href="{% url 'core:refund_policy' %}"
+                            class="text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">Refund
+                            Policy</a></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Bottom -->
+        <div
+            class="mt-10 pt-6 border-t border-[#DEE2E6] dark:border-[#3D3D3D] flex flex-col md:flex-row justify-between items-center gap-4 text-xs text-[#6C757D] dark:text-[#A1A1AA]">
+            <div class="text-center md:text-left">
+                <p>&copy; 2024 - {{ CURRENT_YEAR }} Kiri Research Labs. All rights reserved.</p>
+                <p class="mt-1 opacity-75">RC No. 9317920 | SUID-2621-6457-9859-4343</p>
+            </div>
+            <p>Built with <i class="fas fa-heart text-[#C4992E]"></i> for researchers everywhere.</p>
+        </div>
+    </div>
+</footer>

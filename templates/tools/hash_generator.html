@@ -1,0 +1,83 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Hash Generator | Kiri Tools{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8" x-data="hashTool()">
+    <nav class="mb-6 text-sm flex items-center text-[#6C757D] dark:text-[#A1A1AA]">
+        <a href="{% url 'tools:index' %}" class="hover:text-[#0D7C3D] transition-colors flex items-center">
+            <i class="fas fa-arrow-left mr-2"></i> Tools
+        </a>
+        <span class="mx-2">/</span>
+        <span class="text-[#212529] dark:text-white font-bold">Hash Generator</span>
+    </nav>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+        <div class="flex flex-col">
+            <div class="mb-3 flex justify-between items-center">
+                <label class="text-sm font-bold text-[#212529] dark:text-white uppercase tracking-wider">Input
+                    Text</label>
+                <div class="flex gap-2">
+                    <button @click="input = ''"
+                        class="text-[11px] font-bold text-red-500 hover:underline uppercase">Clear</button>
+                </div>
+            </div>
+            <textarea x-model="input" @input="generate()"
+                class="h-64 w-full p-6 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl focus:border-[#0D7C3D] focus:ring-4 focus:ring-[#0D7C3D]/10 bg-white dark:bg-[#1E1E1E] text-[#212529] dark:text-white resize-none transition-all outline-none"
+                placeholder="Type or paste text to hash..."></textarea>
+        </div>
+
+        <div class="space-y-6">
+            <template x-for="algo in algorithms" :key="algo">
+                <div
+                    class="bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl p-5 shadow-sm">
+                    <div class="flex justify-between items-center mb-3">
+                        <span class="text-xs font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest"
+                            x-text="algo"></span>
+                        <button @click="copy(hashes[algo])"
+                            class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase"
+                            x-text="copiedHash === hashes[algo] ? 'Copied!' : 'Copy'"></button>
+                    </div>
+                    <div class="font-mono text-sm text-[#212529] dark:text-white break-all bg-gray-50 dark:bg-[#252526] p-3 rounded-lg"
+                        x-text="hashes[algo] || '...'"></div>
+                </div>
+            </template>
+        </div>
+    </div>
+</div>
+
+<script>
+    function hashTool() {
+        return {
+            input: '',
+            copiedHash: '',
+            algorithms: ['SHA-256', 'SHA-384', 'SHA-512', 'SHA-1'],
+            hashes: {},
+
+            async generate() {
+                if (!this.input) {
+                    this.hashes = {};
+                    return;
+                }
+
+                const encoder = new TextEncoder();
+                const data = encoder.encode(this.input);
+
+                for (const algo of this.algorithms) {
+                    const hashBuffer = await crypto.subtle.digest(algo, data);
+                    const hashArray = Array.from(new Uint8Array(hashBuffer));
+                    this.hashes[algo] = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+                }
+            },
+
+            copy(val) {
+                if (!val) return;
+                navigator.clipboard.writeText(val);
+                this.copiedHash = val;
+                setTimeout(() => this.copiedHash = '', 2000);
+            }
+        }
+    }
+</script>
+{% endblock %}

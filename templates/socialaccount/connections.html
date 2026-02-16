@@ -30,16 +30,10 @@
                 <div class="flex items-center gap-4">
                     <div class="w-10 h-10 rounded-xl flex items-center justify-center
                         {% if provider == 'github' %}bg-[#24292F]
-                        {% elif provider == 'gitlab' %}bg-[#FC6D26]/10
-                        {% elif provider == 'bitbucket_oauth2' %}bg-[#0052CC]/10
                         {% elif provider == 'huggingface' %}bg-[#FF9D00]/10
                         {% else %}bg-[#F8F9FA] dark:bg-[#2D2D2D]{% endif %}">
                         {% if provider == 'github' %}
                         <i class="fab fa-github text-white"></i>
-                        {% elif provider == 'gitlab' %}
-                        <i class="fab fa-gitlab text-[#FC6D26]"></i>
-                        {% elif provider == 'bitbucket_oauth2' %}
-                        <i class="fab fa-bitbucket text-[#0052CC]"></i>
                         {% elif provider == 'huggingface' %}
                         <i class="fas fa-robot text-[#FF9D00]"></i>
                         {% else %}
@@ -48,12 +42,14 @@
                     </div>
                     <div>
                         <p class="font-medium text-[#212529] dark:text-white capitalize">
-                            {% if provider == 'bitbucket_oauth2' %}Bitbucket{% else %}{{ provider }}{% endif %}
+                            {{ provider }}
                         </p>
                         <p class="text-sm text-[#6C757D] dark:text-[#A1A1AA]">
-                            {{
-                            account.extra_data.login|default:account.extra_data.username|default:account.extra_data.preferred_username|default:"Connected"
-                            }}
+                            {% if provider == 'github' %}
+                            {{ account.extra_data.login }}
+                            {% elif provider == 'huggingface'%}
+                            {{ account.extra_data.preferred_username }}{% else %}
+                            {{account.extra_data.username|default:"Connected" }}{% endif %}
                         </p>
                     </div>
                 </div>
@@ -99,32 +95,6 @@
                 <div>
                     <p class="font-medium text-[#212529] dark:text-white">GitHub</p>
                     <p class="text-xs text-[#6C757D]">Import repos, star sync</p>
-                </div>
-            </a>
-            {% endif %}
-
-            {% if 'gitlab' not in accounts %}
-            <a href="{% provider_login_url 'gitlab' process='connect' %}"
-                class="flex items-center gap-3 p-4 border border-[#DEE2E6] rounded-xl hover:border-[#0D7C3D] hover:bg-[#F8F9FA] transition-all dark:border-[#3D3D3D] dark:hover:bg-[#2D2D2D]">
-                <div class="w-10 h-10 bg-[#FC6D26]/10 rounded-xl flex items-center justify-center">
-                    <i class="fab fa-gitlab text-[#FC6D26]"></i>
-                </div>
-                <div>
-                    <p class="font-medium text-[#212529] dark:text-white">GitLab</p>
-                    <p class="text-xs text-[#6C757D]">Import projects</p>
-                </div>
-            </a>
-            {% endif %}
-
-            {% if 'bitbucket_oauth2' not in accounts %}
-            <a href="{% provider_login_url 'bitbucket_oauth2' process='connect' %}"
-                class="flex items-center gap-3 p-4 border border-[#DEE2E6] rounded-xl hover:border-[#0D7C3D] hover:bg-[#F8F9FA] transition-all dark:border-[#3D3D3D] dark:hover:bg-[#2D2D2D]">
-                <div class="w-10 h-10 bg-[#0052CC]/10 rounded-xl flex items-center justify-center">
-                    <i class="fab fa-bitbucket text-[#0052CC]"></i>
-                </div>
-                <div>
-                    <p class="font-medium text-[#212529] dark:text-white">Bitbucket</p>
-                    <p class="text-xs text-[#6C757D]">Import repositories</p>
                 </div>
             </a>
             {% endif %}

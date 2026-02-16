@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}URL Encoder & Decoder | Kiri Tools{% endblock %}
+
+{% block content %}
+<div class="max-w-6xl mx-auto px-4 py-8" x-data="urlTool()">
+    <nav class="mb-6 text-sm flex items-center text-[#6C757D] dark:text-[#A1A1AA]">
+        <a href="{% url 'tools:index' %}" class="hover:text-[#0D7C3D] transition-colors flex items-center">
+            <i class="fas fa-arrow-left mr-2"></i> Tools
+        </a>
+        <span class="mx-2">/</span>
+        <span class="text-[#212529] dark:text-white font-bold">URL Encoder & Decoder</span>
+    </nav>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-8 h-[calc(100vh-250px)]">
+        <div class="flex flex-col h-full">
+            <div class="mb-3 flex justify-between items-center">
+                <label class="text-sm font-bold text-[#212529] dark:text-white uppercase tracking-wider">Input
+                    Text</label>
+                <div class="flex gap-2">
+                    <button @click="sample()"
+                        class="text-[11px] font-bold text-[#0D7C3D] hover:underline uppercase">Sample</button>
+                    <button @click="input = ''"
+                        class="text-[11px] font-bold text-red-500 hover:underline uppercase">Clear</button>
+                </div>
+            </div>
+            <textarea x-model="input"
+                class="flex-1 w-full p-6 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl focus:border-[#0D7C3D] focus:ring-4 focus:ring-[#0D7C3D]/10 bg-white dark:bg-[#1E1E1E] text-[#212529] dark:text-white resize-none transition-all outline-none"
+                placeholder="Paste your URL or text here..."></textarea>
+        </div>
+
+        <div class="flex flex-col h-full">
+            <div class="mb-3 flex justify-between items-center">
+                <div class="flex gap-4">
+                    <button @click="mode = 'encode'"
+                        :class="mode === 'encode' ? 'text-[#0D7C3D] border-[#0D7C3D]' : 'text-gray-400 border-transparent'"
+                        class="text-sm font-bold uppercase tracking-wider border-b-2 pb-1 transition-all">Encode</button>
+                    <button @click="mode = 'decode'"
+                        :class="mode === 'decode' ? 'text-[#0D7C3D] border-[#0D7C3D]' : 'text-gray-400 border-transparent'"
+                        class="text-sm font-bold uppercase tracking-wider border-b-2 pb-1 transition-all">Decode</button>
+                </div>
+                <button @click="copy()" class="text-[11px] font-bold text-[#0D7C3D] hover:underline uppercase"
+                    x-text="copied ? 'Copied!' : 'Copy Result'"></button>
+            </div>
+            <div class="flex-1 relative">
+                <textarea readonly :value="output"
+                    class="w-full h-full p-6 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl bg-[#F8F9FA] dark:bg-[#252526] text-[#6C757D] dark:text-[#A1A1AA] resize-none outline-none"></textarea>
+                <div x-show="error"
+                    class="absolute inset-x-4 bottom-4 p-4 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-lg text-red-600 dark:text-red-400 text-xs font-bold">
+                    <i class="fas fa-exclamation-triangle mr-2"></i> <span x-text="error"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function urlTool() {
+        return {
+            input: '',
+            mode: 'encode',
+            copied: false,
+            error: '',
+            get output() {
+                this.error = '';
+                if (!this.input) return '';
+                try {
+                    return this.mode === 'encode' ? encodeURIComponent(this.input) : decodeURIComponent(this.input);
+                } catch (e) {
+                    this.error = 'Invalid URL components for decoding.';
+                    return this.input;
+                }
+            },
+            sample() {
+                this.input = this.mode === 'encode' ? 'https://kiri.research/search?q=ai research&lang=en' : 'https%3A%2F%2Fkiri.research%2Fsearch%3Fq%3Dai%20research%26lang%3Den';
+            },
+            copy() {
+                if (!this.output || this.error) return;
+                navigator.clipboard.writeText(this.output);
+                this.copied = true;
+                setTimeout(() => this.copied = false, 2000);
+            }
+        }
+    }
+</script>
+{% endblock %}

@@ -1,454 +1,215 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Kiri Studio | Intelligent IDE{% endblock %}
+{% block title %}{{ page_title }}{% endblock %}
 
 {% block content %}
-<!-- Studio Container (Full Screen) -->
-<div class="fixed inset-0 top-14 bg-[#1E1E1E] flex flex-col overflow-hidden z-40">
+<div class="fixed inset-0 top-14 bg-[#1E1E1E] flex flex-col z-40 font-sans text-[#CCCCCC]">
 
-    <!-- Studio Header -->
-    <div class="h-12 border-b border-[#333] flex items-center justify-between px-4 bg-[#252526]">
+    <div class="h-14 bg-[#252526] border-b border-[#333] flex items-center justify-between px-4 select-none">
+
         <div class="flex items-center gap-3">
-            <a href="{% url 'projects:list' %}" class="md:hidden text-[#A1A1AA] hover:text-white mr-2">
+            <button onclick="toggleSidebar()"
+                class="md:hidden p-2 text-[#A1A1AA] hover:text-white active:bg-[#333] rounded">
+                <i class="fas fa-bars text-lg"></i>
+            </button>
+            <a href="{% url 'home' %}" class="text-[#A1A1AA] hover:text-white transition hidden sm:inline">
                 <i class="fas fa-arrow-left"></i>
             </a>
-            <div class="flex items-center gap-2 text-[#CCCCCC]">
-                <i class="fas fa-code-branch text-[#0D7C3D]"></i>
-                <span class="font-semibold text-sm hidden md:inline">Kiri Studio</span>
-                <span class="font-semibold text-sm md:hidden">Studio</span>
+
+            <div class="flex items-center gap-2">
+                <span class="font-bold text-gray-200 tracking-tight">Kiri Studio</span>
+                {% if studio_type == 'py' %}
                 <span
-                    class="text-xs px-2 py-0.5 bg-[#0D7C3D]/20 text-[#0D7C3D] rounded border border-[#0D7C3D]/30 hidden sm:inline">Beta</span>
+                    class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#0D7C3D]/20 text-[#0D7C3D] border border-[#0D7C3D]/30">PY</span>
+                {% else %}
+                <span
+                    class="text-[10px] font-bold px-1.5 py-0.5 rounded bg-[#f7df1e]/20 text-[#f7df1e] border border-[#f7df1e]/30">JS</span>
+                {% endif %}
             </div>
 
-            <!-- Language Selector (Hidden on tiny screens) -->
-            <div class="h-6 w-px bg-[#333] mx-2 hidden sm:block"></div>
-            <select id="language-select"
-                class="hidden sm:block bg-[#3C3C3C] text-[#CCCCCC] text-sm border border-[#333] rounded px-2 py-1 outline-none focus:border-[#0D7C3D]">
-                <option value="python">Python (Pyodide)</option>
-                <option value="web">Web (HTML/JS)</option>
-            </select>
+            <div id="runtime-status"
+                class="hidden sm:flex items-center gap-2 text-xs text-yellow-500 animate-pulse transition-all ml-4">
+                <i class="fas fa-circle text-[8px]"></i> <span>Booting...</span>
+            </div>
         </div>
 
-        <div class="flex items-center gap-3">
-            <button id="ai-advisor-btn"
-                class="hidden sm:flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-[#A1A1AA] hover:text-white hover:bg-[#3C3C3C] rounded transition-colors">
-                <i class="fas fa-magic text-purple-400"></i>
-                <span>Ask AI</span>
+        <div class="flex items-center gap-2">
+            <button id="github-btn" onclick="openGitHubModal()"
+                class="flex items-center gap-2 px-3 py-1.5 bg-[#24292e] hover:bg-[#000] text-white text-xs font-medium rounded transition-all border border-[#444]">
+                <i class="fab fa-github"></i>
+                <span id="github-btn-text" class="hidden sm:inline">Connect</span>
             </button>
-            <button id="run-btn"
-                class="flex items-center gap-2 px-4 py-1.5 bg-[#0D7C3D] hover:bg-[#0A5C2C] text-white text-sm font-medium rounded transition-colors">
-                <i class="fas fa-play text-xs"></i>
-                <span>Run</span>
+
+            <div class="h-6 w-px bg-[#333] mx-1"></div>
+
+            <button onclick="createNewFile()"
+                class="hidden sm:flex items-center gap-2 px-3 py-1.5 hover:bg-[#3C3C3C] text-[#A1A1AA] hover:text-white text-xs font-medium rounded transition-all">
+                <i class="fas fa-plus"></i> <span class="hidden lg:inline">New File</span>
             </button>
-            <div class="h-6 w-px bg-[#333] mx-1 hidden sm:block"></div>
-            <button id="save-btn"
-                class="hidden sm:block text-[#A1A1AA] hover:text-white p-1.5 rounded hover:bg-[#3C3C3C]"
-                title="Save to Gist">
-                <i class="fas fa-save"></i>
-            </button>
-            <button id="settings-btn"
-                class="hidden sm:block text-[#A1A1AA] hover:text-white p-1.5 rounded hover:bg-[#3C3C3C]"
-                title="Settings">
-                <i class="fas fa-cog"></i>
+
+            <button id="run-btn" disabled
+                class="flex items-center gap-2 px-4 py-1.5 bg-[#0D7C3D] hover:bg-[#0A5C2C] text-white text-sm font-medium rounded transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                <i class="fas fa-play text-xs"></i> <span class="hidden sm:inline">Run</span>
             </button>
         </div>
     </div>
 
-    <!-- Main Workspace (Split View) -->
-    <div class="flex-1 flex overflow-hidden">
+    <div class="flex-1 flex overflow-hidden relative">
 
-        <!-- Sidebar (Files/AI) -->
-        <div class="w-64 bg-[#252526] border-r border-[#333] flex flex-col hidden md:flex">
-            <div class="flex border-b border-[#333]">
-                <button
-                    class="flex-1 py-2 text-xs font-medium text-[#CCCCCC] border-b-2 border-[#0D7C3D] bg-[#1E1E1E]">Explorer</button>
-                <button class="flex-1 py-2 text-xs font-medium text-[#A1A1AA] hover:text-[#CCCCCC]">AI Chat</button>
+        <div id="sidebar"
+            class="absolute md:relative z-30 w-72 h-full bg-[#252526] border-r border-[#333] flex flex-col transform -translate-x-full md:translate-x-0 transition-transform duration-200 shadow-2xl md:shadow-none">
+            <div
+                class="p-4 text-xs font-bold text-[#A1A1AA] uppercase tracking-wider bg-[#252526] flex justify-between items-center border-b border-[#333]">
+                <span>Explorer</span>
+                <button onclick="createNewFile()" class="md:hidden p-2 text-white bg-[#333] rounded hover:bg-[#444]">
+                    <i class="fas fa-plus"></i>
+                </button>
             </div>
 
-            <!-- Explorer View -->
-            <div class="flex-1 overflow-y-auto p-2">
-                <div class="text-xs font-bold text-[#A1A1AA] mb-2 px-2 uppercase tracking-wider">Project Files</div>
-                <div class="space-y-0.5">
-                    <div
-                        class="flex items-center gap-2 px-2 py-1 bg-[#37373D] text-[#CCCCCC] text-sm rounded cursor-pointer">
-                        <i class="fab fa-python text-blue-400 w-4 text-center"></i>
-                        <span>main.py</span>
-                    </div>
-                </div>
-            </div>
+            <div id="file-list" class="flex-1 overflow-y-auto p-2 space-y-1"></div>
+
+            <button onclick="toggleSidebar()"
+                class="md:hidden p-4 text-center text-sm text-gray-500 border-t border-[#333] active:bg-[#333]">
+                Close Sidebar
+            </button>
         </div>
 
-        <!-- Editor Area -->
-        <div class="flex-1 flex flex-col min-w-0">
-            <!-- Monaco Editor Container -->
-            <div id="monaco-editor" class="flex-1 bg-[#1E1E1E]"></div>
+        <div id="sidebar-overlay" onclick="toggleSidebar()"
+            class="absolute inset-0 bg-black/50 z-20 hidden md:hidden transition-opacity"></div>
 
-            <!-- Terminal/Output Area -->
-            <div class="h-48 border-t border-[#333] bg-[#1E1E1E] flex flex-col">
-                <div class="flex items-center justify-between px-4 py-1.5 bg-[#252526] border-b border-[#333]">
-                    <span class="text-xs uppercase font-bold text-[#A1A1AA]">Terminal</span>
-                    <button onclick="clearTerminal()" class="text-xs text-[#A1A1AA] hover:text-white"><i
-                            class="fas fa-trash-alt"></i></button>
+        <div class="flex-1 flex flex-col min-w-0 bg-[#1E1E1E] relative">
+            <div
+                class="h-10 bg-[#1E1E1E] border-b border-[#333] flex items-center px-4 text-xs text-[#A1A1AA] justify-between">
+                <div class="flex items-center gap-2">
+                    <i class="fab fa-python text-[#3776AB] text-sm"></i>
+                    <span id="current-filename" class="italic font-medium">loading...</span>
+                    <span id="unsaved-indicator" class="hidden ml-2 text-yellow-500 text-xs">●</span>
                 </div>
-                <!-- xterm.js container -->
-                <div id="terminal" class="flex-1 p-1 overflow-hidden"></div>
             </div>
+            <div id="monaco-editor" class="absolute inset-0 top-10"></div>
         </div>
 
-        <!-- Live Preview (Web Mode) -->
-        <div id="preview-pane" class="w-[400px] border-l border-[#333] bg-white hidden">
-            <div class="h-8 bg-[#F3F4F6] border-b border-[#E5E7EB] flex items-center px-3 justify-between">
-                <span class="text-xs text-gray-500 font-medium">Live Preview</span>
-                <a href="#" target="_blank" class="text-gray-400 hover:text-gray-600"><i
-                        class="fas fa-external-link-alt text-xs"></i></a>
+        <div class="w-1/3 min-w-[320px] border-l border-[#333] bg-[#1E1E1E] flex flex-col hidden lg:flex">
+            <div class="h-10 bg-[#252526] border-b border-[#333] flex items-center px-1 gap-1">
+                <button onclick="switchTab('terminal')" id="tab-terminal"
+                    class="tab-btn px-4 py-2 text-xs font-medium text-white border-b-2 border-[#0D7C3D] bg-[#1E1E1E]">TERMINAL</button>
+                <button onclick="switchTab('plots')" id="tab-plots"
+                    class="tab-btn px-4 py-2 text-xs font-medium text-[#A1A1AA] border-b-2 border-transparent hover:text-white transition-colors">
+                    {% if studio_type == 'py' %}PLOTS{% else %}PREVIEW{% endif %}
+                </button>
+                <div class="flex-1"></div>
+                <button onclick="term.clear()" class="px-3 text-gray-500 hover:text-white text-xs"><i
+                        class="fas fa-trash-alt"></i></button>
             </div>
-            <iframe id="preview-frame" class="w-full h-full bg-white"></iframe>
-        </div>
-
-        <!-- AI Assistant Modal -->
-        <div id="ai-modal"
-            class="hidden absolute top-14 right-4 w-96 bg-[#252526] border border-[#333] shadow-xl rounded-lg z-50 flex flex-col max-h-[500px]">
-            <div class="flex items-center justify-between p-3 border-b border-[#333]">
-                <span class="text-sm font-semibold text-[#CCCCCC]"><i class="fas fa-magic text-purple-400 mr-2"></i>AI
-                    Assistant</span>
-                <button onclick="toggleAIModal()" class="text-[#A1A1AA] hover:text-white"><i
-                        class="fas fa-times"></i></button>
-            </div>
-            <div id="ai-chat-history" class="p-3 overflow-y-auto flex-1 space-y-3 min-h-[200px] text-sm text-[#CCCCCC]">
-                <div class="bg-[#37373D] p-2 rounded">Hello! I'm your Kiri AI assistant. select code and ask me to
-                    'Explain' or 'Debug', or just ask a question!</div>
-            </div>
-            <div class="p-3 border-t border-[#333]">
-                <div class="flex gap-2">
-                    <input type="text" id="ai-input" placeholder="Ask anything..."
-                        class="flex-1 bg-[#1E1E1E] border border-[#333] rounded px-2 py-1 text-white text-sm focus:border-[#0D7C3D] outline-none">
-                    <button onclick="sendAIRequest('chat')"
-                        class="px-3 py-1 bg-[#0D7C3D] hover:bg-[#0A5C2C] text-white rounded"><i
-                            class="fas fa-paper-plane"></i></button>
+            <div class="flex-1 relative overflow-hidden">
+                <div id="view-terminal" class="absolute inset-0 bg-[#1E1E1E] p-2">
+                    <div id="terminal" class="h-full w-full"></div>
                 </div>
-                <div class="flex gap-2 mt-2 text-xs">
-                    <button onclick="sendAIRequest('explain')"
-                        class="bg-[#3C3C3C] hover:bg-[#4C4C4C] text-[#A1A1AA] hover:text-white px-2 py-1 rounded">Explain
-                        Selection</button>
-                    <button onclick="sendAIRequest('debug')"
-                        class="bg-[#3C3C3C] hover:bg-[#4C4C4C] text-[#A1A1AA] hover:text-white px-2 py-1 rounded">Debug</button>
+                <div id="view-plots"
+                    class="absolute inset-0 bg-[#1E1E1E] hidden overflow-y-auto p-4 flex flex-col items-center gap-4">
+                    <div id="plots-container" class="w-full space-y-4"></div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Dependencies -->
-<!-- xterm.js (Local) -->
+<div id="github-modal"
+    class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="bg-[#252526] border border-[#333] w-full max-w-md rounded-lg shadow-2xl p-5">
+        <div class="flex justify-between items-center mb-6">
+            <h3 class="text-white font-bold text-lg"><i class="fab fa-github mr-2"></i>GitHub Sync</h3>
+            <button onclick="document.getElementById('github-modal').classList.add('hidden')"
+                class="text-gray-500 hover:text-white p-2"><i class="fas fa-times"></i></button>
+        </div>
+        <div id="gh-state-new">
+            <p class="text-sm text-gray-400 mb-4">Create a repository to save your work and enable history tracking.</p>
+            <input type="text" id="repo-name-input" placeholder="Repository Name (e.g., my-project)"
+                class="w-full bg-[#1E1E1E] border border-[#333] text-white text-sm px-4 py-3 rounded mb-4 focus:border-[#0D7C3D] outline-none transition-colors">
+            <button onclick="syncToGitHub(true)"
+                class="w-full bg-[#0D7C3D] hover:bg-[#0A5C2C] text-white py-2.5 rounded text-sm font-bold transition-transform active:scale-95">Create
+                & Push</button>
+        </div>
+        <div id="gh-state-connected" class="hidden">
+            <div class="bg-[#1E1E1E] p-4 rounded mb-4 border border-[#333]">
+                <div class="text-[10px] text-gray-500 uppercase font-bold tracking-wider mb-1">Linked Repository</div>
+                <a id="gh-repo-link" href="#" target="_blank"
+                    class="text-[#0D7C3D] hover:underline text-sm truncate block font-mono">...</a>
+            </div>
+            <button onclick="syncToGitHub(false)"
+                class="w-full bg-[#24292e] hover:bg-[#000] border border-[#444] text-white py-2.5 rounded text-sm font-bold transition-transform active:scale-95">
+                <i class="fas fa-cloud-upload-alt mr-2"></i>Push Changes
+            </button>
+        </div>
+        <div id="gh-loading" class="hidden text-center py-8">
+            <i class="fas fa-circle-notch fa-spin text-[#0D7C3D] text-3xl"></i>
+            <p class="text-sm text-gray-400 mt-3 animate-pulse">Syncing with GitHub...</p>
+        </div>
+    </div>
+</div>
+
+<div id="file-action-menu"
+    class="hidden fixed z-50 bg-[#252526] border border-[#333] shadow-2xl rounded-lg w-56 py-1 overflow-hidden transform transition-opacity duration-100">
+    <button onclick="handleContextAction('run')"
+        class="w-full text-left px-4 py-3 text-sm text-[#CCCCCC] hover:bg-[#0f62fe] hover:text-white flex items-center gap-3 active:bg-[#0f62fe]">
+        <i class="fas fa-play text-xs w-4"></i> Run File
+    </button>
+    <button onclick="handleContextAction('publish')"
+        class="w-full text-left px-4 py-3 text-sm text-[#CCCCCC] hover:bg-[#0f62fe] hover:text-white flex items-center gap-3 border-b border-[#333] active:bg-[#0f62fe]">
+        <i class="fas fa-book-open text-xs w-4"></i> Publish to Library
+    </button>
+    <button onclick="handleContextAction('rename')"
+        class="w-full text-left px-4 py-3 text-sm text-[#CCCCCC] hover:bg-[#0f62fe] hover:text-white flex items-center gap-3 active:bg-[#0f62fe]">
+        <i class="fas fa-edit text-xs w-4"></i> Rename
+    </button>
+    <button onclick="handleContextAction('delete')"
+        class="w-full text-left px-4 py-3 text-sm text-red-400 hover:bg-red-900/30 flex items-center gap-3 active:bg-red-900/30">
+        <i class="fas fa-trash text-xs w-4"></i> Delete
+    </button>
+</div>
+
+<div id="publish-modal"
+    class="hidden fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
+    <div class="bg-[#252526] border border-[#333] w-full max-w-md rounded-lg shadow-2xl p-6">
+        <h3 class="text-white font-bold text-lg mb-6"><i class="fas fa-feather-alt mr-2"></i>Publish Research</h3>
+
+        <label class="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-2">Title</label>
+        <input type="text" id="pub-title"
+            class="w-full bg-[#1E1E1E] border border-[#333] text-white text-sm px-4 py-3 rounded focus:border-[#0D7C3D] outline-none mb-4">
+
+        <div class="flex items-center gap-3 mb-6 p-3 bg-[#1E1E1E] rounded border border-[#333]">
+            <input type="checkbox" id="pub-attach-code" checked class="w-4 h-4 accent-[#0D7C3D] cursor-pointer">
+            <label for="pub-attach-code" class="text-sm text-gray-300 cursor-pointer select-none">Attach current script
+                as source code</label>
+        </div>
+
+        <div class="flex justify-end gap-3">
+            <button onclick="document.getElementById('publish-modal').classList.add('hidden')"
+                class="px-4 py-2 text-sm text-gray-400 hover:text-white transition-colors">Cancel</button>
+            <button onclick="submitPublication()"
+                class="px-6 py-2 bg-[#0D7C3D] hover:bg-[#0A5C2C] text-white text-sm font-bold rounded shadow-lg transition-transform active:scale-95">Publish
+                Draft</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    window.KIRI_CONFIG = {
+        studioType: "{{ studio_type }}",
+        csrfToken: "{{ csrf_token }}",
+        workerPyUrl: "{% static 'js/studio.py.worker.js' %}",
+        workerJsUrl: "{% static 'js/studio.js.worker.js' %}",
+        apiProxyUrl: "{% url 'projects:api_studio_proxy' %}",
+        apiSyncUrl: "{% url 'projects:api_studio_sync' %}",
+        apiPublishUrl: "{% url 'publications:api_studio_publish' %}"
+    };
+</script>
+
 <link rel="stylesheet" href="{% static 'vendor/xterm/xterm.css' %}" />
 <script src="{% static 'vendor/xterm/xterm.js' %}"></script>
 <script src="{% static 'vendor/xterm/xterm-addon-fit.js' %}"></script>
-<!-- Pyodide -->
-<script src="https://cdn.jsdelivr.net/pyodide/v0.25.0/full/pyodide.js"></script>
-<!-- Monaco Editor Loader (Load LAST) -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
 
-<script>
-    // --- Configuration ---
-    let editor;
-    let term;
-    let fitAddon;
-    let pyodide;
-    let webcontainerInstance;
-    let currentLang = 'python';
-
-    // Constants
-    const PYTHON_DEFAULT_CODE = `# Welcome to Kiri Studio (Python Mode)\nimport sys\nprint(f"Python {sys.version} running in browser!")\n\ndef hello():\n    print("Hello from Kiri Studio!")\n\nhello()`;
-    const WEB_DEFAULT_CODE = `// Welcome to Kiri Studio (Node.js Mode)\n// Files are virtual. 'npm install' & 'npm start' work!\n\nconsole.log("Hello from Node.js " + process.version);`;
-
-    // --- Initialization ---
-    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
-
-    require(['vs/editor/editor.main'], function () {
-        editor = monaco.editor.create(document.getElementById('monaco-editor'), {
-            value: PYTHON_DEFAULT_CODE,
-            language: 'python',
-            theme: 'vs-dark',
-            fontSize: 14,
-            minimap: { enabled: false },
-            padding: { top: 16 }
-        });
-
-        // Resize observer
-        new ResizeObserver(() => editor.layout()).observe(document.getElementById('monaco-editor'));
-
-        // Restore session
-        loadSavedState();
-        editor.onDidChangeModelContent(() => {
-            localStorage.setItem('kiri_code_' + currentLang, editor.getValue());
-        });
-    });
-
-    // Initialize Terminal
-    term = new Terminal({
-        theme: {
-            background: '#1E1E1E',
-            foreground: '#CCCCCC',
-            cursor: '#CCCCCC'
-        },
-        fontFamily: 'Menlo, Monaco, "Courier New", monospace',
-        fontSize: 13,
-        rows: 10
-    });
-    fitAddon = new FitAddon.FitAddon();
-    term.loadAddon(fitAddon);
-    term.open(document.getElementById('terminal'));
-    fitAddon.fit();
-
-    term.writeln('\x1b[32mWelcome to Kiri Studio v1.0\x1b[0m');
-    initPythonMode();
-
-    // --- Mode Switching ---
-    async function initPythonMode() {
-        currentLang = 'python';
-        document.getElementById('preview-pane').classList.add('hidden');
-        if (editor) monaco.editor.setModelLanguage(editor.getModel(), 'python');
-
-        if (!pyodide) {
-            term.writeln('Initializing Pyodide (WASM)...');
-            try {
-                pyodide = await loadPyodide();
-                term.writeln('\x1b[32m✔ Pyodide Ready\x1b[0m');
-                pyodide.setStdout({ batched: (str) => term.writeln(str) });
-                pyodide.setStderr({ batched: (str) => term.writeln(`\x1b[31m${str}\x1b[0m`) });
-            } catch (err) {
-                term.writeln(`\x1b[31mFailed to load Pyodide: ${err}\x1b[0m`);
-            }
-        } else {
-            term.writeln('\x1b[36mSwitched to Python Mode\x1b[0m');
-        }
-    }
-
-    async function initWebMode() {
-        currentLang = 'web';
-        document.getElementById('preview-pane').classList.remove('hidden');
-        if (editor) monaco.editor.setModelLanguage(editor.getModel(), 'javascript');
-
-        if (!webcontainerInstance) {
-            term.writeln('Booting WebContainer...');
-            try {
-                // Dynamically load WebContainer API logic (using ESM via import map or CDN)
-                // For simplicity in this template, we assume direct ESM import via module script below
-                // But since this is a clean script tag, we use dynamic import
-                const { WebContainer } = await import('https://cdn.jsdelivr.net/npm/@webcontainer/api@1.1.0/+esm');
-
-                webcontainerInstance = await WebContainer.boot();
-                term.writeln('\x1b[32m✔ WebContainer Booted\x1b[0m');
-
-                // Mount simple files
-                await webcontainerInstance.mount({
-                    'index.js': {
-                        file: {
-                            contents: `const express = require('express');
-const app = express();
-const port = 3000;
-
-app.get('/', (req, res) => {
-    res.send('Welcome to Kiri Studio server!');
-});
-
-app.listen(port, () => {
-    console.log(\`App running at http://localhost:\${port}\`);
-});`
-                        }
-                    },
-                    'package.json': {
-                        file: {
-                            contents: `{"name":"kiri-demo","dependencies":{"express":"latest"},"scripts":{"start":"node index.js"}}`
-                        }
-                    }
-                });
-
-                term.writeln('Installing dependencies...');
-                const installProcess = await webcontainerInstance.spawn('npm', ['install']);
-                installProcess.output.pipeTo(new WritableStream({
-                    write(data) { term.write(data); }
-                }));
-                await installProcess.exit;
-                term.writeln('\x1b[32m✔ Dependencies installed\x1b[0m');
-
-                // Listen for server-ready
-                webcontainerInstance.on('server-ready', (port, url) => {
-                    term.writeln(`\x1b[32mServer ready at ${url}\x1b[0m`);
-                    document.getElementById('preview-frame').src = url;
-                });
-
-            } catch (err) {
-                term.writeln(`\x1b[31mFailed to boot WebContainer: ${err}\x1b[0m`);
-                term.writeln('Ensure you are on HTTPS and headers (COOP/COEP) are set.');
-            }
-        } else {
-            term.writeln('\x1b[36mSwitched to Node.js Mode\x1b[0m');
-        }
-    }
-
-    // --- Event Listeners ---
-    document.getElementById('language-select').addEventListener('change', (e) => {
-        if (e.target.value === 'python') {
-            initPythonMode();
-            editor.setValue(PYTHON_DEFAULT_CODE);
-        } else {
-            initWebMode();
-            editor.setValue(WEB_DEFAULT_CODE);
-        }
-    });
-
-    document.getElementById('run-btn').addEventListener('click', async () => {
-        const code = editor.getValue();
-
-        if (currentLang === 'python') {
-            if (!pyodide) return;
-            term.writeln('\x1b[90m$ python main.py\x1b[0m');
-            try {
-                await pyodide.runPythonAsync(code);
-            } catch (err) {
-                term.writeln(`\x1b[31m${err}\x1b[0m`);
-            }
-        } else {
-            if (!webcontainerInstance) return;
-
-            // Save current code to index.js
-            await webcontainerInstance.fs.writeFile('index.js', code);
-
-            term.writeln('\x1b[90m$ npm start\x1b[0m');
-            const startProcess = await webcontainerInstance.spawn('npm', ['start']);
-            startProcess.output.pipeTo(new WritableStream({
-                write(data) { term.write(data); }
-            }));
-        }
-    });
-
-    // --- Persistence (Auto-Save) ---
-    function loadSavedState() {
-        const savedCode = localStorage.getItem('kiri_code_' + currentLang);
-        if (savedCode) {
-            editor.setValue(savedCode);
-            term.writeln('\x1b[36mRestored saved session.\x1b[0m');
-        }
-    }
-
-    // Auto-save on change
-    if (editor) {
-        editor.onDidChangeModelContent(() => {
-            localStorage.setItem('kiri_code_' + currentLang, editor.getValue());
-        });
-    }
-
-    // --- AI Features ---
-    function toggleAIModal() {
-        document.getElementById('ai-modal').classList.toggle('hidden');
-        document.getElementById('ai-input').focus();
-    }
-
-    document.getElementById('ai-advisor-btn').addEventListener('click', toggleAIModal);
-
-    async function sendAIRequest(task) {
-        const inputField = document.getElementById('ai-input');
-        const chatHistory = document.getElementById('ai-chat-history');
-        const selection = editor.getModel().getValueInRange(editor.getSelection());
-        const fullCode = editor.getValue();
-
-        let context = inputField.value;
-        if (task === 'explain' || task === 'debug') {
-            context = selection || "No code selected. Analyzing full file.";
-            chatHistory.innerHTML += `<div class="bg-[#2D2D2D] p-2 rounded mb-2 text-right"><span class="text-xs text-gray-500 block">${task.toUpperCase()}</span>Code Request</div>`;
-        } else {
-            if (!context) return;
-            chatHistory.innerHTML += `<div class="bg-[#2D2D2D] p-2 rounded mb-2 text-right">${context}</div>`;
-            inputField.value = '';
-        }
-
-        // Show loading state
-        chatHistory.innerHTML += `<div id="ai-loading" class="text-gray-500 text-xs italic">AI is thinking...</div>`;
-        chatHistory.scrollTop = chatHistory.scrollHeight;
-
-        try {
-            const response = await fetch('{% url "projects:api_studio_ai" %}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: JSON.stringify({
-                    task: task,
-                    code: selection || fullCode,
-                    context: task === 'chat' ? context : ''
-                })
-            });
-
-            const data = await response.json();
-            document.getElementById('ai-loading').remove();
-
-            if (data.error) {
-                chatHistory.innerHTML += `<div class="bg-red-900/30 text-red-300 p-2 rounded mb-2">Error: ${data.error}</div>`;
-            } else {
-                // If the response is a dict with structured data, we might need parsing, but api returns 'result' key or direct string usually
-                // The current API might return generic JSON, let's assume it has a text field or is text
-                let reply = data.result || JSON.stringify(data);
-
-                // convert newlines to <br> for simple display
-                reply = reply.replace(/\n/g, '<br>');
-                chatHistory.innerHTML += `<div class="bg-[#37373D] p-2 rounded mb-2">${reply}</div>`;
-            }
-        } catch (err) {
-            document.getElementById('ai-loading')?.remove();
-            chatHistory.innerHTML += `<div class="bg-red-900/30 text-red-300 p-2 rounded mb-2">Network Error</div>`;
-        }
-        chatHistory.scrollTop = chatHistory.scrollHeight;
-    }
-
-    // --- Save to Gist ---
-    document.getElementById('save-btn').addEventListener('click', async () => {
-        const code = editor.getValue();
-        const filename = currentLang === 'python' ? 'main.py' : 'index.js';
-
-        const btn = document.getElementById('save-btn');
-        const icon = btn.querySelector('i');
-        icon.className = 'fas fa-spinner fa-spin';
-
-        try {
-            const response = await fetch('{% url "projects:api_studio_gist" %}', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-CSRFToken': '{{ csrf_token }}'
-                },
-                body: JSON.stringify({
-                    files: { [filename]: code },
-                    description: `Kiri Studio Snippet (${currentLang})`,
-                    public: true
-                })
-            });
-
-            const data = await response.json();
-            if (data.html_url) {
-                term.writeln(`\x1b[32m✔ Gist Created: ${data.html_url}\x1b[0m`);
-                window.open(data.html_url, '_blank');
-            } else {
-                term.writeln(`\x1b[31mSave failed: ${data.error}\x1b[0m`);
-            }
-        } catch (err) {
-            term.writeln(`\x1b[31mSave error: ${err}\x1b[0m`);
-        } finally {
-            icon.className = 'fas fa-save';
-        }
-    });
-
-    function clearTerminal() {
-        term.clear();
-    }
-
-    // Resize handling
-    window.addEventListener('resize', () => {
-        if (editor) editor.layout();
-        if (fitAddon) fitAddon.fit();
-    });
-
-</script>
+<script src="{% static 'js/kiri_studio_core.js' %}"></script>
 {% endblock %}

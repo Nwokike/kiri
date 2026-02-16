@@ -1,0 +1,53 @@
+{% load static %}
+<!-- Hero Section -->
+<section class="mb-12">
+    <div
+        class="relative overflow-hidden rounded-xl bg-white border border-[#DEE2E6] dark:bg-[#1E1E1E] dark:border-[#333] p-8 md:p-12 shadow-sm">
+        <div class="relative z-10">
+            <div
+                class="inline-flex items-center gap-2 px-3 py-1 bg-[#E8F5ED] text-[#0D7C3D] text-[10px] font-bold uppercase tracking-wider rounded-full mb-6 dark:bg-[#0D7C3D]/10">
+                <i class="fas fa-microchip"></i> Perspective
+            </div>
+            <h1
+                class="text-3xl md:text-5xl font-extrabold text-[#212529] dark:text-white mb-6 tracking-tight leading-tight max-w-3xl">
+                Smart, Small, and Scalable Research Tools.
+            </h1>
+            <p class="text-lg md:text-xl text-[#6C757D] dark:text-[#A1A1AA] max-w-2xl mb-10 leading-relaxed">
+                The Efficiency Frontier of Artificial Intelligence. Empowering researchers with state-of-the-art
+                tools and a collaborative community.
+            </p>
+
+            <!-- Dynamic Stats Bar -->
+            <div class="flex flex-wrap gap-10 mb-10">
+                <div class="flex flex-col">
+                    <span class="text-3xl font-bold text-[#212529] dark:text-white">{{ stats.total_projects}}</span>
+                    <span class="text-xs font-bold text-[#6C757D] uppercase tracking-widest">Projects</span>
+                </div>
+                <div class="flex flex-col border-l border-[#DEE2E6] dark:border-[#333] pl-10">
+                    <span class="text-3xl font-bold text-[#212529] dark:text-white">{{stats.total_publications}}</span>
+                    <span class="text-xs font-bold text-[#6C757D] uppercase tracking-widest">Publications</span>
+                </div>
+                <div class="flex flex-col border-l border-[#DEE2E6] dark:border-[#333] pl-10">
+                    <span class="text-3xl font-bold text-[#212529] dark:text-white">{{stats.total_researchers}}</span>
+                    <span class="text-xs font-bold text-[#6C757D] uppercase tracking-widest">Researchers</span>
+                </div>
+            </div>
+
+            <div class="flex flex-wrap gap-4">
+                <a href="{% url 'projects:list' %}"
+                    class="inline-flex items-center gap-2 px-8 py-3.5 bg-[#0D7C3D] text-white font-bold rounded-lg hover:bg-[#0A5C2C] transition-all shadow-md hover:shadow-lg">
+                    <i class="fas fa-rocket text-sm"></i>
+                    Explore Research
+                </a>
+                <a href="{% url 'core:studio_py' %}"
+                    class="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-[#495057] font-bold rounded-lg hover:bg-[#F8F9FA] transition-all border border-[#DEE2E6] dark:bg-[#2D2D2D] dark:text-white dark:border-[#3D3D3D] dark:hover:bg-[#333]">
+                    <i class="fas fa-flask text-sm"></i>
+                    Launch Studio
+                </a>
+            </div>
+        </div>
+        <!-- Decorative elements shifted to classes -->
+        <div class="decorative-blob blob-gold top-0 right-0 w-80 h-80"></div>
+        <div class="decorative-blob blob-white bottom-0 left-1/2 w-64 h-64 opacity-20"></div>
+    </div>
+</section>

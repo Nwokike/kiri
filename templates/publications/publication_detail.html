@@ -6,6 +6,12 @@
 
 {% block title %}{{ publication.title }} | Kiri Publications{% endblock %}
 
+{% block meta_description %}{{ publication.abstract|truncatewords:25 }}{% endblock %}
+
+{% block og_title %}{{ publication.title }} - Research Publication{% endblock %}
+{% block og_description %}{{ publication.abstract|truncatewords:50 }}{% endblock %}
+{% block og_image %}{{ request.scheme }}://{{ request.get_host }}{% static 'images/logos/logo.png' %}{% endblock %}
+
 {% block extra_head %}
 {% if publication.executable_script %}
 <script src="https://cdn.jsdelivr.net/pyodide/v0.27.0/full/pyodide.js"></script>
@@ -43,36 +49,39 @@
         </h1>
 
         <!-- Meta Info -->
-        <div class="flex flex-wrap items-center gap-6 text-sm">
+        <div class="flex flex-wrap items-center gap-6 text-[13px]">
             <div class="flex items-center gap-3">
                 {% if publication.author.github_avatar_url %}
-                <img src="{{ publication.author.github_avatar_url }}" class="w-10 h-10 rounded-full">
+                <img src="{{ publication.author.github_avatar_url }}"
+                    class="w-8 h-8 rounded-full border border-[#DEE2E6] dark:border-[#333]">
                 {% else %}
                 <div
-                    class="w-10 h-10 rounded-full bg-[#0f62fe] text-white flex items-center justify-center font-semibold">
+                    class="w-8 h-8 rounded-full bg-[#161616] text-white flex items-center justify-center font-bold text-[10px]">
                     {{ publication.author.username|slice:":2"|upper }}
                 </div>
                 {% endif %}
                 <div>
-                    <span class="block font-medium text-[#161616] dark:text-white">{{ publication.author.username
-                        }}</span>
-                    <span class="text-[#525252] dark:text-[#a8a8a8]">Author</span>
+                    <span
+                        class="block font-bold text-[#212529] dark:text-white leading-none mb-1">{{publication.author.username}}</span>
+                    <span class="text-[10px] font-bold text-[#ADB5BD] uppercase tracking-tighter">Principal
+                        Investigator</span>
                 </div>
             </div>
 
-            <div class="h-8 w-px bg-[#e0e0e0] dark:bg-[#393939]"></div>
+            <div class="h-6 w-px bg-[#DEE2E6] dark:bg-[#333]"></div>
 
             <div>
-                <span class="block font-medium text-[#161616] dark:text-white">{{ publication.created_at|date:"F j, Y"
-                    }}</span>
-                <span class="text-[#525252] dark:text-[#a8a8a8]">Version {{ publication.version }}</span>
+                <span
+                    class="block font-bold text-[#212529] dark:text-white leading-none mb-1">{{publication.created_at|date:"M d, Y" }}</span>
+                <span class="text-[10px] font-bold text-[#ADB5BD] uppercase tracking-tighter">Edition
+                </span>
             </div>
 
             {% if publication.arxiv_id %}
-            <div class="h-8 w-px bg-[#e0e0e0] dark:bg-[#393939]"></div>
+            <div class="h-6 w-px bg-[#DEE2E6] dark:bg-[#333]"></div>
             <a href="https://arxiv.org/abs/{{ publication.arxiv_id }}" target="_blank"
-                class="text-[#0f62fe] hover:underline">
-                <i class="fas fa-external-link-alt mr-1"></i> arXiv:{{ publication.arxiv_id }}
+                class="text-[#0D7C3D] font-bold hover:underline inline-flex items-center gap-1.5">
+                <i class="fas fa-external-link-alt text-[10px]"></i> arXiv:{{ publication.arxiv_id }}
             </a>
             {% endif %}
         </div>
@@ -120,13 +129,13 @@
     {% if publication.executable_script %}
     <div class="mb-12 border border-[#e0e0e0] dark:border-[#393939]">
         <div
-            class="flex items-center justify-between px-4 py-3 bg-[#f4f4f4] dark:bg-[#393939] border-b border-[#e0e0e0] dark:border-[#525252]">
-            <h3 class="font-mono text-sm font-semibold text-[#161616] dark:text-white">
-                <i class="fab fa-python mr-2 text-[#f1c21b]"></i> Live Demo
+            class="flex items-center justify-between px-4 py-2 bg-[#F8F9FA] dark:bg-[#2D2D2D] border-b border-[#DEE2E6] dark:border-[#333]">
+            <h3 class="font-bold text-[11px] text-[#6C757D] uppercase tracking-wider">
+                <i class="fab fa-python mr-2 text-[#C4992E]"></i> Live Interface
             </h3>
             <button id="run-code-btn"
-                class="px-4 py-1.5 bg-[#0f62fe] text-white text-xs font-medium hover:bg-[#0353e9] transition-colors">
-                <i class="fas fa-play mr-1"></i> Run Code
+                class="px-3 py-1.5 bg-[#0D7C3D] text-white text-[11px] font-bold rounded hover:bg-[#0A5C2C] transition-all">
+                <i class="fas fa-play mr-1 text-[9px]"></i> EXECUTE
             </button>
         </div>
         <div class="relative">

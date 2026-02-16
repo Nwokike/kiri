@@ -1,76 +1,144 @@
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Diff Viewer | Kiri Tools{% endblock %}
+{% block meta_description %}Compare two text snippets side-by-side or line-by-line with our professional diff viewer.
+High-performance, secure, and privacy-focused text comparison tool.{% endblock %}
 
 {% block content %}
-<div class="max-w-6xl mx-auto px-4 py-8" x-data="diffViewer()">
-    <nav class="mb-6 text-sm">
-        <a href="{% url 'tools:index' %}" class="text-blue-600 hover:underline"><i class="fas fa-arrow-left mr-1"></i>
-            Tools</a>
-        <span class="text-gray-400 mx-2">/</span>
-        <span class="text-gray-600 dark:text-gray-300">Diff Viewer</span>
+<div class="max-w-7xl mx-auto px-4 py-8" x-data="diffTool()">
+    <!-- Navigation -->
+    <nav class="mb-6 text-sm flex items-center text-[#6C757D] dark:text-[#A1A1AA]">
+        <a href="{% url 'tools:index' %}" class="hover:text-[#0D7C3D] transition-colors flex items-center">
+            <i class="fas fa-arrow-left mr-2"></i> Tools
+        </a>
+        <span class="mx-2">/</span>
+        <span class="text-[#212529] dark:text-white font-bold">Diff Viewer</span>
     </nav>
 
-    <h1 class="text-2xl font-bold text-gray-900 dark:text-white mb-6">Diff Viewer</h1>
-
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
-        <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Original Text</label>
-            <textarea x-model="original" rows="10"
-                class="w-full p-3 text-sm font-mono border border-gray-300 dark:border-[#444] rounded-lg bg-white dark:bg-[#1E1E1E] text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Paste original text here..."></textarea>
-        </div>
-        <div>
-            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Changed Text</label>
-            <textarea x-model="changed" rows="10"
-                class="w-full p-3 text-sm font-mono border border-gray-300 dark:border-[#444] rounded-lg bg-white dark:bg-[#1E1E1E] text-gray-900 dark:text-white focus:ring-blue-500 focus:border-blue-500"
-                placeholder="Paste changed text here..."></textarea>
+    <div class="mb-6 flex justify-between items-center">
+        <h1 class="text-2xl font-bold text-[#212529] dark:text-white">Diff Viewer</h1>
+        <div class="flex gap-4 items-center">
+            <div
+                class="flex bg-[#F8F9FA] dark:bg-[#2D2D2D] p-1 rounded-lg border border-[#DEE2E6] dark:border-[#3D3D3D]">
+                <button @click="outputFormat = 'line-by-line'"
+                    :class="outputFormat === 'line-by-line' ? 'bg-white dark:bg-[#1E1E1E] shadow-sm text-[#0D7C3D]' : 'text-[#6C757D] dark:text-[#A1A1AA]'"
+                    class="px-3 py-1 text-xs font-bold rounded-md transition-all">Line-by-Line</button>
+                <button @click="outputFormat = 'side-by-side'"
+                    :class="outputFormat === 'side-by-side' ? 'bg-white dark:bg-[#1E1E1E] shadow-sm text-[#0D7C3D]' : 'text-[#6C757D] dark:text-[#A1A1AA]'"
+                    class="px-3 py-1 text-xs font-bold rounded-md transition-all">Side-by-Side</button>
+            </div>
+            <button @click="sample()" class="text-xs font-bold text-[#0D7C3D] hover:underline uppercase">Sample</button>
         </div>
     </div>
 
-    <!-- Compute Button -->
-    <div class="text-center mb-8">
-        <button @click="compare()"
-            class="px-6 py-2 bg-blue-600 text-white font-medium rounded-lg hover:bg-blue-700 transition-colors">
-            Compare Texts
-        </button>
+    <!-- Inputs -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+        <div class="flex flex-col">
+            <label class="text-xs font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest mb-3">Original
+                Version</label>
+            <textarea x-model="original" rows="8"
+                class="w-full p-4 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl bg-white dark:bg-[#1E1E1E] text-[#212529] dark:text-white focus:border-[#0D7C3D] outline-none transition-all resize-none"
+                placeholder="Paste original text..."></textarea>
+        </div>
+        <div class="flex flex-col">
+            <label class="text-xs font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest mb-3">Modified
+                Version</label>
+            <textarea x-model="modified" rows="8"
+                class="w-full p-4 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl bg-white dark:bg-[#1E1E1E] text-[#212529] dark:text-white focus:border-[#0D7C3D] outline-none transition-all resize-none"
+                placeholder="Paste modified text..."></textarea>
+        </div>
     </div>
 
     <!-- Result -->
-    <div x-show="compared"
-        class="bg-white dark:bg-[#1E1E1E] border border-gray-200 dark:border-[#333] rounded-lg p-4 font-mono text-sm overflow-x-auto">
-        <div class="flex flex-col gap-1">
-            <template x-for="(part, index) in diffs" :key="index">
-                <span :class="{
-                    'bg-green-100 text-green-800 dark:bg-green-900/40 dark:text-green-300': part.added,
-                    'bg-red-100 text-red-800 dark:bg-red-900/40 dark:text-red-300': part.removed,
-                    'text-gray-600 dark:text-gray-400': !part.added && !part.removed
-                }" x-text="part.value" class="whitespace-pre-wrap"></span>
-            </template>
+    <div x-show="original || modified" class="space-y-4">
+        <div class="flex items-center justify-between">
+            <h3 class="text-sm font-bold text-[#212529] dark:text-white uppercase tracking-wider">Comparison Result</h3>
+        </div>
+        <div id="diff-output"
+            class="bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl overflow-hidden shadow-sm">
+            <!-- Diff2Html will render here -->
         </div>
     </div>
 </div>
 
-<!-- Load jsdiff library from CDN -->
+<!-- Diff2Html & JsDiff CDNs -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/diff2html/bundles/css/diff2html.min.css">
+<script src="https://cdn.jsdelivr.net/npm/diff2html/bundles/js/diff2html-ui.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsdiff/5.1.0/diff.min.js"></script>
 
+<style>
+    .d2h-file-header {
+        display: none;
+    }
+
+    /* Hide the fake filename header */
+    .d2h-wrapper {
+        font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
+        border: none !important;
+    }
+
+    .dark .d2h-file-wrapper {
+        border-color: #333 !important;
+    }
+
+    .dark .d2h-code-line-ctn {
+        color: #A1A1AA !important;
+    }
+
+    .dark .d2h-info {
+        background-color: #1E1E1E !important;
+        border-color: #333 !important;
+    }
+
+    .dark .d2h-ins {
+        background-color: rgba(13, 124, 61, 0.2) !important;
+        color: #4ade80 !important;
+    }
+
+    .dark .d2h-del {
+        background-color: rgba(220, 38, 38, 0.2) !important;
+        color: #f87171 !important;
+    }
+
+    .dark .d2h-code-line {
+        color: #e4e4e7 !important;
+    }
+</style>
+
 <script>
-    function diffViewer() {
+    function diffTool() {
         return {
-            original: 'The quick brown fox jumps over the lazy dog.',
-            changed: 'The quick green fox jumps over the active dog.',
-            diffs: [],
-            compared: false,
+            original: '',
+            modified: '',
+            outputFormat: 'side-by-side',
 
-            compare() {
-                if (typeof Diff === 'undefined') {
-                    alert('Diff library loading...');
-                    return;
-                }
+            init() {
+                this.$watch('original', () => this.updateDiff());
+                this.$watch('modified', () => this.updateDiff());
+                this.$watch('outputFormat', () => this.updateDiff());
+            },
 
-                // Use jsdiff to compute word diff
-                this.diffs = Diff.diffWords(this.original, this.changed);
-                this.compared = true;
+            updateDiff() {
+                if (!this.original && !this.modified) return;
+
+                const diffString = Diff.createTwoFilesPatch('Original', 'Modified', this.original, this.modified);
+
+                const targetElement = document.getElementById('diff-output');
+                const diff2htmlUi = new Diff2HtmlUI(targetElement, diffString, {
+                    drawFileList: false,
+                    matching: 'lines',
+                    outputFormat: this.outputFormat,
+                    highlight: true,
+                    renderNothingWhenEmpty: true
+                });
+
+                diff2htmlUi.draw();
+            },
+
+            sample() {
+                this.original = "def fast_power(base, power):\n    result = 1\n    while power > 0:\n        if power % 2 == 1:\n            result *= base\n        base *= base\n        power //= 2\n    return result";
+                this.modified = "def fast_power(base, power):\n    \"\"\"Calculates base^power efficiently.\"\"\"\n    result = 1\n    while power > 0:\n        # Check if current power is odd\n        if power % 2 != 0:\n            result *= base\n        base *= base\n        power = power // 2\n    return result";
             }
         }
     }

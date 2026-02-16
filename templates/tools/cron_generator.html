@@ -1,0 +1,91 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Cron Generator | Kiri Tools{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto px-4 py-8" x-data="cronTool()">
+    <nav class="mb-6 text-sm flex items-center text-[#6C757D] dark:text-[#A1A1AA]">
+        <a href="{% url 'tools:index' %}" class="hover:text-[#0D7C3D] transition-colors flex items-center">
+            <i class="fas fa-arrow-left mr-2"></i> Tools
+        </a>
+        <span class="mx-2">/</span>
+        <span class="text-[#212529] dark:text-white font-bold">Cron Generator</span>
+    </nav>
+
+    <div class="bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl p-8 shadow-sm">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+            <div class="space-y-6">
+                <template x-for="part in parts" :key="part.name">
+                    <div>
+                        <label
+                            class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest mb-2 block"
+                            x-text="part.label"></label>
+                        <select x-model="part.value" @change="generate()"
+                            class="w-full p-3 text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-lg bg-white dark:bg-[#1E1E1E] text-[#212529] dark:text-white outline-none">
+                            <template x-for="option in part.options" :key="option.v">
+                                <option :value="option.v" x-text="option.l"></option>
+                            </template>
+                        </select>
+                    </div>
+                </template>
+            </div>
+
+            <div class="flex flex-col justify-center gap-6">
+                <div
+                    class="p-8 bg-gray-50 dark:bg-[#252526] rounded-xl border border-[#DEE2E6] dark:border-[#3D3D3D] text-center">
+                    <div
+                        class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase mb-4 tracking-widest">
+                        Generated Cron Expression</div>
+                    <div class="text-3xl font-mono font-bold text-[#0D7C3D] mb-6" x-text="expression"></div>
+                    <button @click="copy()" class="text-xs font-bold text-[#0D7C3D] hover:underline uppercase"
+                        x-text="copied ? 'Copied!' : 'Copy Expression'"></button>
+                </div>
+
+                <div class="p-6 bg-[#0D7C3D]/5 border border-[#0D7C3D]/10 rounded-xl">
+                    <div class="text-[10px] font-bold text-[#0D7C3D] uppercase mb-2 tracking-widest">Next Execution
+                    </div>
+                    <div class="text-sm text-[#212529] dark:text-gray-300 italic" x-text="description"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function cronTool() {
+        return {
+            parts: [
+                { name: 'min', label: 'Minute', value: '*', options: [{ v: '*', l: 'Every minute' }, { v: '0', l: '0' }, { v: '*/5', l: 'Every 5 minutes' }, { v: '*/15', l: 'Every 15 minutes' }] },
+                { name: 'hour', label: 'Hour', value: '*', options: [{ v: '*', l: 'Every hour' }, { v: '0', l: 'Midnight' }, { v: '12', l: 'Noon' }, { v: '*/2', l: 'Every 2 hours' }] },
+                { name: 'dom', label: 'Day of Month', value: '*', options: [{ v: '*', l: 'Every day' }, { v: '1', l: '1st' }, { v: '15', l: '15th' }, { v: 'L', l: 'Last day' }] },
+                { name: 'month', label: 'Month', value: '*', options: [{ v: '*', l: 'Every month' }, { v: '1', l: 'January' }, { v: '6', l: 'June' }, { v: '12', l: 'December' }] },
+                { name: 'dow', label: 'Day of Week', value: '*', options: [{ v: '*', l: 'Every day' }, { v: '0', l: 'Sunday' }, { v: '1-5', l: 'Weekdays' }, { v: '6,0', l: 'Weekends' }] }
+            ],
+            expression: '* * * * *',
+            description: 'Runs every minute of every day.',
+            copied: false,
+
+            generate() {
+                this.expression = this.parts.map(p => p.value).join(' ');
+                this.updateDescription();
+            },
+
+            updateDescription() {
+                // Very basic description logic
+                const labels = this.parts.map(p => {
+                    const opt = p.options.find(o => o.v === p.value);
+                    return opt ? opt.l.toLowerCase() : p.value;
+                });
+                this.description = `Runs at ${labels[0]} on ${labels[1]} of ${labels[2]} in ${labels[3]} on ${labels[4]}.`;
+            },
+
+            copy() {
+                navigator.clipboard.writeText(this.expression);
+                this.copied = true;
+                setTimeout(() => this.copied = false, 2000);
+            }
+        }
+    }
+</script>
+{% endblock %}

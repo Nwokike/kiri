@@ -1,0 +1,114 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}JWT Parser | Kiri Tools{% endblock %}
+
+{% block content %}
+<div class="max-w-5xl mx-auto px-4 py-8" x-data="jwtTool()">
+    <nav class="mb-6 text-sm flex items-center text-[#6C757D] dark:text-[#A1A1AA]">
+        <a href="{% url 'tools:index' %}" class="hover:text-[#0D7C3D] transition-colors flex items-center">
+            <i class="fas fa-arrow-left mr-2"></i> Tools
+        </a>
+        <span class="mx-2">/</span>
+        <span class="text-[#212529] dark:text-white font-bold">JWT Parser</span>
+    </nav>
+
+    <div class="mb-8">
+        <h1 class="text-3xl font-extrabold text-[#212529] dark:text-white mb-2">JWT Parser & Decoder</h1>
+        <p class="text-[#6C757D] dark:text-[#A1A1AA]">Decode JSON Web Tokens and inspect their headers and payloads
+            locally.</p>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 h-[calc(100vh-320px)]">
+        <!-- Input -->
+        <div class="flex flex-col h-full">
+            <div class="mb-3 flex justify-between items-center">
+                <label class="text-xs font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest">Encoded
+                    Token</label>
+                <div class="flex gap-4">
+                    <button @click="sample()"
+                        class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase">Sample</button>
+                    <button @click="input = ''"
+                        class="text-[10px] font-bold text-red-500 hover:underline uppercase">Clear</button>
+                </div>
+            </div>
+            <textarea x-model="input"
+                class="flex-1 w-full p-6 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl focus:border-[#0D7C3D] focus:ring-4 focus:ring-[#0D7C3D]/10 bg-white dark:bg-[#1E1E1E] text-[#212529] dark:text-white resize-none transition-all outline-none break-all"
+                placeholder="Paste JWT here..."></textarea>
+        </div>
+
+        <!-- Decoded Output -->
+        <div class="flex flex-col h-full overflow-hidden">
+            <div class="mb-3">
+                <label class="text-xs font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest">Decoded
+                    Data</label>
+            </div>
+
+            <div class="flex-1 flex flex-col gap-4 overflow-auto pr-2">
+                <!-- Header -->
+                <div class="p-6 bg-white dark:bg-[#1E1E1E] rounded-xl border border-[#DEE2E6] dark:border-[#333]">
+                    <div class="text-[10px] font-bold text-rose-500 uppercase mb-3 tracking-tighter">Header: Algorithm &
+                        Token Type</div>
+                    <pre class="text-xs text-[#212529] dark:text-[#E4E4E7] font-mono"
+                        x-text="headerText || 'No header decoded'"></pre>
+                </div>
+
+                <!-- Payload -->
+                <div class="p-6 bg-white dark:bg-[#1E1E1E] rounded-xl border border-[#DEE2E6] dark:border-[#333]">
+                    <div class="text-[10px] font-bold text-blue-500 uppercase mb-3 tracking-tighter">Payload: Data &
+                        Claims</div>
+                    <pre class="text-xs text-[#212529] dark:text-[#E4E4E7] font-mono"
+                        x-text="payloadText || 'No payload decoded'"></pre>
+                </div>
+
+                <div x-show="error"
+                    class="p-4 bg-red-50 dark:bg-red-900/10 text-red-600 dark:text-red-400 rounded-lg text-xs font-bold border border-red-100 dark:border-red-900/20">
+                    <i class="fas fa-exclamation-triangle mr-2"></i> <span x-text="error"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- jwt-decode CDN -->
+<script src="https://cdn.jsdelivr.net/npm/jwt-decode/build/jwt-decode.min.js"></script>
+
+<script>
+    function jwtTool() {
+        return {
+            input: '',
+            headerText: '',
+            payloadText: '',
+            error: '',
+
+            init() {
+                this.$watch('input', () => this.decode());
+            },
+
+            decode() {
+                this.error = '';
+                this.headerText = '';
+                this.payloadText = '';
+
+                if (!this.input.trim()) return;
+
+                try {
+                    // jwt-decode library
+                    const decodedPayload = jwt_decode(this.input);
+                    const decodedHeader = jwt_decode(this.input, { header: true });
+
+                    this.headerText = JSON.stringify(decodedHeader, null, 4);
+                    this.payloadText = JSON.stringify(decodedPayload, null, 4);
+                } catch (e) {
+                    this.error = 'Invalid JWT: ' + e.message;
+                }
+            },
+
+            sample() {
+                // A valid-ish looking sample JWT for demo (no signature validation done here)
+                this.input = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE4OTM0NTYwMDAsInJvbGUiOiJyZXNlYXJjaGVyIiwicGxhdGZvcm0iOiJraXJpIn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
+            }
+        }
+    }
+</script>
+{% endblock %}

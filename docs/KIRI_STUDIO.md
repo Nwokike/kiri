@@ -1,63 +1,31 @@
-# Kiri Studio - Technical Reference
+# Kiri Studio Architecture
 
-> **v1.2 (Stable)** | Intelligent IDE for Applied Research
+Kiri Studio is not a single IDE, but a unified interface for **Intelligence on the Edge**. It consists of two specialized runtime environments that share a common UI.
 
-## Overview
-Kiri Studio is a zero-server, client-side IDE integrated into the Kiri platform. It leverages **WebAssembly (WASM)** and **Pyodide** to provide a full Python execution environment directly in the user's browser, eliminating the need for backend container orchestration.
+## 1. PyStudio 
+* **Target:** Applied Research, Data Science, Education.
+* **Engine:** `Pyodide` (Python 3.11 via WebAssembly).
+* **Key Features:**
+    * **OPFS Storage:** Mounts a persistent virtual hard drive to `/home/pyodide`.
+    * **Matplotlib Hook:** Intercepts `plt.show()` to render plots in the IDE tab.
+    * **Micropip:** Auto-installs pure Python wheels (Pandas, Numpy, Scikit-learn).
+* **Worker:** `static/js/studio.py.worker.js`
 
-## Core Architecture
+## 2. JS Studio
+* **Target:** Frontend Development, Full-Stack Node.js.
+* **Engine:** `WebContainers` (Node.js via WebAssembly).
+* **Key Features:**
+    * **Virtual Network:** Runs a TCP network inside the browser tab.
+    * **Live Preview:** Renders the user's localhost server (port 3000/5173) in an iframe.
+    * **NPM Integration:** Full access to the npm registry.
+* **Worker:** `static/js/studio.js.worker.js`
 
-```mermaid
-flowchart TD
-    User[User Browser]
-    
-    subgraph KiriStudio[Kiri Studio (Client-Side)]
-        UI[Monaco Editor]
-        Term[xterm.js Terminal]
-        
-        subgraph Runtimes
-            PY[Pyodide (WASM)]
-            WC[WebContainer (Draft)]
-        end
-        
-        FS[Virtual File System]
-    end
-    
-    Backend[Kiri Django Server]
-    
-    User --> UI
-    UI -->|Code| FS
-    FS -->|Read| PY
-    
-    PY -->|Output| Term
-```
+## The Shared UI Layer
+Both studios share the same HTML shell (`kiri_studio.html`) but load different workers based on the URL parameter:
+* `/studio/py/?repo=...` -> Loads PyStudio Worker
+* `/studio/js/?repo=...` -> Loads JS Studio Worker
 
-## Features
-
-### 1. Python Runtime (Pyodide)
-*   **Engine:** CPython compiled to WebAssembly.
-*   **Capabilities:** Standard library, custom package loading, and SharedArrayBuffer for high performance.
-*   **Isolation:** Runs entirely in a Web Worker (`pyodide_worker.js`) to keep the UI thread responsive.
-
-### 2. Live Preview
-*   **Static Assets**: Instant rendering of HTML/CSS/JS files.
-*   **Hot Reload**: Virtual FS changes trigger immediate preview updates.
-
-## Backend & Security Integration
-
-### 1. Security Headers
-To satisfy the requirements for `SharedArrayBuffer` and cross-origin resource fetching, Kiri implements:
-- **Global CORP**: `Cross-Origin-Resource-Policy: cross-origin` allows fetching external assets.
-- **Path-Specific COOP/COEP**: Applied to `/studio/` via `SecurityHeadersMiddleware`:
-    - `Cross-Origin-Opener-Policy: same-origin`
-    - `Cross-Origin-Embedder-Policy: require-corp`
-
-### 2. Service Worker
-The PWA Service Worker is **COEP-aware**, ensuring that cached responses are served with the proper headers to maintain the isolated context required for WASM.
-
-## Roadmap
-*   [x] COEP-aware Service Worker [x]
-*   [x] Path-specific COOP/COEP isolation [x]
-*   [x] SharedArrayBuffer performance [x]
-*   [ ] Persistent Virtual FS to IndexedDB
-*   [ ] Multi-file Pyodide support
+## GitHub Integration (Vibe Coding)
+Both studios share the "Magic Sync" capability:
+1.  **Pull:** Worker downloads/unzips the GitHub repo into the virtual FS.
+2.  **Push:** Worker zips the modified FS -> API pushes to GitHub -> Updates Kiri Project.

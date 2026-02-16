@@ -1,0 +1,113 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}YAML to JSON Converter | Kiri Tools{% endblock %}
+{% block meta_description %}Securely convert YAML configuration files to JSON format. High-speed, client-side conversion
+with syntax highlighting and privacy.{% endblock %}
+
+{% block content %}
+<div class="max-w-7xl mx-auto px-4 py-8" x-data="yamlTool()">
+    <nav class="mb-6 text-sm flex items-center text-[#6C757D] dark:text-[#A1A1AA]">
+        <a href="{% url 'tools:index' %}" class="hover:text-[#0D7C3D] transition-colors flex items-center">
+            <i class="fas fa-arrow-left mr-2"></i> Tools
+        </a>
+        <span class="mx-2">/</span>
+        <span class="text-[#212529] dark:text-white font-bold">YAML to JSON</span>
+    </nav>
+
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 h-[calc(100vh-280px)]">
+        <!-- Input YAML -->
+        <div class="flex flex-col h-full">
+            <div class="mb-3 flex justify-between items-center">
+                <label class="text-xs font-bold text-[#212529] dark:text-white uppercase tracking-widest">Input
+                    YAML</label>
+                <div class="flex gap-4">
+                    <button @click="sample()"
+                        class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase">Sample</button>
+                    <button @click="input = ''"
+                        class="text-[10px] font-bold text-red-500 hover:underline uppercase">Clear</button>
+                </div>
+            </div>
+            <textarea x-model="input"
+                class="flex-1 w-full p-6 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl focus:border-[#0D7C3D] focus:ring-4 focus:ring-[#0D7C3D]/10 bg-white dark:bg-[#1E1E1E] text-[#212529] dark:text-white resize-none transition-all outline-none"
+                placeholder="Paste YAML here..."></textarea>
+        </div>
+
+        <!-- Output JSON -->
+        <div class="flex flex-col h-full">
+            <div class="mb-3 flex justify-between items-center">
+                <label class="text-xs font-bold text-[#212529] dark:text-white uppercase tracking-widest">Output
+                    JSON</label>
+                <button @click="copy()" class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase"
+                    x-text="copied ? 'Copied!' : 'Copy JSON'"></button>
+            </div>
+            <div class="flex-1 relative overflow-hidden rounded-xl border border-[#DEE2E6] dark:border-[#3D3D3D]">
+                <div id="json-output" class="w-full h-full bg-[#F8F9FA] dark:bg-[#121212] overflow-auto p-6">
+                    <pre><code class="language-json" x-text="output"></code></pre>
+                </div>
+                <div x-show="error"
+                    class="absolute bottom-4 left-4 right-4 bg-red-100 text-red-700 px-4 py-2 rounded-lg text-xs font-bold border border-red-200">
+                    <i class="fas fa-exclamation-circle mr-2"></i> <span x-text="error"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- JS-YAML and Prism -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism.min.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+
+<style>
+    .dark pre[class*="language-"],
+    .dark code[class*="language-"] {
+        background: transparent;
+        color: #E4E4E7;
+        text-shadow: none;
+    }
+</style>
+
+<script>
+    function yamlTool() {
+        return {
+            input: '',
+            output: '',
+            error: '',
+            copied: false,
+
+            init() {
+                this.$watch('input', () => this.convert());
+            },
+
+            convert() {
+                this.error = '';
+                if (!this.input.trim()) {
+                    this.output = '';
+                    return;
+                }
+                try {
+                    const parsed = jsyaml.load(this.input);
+                    this.output = JSON.stringify(parsed, null, 4);
+                    this.$nextTick(() => Prism.highlightAll());
+                } catch (e) {
+                    this.error = "YAML Error: " + e.message;
+                    this.output = '';
+                }
+            },
+
+            sample() {
+                this.input = "kiri_config:\n  environment: production\n  features:\n    - studio: true\n    - forum: true\n    - tools: true\n  database:\n    type: postgresql\n    port: 5432\n    pooling: true";
+            },
+
+            copy() {
+                if (!this.output || this.error) return;
+                navigator.clipboard.writeText(this.output);
+                this.copied = true;
+                setTimeout(() => this.copied = false, 2000);
+            }
+        }
+    }
+</script>
+{% endblock %}

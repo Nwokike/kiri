@@ -445,65 +445,76 @@ function initTerminal() {
 }
 
 function initMonaco() {
+    if (editor) return; // Already initialized
+    if (typeof monaco !== 'undefined' && monaco.editor) {
+        _createMonaco();
+        return;
+    }
+
     require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' } });
     require(['vs/editor/editor.main'], function () {
-        editor = monaco.editor.create(document.getElementById('monaco-editor'), {
-            value: "",
-            language: window.KIRI_CONFIG.studioType === 'py' ? 'python' : 'javascript',
-            theme: 'vs-dark',
-            fontSize: 14,
-            fontFamily: '"JetBrains Mono", monospace',
-            automaticLayout: true,
-            minimap: { enabled: false }
-        });
-
-        let saveTimeout;
-        editor.onDidChangeModelContent(() => {
-            document.getElementById('unsaved-indicator').classList.remove('hidden');
-            clearTimeout(saveTimeout);
-            saveTimeout = setTimeout(() => {
-                if (worker && currentFile) {
-                    worker.postMessage({ cmd: 'save', filename: currentFile, content: editor.getValue() });
-                    document.getElementById('unsaved-indicator').classList.add('hidden');
-                }
-            }, 1000);
-        });
-
-        // --- PHASE 6: GHOST TEXT INTEGRATION ---
-        if (window.studioAI) {
-            monaco.languages.registerInlineCompletionsProvider(window.KIRI_CONFIG.studioType === 'py' ? 'python' : 'javascript', {
-                provideInlineCompletions: async function (model, position, context, token) {
-                    // Extract context: lines leading up to the cursor
-                    const textUntilPosition = model.getValueInRange({
-                        startLineNumber: Math.max(1, position.lineNumber - 30),
-                        startColumn: 1,
-                        endLineNumber: position.lineNumber,
-                        endColumn: position.column
-                    });
-
-                    // Basic sanity check: don't trigger on tiny inputs
-                    if (textUntilPosition.trim().length < 5) return { items: [] };
-
-                    // Call the AI Orchestrator (Ghost Lane)
-                    const prediction = await window.studioAI.completeCode(textUntilPosition, window.KIRI_CONFIG.studioType);
-
-                    if (prediction && prediction.result && prediction.result.code) {
-                        return {
-                            items: [{
-                                insertText: prediction.result.code,
-                                range: new monaco.Range(
-                                    position.lineNumber, position.column,
-                                    position.lineNumber, position.column
-                                )
-                            }]
-                        };
-                    }
-                    return { items: [] };
-                },
-                freeInlineCompletions: true
-            });
-        }
+        _createMonaco();
     });
+}
+
+function _createMonaco() {
+    if (editor) return;
+    editor = monaco.editor.create(document.getElementById('monaco-editor'), {
+        value: "",
+        language: window.KIRI_CONFIG.studioType === 'py' ? 'python' : 'javascript',
+        theme: 'vs-dark',
+        fontSize: 14,
+        fontFamily: '"JetBrains Mono", monospace',
+        automaticLayout: true,
+        minimap: { enabled: false }
+    });
+
+    let saveTimeout;
+    editor.onDidChangeModelContent(() => {
+        document.getElementById('unsaved-indicator').classList.remove('hidden');
+        clearTimeout(saveTimeout);
+        saveTimeout = setTimeout(() => {
+            if (worker && currentFile) {
+                worker.postMessage({ cmd: 'save', filename: currentFile, content: editor.getValue() });
+                document.getElementById('unsaved-indicator').classList.add('hidden');
+            }
+        }, 1000);
+    });
+
+    // --- PHASE 6: GHOST TEXT INTEGRATION ---
+    if (window.studioAI) {
+        monaco.languages.registerInlineCompletionsProvider(window.KIRI_CONFIG.studioType === 'py' ? 'python' : 'javascript', {
+            provideInlineCompletions: async function (model, position, context, token) {
+                // Extract context: lines leading up to the cursor
+                const textUntilPosition = model.getValueInRange({
+                    startLineNumber: Math.max(1, position.lineNumber - 30),
+                    startColumn: 1,
+                    endLineNumber: position.lineNumber,
+                    endColumn: position.column
+                });
+
+                // Basic sanity check: don't trigger on tiny inputs
+                if (textUntilPosition.trim().length < 5) return { items: [] };
+
+                // Call the AI Orchestrator (Ghost Lane)
+                const prediction = await window.studioAI.completeCode(textUntilPosition, window.KIRI_CONFIG.studioType);
+
+                if (prediction && prediction.result && prediction.result.code) {
+                    return {
+                        items: [{
+                            insertText: prediction.result.code,
+                            range: new monaco.Range(
+                                position.lineNumber, position.column,
+                                position.lineNumber, position.column
+                            )
+                        }]
+                    };
+                }
+                return { items: [] };
+            },
+            freeInlineCompletions: true
+        });
+    }
 }
 
 function setupEventListeners() {

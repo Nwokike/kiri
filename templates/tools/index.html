@@ -51,8 +51,8 @@
             {% include "tools/partials/tool_card.html" with name="JWT Parser" url="tools:jwt_parser" icon="fa-id-card" color="pink" desc="Decode and inspect JWT payloads." %}
             <!-- Image to Base64 -->
             {% include "tools/partials/tool_card.html" with name="Image to Base64" url="tools:image_to_base64" icon="fa-image" color="rose" desc="Convert images to Base64 strings." %}
-            <!-- YAML to JSON -->
-            {% include "tools/partials/tool_card.html" with name="YAML to JSON" url="tools:yaml_json_converter" icon="fa-file-code" color="orange" desc="Convert YAML configurations to JSON." %}
+            <!-- YAML & JSON -->
+            {% include "tools/partials/tool_card.html" with name="YAML & JSON" url="tools:yaml_json_converter" icon="fa-file-code" color="orange" desc="Convert between YAML and JSON seamlessly." %}
             <!-- Markdown Previewer -->
             {% include "tools/partials/tool_card.html" with name="Markdown Preview" url="tools:markdown_previewer" icon="fa-file-alt" color="blue" desc="Live GFM markdown editor and preview." %}
             <!-- HTML Entities -->
@@ -71,10 +71,8 @@
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             <!-- LaTeX Editor -->
             {% include "tools/partials/tool_card.html" with name="LaTeX Editor" url="tools:latex_editor" icon="fa-square-root-alt" color="neutral" desc="Live LaTeX equation preview and editor." %}
-            <!-- CSV to JSON -->
-            {% include "tools/partials/tool_card.html" with name="CSV to JSON" url="tools:csv_to_json" icon="fa-file-code" color="emerald" desc="Convert CSV datasets to structured JSON." %}
-            <!-- JSON to CSV -->
-            {% include "tools/partials/tool_card.html" with name="JSON to CSV" url="tools:json_to_csv" icon="fa-file-csv" color="emerald" desc="Convert complex JSON to flat CSV files." %}
+            <!-- CSV & JSON -->
+            {% include "tools/partials/tool_card.html" with name="CSV & JSON" url="tools:json_csv_converter" icon="fa-file-csv" color="emerald" desc="Bidirectional conversion between CSV and JSON." %}
             <!-- Unit Converter -->
             {% include "tools/partials/tool_card.html" with name="Unit Converter" url="tools:unit_converter" icon="fa-balance-scale" color="yellow" desc="Scientific and digital unit conversions." %}
             <!-- Unix Timestamp -->
@@ -129,8 +127,10 @@
     </section>
 
     <!-- Security Note -->
-    <div class="mt-16 p-6 bg-[#0D7C3D]/5 border border-[#0D7C3D]/10 rounded-xl flex flex-col md:flex-row items-center gap-6">
-        <div class="w-16 h-16 bg-white dark:bg-[#1E1E1E] rounded-full shadow-sm flex items-center justify-center text-[#0D7C3D] text-2xl shrink-0">
+    <div
+        class="mt-16 p-6 bg-[#0D7C3D]/5 border border-[#0D7C3D]/10 rounded-xl flex flex-col md:flex-row items-center gap-6">
+        <div
+            class="w-16 h-16 bg-white dark:bg-[#1E1E1E] rounded-full shadow-sm flex items-center justify-center text-[#0D7C3D] text-2xl shrink-0">
             <i class="fas fa-user-shield"></i>
         </div>
         <div>

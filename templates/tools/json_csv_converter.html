@@ -1,0 +1,178 @@
+{% extends "tools/base_tool.html" %}
+{% load static %}
+
+{% block title %}CSV & JSON Converter | Kiri Research{% endblock %}
+{% block meta_description %}Seamlessly transform datasets between CSV and JSON formats. Ideal for researchers managing
+tabular data and structured arrays with precision.{% endblock %}
+
+{% block tool_name %}CSV & JSON{% endblock %}
+{% block tool_icon %}fa-file-csv{% endblock %}
+{% block tool_title %}CSV & JSON Converter{% endblock %}
+{% block tool_description %}
+Seamlessly transform datasets between CSV and JSON formats.
+Ideal for researchers managing tabular data and structured arrays with precision.
+{% endblock %}
+
+{% block tool_accept %}.csv,.json{% endblock %}
+
+{% block tool_actions_left %}
+<div class="flex items-center gap-2">
+    <span class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase">Direction:</span>
+    <div class="flex bg-white dark:bg-[#1E1E1E] p-1 rounded-lg border border-[#DEE2E6] dark:border-[#3D3D3D]">
+        <button @click="mode = 'c2j'; resetTool(); loadSample()"
+            :class="mode === 'c2j' ? 'bg-[#0D7C3D] text-white' : 'text-[#6C757D]'"
+            class="px-2 py-1 text-[9px] font-bold rounded-md transition-all">CSV to JSON</button>
+        <button @click="mode = 'j2c'; resetTool(); loadSample()"
+            :class="mode === 'j2c' ? 'bg-[#0D7C3D] text-white' : 'text-[#6C757D]'"
+            class="px-2 py-1 text-[9px] font-bold rounded-md transition-all">JSON to CSV</button>
+    </div>
+</div>
+{% endblock %}
+
+{% block tool_actions_right %}
+<button @click="download()"
+    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-[#0D7C3D] text-white hover:bg-[#0A5C2C]"
+    x-show="output">
+    <i class="fas fa-download"></i>
+    <span x-text="mode === 'c2j' ? 'Download JSON' : 'Download CSV'"></span>
+</button>
+{% endblock %}
+
+{% block tool_body %}
+<div class="space-y-6">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[500px]">
+        <!-- Input Area -->
+        <div class="flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+                <span
+                    class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest flex items-center gap-2">
+                    <i class="fas"
+                        :class="mode === 'c2j' ? 'fa-table text-[#0D7C3D]' : 'fa-brackets-curly text-purple-500'"></i>
+                    <span x-text="mode === 'c2j' ? 'Source CSV' : 'Source JSON Array'"></span>
+                </span>
+                <span class="text-[10px] text-[#A1A1AA]" x-text="input.length ? input.length + ' chars' : ''"></span>
+            </div>
+            <textarea x-model="input" @input="convert()"
+                class="flex-1 w-full p-6 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[1.5rem] bg-white dark:bg-[#121212] text-[#212529] dark:text-[#E4E4E7] resize-none shadow-inner"
+                :placeholder="mode === 'c2j' ? 'Paste CSV content...' : 'Paste JSON array...'"></textarea>
+        </div>
+
+        <!-- Output Area -->
+        <div class="flex flex-col gap-3">
+            <div class="flex items-center justify-between">
+                <span
+                    class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest flex items-center gap-2">
+                    <i class="fas"
+                        :class="mode === 'c2j' ? 'fa-brackets-curly text-purple-500' : 'fa-table text-[#0D7C3D]'"></i>
+                    <span x-text="mode === 'c2j' ? 'JSON Output' : 'CSV Output'"></span>
+                </span>
+                <button @click="copyToClipboard(output)"
+                    class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase flex items-center gap-1.5"
+                    x-show="output">
+                    <i class="fas" :class="copied ? 'fa-check' : 'fa-copy'"></i>
+                    <span x-text="copied ? 'Copied' : 'Copy'"></span>
+                </button>
+            </div>
+            <div class="flex-1 rounded-[1.5rem] bg-[#121212] border border-[#3D3D3D] relative overflow-hidden group">
+                <textarea readonly x-model="output"
+                    class="w-full h-full p-6 font-mono text-sm bg-transparent text-[#4ADE80] resize-none outline-none"
+                    :placeholder="mode === 'c2j' ? 'JSON results...' : 'CSV results...'"></textarea>
+
+                <!-- Format Toggles -->
+                <div class="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <template x-if="mode === 'c2j'">
+                        <div class="flex gap-1">
+                            <button @click="pretty = true; convert()"
+                                :class="pretty ? 'bg-[#4ADE80] text-black' : 'bg-[#2D2D2D] text-white'"
+                                class="px-2 py-1 text-[9px] font-bold rounded-md">Pretty</button>
+                            <button @click="pretty = false; convert()"
+                                :class="!pretty ? 'bg-[#4ADE80] text-black' : 'bg-[#2D2D2D] text-white'"
+                                class="px-2 py-1 text-[9px] font-bold rounded-md">Minify</button>
+                        </div>
+                    </template>
+                    <template x-if="mode === 'j2c'">
+                        <div class="flex gap-1">
+                            <button @click="headers = true; convert()"
+                                :class="headers ? 'bg-[#0D7C3D] text-white' : 'bg-[#2D2D2D] text-white'"
+                                class="px-2 py-1 text-[9px] font-bold rounded-md">Headers</button>
+                            <button @click="headers = false; convert()"
+                                :class="!headers ? 'bg-[#0D7C3D] text-white' : 'bg-[#2D2D2D] text-white'"
+                                class="px-2 py-1 text-[9px] font-bold rounded-md">No Headers</button>
+                        </div>
+                    </template>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block tool_js_data %}
+{
+mode: 'c2j',
+pretty: true,
+headers: true,
+
+loadSample() {
+if (this.mode === 'c2j') {
+this.input = `id,name,category,relevance,status
+1,Alpha Neuron,ML,0.98,active
+2,Beta Flux,Quantum,0.85,active
+3,Gamma Ray,Physics,0.92,archived
+4,Delta Force,Robotics,0.76,hot`;
+} else {
+this.input = JSON.stringify([
+{ id: 1, name: "Alpha Neuron", category: "ML", relevance: 0.98, status: "active" },
+{ id: 2, name: "Beta Flux", category: "Quantum", relevance: 0.85, status: "active" },
+{ id: 3, name: "Gamma Ray", category: "Physics", relevance: 0.92, status: "archived" }
+], null, 4);
+}
+this.convert();
+},
+
+convert() {
+if (!this.input.trim()) {
+this.output = '';
+this.error = '';
+return;
+}
+
+try {
+if (this.mode === 'c2j') {
+const results = Papa.parse(this.input, {
+header: true,
+skipEmptyLines: true,
+dynamicTyping: true
+});
+if (results.errors.length > 0) {
+this.error = "CSV Error: " + results.errors[0].message;
+return;
+}
+this.output = this.pretty ? JSON.stringify(results.data, null, 4) : JSON.stringify(results.data);
+this.statusMessage = `${results.data.length} records processed`;
+} else {
+let parsed = JSON.parse(this.input);
+if (!Array.isArray(parsed)) parsed = [parsed];
+this.output = Papa.unparse(parsed, { header: this.headers, skipEmptyLines: true });
+this.statusMessage = `${parsed.length} objects converted to CSV`;
+}
+this.error = '';
+} catch (e) {
+this.error = "Conversion failed: " + e.message;
+this.output = '';
+this.statusMessage = 'Error';
+}
+},
+
+download() {
+if (!this.output || this.error) return;
+const ext = this.mode === 'c2j' ? 'json' : 'csv';
+const mime = this.mode === 'c2j' ? 'application/json' : 'text/csv';
+this.downloadFile(this.output, `kiri_data.${ext}`, mime);
+}
+}
+{% endblock %}
+
+{% block extra_js_tool %}
+<script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+{% endblock %}

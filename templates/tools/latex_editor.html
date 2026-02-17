@@ -1,6 +1,10 @@
 {% extends "tools/base_tool.html" %}
 {% load static %}
 
+{% block title %}LaTeX Equation Editor & Previewer | Kiri Research{% endblock %}
+{% block meta_description %}Compose beautiful mathematical formulas with real-time LaTeX rendering. Ideal for
+researchers, students, and technical documentation.{% endblock %}
+
 {% block tool_name %}LaTeX Editor{% endblock %}
 {% block tool_icon %}fa-square-root-variable{% endblock %}
 {% block tool_title %}LaTeX Equation Editor{% endblock %}
@@ -8,6 +12,8 @@
 Compose beautiful mathematical formulas with real-time rendering.
 Ideal for researchers writing papers, students solving complex equations, and technical documentation.
 {% endblock %}
+
+{% block tool_accept %}.tex,.txt{% endblock %}
 
 {% block tool_actions_right %}
 <button @click="copyForMarkdown()"
@@ -88,11 +94,7 @@ Ideal for researchers writing papers, students solving complex equations, and te
 
 {% block tool_js_data %}
 {
-init() {
-this.input = 'e^{i\\pi} + 1 = 0';
-this.$nextTick(() => this.render());
-},
-
+hideUpload: true,
 insert(val) {
 const area = this.$refs.textarea;
 const start = area.selectionStart;
@@ -100,6 +102,12 @@ const end = area.selectionEnd;
 this.input = this.input.substring(0, start) + val + this.input.substring(end);
 area.focus();
 this.$nextTick(() => this.render());
+},
+
+loadSample() {
+this.input = '\\nabla \\cdot \\mathbf{E} = \\frac{\\rho}{\\epsilon_0}';
+this.render();
+this.statusMessage = 'Sample Maxwell equation loaded';
 },
 
 sample(val) {
@@ -139,7 +147,6 @@ this.render();
 {% endblock %}
 
 {% block extra_js_tool %}
-<script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
 <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
 <style>
     .MathJax {

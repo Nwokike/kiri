@@ -1,6 +1,10 @@
 {% extends "tools/base_tool.html" %}
 {% load static %}
 
+{% block title %}Professional Diff Viewer | Kiri Research{% endblock %}
+{% block meta_description %}Compare text snippets side-by-side or line-by-line with high-performance syntax highlighting
+and change detection.{% endblock %}
+
 {% block tool_name %}Diff Viewer{% endblock %}
 {% block tool_icon %}fa-columns{% endblock %}
 {% block tool_title %}Professional Diff Viewer{% endblock %}
@@ -12,10 +16,10 @@ Ideal for code review, version comparison, and identifying subtle changes in doc
 {% block tool_actions_left %}
 <div class="flex items-center gap-2">
     <div class="flex bg-white dark:bg-[#1E1E1E] p-1 rounded-xl border border-[#DEE2E6] dark:border-[#3D3D3D] shadow-sm">
-        <button @click="outputFormat = 'line-by-line'; updateDiff()"
+        <button @click="outputFormat = 'line-by-line'; convert()"
             :class="outputFormat === 'line-by-line' ? 'bg-[#0D7C3D] text-white' : 'text-[#6C757D] dark:text-[#A1A1AA] hover:bg-[#F1F3F5] dark:hover:bg-[#2D2D2D]'"
             class="px-3 py-1.5 text-[10px] font-bold rounded-lg transition-all">Line-by-Line</button>
-        <button @click="outputFormat = 'side-by-side'; updateDiff()"
+        <button @click="outputFormat = 'side-by-side'; convert()"
             :class="outputFormat === 'side-by-side' ? 'bg-[#0D7C3D] text-white' : 'text-[#6C757D] dark:text-[#A1A1AA] hover:bg-[#F1F3F5] dark:hover:bg-[#2D2D2D]'"
             class="px-3 py-1.5 text-[10px] font-bold rounded-lg transition-all">Side-by-Side</button>
     </div>
@@ -38,7 +42,7 @@ Ideal for code review, version comparison, and identifying subtle changes in doc
                 </button>
                 <input type="file" x-ref="fileInput1" class="hidden" @change="uploadToField($event, 'input')">
             </div>
-            <textarea x-model="input" @input="updateDiff()"
+            <textarea x-model="input" @input="convert()"
                 class="w-full h-48 p-4 font-mono text-xs border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-2xl bg-white dark:bg-[#121212] text-[#212529] dark:text-[#E4E4E7] transition-all resize-none shadow-inner"
                 placeholder="Paste original text..."></textarea>
         </div>
@@ -55,7 +59,7 @@ Ideal for code review, version comparison, and identifying subtle changes in doc
                 </button>
                 <input type="file" x-ref="fileInput2" class="hidden" @change="uploadToField($event, 'modified')">
             </div>
-            <textarea x-model="modified" @input="updateDiff()"
+            <textarea x-model="modified" @input="convert()"
                 class="w-full h-48 p-4 font-mono text-xs border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-2xl bg-white dark:bg-[#121212] text-[#212529] dark:text-[#E4E4E7] transition-all resize-none shadow-inner"
                 placeholder="Paste modified text..."></textarea>
         </div>
@@ -80,6 +84,7 @@ Ideal for code review, version comparison, and identifying subtle changes in doc
 
 {% block tool_js_data %}
 {
+hideUpload: true,
 modified: '',
 outputFormat: 'side-by-side',
 
@@ -90,22 +95,35 @@ const reader = new FileReader();
 reader.onload = (e) => {
 this[field] = e.target.result;
 this.statusMessage = `${file.name} uploaded to ${field === 'input' ? 'original' : 'modified'}`;
-this.updateDiff();
+this.convert();
 };
 reader.readAsText(file);
 },
 
 loadSample() {
-this.input = "def fast_power(base, power):\n result = 1\n while power > 0:\n if power % 2 == 1:\n result *= base\n base
-*= base\n power //= 2\n return result";
-this.modified = "def fast_power(base, power):\n \"\"\"Calculates base^power efficiently.\"\"\"\n result = 1\n while
-power > 0:\n # Check if current power is odd\n if power % 2 != 0:\n result *= base\n base *= base\n power = power // 2\n
-return result";
+this.input = `def fast_power(base, power):
+result = 1
+while power > 0:
+if power % 2 == 1:
+result *= base
+base *= base
+power //= 2
+return result`;
+this.modified = `def fast_power(base, power):
+"""Calculates base^power efficiently."""
+result = 1
+while power > 0:
+# Check if current power is odd
+if power % 2 != 0:
+result *= base
+base *= base
+power = power // 2
+return result`;
 this.statusMessage = 'Sample loaded';
-this.updateDiff();
+this.convert();
 },
 
-updateDiff() {
+convert() {
 if (!this.input && !this.modified) return;
 this.$nextTick(() => {
 try {

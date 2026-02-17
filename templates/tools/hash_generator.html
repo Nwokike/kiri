@@ -1,12 +1,16 @@
 {% extends "tools/base_tool.html" %}
 {% load static %}
 
+{% block title %}Secure Hash Generator | Kiri Research{% endblock %}
+{% block meta_description %}Generate cryptographic hashes using standard algorithms. All calculations happen locally in
+your browser.{% endblock %}
+
 {% block tool_name %}Hash Generator{% endblock %}
 {% block tool_icon %}fa-fingerprint{% endblock %}
 {% block tool_title %}Secure Hash Generator{% endblock %}
 {% block tool_description %}
-Generate high-security cryptographic hashes using standard algorithms.
-All processing is performed locally in your browser leveraging the Web Crypto API.
+Generate cryptographic hashes using standard algorithms.
+All calculations happen locally in your browser.
 {% endblock %}
 
 {% block tool_actions_left %}
@@ -16,7 +20,7 @@ All processing is performed locally in your browser leveraging the Web Crypto AP
         class="flex items-center gap-3 bg-white dark:bg-[#1E1E1E] px-3 py-1.5 rounded-xl border border-[#DEE2E6] dark:border-[#3D3D3D] shadow-sm">
         <template x-for="algo in availableAlgos">
             <label class="flex items-center gap-1.5 cursor-pointer group">
-                <input type="checkbox" :value="algo" x-model="selectedAlgos" @change="generate()"
+                <input type="checkbox" :value="algo" x-model="selectedAlgos" @change="convert()"
                     class="w-3 h-3 text-[#0D7C3D] border-gray-300 rounded focus:ring-[#0D7C3D]">
                 <span class="text-[9px] font-bold uppercase group-hover:text-[#0D7C3D] transition-colors"
                     x-text="algo.replace('SHA-', 'S')"></span>
@@ -31,7 +35,7 @@ All processing is performed locally in your browser leveraging the Web Crypto AP
     <div class="flex flex-col gap-3">
         <label class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest">Source
             Message</label>
-        <textarea x-model="input" @input="generate()"
+        <textarea x-model="input" @input="convert()"
             class="h-32 w-full p-6 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[1.5rem] bg-white dark:bg-[#121212] text-[#212529] dark:text-[#E4E4E7] resize-none shadow-inner"
             placeholder="Type or paste message to hash..."></textarea>
     </div>
@@ -66,10 +70,10 @@ hashes: {},
 
 loadSample() {
 this.input = "The quick brown fox jumps over the lazy dog";
-this.generate();
+this.convert();
 },
 
-async generate() {
+async convert() {
 if (!this.input) {
 this.hashes = {};
 this.statusMessage = 'Ready';
@@ -80,17 +84,42 @@ this.statusMessage = 'Calculating hashes...';
 const encoder = new TextEncoder();
 const data = encoder.encode(this.input);
 
+const newHashes = {};
 for (const algo of this.selectedAlgos) {
 try {
+// Primary: Web Crypto API (requires Secure Context / HTTPS)
+if (window.crypto && window.crypto.subtle) {
 const hashBuffer = await crypto.subtle.digest(algo, data);
 const hashArray = Array.from(new Uint8Array(hashBuffer));
-this.hashes[algo] = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-this.$forceUpdate(); // Ensure layout reflects changes
+newHashes[algo] = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+} else {
+throw new Error('Web Crypto unavailable');
+}
 } catch (err) {
-this.hashes[algo] = 'Algorithm not supported';
+// Fallback: CryptoJS library
+try {
+const algoMap = {
+'SHA-1': CryptoJS.SHA1,
+'SHA-256': CryptoJS.SHA256,
+'SHA-384': CryptoJS.SHA384,
+'SHA-512': CryptoJS.SHA512
+};
+if (algoMap[algo]) {
+newHashes[algo] = algoMap[algo](this.input).toString();
+} else {
+newHashes[algo] = 'Algorithm not found';
+}
+} catch (fallbackErr) {
+newHashes[algo] = 'Hashing failed';
 }
 }
+}
+this.hashes = newHashes;
 this.statusMessage = 'Hashes updated';
 }
 }
+{% endblock %}
+
+{% block extra_js_tool %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
 {% endblock %}

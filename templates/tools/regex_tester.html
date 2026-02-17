@@ -1,6 +1,10 @@
 {% extends "tools/base_tool.html" %}
 {% load static %}
 
+{% block title %}Live Regex Tester & Debugger | Kiri Research{% endblock %}
+{% block meta_description %}Test and debug regular expressions with real-time matching and capture group highlighting.
+Optimized for JavaScript regex engine.{% endblock %}
+
 {% block tool_name %}Regex Tester{% endblock %}
 {% block tool_icon %}fa-asterisk{% endblock %}
 {% block tool_title %}Live Regex Tester & Debugger{% endblock %}
@@ -42,7 +46,7 @@ Optimized for JavaScript regex engine with instant feedback on large text blocks
             <div
                 class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#6C757D] font-mono text-lg">
                 /</div>
-            <input type="text" x-model="regex" @input="updateMatches()"
+            <input type="text" x-model="regex" @input="convert()"
                 class="w-full pl-8 pr-16 py-4 font-mono text-lg border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-2xl bg-white dark:bg-[#121212] text-[#212529] dark:text-white shadow-inner focus:border-[#0D7C3D] outline-none transition-all"
                 placeholder="([a-z]+)">
             <div
@@ -59,7 +63,7 @@ Optimized for JavaScript regex engine with instant feedback on large text blocks
                     String</span>
                 <span class="text-[10px] text-[#A1A1AA]" x-text="input.length ? input.length + ' chars' : ''"></span>
             </div>
-            <textarea x-model="input" @input="updateMatches()"
+            <textarea x-model="input" @input="convert()"
                 class="flex-1 w-full p-6 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[1.5rem] bg-white dark:bg-[#121212] text-[#212529] dark:text-[#E4E4E7] resize-none shadow-inner"
                 placeholder="Content to test against..."></textarea>
         </div>
@@ -98,15 +102,16 @@ Optimized for JavaScript regex engine with instant feedback on large text blocks
 
 {% block tool_js_data %}
 {
+hideUpload: true,
 regex: '[a-zA-Z]+',
 flags: 'gm',
 matches: [],
 
 loadSample() {
-this.input = "Welcome to Kiri Research Ecosystem. Contact us at elite@kiri.ai or support-alpha@labs.kiri.dev for any
-technical queries. Version: 2.0.4-beta";
+this.input = `Welcome to Kiri Research Ecosystem. Contact us at elite@kiri.ai or support-alpha@labs.kiri.dev for any
+technical queries. Version: 2.0.4-beta`;
 this.regex = "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}";
-this.updateMatches();
+this.convert();
 },
 
 toggleFlag(f) {
@@ -115,11 +120,10 @@ this.flags = this.flags.replace(f, '');
 } else {
 this.flags += f;
 }
-this.updateMatches();
+this.convert();
 },
 
-updateMatches() {
-this.error = '';
+convert() {
 if (!this.regex || !this.input) {
 this.matches = [];
 return;

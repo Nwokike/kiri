@@ -1,6 +1,10 @@
 {% extends "tools/base_tool.html" %}
 {% load static %}
 
+{% block title %}Professional SQL Formatter | Kiri Research{% endblock %}
+{% block meta_description %}Beautify and format SQL queries for multiple dialects including PostgreSQL, MySQL, SQLite,
+and Oracle.{% endblock %}
+
 {% block tool_name %}SQL Formatter{% endblock %}
 {% block tool_icon %}fa-database{% endblock %}
 {% block tool_title %}Professional SQL Formatter{% endblock %}
@@ -9,10 +13,12 @@ Beautify and format your SQL queries for better readability and debugging.
 Supports multiple dialects including PostgreSQL, MySQL, SQLite, and Oracle.
 {% endblock %}
 
+{% block tool_accept %}.sql{% endblock %}
+
 {% block tool_actions_left %}
 <div class="flex items-center gap-2">
     <span class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase">Dialect:</span>
-    <select x-model="dialect" @change="format()"
+    <select x-model="dialect" @change="convert()"
         class="text-[10px] font-bold bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-lg px-3 py-2 outline-none focus:border-[#0D7C3D] transition-all">
         <option value="sql">Standard SQL</option>
         <option value="postgresql">PostgreSQL</option>
@@ -45,7 +51,7 @@ Supports multiple dialects including PostgreSQL, MySQL, SQLite, and Oracle.
                 </span>
                 <span class="text-[10px] text-[#A1A1AA]" x-text="input.length ? input.length + ' chars' : ''"></span>
             </div>
-            <textarea x-model="input" @input="format()"
+            <textarea x-model="input" @input="convert()"
                 class="flex-1 w-full p-6 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[1.5rem] bg-white dark:bg-[#121212] text-[#212529] dark:text-[#E4E4E7] resize-none shadow-inner"
                 placeholder="Paste your SQL query here..."></textarea>
         </div>
@@ -71,10 +77,10 @@ Supports multiple dialects including PostgreSQL, MySQL, SQLite, and Oracle.
 
                 <!-- Format Options -->
                 <div class="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button @click="uppercase = true; format()"
+                    <button @click="uppercase = true; convert()"
                         :class="uppercase ? 'bg-[#4ADE80] text-black' : 'bg-[#2D2D2D] text-white'"
                         class="px-2 py-1 text-[9px] font-bold rounded-md">UPPER</button>
-                    <button @click="uppercase = false; format()"
+                    <button @click="uppercase = false; convert()"
                         :class="!uppercase ? 'bg-[#4ADE80] text-black' : 'bg-[#2D2D2D] text-white'"
                         class="px-2 py-1 text-[9px] font-bold rounded-md">Lower</button>
                 </div>
@@ -86,18 +92,24 @@ Supports multiple dialects including PostgreSQL, MySQL, SQLite, and Oracle.
 
 {% block tool_js_data %}
 {
+hideUpload: true,
 dialect: 'sql',
 uppercase: true,
 
 loadSample() {
-this.input = "SELECT projects.id, projects.name, users.username, COUNT(comments.id) as comment_count FROM projects LEFT
-JOIN users ON projects.owner_id = users.id LEFT JOIN comments ON comments.project_id = projects.id WHERE projects.status
-= 'active' AND projects.stars_count > 100 GROUP BY projects.id, users.id HAVING comment_count > 5 ORDER BY comment_count
-DESC LIMIT 10;";
-this.format();
+this.input = `SELECT projects.id, projects.name, users.username, COUNT(comments.id) as comment_count
+FROM projects
+LEFT JOIN users ON projects.owner_id = users.id
+LEFT JOIN comments ON comments.project_id = projects.id
+WHERE projects.status = 'active' AND projects.stars_count > 100
+GROUP BY projects.id, users.id
+HAVING comment_count > 5
+ORDER BY comment_count DESC
+LIMIT 10;`;
+this.convert();
 },
 
-format() {
+convert() {
 if (!this.input.trim()) {
 this.output = '';
 this.error = '';

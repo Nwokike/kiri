@@ -1,6 +1,10 @@
 {% extends "tools/base_tool.html" %}
 {% load static %}
 
+{% block title %}Image to Base64 Encoder | Kiri Research{% endblock %}
+{% block meta_description %}Convert images into Base64 data strings for direct embedding in CSS, HTML, or JSON. Secure
+and preserves quality without uploads.{% endblock %}
+
 {% block tool_name %}Image to Base64{% endblock %}
 {% block tool_icon %}fa-image{% endblock %}
 {% block tool_title %}Image to Base64 Encoder{% endblock %}
@@ -13,18 +17,20 @@ Fast, secure, and preserves image quality without any server-side upload.
 <div class="flex items-center gap-2">
     <span class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase">Format:</span>
     <div class="flex bg-white dark:bg-[#1E1E1E] p-1 rounded-lg border border-[#DEE2E6] dark:border-[#3D3D3D]">
-        <button @click="outputType = 'raw'; generateOutput()"
+        <button @click="outputType = 'raw'; convert()"
             :class="outputType === 'raw' ? 'bg-[#0D7C3D] text-white' : 'text-[#6C757D]'"
             class="px-2 py-1 text-[9px] font-bold rounded-md">Raw</button>
-        <button @click="outputType = 'css'; generateOutput()"
+        <button @click="outputType = 'css'; convert()"
             :class="outputType === 'css' ? 'bg-[#0D7C3D] text-white' : 'text-[#6C757D]'"
             class="px-2 py-1 text-[9px] font-bold rounded-md">CSS</button>
-        <button @click="outputType = 'html'; generateOutput()"
+        <button @click="outputType = 'html'; convert()"
             :class="outputType === 'html' ? 'bg-[#0D7C3D] text-white' : 'text-[#6C757D]'"
             class="px-2 py-1 text-[9px] font-bold rounded-md">HTML</button>
     </div>
 </div>
 {% endblock %}
+
+{% block tool_accept %}image/*{% endblock %}
 
 {% block tool_actions_right %}
 <button @click="downloadOutput()"
@@ -96,7 +102,8 @@ Fast, secure, and preserves image quality without any server-side upload.
 
 {% block tool_js_data %}
 {
-over: false,
+file: null,
+previewUrl: '',
 outputType: 'raw',
 fileName: '',
 rawBase64: '',
@@ -106,10 +113,28 @@ this.rawBase64 = '';
 this.fileName = '';
 },
 
+async loadSample() {
+try {
+const response = await fetch("{% static 'images/logos/logo.png' %}");
+const blob = await response.blob();
+const reader = new FileReader();
+reader.onload = (e) => {
+this.input = e.target.result;
+this.rawBase64 = e.target.result;
+this.fileName = 'logo.png';
+this.convert();
+this.statusMessage = 'Sample logo loaded';
+};
+reader.readAsDataURL(blob);
+} catch (err) {
+this.error = 'Failed to load sample logo';
+}
+},
+
 handleDrop(e) {
 this.over = false;
-const file = e.dataTransfer.files[0];
-if (file) this.processImage(file);
+const files = e.dataTransfer.files;
+if (files.length > 0) this.processImage(files[0]);
 },
 
 handleFileUpload(event) {
@@ -128,19 +153,18 @@ this.statusMessage = 'Encoding ' + file.name + '...';
 
 const reader = new FileReader();
 reader.onload = (e) => {
-this.input = e.target.result; // This is the dataURL
+this.input = e.target.result;
 this.rawBase64 = e.target.result;
-this.generateOutput();
+this.convert();
 this.statusMessage = 'Image encoded successfully';
 };
 reader.readAsDataURL(file);
 },
 
-generateOutput() {
+convert() {
 if (!this.rawBase64) return;
 
 if (this.outputType === 'raw') {
-// Strip the data:image/xxx;base64, part
 this.output = this.rawBase64.split(',')[1];
 } else if (this.outputType === 'css') {
 this.output = `background-image: url("${this.rawBase64}");`;

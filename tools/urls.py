@@ -18,7 +18,7 @@ urlpatterns = [
     path('jwt-parser/', views.jwt_parser, name='jwt_parser'),
     path('unit-converter/', views.unit_converter, name='unit_converter'),
     path('latex-editor/', views.latex_editor, name='latex_editor'),
-    path('json-to-csv/', views.json_to_csv, name='json_to_csv'),
+    path('csv-json/', views.json_csv_converter, name='json_csv_converter'),
     path('image-to-base64/', views.image_to_base64, name='image_to_base64'),
     path('yaml-json/', views.yaml_json_converter, name='yaml_json_converter'),
     path('markdown-preview/', views.markdown_previewer, name='markdown_previewer'),
@@ -27,7 +27,7 @@ urlpatterns = [
     path('api-tester/', views.api_tester, name='api_tester'),
     path('data-profiler/', views.data_profiler, name='data_profiler'),
     path('json-schema/', views.json_schema_validator, name='json_schema_validator'),
-    path('csv-to-json/', views.csv_to_json, name='csv_to_json'),
+
     path('pdf-merger/', views.pdf_merger, name='pdf_merger'),
     path('pdf-text-extractor/', views.pdf_text_extractor, name='pdf_text_extractor'),
     path('image-resizer/', views.image_resizer, name='image_resizer'),

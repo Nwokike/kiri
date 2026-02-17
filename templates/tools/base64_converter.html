@@ -1,12 +1,16 @@
 {% extends "tools/base_tool.html" %}
 {% load static %}
 
+{% block title %}Base64 Text Encoder & Decoder | Kiri Research{% endblock %}
+{% block meta_description %}Fast and secure Base64 conversion for raw text and data. Perform encoding and decoding
+entirely in your browser for maximum privacy.{% endblock %}
+
 {% block tool_name %}Base64 Converter{% endblock %}
 {% block tool_icon %}fa-exchange-alt{% endblock %}
 {% block tool_title %}Text Base64 Encoder & Decoder{% endblock %}
 {% block tool_description %}
-Fast and secure Base64 conversion for raw text and data.
-Perform encoding and decoding entirely in your browser to maintain data privacy.
+Base64 conversion for text and data.
+Everything runs locally in your browser to maintain privacy.
 {% endblock %}
 
 {% block tool_actions_left %}
@@ -75,9 +79,9 @@ mode: 'encode',
 
 loadSample() {
 if (this.mode === 'encode') {
-this.input = "Kiri Research Labs - Standard for Elite Research Tools";
+this.input = "Standardized text sample for local processing.";
 } else {
-this.input = "S2lyaSBSZXNlYXJjaCBMYWJzIC0gU3RhbmRhcmQgZm9yIEVsaXRlIFJlc2VhcmNoIFRvb2xz";
+this.input = "U3RhbmRhcmRpemVkIHRleHQgc2FtcGxlIGZvciBsb2NhbCBwcm9jZXNzaW5nLg==";
 }
 this.convert();
 },

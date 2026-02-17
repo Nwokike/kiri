@@ -1,6 +1,10 @@
 {% extends "tools/base_tool.html" %}
 {% load static %}
 
+{% block title %}Bulk UUID v4 Generator | Kiri Research{% endblock %}
+{% block meta_description %}Generate secure Version 4 Universally Unique Identifiers (UUIDs) in bulk for database, API,
+and system development.{% endblock %}
+
 {% block tool_name %}UUID Generator{% endblock %}
 {% block tool_icon %}fa-fingerprint{% endblock %}
 {% block tool_title %}Bulk UUID v4 Generator{% endblock %}
@@ -101,6 +105,7 @@ API development, or distributed systems research.
 
 {% block tool_js_data %}
 {
+hideUpload: true,
 count: 10,
 uppercase: false,
 noHyphens: false,

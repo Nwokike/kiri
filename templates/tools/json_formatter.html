@@ -1,6 +1,10 @@
 {% extends "tools/base_tool.html" %}
 {% load static %}
 
+{% block title %}JSON Formatter & Validator | Kiri Research{% endblock %}
+{% block meta_description %}Clean up, validate, and format messy JSON data instantly. Support for 2 and 4-space
+indentation and minification.{% endblock %}
+
 {% block tool_name %}JSON Formatter{% endblock %}
 {% block tool_icon %}fa-code{% endblock %}
 {% block tool_title %}JSON Formatter & Beautifier{% endblock %}
@@ -30,7 +34,7 @@ locally in your browser with full syntax highlighting.
                 </span>
                 <span class="text-[10px] text-[#A1A1AA]" x-text="input.length ? input.length + ' chars' : ''"></span>
             </div>
-            <textarea x-model="input" @input="format()"
+            <textarea x-model="input" @input="convert()"
                 class="flex-1 w-full p-6 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[1.5rem] bg-white dark:bg-[#121212] text-[#212529] dark:text-[#E4E4E7] resize-none shadow-inner"
                 placeholder="Paste your JSON here or drag and drop a file..."></textarea>
         </div>
@@ -56,13 +60,13 @@ locally in your browser with full syntax highlighting.
 
                 <!-- Tools Overlay -->
                 <div class="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <button @click="indent = 4; format()"
+                    <button @click="indent = 4; convert()"
                         :class="indent === 4 ? 'bg-[#4ADE80] text-black' : 'bg-[#2D2D2D] text-white'"
                         class="px-2 py-1 text-[9px] font-bold rounded-md">4 Space</button>
-                    <button @click="indent = 2; format()"
+                    <button @click="indent = 2; convert()"
                         :class="indent === 2 ? 'bg-[#4ADE80] text-black' : 'bg-[#2D2D2D] text-white'"
                         class="px-2 py-1 text-[9px] font-bold rounded-md">2 Space</button>
-                    <button @click="indent = 0; format()"
+                    <button @click="indent = 0; convert()"
                         :class="indent === 0 ? 'bg-[#4ADE80] text-black' : 'bg-[#2D2D2D] text-white'"
                         class="px-2 py-1 text-[9px] font-bold rounded-md">Minify</button>
                 </div>
@@ -74,6 +78,7 @@ locally in your browser with full syntax highlighting.
 
 {% block tool_js_data %}
 {
+hideUpload: true,
 indent: 4,
 
 loadSample() {
@@ -88,10 +93,10 @@ speed: "Instant"
 },
 tags: ["research", "productivity", "security"]
 });
-this.format();
+this.convert();
 },
 
-format() {
+convert() {
 if (!this.input.trim()) {
 this.output = '';
 this.error = '';

@@ -1,12 +1,31 @@
 {% extends "tools/base_tool.html" %}
 {% load static %}
 
-{% block tool_name %}YAML to JSON{% endblock %}
+{% block title %}YAML & JSON Converter | Kiri Research{% endblock %}
+{% block meta_description %}Seamlessly convert between YAML and JSON formats with support for complex nesting and
+multi-document YAML. 100% client-side.{% endblock %}
+
+{% block tool_name %}YAML & JSON{% endblock %}
 {% block tool_icon %}fa-file-code{% endblock %}
-{% block tool_title %}YAML to JSON Converter{% endblock %}
+{% block tool_title %}YAML & JSON Converter{% endblock %}
 {% block tool_description %}
-Seamlessly convert YAML configuration files to structured JSON.
-Supports complex nesting and multi-document YAML strings, processed entirely in your browser.
+Seamlessly convert between YAML and JSON formats.
+Supports complex nesting, multi-document YAML, and pretty-printing, processed entirely in your browser.
+{% endblock %}
+
+{% block tool_accept %}.yaml,.yml,.json{% endblock %}
+{% block tool_actions_left %}
+<div class="flex items-center gap-2">
+    <span class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase">Direction:</span>
+    <div class="flex bg-white dark:bg-[#1E1E1E] p-1 rounded-lg border border-[#DEE2E6] dark:border-[#3D3D3D]">
+        <button @click="mode = 'y2j'; resetTool(); loadSample()"
+            :class="mode === 'y2j' ? 'bg-[#0D7C3D] text-white' : 'text-[#6C757D]'"
+            class="px-2 py-1 text-[9px] font-bold rounded-md transition-all">YAML to JSON</button>
+        <button @click="mode = 'j2y'; resetTool(); loadSample()"
+            :class="mode === 'j2y' ? 'bg-[#0D7C3D] text-white' : 'text-[#6C757D]'"
+            class="px-2 py-1 text-[9px] font-bold rounded-md transition-all">JSON to YAML</button>
+    </div>
+</div>
 {% endblock %}
 
 {% block tool_actions_right %}
@@ -14,7 +33,7 @@ Supports complex nesting and multi-document YAML strings, processed entirely in 
     class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-[#0D7C3D] text-white hover:bg-[#0A5C2C]"
     x-show="output">
     <i class="fas fa-download"></i>
-    <span>Download JSON</span>
+    <span x-text="mode === 'y2j' ? 'Download JSON' : 'Download YAML'"></span>
 </button>
 {% endblock %}
 
@@ -26,13 +45,15 @@ Supports complex nesting and multi-document YAML strings, processed entirely in 
             <div class="flex items-center justify-between">
                 <span
                     class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest flex items-center gap-2">
-                    <i class="fas fa-file-invoice text-[#C4992E]"></i> Input YAML
+                    <i class="fas"
+                        :class="mode === 'y2j' ? 'fa-file-invoice text-[#C4992E]' : 'fa-code text-blue-500'"></i>
+                    <span x-text="mode === 'y2j' ? 'Input YAML' : 'Input JSON'"></span>
                 </span>
                 <span class="text-[10px] text-[#A1A1AA]" x-text="input.length ? input.length + ' chars' : ''"></span>
             </div>
             <textarea x-model="input" @input="convert()"
                 class="flex-1 w-full p-6 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[1.5rem] bg-white dark:bg-[#121212] text-[#212529] dark:text-[#E4E4E7] resize-none shadow-inner"
-                placeholder="Paste your YAML here or drag and drop a file..."></textarea>
+                :placeholder="mode === 'y2j' ? 'Paste your YAML here...' : 'Paste your JSON here...'"></textarea>
         </div>
 
         <!-- Output Area -->
@@ -40,7 +61,9 @@ Supports complex nesting and multi-document YAML strings, processed entirely in 
             <div class="flex items-center justify-between">
                 <span
                     class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest flex items-center gap-2">
-                    <i class="fas fa-code-merge text-[#0D7C3D]"></i> Target JSON
+                    <i class="fas"
+                        :class="mode === 'y2j' ? 'fa-code-merge text-[#0D7C3D]' : 'fa-file-export text-orange-500'"></i>
+                    <span x-text="mode === 'y2j' ? 'Target JSON' : 'Target YAML'"></span>
                 </span>
                 <button @click="copyToClipboard(output)"
                     class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase flex items-center gap-1.5"
@@ -51,7 +74,7 @@ Supports complex nesting and multi-document YAML strings, processed entirely in 
             </div>
             <div class="flex-1 rounded-[1.5rem] bg-[#121212] border border-[#3D3D3D] relative overflow-hidden group">
                 <div class="w-full h-full p-6 overflow-auto custom-scrollbar">
-                    <pre><code class="language-json" x-text="output"></code></pre>
+                    <pre><code :class="'language-' + (mode === 'y2j' ? 'json' : 'yaml')" x-text="output"></code></pre>
                 </div>
             </div>
         </div>
@@ -61,9 +84,33 @@ Supports complex nesting and multi-document YAML strings, processed entirely in 
 
 {% block tool_js_data %}
 {
+mode: 'y2j',
+
 loadSample() {
-this.input = "environment: development\ndebug: true\nservices:\n nexus:\n image: kiri/nexus:latest\n ports:\n -
-\"8000:8000\"\n brain:\n image: kiri/brain:v2\n resources:\n gpu: true\n memory: 32Gi";
+if (this.mode === 'y2j') {
+this.input = `environment: development
+debug: true
+services:
+nexus:
+image: kiri/nexus:latest
+ports:
+- "8000:8000"
+brain:
+image: kiri/brain:v2
+resources:
+gpu: true
+memory: 32Gi`;
+} else {
+this.input = JSON.stringify({
+app: "Kiri Studio",
+version: "2.5.0",
+modules: ["Research", "Tools", "Brain"],
+config: {
+cache: "redis",
+timeout: 5000
+}
+}, null, 4);
+}
 this.convert();
 },
 
@@ -75,13 +122,19 @@ return;
 }
 
 try {
+if (this.mode === 'y2j') {
 const parsed = jsyaml.load(this.input);
 this.output = JSON.stringify(parsed, null, 4);
+this.statusMessage = 'YAML converted to JSON';
+} else {
+const parsed = JSON.parse(this.input);
+this.output = jsyaml.dump(parsed);
+this.statusMessage = 'JSON converted to YAML';
+}
 this.error = '';
-this.statusMessage = 'YAML converted successfully';
 this.$nextTick(() => Prism.highlightAll());
 } catch (e) {
-this.error = "YAML Parsing error: " + e.message;
+this.error = (this.mode === 'y2j' ? "YAML" : "JSON") + " Parsing error: " + e.message;
 this.output = '';
 this.statusMessage = 'Conversion failed';
 }
@@ -89,7 +142,9 @@ this.statusMessage = 'Conversion failed';
 
 download() {
 if (!this.output || this.error) return;
-this.downloadFile(this.output, 'kiri_config.json', 'application/json');
+const ext = this.mode === 'y2j' ? 'json' : 'yaml';
+const mime = this.mode === 'y2j' ? 'application/json' : 'application/x-yaml';
+this.downloadFile(this.output, `kiri_config.${ext}`, mime);
 }
 }
 {% endblock %}
@@ -99,6 +154,7 @@ this.downloadFile(this.output, 'kiri_config.json', 'application/json');
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
 
 <style>
     pre[class*="language-"],

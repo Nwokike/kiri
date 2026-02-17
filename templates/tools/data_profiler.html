@@ -1,12 +1,16 @@
 {% extends "tools/base_tool.html" %}
 {% load static %}
 
+{% block title %}CSV Analytical Profiler | Kiri Research{% endblock %}
+{% block meta_description %}Generate comprehensive statistical blueprints for tabular datasets. Analyze distributions
+and identify missing data vectors instantly.{% endblock %}
+
 {% block tool_name %}Data Profiler{% endblock %}
 {% block tool_icon %}fa-chart-pie{% endblock %}
 {% block tool_title %}CSV Analytical Profiler{% endblock %}
 {% block tool_description %}
-Generate comprehensive statistical blueprints for your tabular datasets.
-Analyze distributions, identify missing data vectors, and visualize quality metrics instantly on your local hardware.
+Statistical profiling for tabular datasets.
+Analyze distributions and data quality instantly on your local hardware.
 {% endblock %}
 
 {% block tool_body %}
@@ -15,7 +19,7 @@ Analyze distributions, identify missing data vectors, and visualize quality metr
     <template x-if="!data">
         <div class="h-96 border-2 border-dashed border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[3rem] flex flex-col items-center justify-center gap-6 bg-[#F8F9FA]/50 dark:bg-[#1A1A1A]/50 hover:bg-white dark:hover:bg-[#1A1A1A] hover:border-[#0D7C3D] transition-all cursor-pointer group"
             @click="$refs.fileInput.click()">
-            <input type="file" x-ref="fileInput" class="hidden" accept=".csv" @change="handleFile($event)">
+            <input type="file" x-ref="fileInput" class="hidden" accept=".csv,.json" @change="handleFile($event)">
             <div
                 class="w-20 h-20 rounded-[2rem] bg-[#0D7C3D]/10 flex items-center justify-center text-[#0D7C3D] group-hover:rotate-12 transition-transform">
                 <i class="fas fa-file-csv text-3xl"></i>
@@ -23,7 +27,7 @@ Analyze distributions, identify missing data vectors, and visualize quality metr
             <div class="text-center">
                 <p class="text-xs font-black text-[#212529] dark:text-white uppercase tracking-[0.3em]">Ignite Dataset
                     Analysis</p>
-                <p class="text-[10px] text-[#A1A1AA] mt-2 italic">Supports CSV up to 10MB (Local Processing)</p>
+                <p class="text-[10px] text-[#A1A1AA] mt-2 italic">Supports CSV & JSON up to 10MB (Local Processing)</p>
             </div>
             <button @click.stop="loadSample()"
                 class="text-[10px] font-black text-[#0D7C3D] uppercase hover:underline">Or Load Calibration
@@ -60,15 +64,17 @@ Analyze distributions, identify missing data vectors, and visualize quality metr
 
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
                 <!-- Column Navigation -->
-                <div class="lg:col-span-1 flex flex-col gap-2 max-h-[600px] overflow-auto pr-2 custom-scrollbar">
-                    <span class="text-[9px] font-black text-[#ADB5BD] uppercase tracking-[0.2em] mb-2 ml-2">Data
+                <div
+                    class="lg:col-span-1 flex flex-row lg:flex-col gap-2 max-h-[600px] overflow-x-auto lg:overflow-y-auto pb-4 lg:pb-0 pr-2 custom-scrollbar">
+                    <span
+                        class="text-[9px] font-black text-[#ADB5BD] uppercase tracking-[0.2em] mb-2 ml-2 hidden lg:block">Data
                         Vectors</span>
                     <template x-for="col in columns" :key="col">
                         <button @click="selectedCol = col"
                             :class="selectedCol === col ? 'bg-[#121212] border-[#0D7C3D] text-[#0D7C3D]' : 'bg-white dark:bg-[#1A1A1A] text-[#6C757D] dark:text-[#A1A1AA] border-[#DEE2E6] dark:border-[#3D3D3D] hover:border-[#0D7C3D]'"
-                            class="w-full text-left px-5 py-4 rounded-2xl border text-[11px] font-black transition-all truncate flex justify-between items-center group shadow-sm">
+                            class="whitespace-nowrap lg:whitespace-normal text-left px-5 py-4 rounded-2xl border text-[11px] font-black transition-all truncate flex justify-between items-center group shadow-sm shrink-0">
                             <span x-text="col"></span>
-                            <div class="w-2 h-2 rounded-full"
+                            <div class="w-2 h-2 rounded-full ml-3"
                                 :class="columnStats[col]?.missing > 0 ? 'bg-orange-400' : 'bg-[#0D7C3D]'"></div>
                         </button>
                     </template>
@@ -162,25 +168,58 @@ columns: [],
 selectedCol: '',
 columnStats: {},
 stats: { rowCount: 0, colCount: 0 },
+hideReset: true,
 
 handleFile(e) {
 const file = e.target.files[0];
 if (!file) return;
-this.fileName = file.name;
-this.statusMessage = 'Parsing large CSV asset...';
 
+if (typeof Papa === 'undefined') {
+this.error = 'PapaParse library failed to load. Please check your connection.';
+return;
+}
+
+this.fileName = file.name;
+const isJson = file.type === 'application/json' || file.name.endsWith('.json');
+this.statusMessage = `Parsing ${isJson ? 'JSON' : 'CSV'} asset...`;
+
+if (isJson) {
+const reader = new FileReader();
+reader.onload = (e) => {
+try {
+let parsed = JSON.parse(e.target.result);
+if (!Array.isArray(parsed)) parsed = [parsed];
+this.processData({ data: parsed });
+} catch (err) {
+this.error = "Invalid JSON file: " + err.message;
+}
+};
+reader.readAsText(file);
+} else {
 Papa.parse(file, {
 header: true,
 dynamicTyping: true,
 skipEmptyLines: true,
 complete: (results) => this.processData(results)
 });
+}
 },
 
 loadSample() {
-this.fileName = 'system_diagnostics.csv';
-const sampleText =
-"id,node,load,errors,status\n1,Alpha-01,0.45,0,Stable\n2,Beta-09,0.89,4,Warning\n3,Sigma-12,0.12,0,Stable\n4,Theta-04,0.34,1,Stable\n5,Omega-99,0.99,12,Critical\n6,Delta-05,0.76,0,Stable\n7,Mu-21,0.23,0,Stable\n8,Zeta-11,0.55,2,Stable";
+this.fileName = 'dataset_sample.csv';
+const sampleText = `user_id,region,activity_score,events,status
+101,North,0.45,0,Active
+102,South,0.89,4,Review
+103,West,0.12,0,Active
+104,East,0.34,1,Active
+105,North,0.99,12,Critical
+106,North,0.76,0,Active
+107,South,0.23,0,Active
+108,West,0.55,2,Active`;
+if (typeof Papa === 'undefined') {
+this.error = 'PapaParse library failed to load.';
+return;
+}
 this.processData(Papa.parse(sampleText, { header: true, dynamicTyping: true }));
 },
 

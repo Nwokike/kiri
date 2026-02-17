@@ -1,6 +1,10 @@
 {% extends "tools/base_tool.html" %}
 {% load static %}
 
+{% block title %}JSON Schema Validator | Kiri Research{% endblock %}
+{% block meta_description %}Validate JSON data against structural schema standards using the high-performance Ajv
+engine. supports Draft-07, 2019-09, and 2020-12.{% endblock %}
+
 {% block tool_name %}Schema Verifier{% endblock %}
 {% block tool_icon %}fa-microchip{% endblock %}
 {% block tool_title %}JSON Schema Validator{% endblock %}
@@ -19,10 +23,10 @@ Strict compliance checks against draft-07, 2019-09, and 2020-12 standards entire
                     class="text-[10px] font-black text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest flex items-center gap-2">
                     <i class="fas fa-file-code text-blue-500"></i> Local Data (JSON)
                 </span>
-                <button @click="sample()"
+                <button @click="loadSample()"
                     class="text-[10px] font-black text-[#0D7C3D] hover:underline uppercase">Hydrate Sample</button>
             </div>
-            <textarea x-model="input" @input="validate()"
+            <textarea x-model="input" @input="convert()"
                 class="flex-1 w-full p-8 font-mono text-xs border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[2.5rem] bg-white dark:bg-[#121212] text-[#212529] dark:text-[#E4E4E7] resize-none shadow-inner outline-none focus:border-[#0D7C3D] transition-all"
                 placeholder="Paste object data here..."></textarea>
         </div>
@@ -37,7 +41,7 @@ Strict compliance checks against draft-07, 2019-09, and 2020-12 standards entire
                     </span>
                 </div>
                 <div class="flex-1 relative">
-                    <textarea x-model="schemaInput" @input="validate()"
+                    <textarea x-model="schemaInput" @input="convert()"
                         class="w-full h-full p-8 font-mono text-xs border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[2.5rem] bg-white dark:bg-[#121212] text-[#212529] dark:text-[#E4E4E7] resize-none shadow-inner outline-none focus:border-[#0D7C3D] transition-all"
                         placeholder="Paste JSON Schema here..."></textarea>
                 </div>
@@ -109,11 +113,22 @@ errors: [],
 ajv: null,
 
 init() {
+try {
+if (typeof ajv7 !== 'undefined') {
 this.ajv = new ajv7();
-this.validate();
+} else if (typeof Ajv !== 'undefined') {
+// Some bundles use 'Ajv' instead of 'ajv7'
+this.ajv = new Ajv();
+} else {
+this.error = 'AJV library failed to load. Please check your internet connection.';
+}
+} catch (e) {
+this.error = 'Failed to initialize validation engine: ' + e.message;
+}
+this.convert();
 },
 
-validate() {
+convert() {
 if (!this.input.trim() || !this.schemaInput.trim()) {
 this.valid = null;
 return;
@@ -122,6 +137,11 @@ return;
 try {
 const data = JSON.parse(this.input);
 const schema = JSON.parse(this.schemaInput);
+
+if (!this.ajv) {
+this.statusMessage = 'Initialization incomplete';
+return;
+}
 
 const validateFn = this.ajv.compile(schema);
 this.valid = validateFn(data);
@@ -134,16 +154,18 @@ this.statusMessage = 'Syntax Error';
 }
 },
 
-sample() {
+loadSample() {
 this.schemaInput = JSON.stringify({
+$schema: "https://json-schema.org/draft/2020-12/schema",
+title: "Research Node",
 type: "object",
 properties: {
-id: { type: "number" },
+id: { type: "number", minimum: 1 },
 tier: { enum: ["PRO", "LITE", "RESEARCH"] },
 metadata: {
 type: "object",
 required: ["origin"],
-properties: { origin: { type: "string" } }
+properties: { origin: { type: "string", minLength: 3 } }
 }
 },
 required: ["id", "tier"]
@@ -155,7 +177,8 @@ tier: "RESEARCH",
 metadata: { origin: "Kiri-Core" }
 }, null, 4);
 
-this.validate();
+this.convert();
+this.statusMessage = 'Sample schema and payload loaded';
 }
 }
 {% endblock %}

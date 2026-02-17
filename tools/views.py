@@ -58,8 +58,8 @@ def latex_editor(request):
     return render(request, 'tools/latex_editor.html')
 
 @login_not_required
-def json_to_csv(request):
-    return render(request, 'tools/json_to_csv.html')
+def json_csv_converter(request):
+    return render(request, 'tools/json_csv_converter.html')
 
 @login_not_required
 def image_to_base64(request):
@@ -93,9 +93,7 @@ def data_profiler(request):
 def json_schema_validator(request):
     return render(request, 'tools/json_schema_validator.html')
 
-@login_not_required
-def csv_to_json(request):
-    return render(request, 'tools/csv_to_json.html')
+
 
 @login_not_required
 def pdf_merger(request):

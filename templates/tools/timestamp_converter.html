@@ -1,6 +1,10 @@
 {% extends "tools/base_tool.html" %}
 {% load static %}
 
+{% block title %}Unix Timestamp Converter | Kiri Research{% endblock %}
+{% block meta_description %}Seamlessly translate between Unix timestamps and human-readable dates with local timezone
+adjustments.{% endblock %}
+
 {% block tool_name %}Timestamp Converter{% endblock %}
 {% block tool_icon %}fa-history{% endblock %}
 {% block tool_title %}Unix Timestamp Converter{% endblock %}
@@ -81,7 +85,7 @@ Supports seconds, milliseconds, and ISO 8601 formatting with local timezone adju
 {% block tool_js_data %}
 {
 now: Math.floor(Date.now() / 1000),
-unixInput: Math.floor(Date.now() / 1000),
+unixInput: '',
 unixResult: '',
 humanInput: '',
 humanResult: '',
@@ -89,8 +93,12 @@ humanResult: '',
 init() {
 this.updateNow();
 setInterval(() => this.updateNow(), 1000);
-this.setToNow();
+},
+
+loadSample() {
+this.unixInput = 1700000000;
 this.convertUnix();
+this.statusMessage = 'Sample timestamp loaded';
 },
 
 updateNow() {
@@ -102,6 +110,10 @@ const d = new Date();
 d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
 this.humanInput = d.toISOString().slice(0, 16);
 this.convertHuman();
+},
+
+convert() {
+this.convertUnix();
 },
 
 convertUnix() {

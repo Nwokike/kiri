@@ -1,13 +1,19 @@
 {% extends "tools/base_tool.html" %}
 {% load static %}
 
+{% block title %}HTML Entity Encoder & Decoder | Kiri Research{% endblock %}
+{% block meta_description %}Convert special characters into HTML entities or restore them to plain text for web
+development.{% endblock %}
+
 {% block tool_name %}HTML Entities{% endblock %}
 {% block tool_icon %}fa-code{% endblock %}
 {% block tool_title %}HTML Entity Encoder & Decoder{% endblock %}
 {% block tool_description %}
-Securely transform special characters into HTML entities or restore them to plain text.
-Essential for neutralizing XSS vulnerabilities and ensuring correct character rendering in templates.
+Convert special characters into HTML entities or restore them to plain text.
+Essential for correct character rendering in templates and web applications.
 {% endblock %}
+
+{% block tool_accept %}.html,.txt{% endblock %}
 
 {% block tool_actions_left %}
 <div class="flex items-center gap-2">
@@ -72,18 +78,24 @@ Essential for neutralizing XSS vulnerabilities and ensuring correct character re
 
 {% block tool_js_data %}
 {
+hideUpload: true,
 mode: 'encode',
 
 loadSample() {
 if (this.mode === 'encode') {
-this.input = "<html>\n
+this.input = `<html>
 
-<body>\n <p>Welcome to \"Kiri\" & the team!</p>\n </body>\n
+<body>
+    <p>Welcome to "Kiri" & the team!</p>
+</body>
 
-</html>";
+</html>`;
 } else {
-this.input = "&lt;html&gt;\n &lt;body&gt;\n &lt;p&gt;Welcome to &quot;Kiri&quot; &amp; the team!&lt;/p&gt;\n
-&lt;/body&gt;\n&lt;/html&gt;";
+this.input = `&lt;html&gt;
+&lt;body&gt;
+&lt;p&gt;Welcome to &quot;Kiri&quot; &amp; the team!&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;`;
 }
 this.convert();
 },

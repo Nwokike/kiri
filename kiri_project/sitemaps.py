@@ -24,10 +24,10 @@ class StaticViewSitemap(Sitemap):
             'tools:diff_viewer', 'tools:url_encoder', 'tools:timestamp_converter',
             'tools:hash_generator', 'tools:uuid_generator', 'tools:sql_formatter',
             'tools:cron_generator', 'tools:jwt_parser', 'tools:unit_converter',
-            'tools:latex_editor', 'tools:json_to_csv', 'tools:image_to_base64',
-            'tools:yaml_json_converter', 'tools:markdown_previewer', 'tools:html_entities',
+            'tools:latex_editor', 'tools:image_to_base64', 'tools:yaml_json_converter',
+            'tools:json_csv_converter', 'tools:markdown_previewer', 'tools:html_entities',
             'tools:password_generator', 'tools:api_tester', 'tools:data_profiler',
-            'tools:json_schema_validator', 'tools:csv_to_json', 'tools:image_converter',
+            'tools:json_schema_validator', 'tools:image_converter',
             'tools:image_resizer', 'tools:pdf_merger', 'tools:pdf_text_extractor'
         ]
     

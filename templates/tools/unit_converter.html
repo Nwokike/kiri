@@ -1,5 +1,6 @@
-{% extends "tools/base_tool.html" %}
-{% load static %}
+{% block title %}Professional Unit Converter | Kiri Research{% endblock %}
+{% block meta_description %}High-precision conversion between physical and digital units, optimized for scientific
+research and engineering.{% endblock %}
 
 {% block tool_name %}Unit Converter{% endblock %}
 {% block tool_icon %}fa-balance-scale{% endblock %}
@@ -9,16 +10,18 @@ Rapidly convert between physical and digital units.
 Optimized for scientific research, engineering calculations, and data management.
 {% endblock %}
 
+{% block tool_accept %}.txt,.json{% endblock %}
+
 {% block tool_body %}
-<div class="space-y-8 h-[500px] flex flex-col">
+<div class="space-y-8">
     <div
-        class="p-8 bg-white dark:bg-[#1A1A1A] rounded-[2.5rem] border border-[#DEE2E6] dark:border-[#3D3D3D] shadow-sm flex-1 flex flex-col gap-8">
+        class="p-8 bg-white dark:bg-[#1A1A1A] rounded-[2.5rem] border border-[#DEE2E6] dark:border-[#3D3D3D] shadow-sm flex flex-col gap-8">
         <!-- Category Selector -->
-        <div class="flex items-center gap-4">
+        <div class="flex flex-wrap items-center gap-2">
             <template x-for="cat in categories" :key="cat.name">
                 <button @click="category = cat.name; reset()"
                     :class="category === cat.name ? 'bg-[#0D7C3D] text-white' : 'bg-[#F8F9FA] dark:bg-[#121212] text-[#6C757D] dark:text-[#A1A1AA] border border-[#DEE2E6] dark:border-[#3D3D3D]'"
-                    class="px-5 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm"
+                    class="px-4 py-2 rounded-xl text-[10px] font-bold transition-all active:scale-95 shadow-sm"
                     x-text="cat.label">
                 </button>
             </template>
@@ -73,11 +76,12 @@ Optimized for scientific research, engineering calculations, and data management
 
 {% block tool_js_data %}
 {
+hideUpload: true,
 category: 'length',
 fromValue: 1,
-toValue: 1000,
+toValue: 0,
 fromUnit: 'm',
-toUnit: 'mm',
+toUnit: 'km',
 categories: [
 {
 name: 'length',
@@ -89,7 +93,8 @@ units: [
 { code: 'cm', label: 'Centimeters (cm)', f: 100 },
 { code: 'mi', label: 'Miles (mi)', f: 0.000621371 },
 { code: 'ft', label: 'Feet (ft)', f: 3.28084 },
-{ code: 'in', label: 'Inches (in)', f: 39.3701 }
+{ code: 'in', label: 'Inches (in)', f: 39.3701 },
+{ code: 'yd', label: 'Yards (yd)', f: 1.09361 }
 ]
 },
 {
@@ -98,6 +103,7 @@ label: 'Mass',
 units: [
 { code: 'kg', label: 'Kilograms (kg)', f: 1 },
 { code: 'g', label: 'Grams (g)', f: 1000 },
+{ code: 'mg', label: 'Milligrams (mg)', f: 1000000 },
 { code: 'lb', label: 'Pounds (lb)', f: 2.20462 },
 { code: 'oz', label: 'Ounces (oz)', f: 35.274 },
 { code: 't', label: 'Tons (t)', f: 0.001 }
@@ -107,8 +113,9 @@ units: [
 name: 'data',
 label: 'Digital Data',
 units: [
-{ code: 'bytes', label: 'Bytes (B)', f: 1024 * 1024 },
-{ code: 'kb', label: 'Kilobytes (KB)', f: 1024 },
+{ code: 'b', label: 'Bits (b)', f: 8388608 },
+{ code: 'B', label: 'Bytes (B)', f: 1048576 },
+{ code: 'kb', label: 'Kilobytes (KB - 1024)', f: 1024 },
 { code: 'mb', label: 'Megabytes (MB)', f: 1 },
 { code: 'gb', label: 'Gigabytes (GB)', f: 1/1024 },
 { code: 'tb', label: 'Terabytes (TB)', f: 1/(1024*1024) }
@@ -117,8 +124,33 @@ units: [
 {
 name: 'temp',
 label: 'Temperature',
-units: [{ code: 'c', label: 'Celsius (°C)' }, { code: 'f', label: 'Fahrenheit (°F)' }, { code: 'k', label: 'Kelvin (K)'
-}]
+units: [
+{ code: 'c', label: 'Celsius (°C)' },
+{ code: 'f', label: 'Fahrenheit (°F)' },
+{ code: 'k', label: 'Kelvin (K)' }
+]
+},
+{
+name: 'time',
+label: 'Time',
+units: [
+{ code: 'ms', label: 'Milliseconds (ms)', f: 3600000 },
+{ code: 's', label: 'Seconds (s)', f: 3600 },
+{ code: 'min', label: 'Minutes (min)', f: 60 },
+{ code: 'hr', label: 'Hours (hr)', f: 1 },
+{ code: 'day', label: 'Days (d)', f: 1/24 },
+{ code: 'wk', label: 'Weeks (w)', f: 1/168 }
+]
+},
+{
+name: 'pressure',
+label: 'Pressure',
+units: [
+{ code: 'pa', label: 'Pascal (Pa)', f: 101325 },
+{ code: 'bar', label: 'Bar', f: 1.01325 },
+{ code: 'atm', label: 'Atmosphere (atm)', f: 1 },
+{ code: 'psi', label: 'PSI', f: 14.6959 }
+]
 }
 ],
 
@@ -126,11 +158,20 @@ get currentUnits() {
 return this.categories.find(c => c.name === this.category).units;
 },
 
+loadSample() {
+this.category = 'data';
+this.fromValue = 1024;
+this.fromUnit = 'mb';
+this.toUnit = 'gb';
+this.convert('f');
+this.statusMessage = 'Sample conversion loaded';
+},
+
 reset() {
 const units = this.currentUnits;
+if (!this.fromValue) this.fromValue = 1;
 this.fromUnit = units[0].code;
 this.toUnit = units[1] ? units[1].code : units[0].code;
-this.fromValue = 1;
 this.convert('f');
 },
 
@@ -144,7 +185,7 @@ this.toValue = tmpValue;
 this.statusMessage = 'Units swapped';
 },
 
-convert(dir) {
+convert(dir = 'f') {
 if (this.category === 'temp') return this.convertTemp(dir);
 
 const units = this.currentUnits;
@@ -153,35 +194,35 @@ const tUnit = units.find(u => u.code === this.toUnit);
 
 if (dir === 'f') {
 const base = this.fromValue / fUnit.f;
-this.toValue = Math.round(base * tUnit.f * 1000000) / 1000000;
+this.toValue = parseFloat((base * tUnit.f).toPrecision(12));
 } else {
 const base = this.toValue / tUnit.f;
-this.fromValue = Math.round(base * fUnit.f * 1000000) / 1000000;
+this.fromValue = parseFloat((base * fUnit.f).toPrecision(12));
 }
-this.statusMessage = 'Calculated';
+this.statusMessage = 'Synchronized';
 },
 
 convertTemp(dir) {
 let c;
 if (dir === 'f') {
-if (this.fromUnit === 'c') c = this.fromValue;
+if (this.fromUnit === 'c') c = parseFloat(this.fromValue);
 else if (this.fromUnit === 'f') c = (this.fromValue - 32) * 5/9;
 else if (this.fromUnit === 'k') c = this.fromValue - 273.15;
 
 if (this.toUnit === 'c') this.toValue = c;
 else if (this.toUnit === 'f') this.toValue = (c * 9/5) + 32;
-else if (this.toUnit === 'k') this.toValue = c + 273.15;
+else if (this.toUnit === 'k') this.toValue = Number(c) + 273.15;
 } else {
-if (this.toUnit === 'c') c = this.toValue;
+if (this.toUnit === 'c') c = parseFloat(this.toValue);
 else if (this.toUnit === 'f') c = (this.toValue - 32) * 5/9;
 else if (this.toUnit === 'k') c = this.toValue - 273.15;
 
 if (this.fromUnit === 'c') this.fromValue = c;
 else if (this.fromUnit === 'f') this.fromValue = (c * 9/5) + 32;
-else if (this.fromUnit === 'k') this.fromValue = c + 273.15;
+else if (this.fromUnit === 'k') this.fromValue = Number(c) + 273.15;
 }
-this.fromValue = Math.round(this.fromValue * 100) / 100;
-this.toValue = Math.round(this.toValue * 100) / 100;
+this.fromValue = parseFloat(Number(this.fromValue).toPrecision(8));
+this.toValue = parseFloat(Number(this.toValue).toPrecision(8));
 this.statusMessage = 'Temperature synchronized';
 }
 }

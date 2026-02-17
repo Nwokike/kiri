@@ -1,6 +1,10 @@
 {% extends "tools/base_tool.html" %}
 {% load static %}
 
+{% block title %}PDF Text Extractor | Kiri Research{% endblock %}
+{% block meta_description %}Instantly pull raw text content from PDF documents. Our client-side engine parses files
+locally ensuring maximum privacy.{% endblock %}
+
 {% block tool_name %}PDF Extractor{% endblock %}
 {% block tool_icon %}fa-file-export{% endblock %}
 {% block tool_title %}PDF Text Extractor{% endblock %}
@@ -107,9 +111,15 @@ Our client-side engine parses your files locally to ensure data residency and pr
 {% block tool_js_data %}
 {
 file: null,
-isProcessing: false,
 progress: 0,
 stats: { words: 0, pages: 0 },
+hideSample: true,
+
+handleDrop(e) {
+this.over = false;
+const files = e.dataTransfer.files;
+if (files.length > 0) this.handleFiles(files);
+},
 
 handleFiles(files) {
 if (files.length > 0 && files[0].type === 'application/pdf') {
@@ -143,7 +153,9 @@ for (let i = 1; i <= pdf.numPages; i++) { const page=await pdf.getPage(i); const
     this.stats.words = fullText.trim().split(/\s+/).length;
     this.statusMessage = 'Extraction complete';
     } catch (e) {
-    this.error = 'Extraction failed: ' + e.message;
+    console.error('PDF Extraction Error:', e);
+    this.error = 'Extraction failed: ' + (e.message || 'Unknown error');
+    this.statusMessage = 'Extraction failed';
     } finally {
     this.isProcessing = false;
     }

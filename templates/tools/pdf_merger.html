@@ -1,6 +1,10 @@
 {% extends "tools/base_tool.html" %}
 {% load static %}
 
+{% block title %}Professional PDF Merger | Kiri Research{% endblock %}
+{% block meta_description %}Consolidate multiple PDF documents into a single, high-quality file. Complete browser-side
+processing ensures data residency and privacy.{% endblock %}
+
 {% block tool_name %}PDF Merger{% endblock %}
 {% block tool_icon %}fa-layer-group{% endblock %}
 {% block tool_title %}Professional PDF Merger{% endblock %}
@@ -8,6 +12,8 @@
 Consolidate multiple PDF documents into a single, high-quality file.
 Complete browser-side processing ensures your sensitive legal or technical documents never touch a server.
 {% endblock %}
+
+{% block tool_accept %}.pdf{% endblock %}
 
 {% block tool_actions_right %}
 <button @click="merge()"
@@ -83,7 +89,13 @@ Complete browser-side processing ensures your sensitive legal or technical docum
 {% block tool_js_data %}
 {
 files: [],
-isProcessing: false,
+hideSample: true,
+
+handleDrop(e) {
+this.dragging = false;
+const files = e.dataTransfer.files;
+if (files.length > 0) this.handleFiles(files);
+},
 
 handleFiles(incomingFiles) {
 const pdfs = Array.from(incomingFiles).filter(f => f.type === 'application/pdf');

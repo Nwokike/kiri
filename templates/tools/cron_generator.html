@@ -1,6 +1,10 @@
 {% extends "tools/base_tool.html" %}
 {% load static %}
 
+{% block title %}Cron Expression Builder | Kiri Research{% endblock %}
+{% block meta_description %}Generate and validate cron expressions for scheduled tasks. Visual selection tool with
+real-time human-readable translations.{% endblock %}
+
 {% block tool_name %}Cron Generator{% endblock %}
 {% block tool_icon %}fa-clock{% endblock %}
 {% block tool_title %}Cron Expression Builder{% endblock %}
@@ -75,6 +79,8 @@ Visual selection tool that translates syntax into human-readable descriptions in
 
 {% block tool_js_data %}
 {
+hideUpload: true,
+hideSample: true,
 parts: [
 { name: 'min', label: 'Minute', value: '*', options: [{ v: '*', l: 'Every minute' }, { v: '0', l: '0' }, { v: '*/5', l:
 'Every 5 minutes' }, { v: '*/15', l: 'Every 15 minutes' }, { v: '30', l: '30' }] },

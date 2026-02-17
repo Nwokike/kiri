@@ -1,6 +1,10 @@
 {% extends "tools/base_tool.html" %}
 {% load static %}
 
+{% block title %}HTTP API Tester & Debugger | Kiri Research{% endblock %}
+{% block meta_description %}Interface directly with local or remote APIs. Complete control over headers, payloads, and
+methods with instant response visualization.{% endblock %}
+
 {% block tool_name %}API Tester{% endblock %}
 {% block tool_icon %}fa-satellite-dish{% endblock %}
 {% block tool_title %}HTTP Endpoint Debugger{% endblock %}
@@ -132,6 +136,7 @@ Complete control over headers, payloads, and methods with instant response visua
 
 {% block tool_js_data %}
 {
+hideUpload: true,
 method: 'GET',
 url: '',
 tab: 'params',

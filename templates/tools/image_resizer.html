@@ -1,6 +1,10 @@
 {% extends "tools/base_tool.html" %}
 {% load static %}
 
+{% block title %}Image Dimensional Resizer | Kiri Research{% endblock %}
+{% block meta_description %}Modify the pixel dimensions of your images with surgical precision. Maintain aspect ratios
+or force custom bounding boxes locally.{% endblock %}
+
 {% block tool_name %}Resizer{% endblock %}
 {% block tool_icon %}fa-compress-arrows-alt{% endblock %}
 {% block tool_title %}Image Dimensional Resizer{% endblock %}
@@ -125,15 +129,36 @@ Maintain aspect ratios or force custom bounding boxes using our high-fidelity cl
 
 {% block tool_js_data %}
 {
-file: null,
-previewUrl: '',
-originalWidth: 0,
-originalHeight: 0,
-targetWidth: 0,
-targetHeight: 0,
 aspectRatio: 1,
 lockAspect: true,
 previewScale: 80,
+
+onReset() {
+this.file = null;
+this.previewUrl = '';
+this.originalWidth = 0;
+this.originalHeight = 0;
+this.targetWidth = 0;
+this.targetHeight = 0;
+},
+
+async loadSample() {
+try {
+const response = await fetch("{% static 'images/logos/logo.png' %}");
+const blob = await response.blob();
+const file = new File([blob], 'kiri_logo.png', { type: 'image/png' });
+this.handleFiles([file]);
+this.statusMessage = 'Kiri logo loaded as sample';
+} catch (err) {
+this.error = 'Failed to load sample logo';
+}
+},
+
+handleDrop(e) {
+this.dragging = false;
+const files = e.dataTransfer.files;
+if (files.length > 0) this.handleFiles(files);
+},
 
 handleFiles(files) {
 if (files.length > 0 && files[0].type.startsWith('image/')) {
@@ -196,12 +221,14 @@ ctx.imageSmoothingQuality = 'high';
 ctx.drawImage(img, 0, 0, this.targetWidth, this.targetHeight);
 
 canvas.toBlob((blob) => {
-this.downloadFile(blob, `resized_${this.targetWidth}x${this.targetHeight}_${this.file.name}`, this.file.type);
+const fileName = `resized_${this.targetWidth}x${this.targetHeight}_${this.file.name}`;
+this.downloadFile(blob, fileName, this.file.type);
 this.isProcessing = false;
 this.statusMessage = 'Resized image exported';
 }, this.file.type, 0.95);
 };
 img.src = this.previewUrl;
+},
 }
 }
 {% endblock %}

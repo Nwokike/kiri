@@ -1,12 +1,16 @@
 {% extends "tools/base_tool.html" %}
 {% load static %}
 
+{% block title %}Image Format Converter | Kiri Research{% endblock %}
+{% block meta_description %}Convert images between WebP, PNG, and JPEG formats. All processing happens locally in your
+browser.{% endblock %}
+
 {% block tool_name %}Image Sync{% endblock %}
 {% block tool_icon %}fa-sync-alt{% endblock %}
 {% block tool_title %}Image Format Converter{% endblock %}
 {% block tool_description %}
-Seamlessly pivot between modern image formats including WebP, PNG, and JPEG.
-Complete browser-side transcoding preserves your visual privacy while maintaining peak image quality.
+Convert images between WebP, PNG, and JPEG formats.
+Processing is performed locally in your browser to maintain privacy.
 {% endblock %}
 
 {% block tool_actions_right %}
@@ -61,7 +65,7 @@ Complete browser-side transcoding preserves your visual privacy while maintainin
                     <i class="fas fa-microchip"></i>
                 </div>
                 <p class="text-[10px] text-[#6C757D] dark:text-[#A1A1AA] leading-relaxed italic">
-                    Utilizing <strong class="text-[#0D7C3D]">Canvas2D</strong> for hardware-accelerated transcoding.
+                    Privacy-focused local processing.
                 </p>
             </div>
         </div>
@@ -131,6 +135,30 @@ targetFormat: 'image/png',
 quality: 90,
 dimensions: '0 x 0',
 formats: ['image/png', 'image/jpeg', 'image/webp'],
+
+onReset() {
+this.file = null;
+this.previewUrl = '';
+this.dimensions = '0 x 0';
+},
+
+async loadSample() {
+try {
+const response = await fetch("{% static 'images/logos/logo.png' %}");
+const blob = await response.blob();
+const file = new File([blob], 'kiri_logo.png', { type: 'image/png' });
+this.handleFiles([file]);
+this.statusMessage = 'Kiri logo loaded as sample';
+} catch (err) {
+this.error = 'Failed to load sample logo';
+}
+},
+
+handleDrop(e) {
+this.dragging = false;
+const files = e.dataTransfer.files;
+if (files.length > 0) this.handleFiles(files);
+},
 
 handleFiles(files) {
 if (files.length > 0 && files[0].type.startsWith('image/')) {

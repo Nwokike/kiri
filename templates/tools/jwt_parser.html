@@ -1,6 +1,10 @@
 {% extends "tools/base_tool.html" %}
 {% load static %}
 
+{% block title %}JWT Parser & Inspector | Kiri Research{% endblock %}
+{% block meta_description %}Decode and inspect JSON Web Tokens (JWT) header and payload data entirely in your browser.
+Identify claims and expiration times.{% endblock %}
+
 {% block tool_name %}JWT Parser{% endblock %}
 {% block tool_icon %}fa-shield-halved{% endblock %}
 {% block tool_title %}JSON Web Token Inspector{% endblock %}
@@ -30,7 +34,7 @@ Identify claims, expiration times, and signature algorithms entirely in your bro
                 </span>
                 <span class="text-[10px] text-[#A1A1AA]" x-text="input.length ? input.length + ' chars' : ''"></span>
             </div>
-            <textarea x-model="input" @input="decode()"
+            <textarea x-model="input" @input="convert()"
                 class="flex-1 w-full p-6 font-mono text-xs border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[1.5rem] bg-white dark:bg-[#121212] text-[#212529] dark:text-[#E4E4E7] resize-none shadow-inner break-all"
                 placeholder="Paste your JWT here..."></textarea>
         </div>
@@ -77,16 +81,17 @@ Identify claims, expiration times, and signature algorithms entirely in your bro
 
 {% block tool_js_data %}
 {
+hideUpload: true,
 headerText: '',
 payloadText: '',
 
 loadSample() {
 this.input =
 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE4OTM0NTYwMDAsInJvbGUiOiJyZXNlYXJjaGVyIiwicGxhdGZvcm0iOiJraXJpIn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
-this.decode();
+this.convert();
 },
 
-decode() {
+convert() {
 this.error = '';
 this.headerText = '';
 this.payloadText = '';

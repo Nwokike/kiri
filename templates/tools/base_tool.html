@@ -13,7 +13,8 @@
 
     <div class="mb-10">
         <div class="flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
-            <div class="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#0D7C3D] to-[#2E9A4F] flex items-center justify-center text-white shadow-lg shadow-[#0D7C3D]/20 shrink-0">
+            <div
+                class="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#0D7C3D] to-[#2E9A4F] flex items-center justify-center text-white shadow-lg shadow-[#0D7C3D]/20 shrink-0">
                 <i class="fas {% block tool_icon %}fa-tools{% endblock %} text-2xl"></i>
             </div>
             <div>
@@ -27,26 +28,29 @@
         </div>
     </div>
 
-    <div class="bg-white dark:bg-[#1E1E1E] rounded-[2rem] border border-[#DEE2E6] dark:border-[#3D3D3D] shadow-2xl shadow-black/5 overflow-hidden transition-all duration-300">
-        <div class="border-b border-[#DEE2E6] dark:border-[#3D3D3D] bg-[#F8F9FA]/50 dark:bg-[#1A1A1A]/50 backdrop-blur-md px-6 py-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+    <div
+        class="bg-white dark:bg-[#1E1E1E] rounded-[2rem] border border-[#DEE2E6] dark:border-[#3D3D3D] shadow-2xl shadow-black/5 overflow-hidden transition-all duration-300">
+        <div
+            class="border-b border-[#DEE2E6] dark:border-[#3D3D3D] bg-[#F8F9FA]/50 dark:bg-[#1A1A1A]/50 backdrop-blur-md px-6 py-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div class="flex flex-wrap items-center gap-2">
                 {% block tool_actions_left %}{% endblock %}
-                <button @click="$refs.fileInput.click()"
+                <button @click="$refs.fileInput.click()" x-show="!hideUpload"
                     class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-white dark:bg-[#2D2D2D] text-[#212529] dark:text-white border border-[#DEE2E6] dark:border-[#3D3D3D] hover:bg-[#F1F3F5] dark:hover:bg-[#3D3D3D]">
                     <i class="fas fa-file-upload text-[#0D7C3D]"></i>
                     <span>Upload File</span>
                 </button>
-                <input type="file" x-ref="fileInput" class="hidden" @change="handleFileUpload($event)">
+                <input type="file" x-ref="fileInput" class="hidden" @change="handleFileUpload($event)"
+                    accept="{% block tool_accept %}*/*{% endblock %}" x-show="!hideUpload">
             </div>
 
             <div class="flex flex-wrap items-center gap-2">
                 {% block tool_actions_right %}{% endblock %}
-                <button @click="loadSample()"
+                <button @click="loadSample()" x-show="!hideSample"
                     class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-white dark:bg-[#2D2D2D] text-[#212529] dark:text-white border border-[#DEE2E6] dark:border-[#3D3D3D] hover:bg-[#F1F3F5] dark:hover:bg-[#3D3D3D]">
                     <i class="fas fa-vial text-purple-500"></i>
                     <span>Load Sample</span>
                 </button>
-                <button @click="resetTool()"
+                <button @click="resetTool()" x-show="!hideReset"
                     class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-white dark:bg-[#2D2D2D] text-red-500 border border-[#DEE2E6] dark:border-[#3D3D3D] hover:bg-red-50 dark:hover:bg-red-900/10">
                     <i class="fas fa-undo"></i>
                     <span>Reset</span>
@@ -58,7 +62,8 @@
             {% block tool_body %}{% endblock %}
         </div>
 
-        <div class="bg-[#F8F9FA]/50 dark:bg-[#1A1A1A]/50 border-t border-[#DEE2E6] dark:border-[#3D3D3D] px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+        <div
+            class="bg-[#F8F9FA]/50 dark:bg-[#1A1A1A]/50 border-t border-[#DEE2E6] dark:border-[#3D3D3D] px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-4 text-[11px] font-medium text-[#6C757D] dark:text-[#A1A1AA]">
                 <span class="flex items-center gap-1.5 px-2 py-1 bg-[#0D7C3D]/10 text-[#0D7C3D] rounded-lg">
                     <i class="fas fa-user-shield"></i> 100% Private Tool
@@ -87,10 +92,22 @@
 
 <style>
     @keyframes bounce-in {
-        0% { transform: translate(-50%, 2rem); opacity: 0; }
-        60% { transform: translate(-50%, -0.5rem); opacity: 1; }
-        100% { transform: translate(-50%, 0); opacity: 1; }
+        0% {
+            transform: translate(-50%, 2rem);
+            opacity: 0;
+        }
+
+        60% {
+            transform: translate(-50%, -0.5rem);
+            opacity: 1;
+        }
+
+        100% {
+            transform: translate(-50%, 0);
+            opacity: 1;
+        }
     }
+
     .animate-bounce-in {
         animation: bounce-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
     }
@@ -104,9 +121,10 @@
         transition-duration: 150ms;
         outline: 2px solid transparent;
         outline-offset: 2px;
-        border-radius: 0.75rem; /* rounded-xl */
+        border-radius: 0.75rem;
+        /* rounded-xl */
     }
-    
+
     textarea:focus,
     input[type="text"]:focus,
     input[type="number"]:focus {
@@ -122,21 +140,25 @@
         width: 8px;
         height: 8px;
     }
+
     ::-webkit-scrollbar-track {
         background: transparent;
     }
+
     ::-webkit-scrollbar-thumb {
         background-color: #DEE2E6;
         border-radius: 9999px;
     }
+
     ::-webkit-scrollbar-thumb:hover {
         background-color: #ADB5BD;
     }
-    
+
     @media (prefers-color-scheme: dark) {
         ::-webkit-scrollbar-thumb {
             background-color: #3D3D3D;
         }
+
         ::-webkit-scrollbar-thumb:hover {
             background-color: #525252;
         }
@@ -147,17 +169,31 @@
     function toolSetup() {
         return {
             input: '',
+            file: null,
             output: '',
             error: '',
             statusMessage: '',
             copied: false,
+            hideReset: false,
+            hideSample: false,
+            isProcessing: false,
+            dragging: false,
+            over: false,
+            hideUpload: false,
 
             async handleFileUpload(event) {
                 const file = event.target.files[0];
                 if (!file) return;
 
+                this.file = file; // Standardize this.file across tools
                 this.statusMessage = `Reading ${file.name}...`;
                 this.error = '';
+
+                // Call handleFiles if tool provides it (older pattern)
+                if (typeof this.handleFiles === 'function') {
+                    this.handleFiles([file]);
+                    return;
+                }
 
                 const reader = new FileReader();
                 reader.onload = (e) => {

@@ -85,8 +85,46 @@
                     </a>
                     <div class="h-px bg-gray-100 dark:bg-[#333] my-1 mr-4"></div>
 
-                    <!-- Category: Programming Essentials -->
+                    <!-- Category: Data & Research -->
                     <div class="px-4 py-1 mt-2 mb-1">
+                        <span
+                            class="nav-label text-[10px] font-bold text-[#ADB5BD] uppercase tracking-widest leading-none transition-opacity duration-200">Data
+                            & Research</span>
+                    </div>
+                    <a href="{% url 'tools:data_profiler' %}"
+                        class="flex items-center h-9 px-4 gap-3 text-[12px] font-bold text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
+                        <i class="fas fa-chart-pie w-4 text-center"></i>
+                        <span class="nav-label">Data Profiler</span>
+                    </a>
+                    <a href="{% url 'tools:json_csv_converter' %}"
+                        class="flex items-center h-9 px-4 gap-3 text-[12px] font-bold text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
+                        <i class="fas fa-file-csv w-4 text-center"></i>
+                        <span class="nav-label">CSV <i class="fas fa-right-left text-[9px] opacity-40 mx-0.5"></i>
+                            JSON</span>
+                    </a>
+                    <a href="{% url 'tools:json_schema_validator' %}"
+                        class="flex items-center h-9 px-4 gap-3 text-[12px] font-bold text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
+                        <i class="fas fa-project-diagram w-4 text-center"></i>
+                        <span class="nav-label">JSON Schema</span>
+                    </a>
+                    <a href="{% url 'tools:latex_editor' %}"
+                        class="flex items-center h-9 px-4 gap-3 text-[12px] font-bold text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
+                        <i class="fas fa-square-root-alt w-4 text-center"></i>
+                        <span class="nav-label">LaTeX Editor</span>
+                    </a>
+                    <a href="{% url 'tools:timestamp_converter' %}"
+                        class="flex items-center h-9 px-4 gap-3 text-[12px] font-bold text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
+                        <i class="fas fa-clock w-4 text-center"></i>
+                        <span class="nav-label">Timestamp</span>
+                    </a>
+                    <a href="{% url 'tools:unit_converter' %}"
+                        class="flex items-center h-9 px-4 gap-3 text-[12px] font-bold text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
+                        <i class="fas fa-balance-scale w-4 text-center"></i>
+                        <span class="nav-label">Unit Converter</span>
+                    </a>
+
+                    <!-- Category: Programming Essentials -->
+                    <div class="px-4 py-1 mt-4 mb-1">
                         <span
                             class="nav-label text-[10px] font-bold text-[#ADB5BD] uppercase tracking-widest leading-none transition-opacity duration-200">Programming</span>
                     </div>
@@ -100,6 +138,12 @@
                         <i class="fas fa-database w-4 text-center"></i>
                         <span class="nav-label">SQL Formatter</span>
                     </a>
+                    <a href="{% url 'tools:yaml_json_converter' %}"
+                        class="flex items-center h-9 px-4 gap-3 text-[12px] font-bold text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
+                        <i class="fas fa-file-code w-4 text-center"></i>
+                        <span class="nav-label">YAML <i class="fas fa-right-left text-[9px] opacity-40 mx-0.5"></i>
+                            JSON</span>
+                    </a>
                     <a href="{% url 'tools:diff_viewer' %}"
                         class="flex items-center h-9 px-4 gap-3 text-[12px] font-bold text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
                         <i class="fas fa-columns w-4 text-center"></i>
@@ -110,77 +154,35 @@
                         <i class="fas fa-asterisk w-4 text-center"></i>
                         <span class="nav-label">Regex Tester</span>
                     </a>
+                    <a href="{% url 'tools:jwt_parser' %}"
+                        class="flex items-center h-9 px-4 gap-3 text-[12px] font-bold text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
+                        <i class="fas fa-id-card w-4 text-center"></i>
+                        <span class="nav-label">JWT Parser</span>
+                    </a>
                     <a href="{% url 'tools:base64_converter' %}"
                         class="flex items-center h-9 px-4 gap-3 text-[12px] font-bold text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
                         <i class="fas fa-exchange-alt w-4 text-center"></i>
-                        <span class="nav-label">Base64</span>
+                        <span class="nav-label">Base64 Converter</span>
                     </a>
                     <a href="{% url 'tools:url_encoder' %}"
                         class="flex items-center h-9 px-4 gap-3 text-[12px] font-bold text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
                         <i class="fas fa-link w-4 text-center"></i>
                         <span class="nav-label">URL Encoder</span>
                     </a>
-                    <a href="{% url 'tools:jwt_parser' %}"
+                    <a href="{% url 'tools:markdown_previewer' %}"
                         class="flex items-center h-9 px-4 gap-3 text-[12px] font-bold text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
-                        <i class="fas fa-id-card w-4 text-center"></i>
-                        <span class="nav-label">JWT Parser</span>
+                        <i class="fas fa-file-alt w-4 text-center"></i>
+                        <span class="nav-label">Markdown</span>
                     </a>
                     <a href="{% url 'tools:image_to_base64' %}"
                         class="flex items-center h-9 px-4 gap-3 text-[12px] font-bold text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
                         <i class="fas fa-image w-4 text-center"></i>
                         <span class="nav-label">Image to Base64</span>
                     </a>
-                    <a href="{% url 'tools:yaml_json_converter' %}"
-                        class="flex items-center h-9 px-4 gap-3 text-[12px] font-bold text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
-                        <i class="fas fa-file-code w-4 text-center"></i>
-                        <span class="nav-label">YAML/JSON</span>
-                    </a>
-                    <a href="{% url 'tools:markdown_previewer' %}"
-                        class="flex items-center h-9 px-4 gap-3 text-[12px] font-bold text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
-                        <i class="fas fa-file-alt w-4 text-center"></i>
-                        <span class="nav-label">Markdown</span>
-                    </a>
                     <a href="{% url 'tools:html_entities' %}"
                         class="flex items-center h-9 px-4 gap-3 text-[12px] font-bold text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
-                        <i class="fas fa-brackets-curly w-4 text-center"></i>
+                        <i class="fas fa-code w-4 text-center"></i>
                         <span class="nav-label">HTML Entities</span>
-                    </a>
-
-                    <!-- Category: Data & Research -->
-                    <div class="px-4 py-1 mt-4 mb-1">
-                        <span
-                            class="nav-label text-[10px] font-bold text-[#ADB5BD] uppercase tracking-widest leading-none transition-opacity duration-200">Data
-                            & Research</span>
-                    </div>
-                    <a href="{% url 'tools:latex_editor' %}"
-                        class="flex items-center h-9 px-4 gap-3 text-[12px] font-bold text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
-                        <i class="fas fa-square-root-alt w-4 text-center"></i>
-                        <span class="nav-label">LaTeX Editor</span>
-                    </a>
-                    <a href="{% url 'tools:json_csv_converter' %}"
-                        class="flex items-center h-9 px-4 gap-3 text-[12px] font-bold text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
-                        <i class="fas fa-file-csv w-4 text-center"></i>
-                        <span class="nav-label">CSV & JSON</span>
-                    </a>
-                    <a href="{% url 'tools:unit_converter' %}"
-                        class="flex items-center h-9 px-4 gap-3 text-[12px] font-bold text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
-                        <i class="fas fa-balance-scale w-4 text-center"></i>
-                        <span class="nav-label">Unit Converter</span>
-                    </a>
-                    <a href="{% url 'tools:timestamp_converter' %}"
-                        class="flex items-center h-9 px-4 gap-3 text-[12px] font-bold text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
-                        <i class="fas fa-clock w-4 text-center"></i>
-                        <span class="nav-label">Timestamp</span>
-                    </a>
-                    <a href="{% url 'tools:data_profiler' %}"
-                        class="flex items-center h-9 px-4 gap-3 text-[12px] font-bold text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
-                        <i class="fas fa-chart-pie w-4 text-center"></i>
-                        <span class="nav-label">Data Profiler</span>
-                    </a>
-                    <a href="{% url 'tools:json_schema_validator' %}"
-                        class="flex items-center h-9 px-4 gap-3 text-[12px] font-bold text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
-                        <i class="fas fa-project-diagram w-4 text-center"></i>
-                        <span class="nav-label">JSON Schema</span>
                     </a>
 
                     <!-- Category: Security & Systems -->
@@ -189,6 +191,11 @@
                             class="nav-label text-[10px] font-bold text-[#ADB5BD] uppercase tracking-widest leading-none transition-opacity duration-200">Security
                             & Systems</span>
                     </div>
+                    <a href="{% url 'tools:api_tester' %}"
+                        class="flex items-center h-9 px-4 gap-3 text-[12px] font-bold text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
+                        <i class="fas fa-plug w-4 text-center"></i>
+                        <span class="nav-label">API Tester</span>
+                    </a>
                     <a href="{% url 'tools:hash_generator' %}"
                         class="flex items-center h-9 px-4 gap-3 text-[12px] font-bold text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
                         <i class="fas fa-fingerprint w-4 text-center"></i>
@@ -204,11 +211,6 @@
                         <i class="fas fa-key w-4 text-center"></i>
                         <span class="nav-label">Password Gen</span>
                     </a>
-                    <a href="{% url 'tools:api_tester' %}"
-                        class="flex items-center h-9 px-4 gap-3 text-[12px] font-bold text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
-                        <i class="fas fa-plug w-4 text-center"></i>
-                        <span class="nav-label">API Tester</span>
-                    </a>
                     <a href="{% url 'tools:cron_generator' %}"
                         class="flex items-center h-9 px-4 gap-3 text-[12px] font-bold text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
                         <i class="fas fa-calendar-alt w-4 text-center"></i>
@@ -221,6 +223,16 @@
                             class="nav-label text-[10px] font-bold text-[#ADB5BD] uppercase tracking-widest leading-none transition-opacity duration-200">Docs
                             & Images</span>
                     </div>
+                    <a href="{% url 'tools:image_converter' %}"
+                        class="flex items-center h-9 px-4 gap-3 text-[12px] font-bold text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
+                        <i class="fas fa-sync-alt w-4 text-center"></i>
+                        <span class="nav-label">Image Converter</span>
+                    </a>
+                    <a href="{% url 'tools:image_resizer' %}"
+                        class="flex items-center h-9 px-4 gap-3 text-[12px] font-bold text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
+                        <i class="fas fa-compress-arrows-alt w-4 text-center"></i>
+                        <span class="nav-label">Image Resizer</span>
+                    </a>
                     <a href="{% url 'tools:pdf_merger' %}"
                         class="flex items-center h-9 px-4 gap-3 text-[12px] font-bold text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
                         <i class="fas fa-layer-group w-4 text-center"></i>
@@ -230,16 +242,6 @@
                         class="flex items-center h-9 px-4 gap-3 text-[12px] font-bold text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
                         <i class="fas fa-file-alt w-4 text-center"></i>
                         <span class="nav-label">PDF Extractor</span>
-                    </a>
-                    <a href="{% url 'tools:image_resizer' %}"
-                        class="flex items-center h-9 px-4 gap-3 text-[12px] font-bold text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
-                        <i class="fas fa-compress-arrows-alt w-4 text-center"></i>
-                        <span class="nav-label">Image Resizer</span>
-                    </a>
-                    <a href="{% url 'tools:image_converter' %}"
-                        class="flex items-center h-9 px-4 gap-3 text-[12px] font-bold text-[#6C757D] hover:text-[#0D7C3D] transition-colors dark:text-[#A1A1AA]">
-                        <i class="fas fa-sync-alt w-4 text-center"></i>
-                        <span class="nav-label">Image Converter</span>
                     </a>
                 </div>
             </div>

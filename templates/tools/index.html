@@ -6,7 +6,6 @@
 
 {% block content %}
 <div class="px-4 py-8 md:py-12 max-w-7xl mx-auto">
-    <!-- Header -->
     <div class="mb-12">
         <nav class="flex text-sm text-[#6C757D] dark:text-[#A1A1AA] mb-4" aria-label="Breadcrumb">
             <ol class="inline-flex items-center space-x-1 md:space-x-3">
@@ -26,41 +25,6 @@
             researchers, data scientists, and developers. Everything runs locally in your browser.</p>
     </div>
 
-    <!-- Category: Programming Essentials -->
-    <section class="mb-16">
-        <div class="flex items-center gap-3 mb-8">
-            <div class="w-10 h-10 bg-[#0D7C3D]/10 rounded-lg flex items-center justify-center text-[#0D7C3D]">
-                <i class="fas fa-code"></i>
-            </div>
-            <h2 class="text-2xl font-bold text-[#212529] dark:text-white">Programming Essentials</h2>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <!-- JSON Formatter -->
-            {% include "tools/partials/tool_card.html" with name="JSON Formatter" url="tools:json_formatter" icon="fa-code" color="blue" desc="Validate, format, and minify JSON data." %}
-            <!-- SQL Formatter -->
-            {% include "tools/partials/tool_card.html" with name="SQL Formatter" url="tools:sql_formatter" icon="fa-database" color="indigo" desc="Beautify and format SQL queries." %}
-            <!-- Diff Viewer -->
-            {% include "tools/partials/tool_card.html" with name="Diff Viewer" url="tools:diff_viewer" icon="fa-columns" color="orange" desc="Compare text snippets side-by-side." %}
-            <!-- Regex Tester -->
-            {% include "tools/partials/tool_card.html" with name="Regex Tester" url="tools:regex_tester" icon="fa-asterisk" color="green" desc="Test regular expressions in real-time." %}
-            <!-- Base64 Converter -->
-            {% include "tools/partials/tool_card.html" with name="Base64 Converter" url="tools:base64_converter" icon="fa-exchange-alt" color="purple" desc="Encode/decode text and binary to Base64." %}
-            <!-- URL Encoder -->
-            {% include "tools/partials/tool_card.html" with name="URL Encoder" url="tools:url_encoder" icon="fa-link" color="cyan" desc="Safe URL encoding and decoding." %}
-            <!-- JWT Parser -->
-            {% include "tools/partials/tool_card.html" with name="JWT Parser" url="tools:jwt_parser" icon="fa-id-card" color="pink" desc="Decode and inspect JWT payloads." %}
-            <!-- Image to Base64 -->
-            {% include "tools/partials/tool_card.html" with name="Image to Base64" url="tools:image_to_base64" icon="fa-image" color="rose" desc="Convert images to Base64 strings." %}
-            <!-- YAML & JSON -->
-            {% include "tools/partials/tool_card.html" with name="YAML & JSON" url="tools:yaml_json_converter" icon="fa-file-code" color="orange" desc="Convert between YAML and JSON seamlessly." %}
-            <!-- Markdown Previewer -->
-            {% include "tools/partials/tool_card.html" with name="Markdown Preview" url="tools:markdown_previewer" icon="fa-file-alt" color="blue" desc="Live GFM markdown editor and preview." %}
-            <!-- HTML Entities -->
-            {% include "tools/partials/tool_card.html" with name="HTML Entities" url="tools:html_entities" icon="fa-brackets-curly" color="cyan" desc="Encode and decode HTML entities securely." %}
-        </div>
-    </section>
-
-    <!-- Category: Data & Research -->
     <section class="mb-16">
         <div class="flex items-center gap-3 mb-8">
             <div class="w-10 h-10 bg-[#C4992E]/10 rounded-lg flex items-center justify-center text-[#C4992E]">
@@ -69,22 +33,37 @@
             <h2 class="text-2xl font-bold text-[#212529] dark:text-white">Data & Research</h2>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <!-- LaTeX Editor -->
-            {% include "tools/partials/tool_card.html" with name="LaTeX Editor" url="tools:latex_editor" icon="fa-square-root-alt" color="neutral" desc="Live LaTeX equation preview and editor." %}
-            <!-- CSV & JSON -->
-            {% include "tools/partials/tool_card.html" with name="CSV & JSON" url="tools:json_csv_converter" icon="fa-file-csv" color="emerald" desc="Bidirectional conversion between CSV and JSON." %}
-            <!-- Unit Converter -->
-            {% include "tools/partials/tool_card.html" with name="Unit Converter" url="tools:unit_converter" icon="fa-balance-scale" color="yellow" desc="Scientific and digital unit conversions." %}
-            <!-- Unix Timestamp -->
-            {% include "tools/partials/tool_card.html" with name="Unix Timestamp" url="tools:timestamp_converter" icon="fa-clock" color="gray" desc="Convert Unix epoch to human dates." %}
-            <!-- Data Profiler -->
             {% include "tools/partials/tool_card.html" with name="Data Profiler" url="tools:data_profiler" icon="fa-chart-pie" color="rose" desc="Generate statistical summaries of datasets." %}
-            <!-- JSON Schema -->
+            {% include "tools/partials/tool_card.html" with name="CSV <i class='fas fa-right-left text-[10px] mx-1.5 opacity-40'></i> JSON" url="tools:json_csv_converter" icon="fa-file-csv" color="emerald" desc="Bidirectional conversion between CSV and JSON." %}
             {% include "tools/partials/tool_card.html" with name="JSON Schema" url="tools:json_schema_validator" icon="fa-project-diagram" color="indigo" desc="Validate JSON against schema standards." %}
+            {% include "tools/partials/tool_card.html" with name="LaTeX Editor" url="tools:latex_editor" icon="fa-square-root-alt" color="neutral" desc="Live LaTeX equation preview and editor." %}
+            {% include "tools/partials/tool_card.html" with name="Unix Timestamp" url="tools:timestamp_converter" icon="fa-clock" color="gray" desc="Convert Unix epoch to human dates." %}
+            {% include "tools/partials/tool_card.html" with name="Unit Converter" url="tools:unit_converter" icon="fa-balance-scale" color="yellow" desc="Scientific and digital unit conversions." %}
         </div>
     </section>
 
-    <!-- Category: Security & Systems -->
+    <section class="mb-16">
+        <div class="flex items-center gap-3 mb-8">
+            <div class="w-10 h-10 bg-[#0D7C3D]/10 rounded-lg flex items-center justify-center text-[#0D7C3D]">
+                <i class="fas fa-code"></i>
+            </div>
+            <h2 class="text-2xl font-bold text-[#212529] dark:text-white">Programming Essentials</h2>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {% include "tools/partials/tool_card.html" with name="JSON Formatter" url="tools:json_formatter" icon="fa-code" color="blue" desc="Validate, format, and minify JSON data." %}
+            {% include "tools/partials/tool_card.html" with name="SQL Formatter" url="tools:sql_formatter" icon="fa-database" color="indigo" desc="Beautify and format SQL queries." %}
+            {% include "tools/partials/tool_card.html" with name="YAML <i class='fas fa-right-left text-[10px] mx-1.5 opacity-40'></i> JSON" url="tools:yaml_json_converter" icon="fa-file-code" color="orange" desc="Convert between YAML and JSON seamlessly." %}
+            {% include "tools/partials/tool_card.html" with name="Diff Viewer" url="tools:diff_viewer" icon="fa-columns" color="orange" desc="Compare text snippets side-by-side." %}
+            {% include "tools/partials/tool_card.html" with name="Regex Tester" url="tools:regex_tester" icon="fa-asterisk" color="green" desc="Test regular expressions in real-time." %}
+            {% include "tools/partials/tool_card.html" with name="JWT Parser" url="tools:jwt_parser" icon="fa-id-card" color="pink" desc="Decode and inspect JWT payloads." %}
+            {% include "tools/partials/tool_card.html" with name="Base64 Converter" url="tools:base64_converter" icon="fa-exchange-alt" color="purple" desc="Encode/decode text and binary to Base64." %}
+            {% include "tools/partials/tool_card.html" with name="URL Encoder" url="tools:url_encoder" icon="fa-link" color="cyan" desc="Safe URL encoding and decoding." %}
+            {% include "tools/partials/tool_card.html" with name="Markdown Preview" url="tools:markdown_previewer" icon="fa-file-alt" color="blue" desc="Live GFM markdown editor and preview." %}
+            {% include "tools/partials/tool_card.html" with name="Image to Base64" url="tools:image_to_base64" icon="fa-image" color="rose" desc="Convert images to Base64 strings." %}
+            {% include "tools/partials/tool_card.html" with name="HTML Entities" url="tools:html_entities" icon="fa-code" color="cyan" desc="Encode and decode HTML entities securely." %}
+        </div>
+    </section>
+
     <section class="mb-16">
         <div class="flex items-center gap-3 mb-8">
             <div class="w-10 h-10 bg-red-500/10 rounded-lg flex items-center justify-center text-red-500">
@@ -93,40 +72,29 @@
             <h2 class="text-2xl font-bold text-[#212529] dark:text-white">Security & Systems</h2>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <!-- Hash Generator -->
-            {% include "tools/partials/tool_card.html" with name="Hash Generator" url="tools:hash_generator" icon="fa-fingerprint" color="red" desc="Generate MD5, SHA-1, SHA-256 hashes." %}
-            <!-- UUID Generator -->
-            {% include "tools/partials/tool_card.html" with name="UUID Generator" url="tools:uuid_generator" icon="fa-id-badge" color="slate" desc="Bulk generate Version 4 UUIDs." %}
-            <!-- Password Generator -->
-            {% include "tools/partials/tool_card.html" with name="Password Gen" url="tools:password_generator" icon="fa-key" color="green" desc="Securely generate high-entropy passwords." %}
-            <!-- API Tester -->
             {% include "tools/partials/tool_card.html" with name="API Tester (Lite)" url="tools:api_tester" icon="fa-plug" color="teal" desc="Debug and test HTTP endpoints locally." %}
-            <!-- Cron Generator -->
+            {% include "tools/partials/tool_card.html" with name="Hash Generator" url="tools:hash_generator" icon="fa-fingerprint" color="red" desc="Generate MD5, SHA-1, SHA-256 hashes." %}
+            {% include "tools/partials/tool_card.html" with name="UUID Generator" url="tools:uuid_generator" icon="fa-id-badge" color="slate" desc="Bulk generate Version 4 UUIDs." %}
+            {% include "tools/partials/tool_card.html" with name="Password Gen" url="tools:password_generator" icon="fa-key" color="green" desc="Securely generate high-entropy passwords." %}
             {% include "tools/partials/tool_card.html" with name="Cron Generator" url="tools:cron_generator" icon="fa-calendar-alt" color="sky" desc="Generate cron schedules with ease." %}
         </div>
     </section>
 
-    <!-- Category: Document & Image Utils -->
     <section class="mb-16">
         <div class="flex items-center gap-3 mb-8">
             <div class="w-10 h-10 bg-purple-500/10 rounded-lg flex items-center justify-center text-purple-500">
                 <i class="fas fa-file-image"></i>
             </div>
-            <h2 class="text-2xl font-bold text-[#212529] dark:text-white">Document & Image Utils</h2>
+            <h2 class="text-2xl font-bold text-[#212529] dark:text-white">Media & Documents</h2>
         </div>
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-            <!-- PDF Merger -->
-            {% include "tools/partials/tool_card.html" with name="PDF Merger" url="tools:pdf_merger" icon="fa-layer-group" color="red" desc="Merge multiple PDF files into one." %}
-            <!-- PDF Text Extractor -->
-            {% include "tools/partials/tool_card.html" with name="PDF Text Extractor" url="tools:pdf_text_extractor" icon="fa-file-alt" color="orange" desc="Extract plain text from PDF documents." %}
-            <!-- Image Resizer -->
-            {% include "tools/partials/tool_card.html" with name="Image Resizer" url="tools:image_resizer" icon="fa-compress-arrows-alt" color="blue" desc="Change image dimensions locally." %}
-            <!-- Image Converter -->
             {% include "tools/partials/tool_card.html" with name="Image Converter" url="tools:image_converter" icon="fa-sync-alt" color="green" desc="Convert between PNG, JPG, and WebP." %}
+            {% include "tools/partials/tool_card.html" with name="Image Resizer" url="tools:image_resizer" icon="fa-compress-arrows-alt" color="blue" desc="Change image dimensions locally." %}
+            {% include "tools/partials/tool_card.html" with name="PDF Merger" url="tools:pdf_merger" icon="fa-layer-group" color="red" desc="Merge multiple PDF files into one." %}
+            {% include "tools/partials/tool_card.html" with name="PDF Text Extractor" url="tools:pdf_text_extractor" icon="fa-file-alt" color="orange" desc="Extract plain text from PDF documents." %}
         </div>
     </section>
 
-    <!-- Security Note -->
     <div
         class="mt-16 p-6 bg-[#0D7C3D]/5 border border-[#0D7C3D]/10 rounded-xl flex flex-col md:flex-row items-center gap-6">
         <div

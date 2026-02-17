@@ -23,7 +23,8 @@
             <!-- Dynamic Stats Bar -->
             <div class="flex flex-nowrap gap-4 md:gap-10 mb-10 overflow-x-auto no-scrollbar">
                 <div class="flex flex-col min-w-max">
-                    <span class="text-xl md:text-2xl font-bold text-[#212529] dark:text-white">{{stats.total_projects}}</span>
+                    <span
+                        class="text-xl md:text-2xl font-bold text-[#212529] dark:text-white">{{stats.total_projects}}</span>
                     <span class="text-[10px] font-bold text-[#6C757D] uppercase tracking-widest">Projects</span>
                 </div>
                 <div class="flex flex-col border-l border-[#DEE2E6] dark:border-[#333] pl-4 md:pl-10 min-w-max">
@@ -41,13 +42,13 @@
 
             <div class="flex flex-wrap gap-4">
                 <a href="{% url 'projects:list' %}"
-                    class="inline-flex items-center gap-2 px-8 py-3.5 bg-[#0D7C3D] text-white font-bold rounded-lg hover:bg-[#0A5C2C] transition-all shadow-md hover:shadow-lg">
-                    <i class="fas fa-rocket text-sm"></i>
+                    class="inline-flex items-center gap-2 px-6 py-2.5 bg-[#0D7C3D] text-white font-bold rounded-lg hover:bg-[#0A5C2C] transition-all shadow-md hover:shadow-lg text-sm">
+                    <i class="fas fa-rocket text-xs"></i>
                     Explore Research
                 </a>
                 <a href="{% url 'core:studio_py' %}"
-                    class="inline-flex items-center gap-2 px-8 py-3.5 bg-white text-[#495057] font-bold rounded-lg hover:bg-[#F8F9FA] transition-all border border-[#DEE2E6] dark:bg-[#2D2D2D] dark:text-white dark:border-[#3D3D3D] dark:hover:bg-[#333]">
-                    <i class="fas fa-flask text-sm"></i>
+                    class="inline-flex items-center gap-2 px-6 py-2.5 bg-white text-[#495057] font-bold rounded-lg hover:bg-[#F8F9FA] transition-all border border-[#DEE2E6] dark:bg-[#2D2D2D] dark:text-white dark:border-[#3D3D3D] dark:hover:bg-[#333] text-sm">
+                    <i class="fas fa-flask text-xs"></i>
                     Launch Studio
                 </a>
             </div>

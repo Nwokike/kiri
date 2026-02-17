@@ -2,8 +2,7 @@
 {% load static %}
 
 {% block title %}YAML & JSON Converter | Kiri Research{% endblock %}
-{% block meta_description %}Convert between YAML and JSON formats. Supports complex nesting and multi-document YAML.
-{%endblock %}
+{% block meta_description %}Convert between YAML and JSON formats. Supports complex nesting and multi-document YAML.{% endblock %}
 
 {% block tool_name %}YAML & JSON{% endblock %}
 {% block tool_icon %}fa-file-code{% endblock %}
@@ -14,6 +13,7 @@ Supports complex nesting and multi-document YAML locally in your browser.
 {% endblock %}
 
 {% block tool_accept %}.yaml,.yml,.json{% endblock %}
+
 {% block tool_actions_left %}
 <div class="flex items-center gap-2">
     <span class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase">Direction:</span>
@@ -31,7 +31,7 @@ Supports complex nesting and multi-document YAML locally in your browser.
 {% block tool_actions_right %}
 <button @click="download()"
     class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-[#0D7C3D] text-white hover:bg-[#0A5C2C]"
-    x-show="output">
+    x-show="output" style="display: none;">
     <i class="fas fa-download"></i>
     <span x-text="mode === 'y2j' ? 'Download JSON' : 'Download YAML'"></span>
 </button>
@@ -40,34 +40,28 @@ Supports complex nesting and multi-document YAML locally in your browser.
 {% block tool_body %}
 <div class="space-y-6">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[500px]">
-        <!-- Input Area -->
         <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between">
-                <span
-                    class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest flex items-center gap-2">
-                    <i class="fas"
-                        :class="mode === 'y2j' ? 'fa-file-invoice text-[#C4992E]' : 'fa-code text-blue-500'"></i>
+                <span class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest flex items-center gap-2">
+                    <i class="fas" :class="mode === 'y2j' ? 'fa-file-invoice text-[#C4992E]' : 'fa-code text-blue-500'"></i>
                     <span x-text="mode === 'y2j' ? 'Input YAML' : 'Input JSON'"></span>
                 </span>
                 <span class="text-[10px] text-[#A1A1AA]" x-text="input.length ? input.length + ' chars' : ''"></span>
             </div>
             <textarea x-model="input" @input="convert()"
-                class="flex-1 w-full p-6 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[1.5rem] bg-white dark:bg-[#121212] text-[#212529] dark:text-[#E4E4E7] resize-none shadow-inner"
+                class="flex-1 w-full p-6 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[1.5rem] bg-white dark:bg-[#121212] text-[#212529] dark:text-[#E4E4E7] resize-none shadow-inner outline-none focus:border-[#0D7C3D]"
                 :placeholder="mode === 'y2j' ? 'Paste your YAML here...' : 'Paste your JSON here...'"></textarea>
         </div>
 
-        <!-- Output Area -->
         <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between">
-                <span
-                    class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest flex items-center gap-2">
-                    <i class="fas"
-                        :class="mode === 'y2j' ? 'fa-code-merge text-[#0D7C3D]' : 'fa-file-export text-orange-500'"></i>
+                <span class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest flex items-center gap-2">
+                    <i class="fas" :class="mode === 'y2j' ? 'fa-code-merge text-[#0D7C3D]' : 'fa-file-export text-orange-500'"></i>
                     <span x-text="mode === 'y2j' ? 'Target JSON' : 'Target YAML'"></span>
                 </span>
                 <button @click="copyToClipboard(output)"
                     class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase flex items-center gap-1.5"
-                    x-show="output">
+                    x-show="output" style="display: none;">
                     <i class="fas" :class="copied ? 'fa-check' : 'fa-copy'"></i>
                     <span x-text="copied ? 'Copied' : 'Copy'"></span>
                 </button>
@@ -84,69 +78,75 @@ Supports complex nesting and multi-document YAML locally in your browser.
 
 {% block tool_js_data %}
 {
-mode: 'y2j',
+    mode: 'y2j',
 
-loadSample() {
-if (this.mode === 'y2j') {
-this.input = `version: "3.9"
+    loadSample() {
+        if (this.mode === 'y2j') {
+            this.input = `version: "3.9"
 services:
-web:
-image: nginx:latest
-ports:
-- "80:80"
-db:
-image: postgres:15
-environment:
-POSTGRES_DB: sample_db
-resources:
-limits:
-memory: 512M`;
-} else {
-this.input = JSON.stringify({
-app: "Sample Application",
-version: "1.0.0",
-modules: ["API", "Frontend", "Database"],
-config: {
-cache: "memory",
-timeout: 3000
-}
-}, null, 4);
-}
-this.convert();
-},
+  web:
+    image: nginx:latest
+    ports:
+      - "80:80"
+  db:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: sample_db
+    resources:
+      limits:
+        memory: 512M`;
+        } else {
+            this.input = JSON.stringify({
+                app: "Sample Application",
+                version: "1.0.0",
+                modules: ["API", "Frontend", "Database"],
+                config: {
+                    cache: "memory",
+                    timeout: 3000
+                }
+            }, null, 4);
+        }
+        this.convert();
+    },
 
-convert() {
-if (!this.input.trim()) {
-this.output = '';
-this.error = '';
-return;
-}
+    convert() {
+        if (!this.input || !this.input.trim()) {
+            this.output = '';
+            this.error = '';
+            return;
+        }
 
-try {
-if (this.mode === 'y2j') {
-const parsed = jsyaml.load(this.input);
-this.output = JSON.stringify(parsed, null, 4);
-this.statusMessage = 'YAML converted to JSON';
-} else {
-const parsed = JSON.parse(this.input);
-this.output = jsyaml.dump(parsed);
-this.statusMessage = 'JSON converted to YAML';
-}
-this.error = '';
-this.$nextTick(() => Prism.highlightAll());
-} catch (e) {
-this.error = (this.mode === 'y2j' ? "YAML" : "JSON") + " Parsing error: " + e.message;
-this.output = '';
-this.statusMessage = 'Conversion failed';
-}
-},
+        try {
+            if (this.mode === 'y2j') {
+                const parsed = jsyaml.load(this.input);
+                this.output = JSON.stringify(parsed, null, 4);
+                this.statusMessage = 'YAML converted to JSON';
+            } else {
+                const parsed = JSON.parse(this.input);
+                this.output = jsyaml.dump(parsed);
+                this.statusMessage = 'JSON converted to YAML';
+            }
+            this.error = '';
+            
+            // Wait for DOM update then highlight
+            this.$nextTick(() => {
+                if (window.Prism) {
+                    Prism.highlightAll();
+                }
+            });
+        } catch (e) {
+            this.error = (this.mode === 'y2j' ? "YAML" : "JSON") + " Parsing error: " + e.message;
+            this.output = '';
+            this.statusMessage = 'Conversion failed';
+        }
+    },
 
-download() {
-if (!this.output || this.error) return;
-const ext = this.mode === 'y2j' ? 'json' : 'yaml';
-const mime = this.mode === 'y2j' ? 'application/json' : 'application/x-yaml';
-this.downloadFile(this.output, `kiri_config.${ext}`, mime);
-}
+    download() {
+        if (!this.output || this.error) return;
+        const ext = this.mode === 'y2j' ? 'json' : 'yaml';
+        const mime = this.mode === 'y2j' ? 'application/json' : 'application/x-yaml';
+        this.downloadFile(this.output, `kiri_config.${ext}`, mime);
+    }
 }
 {% endblock %}
 
@@ -160,7 +160,7 @@ this.downloadFile(this.output, `kiri_config.${ext}`, mime);
 <style>
     pre[class*="language-"],
     code[class*="language-"] {
-        @apply bg-transparent !important;
+        background-color: transparent !important;
         text-shadow: none !important;
     }
 
@@ -169,7 +169,8 @@ this.downloadFile(this.output, `kiri_config.${ext}`, mime);
     }
 
     .custom-scrollbar::-webkit-scrollbar-thumb {
-        @apply bg-[#3D3D3D] rounded-full;
+        background-color: #3D3D3D;
+        border-radius: 9999px;
     }
 </style>
 {% endblock %}

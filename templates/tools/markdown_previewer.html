@@ -2,15 +2,15 @@
 {% load static %}
 
 {% block title %}Markdown Live Previewer | Kiri Research{% endblock %}
-{% block meta_description %}Draft and visualize documentation with GitHub Flavored Markdown (GFM) support, syntax
-highlighting, and secure sanitized rendering.{% endblock %}
+{% block meta_description %}Draft and visualize documentation with GitHub Flavored Markdown (GFM) support and syntax
+highlighting.{% endblock %}
 
 {% block tool_name %}MD Preview{% endblock %}
 {% block tool_icon %}fa-file-lines{% endblock %}
 {% block tool_title %}Markdown Live Previewer{% endblock %}
 {% block tool_description %}
-Draft and visualize your documentation with our high-performance Markdown engine.
-Supports GitHub Flavored Markdown (GFM), syntax highlighting, and secure sanitized rendering.
+Draft and visualize your documentation with our Markdown engine.
+Supports GitHub Flavored Markdown (GFM) and syntax highlighting.
 {% endblock %}
 
 {% block tool_actions_right %}
@@ -73,29 +73,28 @@ this.convert();
 },
 
 loadSample() {
-this.input = `# Kiri Tool Suite
+this.input = `# Project Documentation
 
-Welcome to the **Premium Tools Hub**. We specialize in high-performance, client-side research utilities.
+This is a sample of **Markdown** rendering. All processing happens locally in your browser.
 
-## Core Principles
-1. **Privacy First**: 100% local processing.
-2. **Elite UI**: State-of-the-art aesthetics.
-3. **Speed**: Instant reactivity with Alpine.js.
+## Features
+1. **Formatting**: Bold, italics, and lists.
+2. **Code**: Syntax highlighting support.
+3. **Tables**: Easy data organization.
 
-### Featured Code
-\`\`\`python
-@kiri_secure
-def process_data(payload):
-# This is handled entirely in your hardware
-return transform(payload)
+### Code Example
+\`\`\`javascript
+function greet(name) {
+console.log("Hello, " + name);
+}
 \`\`\`
 
-> "Building tools that empower researchers to scale their intuition."
+> "Good documentation is essential for any project."
 
-| Tool | Category | Status |
-| :--- | :--- | :--- |
-| SQL Formatter | Pro | Done |
-| MD Previewer | Utility | Active |`;
+| Feature | Support |
+| :--- | :--- |
+| GFM | Full |
+| Privacy | Local |`;
 this.convert();
 },
 

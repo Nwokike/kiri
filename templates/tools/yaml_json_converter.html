@@ -2,15 +2,15 @@
 {% load static %}
 
 {% block title %}YAML & JSON Converter | Kiri Research{% endblock %}
-{% block meta_description %}Seamlessly convert between YAML and JSON formats with support for complex nesting and
-multi-document YAML. 100% client-side.{% endblock %}
+{% block meta_description %}Convert between YAML and JSON formats. Supports complex nesting and multi-document YAML.
+{%endblock %}
 
 {% block tool_name %}YAML & JSON{% endblock %}
 {% block tool_icon %}fa-file-code{% endblock %}
 {% block tool_title %}YAML & JSON Converter{% endblock %}
 {% block tool_description %}
-Seamlessly convert between YAML and JSON formats.
-Supports complex nesting, multi-document YAML, and pretty-printing, processed entirely in your browser.
+Convert between YAML and JSON formats.
+Supports complex nesting and multi-document YAML locally in your browser.
 {% endblock %}
 
 {% block tool_accept %}.yaml,.yml,.json{% endblock %}
@@ -88,26 +88,27 @@ mode: 'y2j',
 
 loadSample() {
 if (this.mode === 'y2j') {
-this.input = `environment: development
-debug: true
+this.input = `version: "3.9"
 services:
-nexus:
-image: kiri/nexus:latest
+web:
+image: nginx:latest
 ports:
-- "8000:8000"
-brain:
-image: kiri/brain:v2
+- "80:80"
+db:
+image: postgres:15
+environment:
+POSTGRES_DB: sample_db
 resources:
-gpu: true
-memory: 32Gi`;
+limits:
+memory: 512M`;
 } else {
 this.input = JSON.stringify({
-app: "Kiri Studio",
-version: "2.5.0",
-modules: ["Research", "Tools", "Brain"],
+app: "Sample Application",
+version: "1.0.0",
+modules: ["API", "Frontend", "Database"],
 config: {
-cache: "redis",
-timeout: 5000
+cache: "memory",
+timeout: 3000
 }
 }, null, 4);
 }

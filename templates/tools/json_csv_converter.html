@@ -2,15 +2,15 @@
 {% load static %}
 
 {% block title %}CSV & JSON Converter | Kiri Research{% endblock %}
-{% block meta_description %}Seamlessly transform datasets between CSV and JSON formats. Ideal for researchers managing
-tabular data and structured arrays with precision.{% endblock %}
+{% block meta_description %}Convert datasets between CSV and JSON formats. Efficiently manage tabular data and
+structured arrays.{% endblock %}
 
 {% block tool_name %}CSV & JSON{% endblock %}
 {% block tool_icon %}fa-file-csv{% endblock %}
 {% block tool_title %}CSV & JSON Converter{% endblock %}
 {% block tool_description %}
-Seamlessly transform datasets between CSV and JSON formats.
-Ideal for researchers managing tabular data and structured arrays with precision.
+Convert datasets between CSV and JSON formats.
+Efficiently manage tabular data and structured arrays locally in your browser.
 {% endblock %}
 
 {% block tool_accept %}.csv,.json{% endblock %}
@@ -116,15 +116,15 @@ headers: true,
 loadSample() {
 if (this.mode === 'c2j') {
 this.input = `id,name,category,relevance,status
-1,Alpha Neuron,ML,0.98,active
-2,Beta Flux,Quantum,0.85,active
-3,Gamma Ray,Physics,0.92,archived
-4,Delta Force,Robotics,0.76,hot`;
+1,Item A,ML,0.98,active
+2,Item B,Web,0.85,active
+3,Item C,Data,0.92,archived
+4,Item D,App,0.76,pending`;
 } else {
 this.input = JSON.stringify([
-{ id: 1, name: "Alpha Neuron", category: "ML", relevance: 0.98, status: "active" },
-{ id: 2, name: "Beta Flux", category: "Quantum", relevance: 0.85, status: "active" },
-{ id: 3, name: "Gamma Ray", category: "Physics", relevance: 0.92, status: "archived" }
+{ id: 1, name: "Item A", category: "ML", relevance: 0.98, status: "active" },
+{ id: 2, name: "Item B", category: "Web", relevance: 0.85, status: "active" },
+{ id: 3, name: "Item C", category: "Data", relevance: 0.92, status: "archived" }
 ], null, 4);
 }
 this.convert();

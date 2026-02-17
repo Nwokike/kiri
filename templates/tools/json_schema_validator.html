@@ -2,15 +2,15 @@
 {% load static %}
 
 {% block title %}JSON Schema Validator | Kiri Research{% endblock %}
-{% block meta_description %}Validate JSON data against structural schema standards using the high-performance Ajv
-engine. supports Draft-07, 2019-09, and 2020-12.{% endblock %}
+{% block meta_description %}Validate JSON data against structural schema standards. Supports Draft-07, 2019-09, and
+2020-12.{% endblock %}
 
 {% block tool_name %}Schema Verifier{% endblock %}
 {% block tool_icon %}fa-microchip{% endblock %}
 {% block tool_title %}JSON Schema Validator{% endblock %}
 {% block tool_description %}
-Enforce structural integrity on your data payloads using the elite Ajv validation engine.
-Strict compliance checks against draft-07, 2019-09, and 2020-12 standards entirely in your browser.
+Validate your JSON data payloads against schema standards.
+Ensure data integrity with checks against draft-07, 2019-09, and 2020-12.
 {% endblock %}
 
 {% block tool_body %}
@@ -64,8 +64,7 @@ Strict compliance checks against draft-07, 2019-09, and 2020-12 standards entire
                             class="w-16 h-16 rounded-full bg-[#0D7C3D] text-white flex items-center justify-center shadow-lg mb-6">
                             <i class="fas fa-check text-2xl"></i>
                         </div>
-                        <h4 class="text-lg font-black uppercase tracking-[0.2em] mb-2">Structural Integrity Confirmed
-                        </h4>
+                        <h4 class="text-lg font-black uppercase tracking-[0.2em] mb-2">Validation Passed</h4>
                         <p class="text-[9px] font-bold opacity-60 uppercase tracking-widest">Payload matches provided
                             schema exactly.</p>
                     </div>
@@ -79,7 +78,7 @@ Strict compliance checks against draft-07, 2019-09, and 2020-12 standards entire
                                 <i class="fas fa-times text-xl"></i>
                             </div>
                             <div>
-                                <h4 class="text-sm font-black uppercase tracking-widest">Validation Rupture</h4>
+                                <h4 class="text-sm font-black uppercase tracking-widest">Validation Failed</h4>
                                 <p class="text-[9px] font-bold opacity-60 uppercase tracking-widest"
                                     x-text="errors.length + ' structural violations detected'"></p>
                             </div>

@@ -1,16 +1,16 @@
 {% extends "tools/base_tool.html" %}
 {% load static %}
 
-{% block title %}Professional SQL Formatter | Kiri Research{% endblock %}
-{% block meta_description %}Beautify and format SQL queries for multiple dialects including PostgreSQL, MySQL, SQLite,
-and Oracle.{% endblock %}
+{% block title %}SQL Formatter | Kiri Research{% endblock %}
+{% block meta_description %}Beautify and format SQL queries for multiple dialects including PostgreSQL, MySQL, and
+SQLite.{% endblock %}
 
 {% block tool_name %}SQL Formatter{% endblock %}
 {% block tool_icon %}fa-database{% endblock %}
-{% block tool_title %}Professional SQL Formatter{% endblock %}
+{% block tool_title %}SQL Formatter{% endblock %}
 {% block tool_description %}
-Beautify and format your SQL queries for better readability and debugging.
-Supports multiple dialects including PostgreSQL, MySQL, SQLite, and Oracle.
+Beautify and format your SQL queries for better readability.
+Supports multiple dialects including PostgreSQL, MySQL, and SQLite locally in your browser.
 {% endblock %}
 
 {% block tool_accept %}.sql{% endblock %}
@@ -97,14 +97,14 @@ dialect: 'sql',
 uppercase: true,
 
 loadSample() {
-this.input = `SELECT projects.id, projects.name, users.username, COUNT(comments.id) as comment_count
-FROM projects
-LEFT JOIN users ON projects.owner_id = users.id
-LEFT JOIN comments ON comments.project_id = projects.id
-WHERE projects.status = 'active' AND projects.stars_count > 100
-GROUP BY projects.id, users.id
-HAVING comment_count > 5
-ORDER BY comment_count DESC
+this.input = `SELECT items.id, items.name, categories.title, COUNT(orders.id) as order_count
+FROM items
+LEFT JOIN categories ON items.category_id = categories.id
+LEFT JOIN orders ON orders.item_id = items.id
+WHERE items.status = 'active' AND items.price > 100
+GROUP BY items.id, categories.id
+HAVING order_count > 5
+ORDER BY order_count DESC
 LIMIT 10;`;
 this.convert();
 },

@@ -1,0 +1,260 @@
+{% extends "tools/base_tool.html" %}
+{% load static %}
+
+{% block title %}PDF to Image Converter | Kiri Research{% endblock %}
+{% block meta_description %}Extract pages from PDF documents as high-quality JPG or PNG images. Bulk extraction to ZIP
+supported with 100% local browser processing.{% endblock %}
+
+{% block tool_name %}PDF to Image{% endblock %}
+{% block tool_icon %}fa-file-image{% endblock %}
+{% block tool_title %}PDF to Image Converter{% endblock %}
+{% block tool_description %}
+Extract pages from PDF documents as high-quality images (JPG or PNG).
+Download single pages or bulk extract entire documents to a ZIP file.
+{% endblock %}
+
+{% block tool_head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script>
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+</script>
+{% endblock %}
+
+{% block tool_body %}
+<div class="space-y-6">
+
+    <div x-show="!pdfDoc"
+        class="text-center py-20 border-2 border-dashed border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[2rem] hover:border-[#0D7C3D] transition-colors cursor-pointer bg-gray-50 dark:bg-[#121212]"
+        @click="$refs.fileInput.click()" @dragover.prevent="$el.classList.add('border-[#0D7C3D]')"
+        @dragleave.prevent="$el.classList.remove('border-[#0D7C3D]')" @drop.prevent="handleDrop($event)">
+
+        <div
+            class="w-20 h-20 bg-[#0D7C3D]/10 rounded-full flex items-center justify-center mx-auto mb-6 text-[#0D7C3D]">
+            <i class="fas fa-file-pdf text-3xl"></i>
+        </div>
+        <h3 class="text-xl font-bold text-[#212529] dark:text-white mb-2">Drop PDF here</h3>
+        <p class="text-[#6C757D] dark:text-[#A1A1AA] text-sm mb-6">Extract pages as images</p>
+        <button
+            class="px-8 py-3 bg-[#0D7C3D] text-white font-bold rounded-xl hover:bg-[#0A5C2C] transition-all shadow-lg">
+            Select PDF
+        </button>
+    </div>
+    <input type="file" x-ref="fileInput" class="hidden" accept=".pdf" @change="loadPdf($event)">
+
+    <div x-show="pdfDoc" class="space-y-6" style="display: none;">
+
+        <div
+            class="flex flex-wrap items-center justify-between gap-4 p-4 bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-2xl shadow-sm">
+            <div class="flex items-center gap-2">
+                <button @click="selectAll()"
+                    class="px-3 py-2 text-xs font-bold text-[#6C757D] hover:bg-gray-100 dark:hover:bg-[#2D2D2D] rounded-lg transition-colors">
+                    <i class="fas fa-check-double mr-1"></i> Select All
+                </button>
+                <button @click="selectedPages = []"
+                    class="px-3 py-2 text-xs font-bold text-[#6C757D] hover:bg-gray-100 dark:hover:bg-[#2D2D2D] rounded-lg transition-colors">
+                    <i class="fas fa-times mr-1"></i> Deselect All
+                </button>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <div
+                    class="flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-[#121212] rounded-lg border border-[#DEE2E6] dark:border-[#3D3D3D]">
+                    <label class="text-[10px] font-bold text-[#6C757D] uppercase">Format:</label>
+                    <select x-model="format"
+                        class="bg-transparent text-xs font-bold text-[#212529] dark:text-white outline-none cursor-pointer">
+                        <option value="jpeg">JPG</option>
+                        <option value="png">PNG</option>
+                    </select>
+                </div>
+
+                <button @click="downloadSelected()" :disabled="loading || selectedPages.length === 0"
+                    class="px-6 py-2.5 bg-[#0D7C3D] hover:bg-[#0A5C2C] text-white rounded-xl text-xs font-bold shadow-lg transition-all active:scale-95 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <template x-if="!loading">
+                        <i class="fas fa-download"></i>
+                    </template>
+                    <template x-if="loading">
+                        <i class="fas fa-circle-notch fa-spin"></i>
+                    </template>
+                    <span x-text="getDownloadLabel()"></span>
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <template x-for="page in pages" :key="page.num">
+                <div @click="toggleSelection(page.num)"
+                    class="group relative aspect-[3/4] bg-gray-100 dark:bg-[#121212] rounded-xl overflow-hidden border-2 transition-all cursor-pointer"
+                    :class="selectedPages.includes(page.num) ? 'border-[#0D7C3D] ring-2 ring-[#0D7C3D]/20' : 'border-[#DEE2E6] dark:border-[#3D3D3D] hover:border-[#0D7C3D]/50'">
+
+                    <div :id="'page-container-' + page.num" class="w-full h-full flex items-center justify-center">
+                        <i class="fas fa-circle-notch fa-spin text-gray-300" x-show="!page.rendered"></i>
+                    </div>
+
+                    <div class="absolute top-2 right-2 w-6 h-6 rounded-full flex items-center justify-center transition-colors shadow-sm z-10"
+                        :class="selectedPages.includes(page.num) ? 'bg-[#0D7C3D] text-white' : 'bg-white/80 dark:bg-black/50 text-transparent border border-gray-200'">
+                        <i class="fas fa-check text-[10px]"></i>
+                    </div>
+
+                    <div class="absolute bottom-2 right-2 bg-black/60 px-2 py-1 rounded text-[10px] font-mono text-white"
+                        x-text="'Page ' + page.num"></div>
+                </div>
+            </template>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block tool_js_data %}
+{
+pdfDoc: null,
+pages: [],
+selectedPages: [],
+loading: false,
+format: 'jpeg',
+scale: 1.5,
+
+init() {
+this.hideUpload = true;
+this.hideSample = true;
+},
+
+onReset() {
+this.pdfDoc = null;
+this._pdfDoc = null;
+this.pages = [];
+this.results = [];
+this.statusMessage = 'Ready';
+this.error = '';
+if (this.$refs.fileInput) this.$refs.fileInput.value = '';
+},
+
+async loadPdf(event) {
+const file = event.target.files?.[0] || event.dataTransfer?.files?.[0];
+if (!file || file.type !== 'application/pdf') return;
+this.loading = true;
+this.statusMessage = "Loading PDF...";
+try {
+const arrayBuffer = await file.arrayBuffer();
+this._pdfDoc = await pdfjsLib.getDocument(arrayBuffer).promise;
+this.pdfDoc = true; // UI flag
+this.pages = Array.from({ length: this._pdfDoc.numPages }, (_, i) => ({
+num: i + 1,
+rendered: false
+}));
+this.selectedPages = this.pages.map(p => p.num);
+this.$nextTick(() => this.renderThumbnails());
+this.statusMessage = "PDF Loaded";
+} catch (err) {
+console.error(err);
+this.error = "Failed to load PDF";
+} finally {
+this.loading = false;
+}
+},
+
+handleDrop(e) {
+e.target.classList.remove('border-[#0D7C3D]');
+this.loadPdf(e);
+},
+
+async renderThumbnails() {
+for (const page of this.pages) {
+if (page.rendered) continue;
+try {
+const pdfPage = await Alpine.raw(this._pdfDoc).getPage(page.num);
+const viewport = pdfPage.getViewport({ scale: 0.5 });
+const canvas = document.createElement('canvas');
+const context = canvas.getContext('2d');
+canvas.height = viewport.height;
+canvas.width = viewport.width;
+await pdfPage.render({ canvasContext: context, viewport: viewport }).promise;
+const container = document.getElementById(`page-container-${page.num}`);
+if (container) {
+container.innerHTML = '';
+container.appendChild(canvas);
+page.rendered = true;
+}
+} catch (e) {
+console.error("Error rendering page", page.num, e);
+}
+}
+},
+
+toggleSelection(pageNum) {
+if (this.selectedPages.includes(pageNum)) {
+this.selectedPages = this.selectedPages.filter(p => p !== pageNum);
+} else {
+this.selectedPages = [...this.selectedPages, pageNum].sort((a, b) => a - b);
+}
+},
+
+selectAll() {
+this.selectedPages = this.pages.map(p => p.num);
+},
+
+getDownloadLabel() {
+if (this.loading) return 'Processing...';
+const count = this.selectedPages.length;
+if (count === 0) return 'Select Pages';
+return count === 1 ? 'Download Image' : `Download ${count} Images (ZIP)`;
+},
+
+async downloadSelected() {
+if (this.selectedPages.length === 0) return;
+this.loading = true;
+this.statusMessage = "Processing images...";
+try {
+const zip = new JSZip();
+const folder = zip.folder("extracted_pages");
+const isSingle = this.selectedPages.length === 1;
+
+for (const pageNum of this.selectedPages) {
+const pdfPage = await Alpine.raw(this._pdfDoc).getPage(pageNum);
+const viewport = pdfPage.getViewport({ scale: 2.0 });
+const canvas = document.createElement('canvas');
+const context = canvas.getContext('2d');
+canvas.height = viewport.height;
+canvas.width = viewport.width;
+await pdfPage.render({ canvasContext: context, viewport: viewport }).promise;
+
+const blob = await new Promise(resolve => canvas.toBlob(resolve, `image/${this.format}`, 0.9));
+const ext = this.format === 'jpeg' ? 'jpg' : 'png';
+const filename = `page_${pageNum}.${ext}`;
+
+if (isSingle) {
+this.downloadFile(null, filename, blob);
+this.statusMessage = "Image downloaded";
+} else {
+folder.file(filename, blob);
+}
+}
+
+if (!isSingle) {
+this.statusMessage = "Zipping files...";
+const content = await zip.generateAsync({ type: "blob" });
+this.downloadFile(null, "kiri_extracted_images.zip", content);
+this.statusMessage = "ZIP Downloaded";
+}
+} catch (err) {
+console.error(err);
+this.error = "Extraction failed";
+} finally {
+this.loading = false;
+}
+},
+
+downloadFile(content, filename, blobInput) {
+const blob = blobInput;
+const url = URL.createObjectURL(blob);
+const link = document.createElement("a");
+link.href = url;
+link.download = filename;
+document.body.appendChild(link);
+link.click();
+document.body.removeChild(link);
+URL.revokeObjectURL(url);
+}
+}
+{% endblock %}

@@ -1,0 +1,489 @@
+{% extends "tools/base_tool.html" %}
+{% load static %}
+
+{% block title %}Optical Intelligence (OCR) | Kiri Research{% endblock %}
+{% block meta_description %}Professional client-side OCR. Extract text from images, screenshots, and clipboard data with
+auto-enhancement and region cropping.{% endblock %}
+
+{% block tool_name %}Optical Intelligence{% endblock %}
+{% block tool_icon %}fa-expand-center{% endblock %}
+{% block tool_title %}Optical Intelligence (OCR){% endblock %}
+{% block tool_description %}
+Extract text from documents, images, and screenshots instantly.
+Features automated layout analysis, image pre-processing (binarization), and clipboard support.
+{% endblock %}
+
+{% block tool_head %}
+<script src='https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js'></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.css" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.6.1/cropper.min.js"></script>
+
+<style>
+    /* Scanner Animation */
+    .scan-container {
+        position: relative;
+        overflow: hidden;
+    }
+
+    .scan-line {
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 2px;
+        background: #0D7C3D;
+        box-shadow: 0 0 4px #0D7C3D, 0 0 15px #0D7C3D;
+        z-index: 20;
+        display: none;
+    }
+
+    .scanning .scan-line {
+        display: block;
+        animation: scanMove 2s linear infinite;
+    }
+
+    @keyframes scanMove {
+        0% {
+            top: 0%;
+            opacity: 0;
+        }
+
+        10% {
+            opacity: 1;
+        }
+
+        90% {
+            opacity: 1;
+        }
+
+        100% {
+            top: 100%;
+            opacity: 0;
+        }
+    }
+
+    /* Checkerboard Background */
+    .editor-bg {
+        background-color: #f8f9fa;
+        background-image:
+            linear-gradient(45deg, #e9ecef 25%, transparent 25%),
+            linear-gradient(-45deg, #e9ecef 25%, transparent 25%),
+            linear-gradient(45deg, transparent 75%, #e9ecef 75%),
+            linear-gradient(-45deg, transparent 75%, #e9ecef 75%);
+        background-size: 20px 20px;
+        background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+    }
+
+    .dark .editor-bg {
+        background-color: #121212;
+        background-image:
+            linear-gradient(45deg, #1a1a1a 25%, transparent 25%),
+            linear-gradient(-45deg, #1a1a1a 25%, transparent 25%),
+            linear-gradient(45deg, transparent 75%, #1a1a1a 75%),
+            linear-gradient(-45deg, transparent 75%, #1a1a1a 75%);
+    }
+
+    /* Cropper Overrides */
+    .cropper-view-box,
+    .cropper-face {
+        outline-color: #0D7C3D;
+    }
+
+    .cropper-line,
+    .cropper-point {
+        background-color: #0D7C3D;
+    }
+
+    .cropper-bg {
+        background: transparent;
+    }
+</style>
+{% endblock %}
+
+{% block tool_body %}
+<div @paste.window="handlePaste($event)" class="flex flex-col gap-6 min-h-[600px]">
+
+    <div x-show="!imageSrc"
+        class="flex-1 flex flex-col items-center justify-center p-12 border-2 border-dashed border-[#DEE2E6] dark:border-[#333] rounded-[2.5rem] bg-[#F8F9FA]/50 dark:bg-[#0a0a0a] hover:border-[#0D7C3D] hover:bg-white dark:hover:bg-[#121212] transition-all cursor-pointer group"
+        @click="$refs.fileInput.click()" @dragover.prevent="$el.classList.add('border-[#0D7C3D]', 'scale-[1.01]')"
+        @dragleave.prevent="$el.classList.remove('border-[#0D7C3D]', 'scale-[1.01]')"
+        @drop.prevent="handleDrop($event)">
+
+        <div
+            class="w-20 h-20 bg-gradient-to-br from-[#0D7C3D] to-[#06401F] rounded-full flex items-center justify-center mb-6 shadow-xl shadow-[#0D7C3D]/20 group-hover:scale-110 transition-transform duration-300">
+            <i class="fas fa-expand-center text-3xl text-white"></i>
+        </div>
+        <h3 class="text-2xl font-black text-[#212529] dark:text-white mb-2 tracking-tight">Scan Document</h3>
+        <p class="text-[#6C757D] dark:text-[#A1A1AA] text-center max-w-sm mb-6 text-sm">
+            Drag & Drop images, paste from clipboard (Ctrl+V), or click to upload.
+        </p>
+        <button
+            class="px-6 py-3 bg-[#212529] dark:bg-white text-white dark:text-black font-bold rounded-xl text-xs uppercase tracking-widest hover:scale-105 transition-all">
+            Select Image
+        </button>
+    </div>
+
+    <div x-show="imageSrc" x-cloak class="grid grid-cols-1 lg:grid-cols-[1.5fr,1fr] gap-6 h-full animate-fade-in">
+
+        <div class="flex flex-col gap-4">
+            <div
+                class="flex flex-wrap items-center justify-between gap-2 p-2 bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-2xl shadow-sm">
+                <div class="flex items-center gap-1">
+                    <button @click="reset()"
+                        class="w-10 h-10 rounded-xl hover:bg-red-50 hover:text-red-500 text-[#6C757D] transition-colors"
+                        title="Close"><i class="fas fa-times"></i></button>
+                    <div class="w-px h-6 bg-[#DEE2E6] dark:bg-[#3D3D3D] mx-1"></div>
+
+                    <button @click="rotate(-90)"
+                        class="w-10 h-10 rounded-xl hover:bg-gray-100 dark:hover:bg-[#333] text-[#6C757D] dark:text-[#A1A1AA] transition-colors"
+                        title="Rotate Left">
+                        <i class="fas fa-undo"></i>
+                    </button>
+                    <button @click="rotate(90)"
+                        class="w-10 h-10 rounded-xl hover:bg-gray-100 dark:hover:bg-[#333] text-[#6C757D] dark:text-[#A1A1AA] transition-colors"
+                        title="Rotate Right">
+                        <i class="fas fa-redo"></i>
+                    </button>
+
+                    <div class="w-px h-6 bg-[#DEE2E6] dark:bg-[#3D3D3D] mx-1"></div>
+
+                    <button @click="toggleCrop()"
+                        :class="isCropping ? 'bg-[#0D7C3D] text-white' : 'text-[#6C757D] dark:text-[#A1A1AA] hover:bg-gray-100 dark:hover:bg-[#333]'"
+                        class="w-10 h-10 rounded-xl transition-colors" title="Crop Tool">
+                        <i class="fas fa-crop-alt"></i>
+                    </button>
+                    <button @click="toggleEnhance()"
+                        :class="isEnhanced ? 'bg-indigo-600 text-white' : 'text-[#6C757D] dark:text-[#A1A1AA] hover:bg-gray-100 dark:hover:bg-[#333]'"
+                        class="w-10 h-10 rounded-xl transition-colors" title="Binarize (High Contrast)">
+                        <i class="fas fa-adjust"></i>
+                    </button>
+                </div>
+
+                <div class="px-2">
+                    <select x-model="language"
+                        class="bg-transparent text-xs font-black uppercase text-[#212529] dark:text-white outline-none cursor-pointer border-none py-2">
+                        <option value="eng">ENG (English)</option>
+                        <option value="spa">SPA (Spanish)</option>
+                        <option value="fra">FRA (French)</option>
+                        <option value="deu">DEU (German)</option>
+                        <option value="jpn">JPN (Japanese)</option>
+                        <option value="chi_sim">CHI (Simplified)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="relative flex-1 bg-[#1a1a1a] rounded-[2rem] overflow-hidden shadow-inner flex items-center justify-center editor-bg min-h-[450px] border border-[#DEE2E6] dark:border-[#3D3D3D]"
+                :class="{ 'scanning': processing }">
+
+                <div class="scan-line"></div>
+
+                <div class="relative max-w-full max-h-full p-4">
+                    <img x-ref="image" :src="imageSrc"
+                        class="max-w-full max-h-[500px] object-contain transition-transform duration-200"
+                        :style="`filter: ${isEnhanced ? 'contrast(200%) grayscale(100%)' : 'none'}; transform: rotate(${rotation}deg)`">
+                </div>
+
+                <div x-show="processing"
+                    class="absolute inset-0 z-30 bg-black/40 backdrop-blur-sm flex flex-col items-center justify-center">
+                    <div class="bg-white dark:bg-[#212529] px-6 py-3 rounded-full shadow-2xl flex items-center gap-3">
+                        <i class="fas fa-circle-notch fa-spin text-[#0D7C3D]"></i>
+                        <span x-text="progressText"
+                            class="font-mono text-xs font-bold text-[#212529] dark:text-white">Processing...</span>
+                    </div>
+                </div>
+            </div>
+
+            <button @click="runOCR()" :disabled="processing"
+                class="w-full py-4 bg-[#0D7C3D] hover:bg-[#0A5C2C] text-white font-black text-sm uppercase tracking-widest rounded-2xl shadow-xl shadow-[#0D7C3D]/20 active:scale-[0.99] transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+                <i class="fas fa-bolt mr-2"></i> Extract Text
+            </button>
+        </div>
+
+        <div
+            class="flex flex-col bg-white dark:bg-[#1E1E1E] rounded-[2rem] border border-[#DEE2E6] dark:border-[#3D3D3D] shadow-sm overflow-hidden h-full">
+            <div
+                class="p-4 border-b border-[#DEE2E6] dark:border-[#3D3D3D] flex justify-between items-center bg-[#F8F9FA] dark:bg-[#252525]">
+                <h4 class="font-black text-[#6C757D] dark:text-[#A1A1AA] text-xs uppercase tracking-wider">
+                    <i class="fas fa-align-left mr-2"></i> Extracted Text
+                </h4>
+                <div x-show="confidence > 0" class="flex items-center gap-2">
+                    <span
+                        class="text-[10px] font-bold px-2 py-1 rounded bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
+                        x-text="'Confidence: ' + confidence + '%'"></span>
+                </div>
+            </div>
+
+            <div class="flex-1 relative group">
+                <textarea x-model="result"
+                    class="w-full h-full p-6 font-mono text-sm bg-transparent border-none resize-none outline-none text-[#212529] dark:text-[#E9ECEF] focus:ring-0 custom-scrollbar"
+                    placeholder="Text will appear here..."></textarea>
+
+                <div x-show="!result && !processing"
+                    class="absolute inset-0 flex items-center justify-center pointer-events-none opacity-20">
+                    <div class="text-center">
+                        <i class="fas fa-quote-right text-4xl mb-3"></i>
+                        <p class="text-xs font-bold uppercase tracking-widest">Waiting for Scan</p>
+                    </div>
+                </div>
+            </div>
+
+            <div
+                class="p-4 border-t border-[#DEE2E6] dark:border-[#3D3D3D] grid grid-cols-3 gap-2 bg-[#F8F9FA] dark:bg-[#252525]">
+                <button @click="copyText()" :disabled="!result"
+                    class="py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors hover:bg-white dark:hover:bg-[#333] border border-transparent hover:border-[#DEE2E6] dark:hover:border-[#3D3D3D] disabled:opacity-50">
+                    <i class="fas" :class="copied ? 'fa-check text-green-500' : 'fa-copy'"></i>
+                    <span x-text="copied ? 'Copied' : 'Copy'"></span>
+                </button>
+                <button @click="speakText()" :disabled="!result"
+                    class="py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors hover:bg-white dark:hover:bg-[#333] border border-transparent hover:border-[#DEE2E6] dark:hover:border-[#3D3D3D] disabled:opacity-50">
+                    <i class="fas fa-volume-up"></i> Listen
+                </button>
+                <button @click="downloadText()" :disabled="!result"
+                    class="py-3 rounded-xl text-[10px] font-black uppercase tracking-widest transition-colors hover:bg-white dark:hover:bg-[#333] border border-transparent hover:border-[#DEE2E6] dark:hover:border-[#3D3D3D] disabled:opacity-50">
+                    <i class="fas fa-download"></i> Save
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <input type="file" x-ref="fileInput" class="hidden" accept="image/png, image/jpeg, image/jpg, image/webp"
+        @change="loadImage($event)">
+</div>
+{% endblock %}
+
+{% block tool_js_data %}
+{
+imageSrc: null,
+result: '',
+confidence: 0,
+language: 'eng',
+processing: false,
+progressText: '0%',
+copied: false,
+statusMessage: '',
+error: '',
+
+// Editor State
+cropper: null,
+isCropping: false,
+isEnhanced: false,
+rotation: 0,
+
+init() {
+this.hideUpload = true;
+this.hideSample = false;
+this.persist('ocr_last_lang', 'language', 'eng');
+},
+
+async loadSample() {
+try {
+const response = await fetch("{% static 'images/logos/logo.png' %}");
+const blob = await response.blob();
+const file = new File([blob], 'kiri_brand_logo.png', { type: 'image/png' });
+this.processFile(file);
+this.statusMessage = 'Brand logo loaded. Ready to scan.';
+} catch (err) {
+console.error(err);
+this.statusMessage = 'Failed to load sample logo';
+}
+},
+
+loadImage(event) {
+const file = event.target.files?.[0] || event.dataTransfer?.files?.[0];
+if (!file) return;
+this.processFile(file);
+},
+
+handleDrop(e) {
+e.target.classList.remove('border-[#0D7C3D]', 'scale-[1.01]');
+this.loadImage(e);
+},
+
+handlePaste(e) {
+const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+for (let index in items) {
+const item = items[index];
+if (item.kind === 'file' && item.type.startsWith('image/')) {
+const blob = item.getAsFile();
+this.processFile(blob);
+break; // Only take the first image
+}
+}
+},
+
+processFile(file) {
+if (this.imageSrc) URL.revokeObjectURL(this.imageSrc);
+this.imageSrc = URL.createObjectURL(file);
+
+// Reset State
+this.result = '';
+this.confidence = 0;
+this.rotation = 0;
+this.isEnhanced = false;
+
+// Destroy old cropper
+if(this.cropper) {
+this.cropper.destroy();
+this.cropper = null;
+this.isCropping = false;
+}
+},
+
+/* --- Editor Tools --- */
+toggleCrop() {
+const imageElement = this.$refs.image;
+if (this.isCropping) {
+this.cropper.destroy();
+this.cropper = null;
+this.isCropping = false;
+// When destroying cropper, ensure visual rotation matches internal state
+imageElement.style.transform = `rotate(${this.rotation}deg)`;
+} else {
+this.isCropping = true;
+// Reset CSS transform as Cropper handles it internally
+imageElement.style.transform = 'none';
+
+this.cropper = new Cropper(imageElement, {
+viewMode: 1,
+dragMode: 'move',
+autoCropArea: 0.8,
+background: false,
+rotatable: true,
+checkOrientation: false,
+ready: () => {
+this.cropper.rotateTo(this.rotation);
+}
+});
+}
+},
+
+rotate(deg) {
+this.rotation = (this.rotation + deg) % 360;
+if (this.isCropping && this.cropper) {
+this.cropper.rotate(deg);
+} else {
+this.$refs.image.style.transform = `rotate(${this.rotation}deg)`;
+}
+},
+
+toggleEnhance() {
+this.isEnhanced = !this.isEnhanced;
+},
+
+/* --- Processing Logic --- */
+async getProcessedCanvas() {
+const img = new Image();
+img.src = this.imageSrc;
+await new Promise(r => img.onload = r);
+
+if (this.isCropping && this.cropper) {
+const canvas = this.cropper.getCroppedCanvas();
+if (this.isEnhanced) return this.applyBinarization(canvas);
+return canvas;
+}
+
+const canvas = document.createElement('canvas');
+const ctx = canvas.getContext('2d');
+
+// Handle Geometry
+if (Math.abs(this.rotation) === 90 || Math.abs(this.rotation) === 270) {
+canvas.width = img.height;
+canvas.height = img.width;
+} else {
+canvas.width = img.width;
+canvas.height = img.height;
+}
+
+ctx.translate(canvas.width / 2, canvas.height / 2);
+ctx.rotate(this.rotation * Math.PI / 180);
+ctx.drawImage(img, -img.width / 2, -img.height / 2);
+
+if (this.isEnhanced) return this.applyBinarization(canvas);
+return canvas;
+},
+
+applyBinarization(canvas) {
+const ctx = canvas.getContext('2d');
+const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+const d = imgData.data;
+
+// Grayscale + Adaptive Threshold
+for (let i = 0; i < d.length; i +=4) { const r=d[i]; const g=d[i+1]; const b=d[i+2]; const v=(0.2126*r + 0.7152*g +
+    0.0722*b>= 128) ? 255 : 0;
+    d[i] = d[i+1] = d[i+2] = v;
+    }
+    ctx.putImageData(imgData, 0, 0);
+    return canvas;
+    },
+
+    async runOCR() {
+    if (!this.imageSrc) return;
+    this.processing = true;
+    this.result = '';
+    this.progressText = 'Preprocessing...';
+
+    try {
+    const canvas = await this.getProcessedCanvas();
+
+    // Fix: Tesseract recognizes canvas directly
+    this.progressText = 'Loading Engine...';
+    const worker = await Tesseract.createWorker(this.language);
+
+    this.progressText = 'Scanning...';
+    const { data } = await worker.recognize(canvas);
+
+    await worker.terminate();
+
+    this.result = data.text.trim();
+    this.confidence = Math.round(data.confidence);
+
+    } catch (err) {
+    console.error(err);
+    this.result = "Error during scan: " + err.message;
+    } finally {
+    this.processing = false;
+    }
+    },
+
+    async copyText() {
+    await navigator.clipboard.writeText(this.result);
+    this.copied = true;
+    setTimeout(() => this.copied = false, 2000);
+    },
+
+    speakText() {
+    if(!this.result) return;
+    window.speechSynthesis.cancel();
+    const utterance = new SpeechSynthesisUtterance(this.result);
+
+    const langMap = {
+    'eng': 'en-US', 'spa': 'es-ES', 'fra': 'fr-FR',
+    'deu': 'de-DE', 'jpn': 'ja-JP', 'chi_sim': 'zh-CN'
+    };
+    utterance.lang = langMap[this.language] || 'en-US';
+    window.speechSynthesis.speak(utterance);
+    },
+
+    downloadText() {
+    const blob = new Blob([this.result], { type: 'text/plain' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `ocr_scan_${Date.now()}.txt`;
+    link.click();
+    URL.revokeObjectURL(url);
+    },
+
+    reset() {
+    if (this.imageSrc) URL.revokeObjectURL(this.imageSrc);
+    this.imageSrc = null;
+    if(this.cropper) {
+    this.cropper.destroy();
+    this.cropper = null;
+    }
+    this.result = '';
+    this.isCropping = false;
+    this.$refs.fileInput.value = '';
+    }
+    }
+    {% endblock %}

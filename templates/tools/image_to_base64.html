@@ -102,11 +102,21 @@ All processing happens locally in your browser.
 
 {% block tool_js_data %}
 {
+hideUpload: true,
+hideSample: false,
+
+init() {
+},
+
 file: null,
-previewUrl: '',
+input: '',
+output: '',
 outputType: 'raw',
 fileName: '',
 rawBase64: '',
+over: false,
+copied: false,
+statusMessage: '',
 
 onReset() {
 this.rawBase64 = '';

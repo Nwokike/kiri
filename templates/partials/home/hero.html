@@ -40,15 +40,15 @@
             </div>
 
 
-            <div class="flex flex-wrap gap-4">
+            <div class="flex flex-nowrap gap-3 md:gap-4 overflow-x-auto no-scrollbar py-2">
                 <a href="{% url 'projects:list' %}"
-                    class="inline-flex items-center gap-2 px-6 py-2.5 bg-[#0D7C3D] text-white font-bold rounded-lg hover:bg-[#0A5C2C] transition-all shadow-md hover:shadow-lg text-sm">
-                    <i class="fas fa-rocket text-xs"></i>
+                    class="inline-flex items-center justify-center gap-2 px-4 md:px-6 py-2.5 bg-[#0D7C3D] text-white font-bold rounded-lg hover:bg-[#0A5C2C] transition-all shadow-md hover:shadow-lg text-xs md:text-sm whitespace-nowrap min-w-max">
+                    <i class="fas fa-rocket text-[10px] md:text-xs"></i>
                     Explore Research
                 </a>
                 <a href="{% url 'core:studio_py' %}"
-                    class="inline-flex items-center gap-2 px-6 py-2.5 bg-white text-[#495057] font-bold rounded-lg hover:bg-[#F8F9FA] transition-all border border-[#DEE2E6] dark:bg-[#2D2D2D] dark:text-white dark:border-[#3D3D3D] dark:hover:bg-[#333] text-sm">
-                    <i class="fas fa-flask text-xs"></i>
+                    class="inline-flex items-center justify-center gap-2 px-4 md:px-6 py-2.5 bg-white text-[#495057] font-bold rounded-lg hover:bg-[#F8F9FA] transition-all border border-[#DEE2E6] dark:bg-[#2D2D2D] dark:text-white dark:border-[#3D3D3D] dark:hover:bg-[#333] text-xs md:text-sm whitespace-nowrap min-w-max">
+                    <i class="fas fa-flask text-[10px] md:text-xs"></i>
                     Launch Studio
                 </a>
             </div>

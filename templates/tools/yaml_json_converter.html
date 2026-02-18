@@ -2,7 +2,8 @@
 {% load static %}
 
 {% block title %}YAML & JSON Converter | Kiri Research{% endblock %}
-{% block meta_description %}Convert between YAML and JSON formats. Supports complex nesting and multi-document YAML.{% endblock %}
+{% block meta_description %}Convert between YAML and JSON formats. Supports complex nesting and multi-document YAML.{%
+endblock %}
 
 {% block tool_name %}YAML & JSON{% endblock %}
 {% block tool_icon %}fa-file-code{% endblock %}
@@ -42,8 +43,10 @@ Supports complex nesting and multi-document YAML locally in your browser.
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[500px]">
         <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between">
-                <span class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest flex items-center gap-2">
-                    <i class="fas" :class="mode === 'y2j' ? 'fa-file-invoice text-[#C4992E]' : 'fa-code text-blue-500'"></i>
+                <span
+                    class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest flex items-center gap-2">
+                    <i class="fas"
+                        :class="mode === 'y2j' ? 'fa-file-invoice text-[#C4992E]' : 'fa-code text-blue-500'"></i>
                     <span x-text="mode === 'y2j' ? 'Input YAML' : 'Input JSON'"></span>
                 </span>
                 <span class="text-[10px] text-[#A1A1AA]" x-text="input.length ? input.length + ' chars' : ''"></span>
@@ -55,8 +58,10 @@ Supports complex nesting and multi-document YAML locally in your browser.
 
         <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between">
-                <span class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest flex items-center gap-2">
-                    <i class="fas" :class="mode === 'y2j' ? 'fa-code-merge text-[#0D7C3D]' : 'fa-file-export text-orange-500'"></i>
+                <span
+                    class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest flex items-center gap-2">
+                    <i class="fas"
+                        :class="mode === 'y2j' ? 'fa-code-merge text-[#0D7C3D]' : 'fa-file-export text-orange-500'"></i>
                     <span x-text="mode === 'y2j' ? 'Target JSON' : 'Target YAML'"></span>
                 </span>
                 <button @click="copyToClipboard(output)"
@@ -78,75 +83,80 @@ Supports complex nesting and multi-document YAML locally in your browser.
 
 {% block tool_js_data %}
 {
-    mode: 'y2j',
+hideUpload: true,
 
-    loadSample() {
-        if (this.mode === 'y2j') {
-            this.input = `version: "3.9"
+init() {
+},
+
+mode: 'y2j',
+
+loadSample() {
+if (this.mode === 'y2j') {
+this.input = `version: "3.9"
 services:
-  web:
-    image: nginx:latest
-    ports:
-      - "80:80"
-  db:
-    image: postgres:15
-    environment:
-      POSTGRES_DB: sample_db
-    resources:
-      limits:
-        memory: 512M`;
-        } else {
-            this.input = JSON.stringify({
-                app: "Sample Application",
-                version: "1.0.0",
-                modules: ["API", "Frontend", "Database"],
-                config: {
-                    cache: "memory",
-                    timeout: 3000
-                }
-            }, null, 4);
-        }
-        this.convert();
-    },
+web:
+image: nginx:latest
+ports:
+- "80:80"
+db:
+image: postgres:15
+environment:
+POSTGRES_DB: sample_db
+resources:
+limits:
+memory: 512M`;
+} else {
+this.input = JSON.stringify({
+app: "Sample Application",
+version: "1.0.0",
+modules: ["API", "Frontend", "Database"],
+config: {
+cache: "memory",
+timeout: 3000
+}
+}, null, 4);
+}
+this.convert();
+},
 
-    convert() {
-        if (!this.input || !this.input.trim()) {
-            this.output = '';
-            this.error = '';
-            return;
-        }
+convert() {
+if (!this.input || !this.input.trim()) {
+this.output = '';
+this.error = '';
+return;
+}
 
-        try {
-            if (this.mode === 'y2j') {
-                const parsed = jsyaml.load(this.input);
-                this.output = JSON.stringify(parsed, null, 4);
-                this.statusMessage = 'YAML converted to JSON';
-            } else {
-                const parsed = JSON.parse(this.input);
-                this.output = jsyaml.dump(parsed);
-                this.statusMessage = 'JSON converted to YAML';
-            }
-            this.error = '';
-            
-            // Wait for DOM update then highlight
-            this.$nextTick(() => {
-                if (window.Prism) {
-                    Prism.highlightAll();
-                }
-            });
-        } catch (e) {
-            this.error = (this.mode === 'y2j' ? "YAML" : "JSON") + " Parsing error: " + e.message;
-            this.output = '';
-            this.statusMessage = 'Conversion failed';
-        }
-    },
+try {
+if (this.mode === 'y2j') {
+const parsed = jsyaml.load(this.input);
+this.output = JSON.stringify(parsed, null, 4);
+this.statusMessage = 'YAML converted to JSON';
+} else {
+const parsed = JSON.parse(this.input);
+this.output = jsyaml.dump(parsed);
+this.statusMessage = 'JSON converted to YAML';
+}
+this.error = '';
 
-    download() {
-        if (!this.output || this.error) return;
-        const ext = this.mode === 'y2j' ? 'json' : 'yaml';
-        const mime = this.mode === 'y2j' ? 'application/json' : 'application/x-yaml';
-        this.downloadFile(this.output, `kiri_config.${ext}`, mime);
-    }
+// Wait for DOM update then highlight
+this.$nextTick(() => {
+if (window.Prism) {
+Prism.highlightAll();
+}
+});
+} catch (e) {
+this.error = (this.mode === 'y2j' ? "YAML" : "JSON") + " Parsing error: " + e.message;
+this.output = '';
+this.statusMessage = 'Conversion failed';
+}
+},
+
+download() {
+if (!this.output || this.error) return;
+const ext = this.mode === 'y2j' ? 'json' : 'yaml';
+const mime = this.mode === 'y2j' ? 'application/json' : 'application/x-yaml';
+this.downloadFile(this.output, `kiri_config.${ext}`, mime);
+}
 }
 {% endblock %}
 

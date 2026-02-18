@@ -38,8 +38,12 @@ def uuid_generator(request):
     return render(request, 'tools/uuid_generator.html')
 
 @login_not_required
-def sql_formatter(request):
-    return render(request, 'tools/sql_formatter.html')
+def sql_refinery(request):
+    return render(request, 'tools/sql_refinery.html')
+
+@login_not_required
+def sql_workbench(request):
+    return render(request, 'tools/sql_workbench.html')
 
 @login_not_required
 def cron_generator(request):
@@ -110,3 +114,47 @@ def image_resizer(request):
 @login_not_required
 def image_converter(request):
     return render(request, 'tools/image_converter.html')
+
+@login_not_required
+def pdf_editor(request):
+    return render(request, 'tools/pdf_editor.html')
+
+@login_not_required
+def markdown_to_pdf(request):
+    return render(request, 'tools/markdown_to_pdf.html')
+
+@login_not_required
+def image_to_pdf(request):
+    return render(request, 'tools/image_to_pdf.html')
+
+@login_not_required
+def pdf_to_image(request):
+    return render(request, 'tools/pdf_to_image.html')
+
+@login_not_required
+def pdf_splitter(request):
+    return render(request, 'tools/pdf_splitter.html')
+
+@login_not_required
+def heic_to_jpg(request):
+    return render(request, 'tools/heic_to_jpg.html')
+
+@login_not_required
+def image_compressor(request):
+    return render(request, 'tools/image_compressor.html')
+
+@login_not_required
+def exif_viewer(request):
+    return render(request, 'tools/exif_viewer.html')
+
+@login_not_required
+def ocr_tool(request):
+    return render(request, 'tools/ocr_tool.html')
+
+@login_not_required
+def audio_transcriber(request):
+    return render(request, 'tools/audio_transcriber.html')
+
+@login_not_required
+def qr_generator(request):
+    return render(request, 'tools/qr_generator.html')

@@ -339,6 +339,8 @@ if not DEBUG or TESTING:
         "https://pagead2.googlesyndication.com",
         "https://static.cloudflareinsights.com",
         "https://adservice.google.com",
+        "https://unpkg.com",
+        "blob:",
     )
     CSP_STYLE_SRC = (
         "'self'",
@@ -351,7 +353,7 @@ if not DEBUG or TESTING:
         "https://fonts.gstatic.com",
         "https://cdnjs.cloudflare.com",
     )
-    CSP_IMG_SRC = ("'self'", "data:", "https:")
+    CSP_IMG_SRC = ("'self'", "data:", "https:", "https://unpkg.com", "blob:")
     CSP_CONNECT_SRC = (
         "'self'", 
         "https://cdn.jsdelivr.net", 
@@ -359,6 +361,8 @@ if not DEBUG or TESTING:
         "https://www.google-analytics.com",
         "https://region1.google-analytics.com",
         "https://stats.g.doubleclick.net",
+        "https://unpkg.com",
+        "blob:",
     )
     CSP_FRAME_SRC = ("'self'", "https://challenges.cloudflare.com", "https://www.youtube-nocookie.com")
     CSP_OBJECT_SRC = ("'none'",)
@@ -397,5 +401,3 @@ PWA_APP_ICONS = [
     {'src': '/static/images/icons/icon-192x192.png', 'sizes': '192x192', 'type': 'image/png'},
     {'src': '/static/images/icons/icon-512x512.png', 'sizes': '512x512', 'type': 'image/png'}
 ]
-# Note: Service worker served via core.views.serviceworker, not static file
-# PWA_SERVICE_WORKER_PATH setting is not used with our template-based approach

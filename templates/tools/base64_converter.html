@@ -75,7 +75,11 @@ Everything runs locally in your browser to maintain privacy.
 
 {% block tool_js_data %}
 {
+hideUpload: true,
 mode: 'encode',
+
+init() {
+},
 
 loadSample() {
 if (this.mode === 'encode') {

@@ -1,0 +1,243 @@
+{% extends "tools/base_tool.html" %}
+{% load static %}
+
+{% block title %}Image to PDF Converter | Kiri Research{% endblock %}
+{% block meta_description %}Combine multiple images (JPG, PNG, WebP) into a single, high-quality PDF document locally in
+your browser. Privacy-first document digitization.{% endblock %}
+
+{% block tool_name %}Image to PDF{% endblock %}
+{% block tool_icon %}fa-images{% endblock %}
+{% block tool_title %}Image to PDF Converter{% endblock %}
+{% block tool_description %}
+Combine multiple images (JPG, PNG, WebP) into a single, high-quality PDF document.
+Perfect for digitizing documents or creating photo albums locally.
+{% endblock %}
+
+{% block tool_head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+{% endblock %}
+
+
+{% block tool_body %}
+<div class="space-y-6">
+
+    <div x-show="images.length === 0"
+        class="text-center py-20 border-2 border-dashed border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[2rem] hover:border-[#0D7C3D] transition-colors cursor-pointer bg-gray-50 dark:bg-[#121212]"
+        @click="$refs.fileInput.click()" @dragover.prevent="$el.classList.add('border-[#0D7C3D]')"
+        @dragleave.prevent="$el.classList.remove('border-[#0D7C3D]')" @drop.prevent="handleDrop($event)">
+
+        <div
+            class="w-20 h-20 bg-[#0D7C3D]/10 rounded-full flex items-center justify-center mx-auto mb-6 text-[#0D7C3D]">
+            <i class="fas fa-images text-3xl"></i>
+        </div>
+        <h3 class="text-xl font-bold text-[#212529] dark:text-white mb-2">Drop images here</h3>
+        <p class="text-[#6C757D] dark:text-[#A1A1AA] text-sm mb-6">Support for JPG, PNG, WebP</p>
+        <button
+            class="px-8 py-3 bg-[#0D7C3D] text-white font-bold rounded-xl hover:bg-[#0A5C2C] transition-all shadow-lg">
+            Select Images
+        </button>
+    </div>
+    <input type="file" x-ref="fileInput" class="hidden" accept="image/png, image/jpeg, image/webp" multiple
+        @change="handleFiles($event)">
+
+    <div x-show="images.length > 0" class="space-y-6" style="display: none;">
+
+        <div
+            class="flex flex-wrap items-center justify-between gap-4 p-4 bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-2xl shadow-sm">
+            <div class="flex items-center gap-2">
+                <button @click="$refs.fileInput.click()"
+                    class="px-4 py-2 text-xs font-bold text-[#0D7C3D] bg-[#0D7C3D]/10 hover:bg-[#0D7C3D]/20 rounded-lg transition-colors">
+                    <i class="fas fa-plus mr-1"></i> Add More
+                </button>
+                <button @click="onReset()"
+                    class="px-4 py-2 text-xs font-bold text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg transition-colors">
+                    <i class="fas fa-trash mr-1"></i> Clear All
+                </button>
+            </div>
+
+            <div class="flex items-center gap-3">
+                <div
+                    class="flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-[#121212] rounded-lg border border-[#DEE2E6] dark:border-[#3D3D3D]">
+                    <label class="text-[10px] font-bold text-[#6C757D] uppercase">Fit:</label>
+                    <select x-model="fitMode"
+                        class="bg-transparent text-xs font-bold text-[#212529] dark:text-white outline-none cursor-pointer">
+                        <option value="a4">A4 Page</option>
+                        <option value="original">Original Size</option>
+                    </select>
+                </div>
+
+                <button @click="generatePDF()" :disabled="loading"
+                    class="px-6 py-2.5 bg-[#0D7C3D] hover:bg-[#0A5C2C] text-white rounded-xl text-xs font-bold shadow-lg transition-all active:scale-95 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                    <template x-if="!loading">
+                        <i class="fas fa-file-pdf"></i>
+                    </template>
+                    <template x-if="loading">
+                        <i class="fas fa-circle-notch fa-spin"></i>
+                    </template>
+                    <span x-text="loading ? 'Processing...' : 'Convert to PDF'"></span>
+                </button>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+            <template x-for="(img, index) in images" :key="index">
+                <div
+                    class="group relative aspect-[3/4] bg-gray-100 dark:bg-[#121212] rounded-xl overflow-hidden border border-[#DEE2E6] dark:border-[#3D3D3D]">
+                    <img :src="img.preview" class="w-full h-full object-cover">
+
+                    <div
+                        class="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                        <button @click="moveUp(index)" x-show="index > 0"
+                            class="w-8 h-8 flex items-center justify-center bg-white text-black rounded-full hover:scale-110 transition-transform">
+                            <i class="fas fa-arrow-left"></i>
+                        </button>
+                        <button @click="removeImage(index)"
+                            class="w-8 h-8 flex items-center justify-center bg-red-500 text-white rounded-full hover:scale-110 transition-transform">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <button @click="moveDown(index)" x-show="index < images.length - 1"
+                            class="w-8 h-8 flex items-center justify-center bg-white text-black rounded-full hover:scale-110 transition-transform">
+                            <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+
+                    <div class="absolute bottom-2 right-2 bg-black/60 px-2 py-1 rounded text-[10px] font-mono text-white"
+                        x-text="'Page ' + (index + 1)"></div>
+                </div>
+            </template>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block tool_js_data %}
+{
+images: [],
+loading: false,
+fitMode: 'a4',
+statusMessage: '',
+error: '',
+
+init() {
+this.hideUpload = true;
+this.hideSample = false;
+},
+
+handleFiles(event) {
+const inputFiles = event.target.files ? Array.from(event.target.files) : [];
+this.processFiles(inputFiles);
+if (event.target && event.target.tagName === 'INPUT') event.target.value = '';
+},
+
+handleDrop(event) {
+event.target.classList.remove('border-[#0D7C3D]');
+this.processFiles(event.dataTransfer.files);
+},
+
+async loadSample() {
+try {
+const response = await fetch("{% static 'images/logos/logo.png' %}");
+const blob = await response.blob();
+const file = new File([blob], "kiri_brand_logo.png", { type: "image/png" });
+this.processFiles([file]);
+this.statusMessage = "Kiri brand logo loaded as sample";
+} catch (err) {
+console.error(err);
+this.error = "Failed to load sample";
+}
+},
+
+processFiles(files) {
+if (!files) return;
+Array.from(files).forEach(file => {
+if (!file.type.match('image.*')) return;
+const reader = new FileReader();
+reader.onload = (e) => {
+this.images.push({
+file: file,
+preview: e.target.result
+});
+};
+reader.readAsDataURL(file);
+});
+},
+
+removeImage(index) {
+this.images.splice(index, 1);
+},
+
+moveUp(index) {
+if (index === 0) return;
+const arr = [...this.images];
+[arr[index], arr[index - 1]] = [arr[index - 1], arr[index]];
+this.images = arr;
+},
+
+moveDown(index) {
+if (index === this.images.length - 1) return;
+const arr = [...this.images];
+[arr[index], arr[index + 1]] = [arr[index + 1], arr[index]];
+this.images = arr;
+},
+
+async generatePDF() {
+if (this.images.length === 0) return;
+if (!window.jspdf) {
+this.error = "PDF library (jspdf) not loaded";
+return;
+}
+this.loading = true;
+this.statusMessage = 'Generating PDF...';
+
+try {
+const { jsPDF } = window.jspdf;
+const doc = new jsPDF();
+const a4Width = 210;
+const a4Height = 297;
+
+for (let i = 0; i < this.images.length; i++) { if (i> 0) doc.addPage();
+    const imgData = this.images[i].preview;
+    const imgProps = doc.getImageProperties(imgData);
+
+    if (this.fitMode === 'a4') {
+    const imgRatio = imgProps.width / imgProps.height;
+    const pageRatio = a4Width / a4Height;
+    let finalWidth, finalHeight;
+    if (imgRatio > pageRatio) {
+    finalWidth = a4Width;
+    finalHeight = a4Width / imgRatio;
+    } else {
+    finalHeight = a4Height;
+    finalWidth = a4Height * imgRatio;
+    }
+    const x = (a4Width - finalWidth) / 2;
+    const y = (a4Height - finalHeight) / 2;
+    doc.addImage(imgData, 'JPEG', x, y, finalWidth, finalHeight);
+    } else {
+    const widthMm = imgProps.width * 0.264583;
+    const heightMm = imgProps.height * 0.264583;
+    doc.deletePage(i + 1);
+    doc.addPage([widthMm, heightMm], widthMm > heightMm ? 'l' : 'p');
+    doc.addImage(imgData, 'JPEG', 0, 0, widthMm, heightMm);
+    }
+    }
+    doc.save('kiri_converted.pdf');
+    this.statusMessage = 'PDF Generated Successfully!';
+    } catch (e) {
+    console.error(e);
+    this.error = 'Failed to generate PDF';
+    } finally {
+    this.loading = false;
+    }
+    },
+
+    onReset() {
+    this.images = [];
+    this.loading = false;
+    this.statusMessage = 'Ready';
+    this.error = '';
+    this.fitMode = 'a4';
+    if (this.$refs.fileInput) this.$refs.fileInput.value = '';
+    }
+    }
+    {% endblock %}

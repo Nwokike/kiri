@@ -87,8 +87,13 @@ All processing happens locally in your browser to maintain privacy.
 
 {% block tool_js_data %}
 {
-files: [],
+hideUpload: true,
 hideSample: true,
+
+init() {
+},
+
+files: [],
 
 handleDrop(e) {
 this.dragging = false;

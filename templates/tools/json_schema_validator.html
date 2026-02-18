@@ -112,6 +112,8 @@ errors: [],
 ajv: null,
 
 init() {
+this.hideUpload = true;
+this.hideSample = false;
 try {
 if (typeof ajv7 !== 'undefined') {
 this.ajv = new ajv7();

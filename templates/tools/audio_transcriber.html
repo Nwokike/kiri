@@ -1,0 +1,607 @@
+{% extends "tools/base_tool.html" %}
+{% load static %}
+
+{% block title %}Neural Audio Transcribe | Kiri Research{% endblock %}
+{% block meta_description %}Client-side AI transcription with timeline synchronization. Generate SRT/VTT subtitles locally using WebGPU-accelerated Whisper.{% endblock %}
+
+{% block tool_name %}Neural Transcribe{% endblock %}
+{% block tool_icon %}fa-wave-square{% endblock %}
+{% block tool_title %}Neural Audio Workstation{% endblock %}
+{% block tool_description %}
+Turn speech into text instantly. 
+Powered by OpenAI's Whisper running locally in your browser via WebGPU. 
+Features microphone recording, interactive timeline sync, and subtitle export.
+{% endblock %}
+
+{% block tool_head %}
+<script src="https://unpkg.com/wavesurfer.js@7.5.0/dist/wavesurfer.min.js"></script>
+<script src="https://unpkg.com/wavesurfer.js@7.5.0/dist/plugins/timeline.min.js"></script>
+
+<style>
+    /* Custom Scrollbar for Transcript */
+    .transcript-box {
+        scrollbar-width: thin;
+        scrollbar-color: #DEE2E6 transparent;
+    }
+    .dark .transcript-box {
+        scrollbar-color: #3D3D3D transparent;
+    }
+    
+    /* Segment Highlight Animation */
+    .segment-row {
+        transition: all 0.2s ease;
+        border-left: 3px solid transparent;
+    }
+    .segment-active {
+        background-color: rgba(13, 124, 61, 0.08);
+        border-left-color: #0D7C3D;
+    }
+    .dark .segment-active {
+        background-color: rgba(13, 124, 61, 0.2);
+    }
+
+    /* Waveform Container */
+    #waveform {
+        mask-image: linear-gradient(to right, transparent 0%, black 2%, black 98%, transparent 100%);
+    }
+
+    /* Recording Pulse Animation */
+    @keyframes pulse-red {
+        0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7); }
+        70% { box-shadow: 0 0 0 10px rgba(239, 68, 68, 0); }
+        100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+    }
+    .recording-pulse {
+        animation: pulse-red 2s infinite;
+    }
+</style>
+{% endblock %}
+
+{% block tool_body %}
+<div class="flex flex-col gap-8 min-h-[600px]">
+
+    <div x-show="!audioFile && !isRecording" 
+        class="flex-1 flex flex-col items-center justify-center p-12 border-2 border-dashed border-[#DEE2E6] dark:border-[#333] rounded-[2.5rem] bg-[#F8F9FA]/50 dark:bg-[#0a0a0a] transition-all animate-fade-in gap-8">
+        
+        <div class="flex flex-col items-center justify-center group cursor-pointer w-full max-w-md"
+            @click="$refs.audioInput.click()" 
+            @dragover.prevent="$el.classList.add('scale-[1.02]')"
+            @dragleave.prevent="$el.classList.remove('scale-[1.02]')"
+            @drop.prevent="handleDrop($event)">
+            
+            <div class="w-20 h-20 bg-gradient-to-br from-[#0D7C3D] to-[#06401F] rounded-full flex items-center justify-center mb-6 shadow-2xl shadow-[#0D7C3D]/20 group-hover:scale-110 transition-transform duration-300">
+                <i class="fas fa-file-audio text-3xl text-white"></i>
+            </div>
+            <h3 class="text-2xl font-black text-[#212529] dark:text-white mb-2 tracking-tight">Load Audio File</h3>
+            <p class="text-[#6C757D] dark:text-[#A1A1AA] text-center text-sm mb-6">
+                MP3, WAV, M4A, OGG
+            </p>
+            <button class="px-6 py-3 bg-[#212529] dark:bg-white text-white dark:text-black font-bold rounded-2xl hover:scale-105 transition-all shadow-lg text-xs uppercase tracking-widest">
+                Browse Files
+            </button>
+        </div>
+
+        <div class="flex items-center gap-4 w-full max-w-xs">
+            <div class="h-px bg-[#DEE2E6] dark:bg-[#333] flex-1"></div>
+            <span class="text-[10px] font-bold text-[#ADB5BD] uppercase">OR</span>
+            <div class="h-px bg-[#DEE2E6] dark:bg-[#333] flex-1"></div>
+        </div>
+
+        <div class="flex flex-col items-center">
+            <button @click="startRecording()" 
+                class="w-16 h-16 rounded-full bg-red-500 hover:bg-red-600 text-white flex items-center justify-center shadow-xl shadow-red-500/20 hover:scale-110 transition-all active:scale-95">
+                <i class="fas fa-microphone text-2xl"></i>
+            </button>
+            <p class="mt-4 text-xs font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest">Record Voice</p>
+        </div>
+    </div>
+
+    <div x-show="isRecording" x-cloak class="flex-1 flex flex-col items-center justify-center p-12 bg-red-50 dark:bg-red-900/10 rounded-[2.5rem] border border-red-100 dark:border-red-900/20 animate-fade-in">
+        <div class="text-center space-y-8">
+            <div class="relative inline-block">
+                <div class="w-24 h-24 rounded-full bg-red-500 flex items-center justify-center text-white recording-pulse">
+                    <i class="fas fa-microphone text-4xl"></i>
+                </div>
+            </div>
+            <div>
+                <h3 class="text-3xl font-black text-gray-900 dark:text-white mb-2" x-text="formatTime(recordingTime)">0:00</h3>
+                <p class="text-red-500 font-bold uppercase tracking-widest text-xs">Recording in progress...</p>
+            </div>
+            <button @click="stopRecording()" 
+                class="px-8 py-4 bg-white dark:bg-[#2D2D2D] text-gray-900 dark:text-white font-black rounded-2xl shadow-xl hover:scale-105 transition-all text-sm uppercase tracking-widest border border-gray-200 dark:border-gray-700">
+                <i class="fas fa-stop mr-2 text-red-500"></i> Stop & Process
+            </button>
+        </div>
+    </div>
+
+    <div x-show="audioFile && !isRecording" x-cloak class="flex flex-col h-full gap-6 animate-slide-up">
+        
+        <div class="bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-3xl p-6 shadow-sm flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-4 w-full md:w-auto">
+                <button @click="reset()" class="w-12 h-12 flex items-center justify-center rounded-2xl bg-[#F8F9FA] dark:bg-[#2D2D2D] hover:text-red-500 hover:bg-red-50 transition-colors">
+                    <i class="fas fa-eject"></i>
+                </button>
+                <div class="overflow-hidden">
+                    <h3 class="font-bold text-[#212529] dark:text-white truncate max-w-[200px]" x-text="audioFile?.name || 'Recording'"></h3>
+                    <div class="flex items-center gap-2 text-xs font-mono text-[#6C757D]">
+                        <span x-text="formatTime(currentTime)"></span> 
+                        <span class="opacity-50">/</span> 
+                        <span x-text="formatTime(duration)"></span>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex items-center gap-3 w-full md:w-auto">
+                <div x-show="status === 'ready'" class="hidden md:flex items-center gap-2 px-4 py-3 bg-[#F8F9FA] dark:bg-[#2D2D2D] rounded-xl border border-[#DEE2E6] dark:border-[#3D3D3D]">
+                    <i class="fas fa-brain text-[#0D7C3D]"></i>
+                    <select x-model="selectedModel" class="bg-transparent text-xs font-bold uppercase outline-none cursor-pointer text-[#212529] dark:text-white">
+                        <option value="Xenova/whisper-tiny">Tiny (Fastest)</option>
+                        <option value="Xenova/whisper-base">Base (Balanced)</option>
+                        <option value="Xenova/whisper-small">Small (Best)</option>
+                    </select>
+                </div>
+
+                <button @click="toggleTranscription()" 
+                    :disabled="['loading_model', 'decoding'].includes(status)"
+                    class="flex-1 md:flex-none px-8 py-3 rounded-xl text-xs font-black uppercase tracking-widest text-white transition-all shadow-lg flex items-center justify-center gap-2 min-w-[160px]"
+                    :class="status === 'transcribing' ? 'bg-red-500 hover:bg-red-600' : 'bg-[#0D7C3D] hover:bg-[#0A5C2C]'">
+                    
+                    <template x-if="status === 'ready' || status === 'done'">
+                        <span class="flex items-center gap-2"><i class="fas fa-bolt"></i> Transcribe</span>
+                    </template>
+                    <template x-if="status === 'loading_model'">
+                        <span class="flex items-center gap-2"><i class="fas fa-circle-notch fa-spin"></i> Loading AI...</span>
+                    </template>
+                     <template x-if="status === 'decoding'">
+                        <span class="flex items-center gap-2"><i class="fas fa-wave-square fa-spin"></i> Decoding...</span>
+                    </template>
+                    <template x-if="status === 'transcribing'">
+                        <span class="flex items-center gap-2"><i class="fas fa-stop"></i> Stop</span>
+                    </template>
+                </button>
+            </div>
+        </div>
+
+        <div class="relative bg-[#1A1A1A] rounded-3xl p-8 border border-[#3D3D3D] shadow-inner overflow-hidden group">
+            <div id="waveform" class="w-full h-32 opacity-80 group-hover:opacity-100 transition-opacity"></div>
+            <div id="wave-timeline" class="w-full mt-2"></div>
+            
+            <div class="absolute bottom-6 left-6 flex items-center gap-3 z-10">
+                <button @click="playPause()" class="w-12 h-12 rounded-full bg-[#0D7C3D] text-white shadow-lg hover:scale-110 active:scale-95 transition-all flex items-center justify-center">
+                    <i class="fas" :class="isPlaying ? 'fa-pause' : 'fa-play pl-1'"></i>
+                </button>
+                <div class="px-3 py-1.5 rounded-full bg-black/40 backdrop-blur border border-white/10 text-[10px] font-mono font-bold text-white">
+                    <span x-text="formatTime(currentTime)"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-[1fr,300px] gap-6 flex-1 min-h-0">
+            
+            <div class="bg-white dark:bg-[#1E1E1E] rounded-3xl border border-[#DEE2E6] dark:border-[#3D3D3D] flex flex-col shadow-sm overflow-hidden h-[500px] lg:h-auto">
+                <div class="p-4 border-b border-[#DEE2E6] dark:border-[#3D3D3D] bg-[#F8F9FA] dark:bg-[#252525] flex justify-between items-center">
+                    <h4 class="font-black text-xs uppercase text-[#6C757D] dark:text-[#A1A1AA] tracking-widest">
+                        <i class="fas fa-align-left mr-2"></i> Live Transcript
+                    </h4>
+                    
+                    <div x-show="status === 'transcribing'" class="flex items-center gap-2">
+                        <span class="relative flex h-2 w-2">
+                          <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-green-400 opacity-75"></span>
+                          <span class="relative inline-flex rounded-full h-2 w-2 bg-green-500"></span>
+                        </span>
+                        <span class="text-[10px] font-bold text-green-600 dark:text-green-400">PROCESSING</span>
+                    </div>
+                </div>
+
+                <div class="flex-1 overflow-y-auto p-2 transcript-box scroll-smooth" x-ref="transcriptBox">
+                    <div x-show="segments.length === 0 && status !== 'transcribing'" class="h-full flex flex-col items-center justify-center text-[#ADB5BD] gap-3">
+                        <i class="fas fa-quote-right text-4xl opacity-20"></i>
+                        <p class="text-xs font-bold uppercase tracking-widest opacity-50">No Data</p>
+                    </div>
+
+                    <div class="space-y-1">
+                        <template x-for="(segment, index) in segments" :key="index">
+                            <div @click="seekTo(segment.start)" 
+                                :id="'seg-' + index"
+                                class="segment-row p-4 rounded-xl cursor-pointer hover:bg-[#F8F9FA] dark:hover:bg-[#2D2D2D] group"
+                                :class="{'segment-active': currentTime >= segment.start && currentTime < segment.end}">
+                                
+                                <div class="flex gap-4">
+                                    <div class="shrink-0 pt-1">
+                                        <span class="text-[10px] font-mono text-[#ADB5BD] group-hover:text-[#0D7C3D] transition-colors"
+                                            x-text="formatTimestamp(segment.start)"></span>
+                                    </div>
+                                    <p class="text-sm leading-relaxed text-[#212529] dark:text-[#E9ECEF]" x-text="segment.text"></p>
+                                </div>
+                            </div>
+                        </template>
+                        <div x-show="status === 'transcribing'" class="p-4 animate-pulse flex gap-4 opacity-50">
+                            <div class="w-12 h-3 bg-gray-200 dark:bg-[#333] rounded"></div>
+                            <div class="flex-1 space-y-2">
+                                <div class="h-3 bg-gray-200 dark:bg-[#333] rounded w-3/4"></div>
+                                <div class="h-3 bg-gray-200 dark:bg-[#333] rounded w-1/2"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div class="bg-[#212529] dark:bg-black text-white p-6 rounded-3xl relative overflow-hidden shadow-xl">
+                    <div class="absolute top-0 right-0 p-8 opacity-20 transform translate-x-4 -translate-y-4">
+                        <i class="fas fa-file-export text-8xl text-white"></i>
+                    </div>
+                    
+                    <h4 class="font-black text-lg mb-1 relative z-10">Export</h4>
+                    <p class="text-gray-400 text-xs mb-6 relative z-10">Download subtitles.</p>
+
+                    <div class="space-y-2 relative z-10">
+                        <button @click="download('srt')" :disabled="segments.length === 0"
+                            class="w-full py-3 bg-white/10 hover:bg-white/20 backdrop-blur rounded-xl text-xs font-bold flex items-center justify-between px-4 transition-all disabled:opacity-30 disabled:cursor-not-allowed">
+                            <span>SUBRIP (.SRT)</span> <i class="fas fa-download"></i>
+                        </button>
+                        <button @click="download('vtt')" :disabled="segments.length === 0"
+                            class="w-full py-3 bg-white/10 hover:bg-white/20 backdrop-blur rounded-xl text-xs font-bold flex items-center justify-between px-4 transition-all disabled:opacity-30 disabled:cursor-not-allowed">
+                            <span>WEBVTT (.VTT)</span> <i class="fas fa-download"></i>
+                        </button>
+                        <button @click="download('txt')" :disabled="segments.length === 0"
+                            class="w-full py-3 bg-white/10 hover:bg-white/20 backdrop-blur rounded-xl text-xs font-bold flex items-center justify-between px-4 transition-all disabled:opacity-30 disabled:cursor-not-allowed">
+                            <span>PLAIN TEXT (.TXT)</span> <i class="fas fa-download"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="bg-white dark:bg-[#1E1E1E] p-6 rounded-3xl border border-[#DEE2E6] dark:border-[#3D3D3D] flex-1">
+                    <h4 class="font-black text-xs uppercase text-[#ADB5BD] mb-4 tracking-widest">Details</h4>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-[#6C757D]">Duration</span>
+                            <span class="font-mono font-bold dark:text-white" x-text="formatTime(duration)"></span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-[#6C757D]">Segments</span>
+                            <span class="font-mono font-bold dark:text-white" x-text="segments.length"></span>
+                        </div>
+                        <div class="flex justify-between items-center text-xs">
+                            <span class="text-[#6C757D]">Sample Rate</span>
+                            <span class="font-mono font-bold dark:text-white">16kHz</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <input type="file" x-ref="audioInput" class="hidden" accept="audio/*,video/*" @change="loadAudio($event)">
+</div>
+{% endblock %}
+
+{% block tool_js_data %}
+{
+    // State
+    audioFile: null,
+    status: 'ready', // ready, loading_model, decoding, transcribing, done, error
+    isPlaying: false,
+    duration: 0,
+    currentTime: 0,
+    playbackSpeed: 1.0,
+    
+    // Recording
+    isRecording: false,
+    recordingTime: 0,
+    mediaRecorder: null,
+    audioChunks: [],
+    timerInterval: null,
+    
+    // Data
+    segments: [],
+    selectedModel: 'Xenova/whisper-tiny',
+    
+    // Instances
+    wavesurfer: null,
+    worker: null,
+
+    init() {
+        this.initWorker();
+    },
+
+    initWorker() {
+        // UPDATED: Using newer transformers.js version
+        const workerCode = `
+            import { pipeline, env } from 'https://cdn.jsdelivr.net/npm/@xenova/transformers@2.17.2';
+            
+            // 1. Force Browser Cache & Disable Local Checks (Fixes 404s)
+            env.allowLocalModels = false;
+            env.useBrowserCache = true;
+            
+            // 2. Silence the "Removing Initializer" ONNX warnings
+            // This stops the console spam you saw
+            env.backends.onnx.logLevel = 'fatal';
+
+            class Transcriber {
+                static instance = null;
+                static modelName = null;
+
+                static async getInstance(model, callback) {
+                    if (this.modelName !== model) {
+                        this.instance = await pipeline('automatic-speech-recognition', model, {
+                            progress_callback: callback
+                        });
+                        this.modelName = model;
+                    }
+                    return this.instance;
+                }
+            }
+
+            self.addEventListener('message', async (e) => {
+                const { type, audio, model } = e.data;
+
+                if (type === 'transcribe') {
+                    try {
+                        const transcriber = await Transcriber.getInstance(model, (data) => {
+                            self.postMessage({ type: 'status', status: 'loading_model', data });
+                        });
+
+                        // 3. FIX FOR HALLUCINATION LOOP ("I think I think...")
+                        const output = await transcriber(audio, {
+                            chunk_length_s: 30,
+                            stride_length_s: 5,
+                            return_timestamps: true,
+                            language: 'en', 
+                            
+                            // CRITICAL FIXES:
+                            temperature: 0,          // Greedy decoding (more stable)
+                            do_sample: false,        // Disable randomness
+                            repetition_penalty: 1.2, // Penalize loops
+                            no_speech_threshold: 0.6 // Ignore silence/static
+                        });
+
+                        self.postMessage({ type: 'result', data: output });
+
+                    } catch (err) {
+                        self.postMessage({ type: 'error', error: err.message });
+                    }
+                }
+            });
+        `;
+
+        const blob = new Blob([workerCode], { type: 'application/javascript' });
+        this.worker = new Worker(URL.createObjectURL(blob), { type: 'module' });
+
+        this.worker.onmessage = (e) => {
+            const { type, data, error } = e.data;
+            
+            if (type === 'status') {
+                // Could handle progress bar here
+            } else if (type === 'result') {
+                if (data.chunks && data.chunks.length > 0) {
+                    this.segments = data.chunks.map(c => ({
+                        start: c.timestamp[0],
+                        end: c.timestamp[1] || c.timestamp[0] + 2,
+                        text: c.text.trim()
+                    }));
+                } else if (data.text) {
+                    this.segments = [{ start: 0, end: this.duration, text: data.text.trim() }];
+                } else {
+                    this.segments = []; 
+                }
+                this.status = 'done';
+            } else if (type === 'error') {
+                console.error(error);
+                this.status = 'error';
+                // Only alert on real errors, ignore minor fetch issues
+                if(!error.includes("content-length")) alert('AI Error: ' + error);
+            }
+        };
+    },
+
+    /* --- Audio Input Handling --- */
+    loadAudio(event) {
+        const file = event.target.files?.[0] || event.dataTransfer?.files?.[0];
+        if (!file) return;
+        this.processFile(file);
+    },
+
+    processFile(file) {
+        this.audioFile = file;
+        this.segments = [];
+        this.status = 'ready';
+        this.initWavesurfer(URL.createObjectURL(file));
+    },
+
+    handleDrop(e) {
+        e.target.classList.remove('scale-[1.02]');
+        this.loadAudio({ target: { files: e.dataTransfer.files } });
+    },
+
+    /* --- Microphone Logic --- */
+    async startRecording() {
+        try {
+            const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+            this.mediaRecorder = new MediaRecorder(stream);
+            this.audioChunks = [];
+            this.isRecording = true;
+            this.recordingTime = 0;
+
+            this.mediaRecorder.ondataavailable = (event) => {
+                this.audioChunks.push(event.data);
+            };
+
+            this.mediaRecorder.onstop = () => {
+                const audioBlob = new Blob(this.audioChunks, { type: 'audio/wav' });
+                const audioFile = new File([audioBlob], "recording.wav", { type: "audio/wav" });
+                this.processFile(audioFile);
+                this.isRecording = false;
+                clearInterval(this.timerInterval);
+                
+                // Stop all tracks to release mic
+                stream.getTracks().forEach(track => track.stop());
+            };
+
+            this.mediaRecorder.start();
+            
+            // Start Timer
+            this.timerInterval = setInterval(() => {
+                this.recordingTime++;
+            }, 1000);
+
+        } catch (err) {
+            console.error(err);
+            alert("Microphone access denied or not available.");
+        }
+    },
+
+    stopRecording() {
+        if (this.mediaRecorder && this.isRecording) {
+            this.mediaRecorder.stop();
+        }
+    },
+
+    /* --- Visualizer --- */
+    initWavesurfer(url) {
+        this.$nextTick(() => {
+            if (this.wavesurfer) this.wavesurfer.destroy();
+
+            const isDark = document.documentElement.classList.contains('dark');
+
+            this.wavesurfer = WaveSurfer.create({
+                container: '#waveform',
+                waveColor: isDark ? '#4a5568' : '#CED4DA',
+                progressColor: '#0D7C3D',
+                cursorColor: '#0D7C3D',
+                barWidth: 3,
+                barRadius: 3,
+                cursorWidth: 2,
+                height: 120,
+                barGap: 3,
+                normalize: true,
+                plugins: [
+                    WaveSurfer.Timeline.create({
+                        container: '#wave-timeline',
+                        primaryColor: isDark ? '#6C757D' : '#ADB5BD',
+                        secondaryColor: isDark ? '#495057' : '#DEE2E6',
+                        fontSize: 10
+                    })
+                ]
+            });
+
+            this.wavesurfer.load(url);
+
+            this.wavesurfer.on('ready', () => {
+                this.duration = this.wavesurfer.getDuration();
+            });
+
+            this.wavesurfer.on('audioprocess', (t) => {
+                this.currentTime = t;
+            });
+
+            this.wavesurfer.on('seek', (t) => {
+                this.currentTime = this.wavesurfer.getCurrentTime();
+            });
+
+            this.wavesurfer.on('finish', () => this.isPlaying = false);
+            this.wavesurfer.on('play', () => this.isPlaying = true);
+            this.wavesurfer.on('pause', () => this.isPlaying = false);
+        });
+    },
+
+    /* --- Transcription Logic --- */
+    async toggleTranscription() {
+        if (this.status === 'transcribing') {
+            this.worker.terminate();
+            this.initWorker();
+            this.status = 'ready';
+            return;
+        }
+
+        this.status = 'decoding';
+
+        try {
+            const audioCtx = new (window.AudioContext || window.webkitAudioContext)({ sampleRate: 16000 });
+            const buffer = await this.audioFile.arrayBuffer();
+            const audioBuffer = await audioCtx.decodeAudioData(buffer);
+            const audioData = audioBuffer.getChannelData(0);
+
+            this.status = 'transcribing';
+            
+            this.worker.postMessage({
+                type: 'transcribe',
+                audio: audioData,
+                model: this.selectedModel
+            });
+
+        } catch (e) {
+            console.error(e);
+            alert('Failed to process audio. Please try a different file format.');
+            this.status = 'error';
+        }
+    },
+
+    playPause() {
+        if(this.wavesurfer) this.wavesurfer.playPause();
+    },
+
+    seekTo(time) {
+        if(this.wavesurfer) {
+            this.wavesurfer.setTime(time);
+            this.wavesurfer.play();
+        }
+    },
+
+    reset() {
+        if(this.wavesurfer) this.wavesurfer.destroy();
+        this.audioFile = null;
+        this.segments = [];
+        this.status = 'ready';
+    },
+
+    /* --- Utilities --- */
+    formatTime(seconds) {
+        if (!seconds) return '0:00';
+        const m = Math.floor(seconds / 60);
+        const s = Math.floor(seconds % 60);
+        return `${m}:${s.toString().padStart(2, '0')}`;
+    },
+
+    formatTimestamp(seconds) {
+        const date = new Date(0);
+        date.setMilliseconds(seconds * 1000);
+        const iso = date.toISOString();
+        return seconds < 3600 ? iso.substr(14, 5) : iso.substr(11, 8);
+    },
+
+    download(format) {
+        let content = '';
+        if (format === 'txt') {
+            content = this.segments.map(s => s.text).join('\n');
+        } else if (format === 'srt') {
+            content = this.segments.map((s, i) => {
+                const start = this.toTimeStr(s.start, ',');
+                const end = this.toTimeStr(s.end, ',');
+                return `${i + 1}\n${start} --> ${end}\n${s.text}\n`;
+            }).join('\n');
+        } else if (format === 'vtt') {
+            content = 'WEBVTT\n\n' + this.segments.map(s => {
+                const start = this.toTimeStr(s.start, '.');
+                const end = this.toTimeStr(s.end, '.');
+                return `${start} --> ${end}\n${s.text}\n`;
+            }).join('\n');
+        }
+
+        const blob = new Blob([content], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `transcript_${Date.now()}.${format}`;
+        a.click();
+        URL.revokeObjectURL(url);
+    },
+
+    toTimeStr(seconds, delimiter) {
+        const date = new Date(0);
+        date.setMilliseconds(seconds * 1000);
+        return date.toISOString().substr(11, 8) + delimiter + date.toISOString().substr(20, 3);
+    }
+}
+{% endblock %}

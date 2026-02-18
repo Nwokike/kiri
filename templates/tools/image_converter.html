@@ -1,145 +1,171 @@
 {% extends "tools/base_tool.html" %}
 {% load static %}
 
-{% block title %}Image Format Converter | Kiri Research{% endblock %}
-{% block meta_description %}Convert images between WebP, PNG, and JPEG formats. All processing happens locally in your
-browser.{% endblock %}
+{% block title %}Image Converter | Kiri Research{% endblock %}
+{% block meta_description %}Securely convert images between PNG, JPEG, and WebP formats locally. Optimized for speed and
+privacy.{% endblock %}
 
 {% block tool_name %}Image Sync{% endblock %}
 {% block tool_icon %}fa-sync-alt{% endblock %}
 {% block tool_title %}Image Format Converter{% endblock %}
 {% block tool_description %}
-Convert images between WebP, PNG, and JPEG formats.
-Processing is performed locally in your browser to maintain privacy.
+Convert between WebP, PNG, and JPEG instantly.
+Runs entirely in your browser with smart transparency handling and quality optimization.
 {% endblock %}
 
 {% block tool_actions_right %}
-<button @click="convertImage()"
-    class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-lg bg-[#0D7C3D] text-white hover:bg-[#0A5C2C] disabled:opacity-50"
-    :disabled="!previewUrl || isProcessing">
+<button @click="convertAndSave()"
+    class="inline-flex items-center gap-2 px-6 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-lg bg-[#0D7C3D] text-white hover:bg-[#0A5C2C] disabled:opacity-50 disabled:cursor-not-allowed"
+    :disabled="!file || isProcessing">
     <i class="fas" :class="isProcessing ? 'fa-spinner fa-spin' : 'fa-file-export'"></i>
-    <span x-text="isProcessing ? 'Converting...' : 'Convert & Export'"></span>
+    <span x-text="isProcessing ? 'Converting...' : 'Export File'"></span>
 </button>
 {% endblock %}
 
 {% block tool_body %}
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
-    <!-- Configuration -->
-    <div class="space-y-8">
+<div class="flex flex-col gap-8 min-h-[600px]">
+
+    <div x-show="!file"
+        class="flex-1 flex flex-col items-center justify-center p-12 border-2 border-dashed border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[2.5rem] bg-[#F8F9FA]/50 dark:bg-[#0a0a0a] hover:border-[#0D7C3D] hover:bg-white dark:hover:bg-[#121212] transition-all cursor-pointer group animate-fade-in"
+        @click="$refs.fileInput.click()" @dragover.prevent="$el.classList.add('border-[#0D7C3D]', 'scale-[1.01]')"
+        @dragleave.prevent="$el.classList.remove('border-[#0D7C3D]', 'scale-[1.01]')"
+        @drop.prevent="handleDrop($event)">
+
         <div
-            class="p-8 bg-white dark:bg-[#1A1A1A] rounded-[2.5rem] border border-[#DEE2E6] dark:border-[#3D3D3D] shadow-sm space-y-8">
-            <h3 class="text-[10px] font-bold text-[#ADB5BD] uppercase tracking-[0.2em]">Target Configuration</h3>
-
-            <!-- Format Pills -->
-            <div class="space-y-3">
-                <label
-                    class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest block ml-1">Destination
-                    Format</label>
-                <div class="grid grid-cols-3 gap-3">
-                    <template x-for="fmt in formats">
-                        <button @click="targetFormat = fmt; convertImage(false)"
-                            :class="targetFormat === fmt ? 'bg-[#0D7C3D] text-white border-[#0D7C3D]' : 'bg-[#F8F9FA] dark:bg-[#121212] text-[#6C757D] dark:text-[#A1A1AA] border-[#DEE2E6] dark:border-[#3D3D3D]'"
-                            class="py-3 px-2 rounded-xl text-xs font-black transition-all border shadow-sm active:scale-95"
-                            x-text="fmt.split('/')[1].toUpperCase()">
-                        </button>
-                    </template>
-                </div>
-            </div>
-
-            <!-- Quality Slider -->
-            <div class="space-y-4" x-show="['image/jpeg', 'image/webp'].includes(targetFormat)">
-                <div class="flex justify-between items-center">
-                    <label
-                        class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest block ml-1">Output
-                        Quality</label>
-                    <span class="text-[10px] font-bold text-[#0D7C3D]" x-text="quality + '%'"></span>
-                </div>
-                <input type="range" x-model.number="quality" min="10" max="100"
-                    class="w-full h-1.5 bg-[#DEE2E6] dark:bg-[#2D2D2D] rounded-lg appearance-none cursor-pointer accent-[#0D7C3D]">
-            </div>
-
-            <!-- Metadata Info -->
-            <div class="p-4 bg-[#0D7C3D]/5 border border-[#0D7C3D]/10 rounded-2xl flex items-center gap-4">
-                <div
-                    class="w-10 h-10 rounded-full bg-white dark:bg-[#2D2D2D] flex items-center justify-center text-[#0D7C3D] shadow-sm">
-                    <i class="fas fa-microchip"></i>
-                </div>
-                <p class="text-[10px] text-[#6C757D] dark:text-[#A1A1AA] leading-relaxed italic">
-                    Privacy-focused local processing.
-                </p>
-            </div>
+            class="w-24 h-24 bg-gradient-to-br from-[#0D7C3D] to-[#06401F] rounded-full flex items-center justify-center mb-8 shadow-2xl shadow-[#0D7C3D]/20 group-hover:scale-110 transition-transform duration-300">
+            <i class="fas fa-images text-4xl text-white"></i>
         </div>
+        <h3 class="text-3xl font-black text-[#212529] dark:text-white mb-3 tracking-tight">Convert Image</h3>
+        <p class="text-[#6C757D] dark:text-[#A1A1AA] text-center max-w-sm mb-8 leading-relaxed">
+            Drag & Drop PNG, JPG, or WEBP.<br>
+            <span class="text-xs opacity-75 font-bold uppercase tracking-wide">100% Client-Side Processing</span>
+        </p>
+        <button
+            class="px-8 py-3 bg-[#212529] dark:bg-white text-white dark:text-black font-bold rounded-2xl hover:scale-105 transition-all shadow-lg">
+            Select File
+        </button>
     </div>
 
-    <!-- Preview Area -->
-    <div class="space-y-6">
-        <div class="flex items-center justify-between px-2">
-            <span class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest">Source
-                Blueprint</span>
-            <div class="flex items-center gap-2" x-show="file">
-                <span
-                    class="px-2 py-0.5 bg-[#DEE2E6] dark:bg-[#3D3D3D] rounded text-[9px] font-bold text-[#6C757D] dark:text-[#A1A1AA]"
-                    x-text="file.type.toUpperCase()"></span>
-            </div>
-        </div>
+    <div x-show="file" x-cloak class="grid grid-cols-1 lg:grid-cols-[1fr,350px] gap-8 animate-slide-up h-full">
 
-        <div class="relative group rounded-[2.5rem] overflow-hidden border border-[#DEE2E6] dark:border-[#3D3D3D] bg-white dark:bg-[#121212] transition-all"
-            @click="$refs.fileInput.click()" @dragover.prevent="dragging = true" @dragleave.prevent="dragging = false"
-            @drop.prevent="handleDrop($event)" :class="{'ring-2 ring-[#0D7C3D]': dragging}">
-
-            <input type="file" x-ref="fileInput" class="hidden" accept="image/*"
-                @change="handleFiles($event.target.files)">
-
-            <template x-if="!previewUrl">
-                <div class="h-80 flex flex-col items-center justify-center gap-4 cursor-pointer">
-                    <div class="w-16 h-16 rounded-full bg-[#0D7C3D]/10 flex items-center justify-center text-[#0D7C3D]">
-                        <i class="fas fa-image text-2xl"></i>
-                    </div>
-                    <p class="text-[11px] font-bold text-[#A1A1AA] uppercase tracking-[0.2em]">Drop Workspace Image</p>
+        <div class="flex flex-col gap-4">
+            <div class="flex items-center justify-between px-2">
+                <span class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest">
+                    <i class="fas fa-eye mr-1"></i> Input Preview
+                </span>
+                <div class="flex gap-2" x-show="file">
+                    <span
+                        class="px-2 py-1 bg-gray-200 dark:bg-[#333] rounded text-[9px] font-bold text-[#6C757D] dark:text-[#A1A1AA]"
+                        x-text="file?.name"></span>
+                    <span
+                        class="px-2 py-1 bg-[#DEE2E6] dark:bg-[#3D3D3D] rounded text-[9px] font-bold text-[#212529] dark:text-white"
+                        x-text="formatSize(file?.size)"></span>
                 </div>
-            </template>
+            </div>
 
-            <template x-if="previewUrl">
-                <div class="relative h-80 flex items-center justify-center bg-checkered p-8">
-                    <img :src="previewUrl"
-                        class="max-w-full max-h-full rounded-lg shadow-2xl transition-transform group-hover:scale-[1.02]">
-                    <!-- Change Overlay -->
-                    <div
-                        class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center backdrop-blur-sm cursor-pointer">
-                        <span class="text-white text-xs font-bold uppercase tracking-widest">Change Source Image</span>
+            <div
+                class="relative flex-1 bg-checkered rounded-[2rem] border border-[#DEE2E6] dark:border-[#3D3D3D] overflow-hidden flex items-center justify-center p-8 group min-h-[400px]">
+                <img :src="previewUrl" class="max-w-full max-h-[500px] object-contain shadow-2xl rounded-lg">
+
+                <div class="absolute bottom-6 right-6">
+                    <span
+                        class="px-3 py-1.5 rounded-full bg-black/60 backdrop-blur-md text-white text-[10px] font-bold uppercase tracking-widest border border-white/20"
+                        x-text="file?.type.split('/')[1]"></span>
+                </div>
+            </div>
+        </div>
+
+        <div class="space-y-6">
+
+            <div
+                class="bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[2rem] p-6 shadow-sm space-y-8">
+
+                <div class="space-y-4">
+                    <div class="flex justify-between items-center">
+                        <h4 class="text-xs font-black text-[#6C757D] uppercase tracking-widest">Target Format</h4>
+                    </div>
+
+                    <div class="grid grid-cols-1 gap-2">
+                        <template x-for="fmt in formats" :key="fmt.mime">
+                            <button @click="targetFormat = fmt.mime"
+                                :class="targetFormat === fmt.mime 
+                                    ? 'bg-[#0D7C3D] text-white shadow-lg shadow-green-900/20 border-[#0D7C3D]' 
+                                    : 'bg-[#F8F9FA] dark:bg-[#121212] text-[#6C757D] dark:text-[#A1A1AA] border-[#DEE2E6] dark:border-[#3D3D3D] hover:bg-gray-100 dark:hover:bg-[#2D2D2D]'"
+                                class="relative w-full px-4 py-4 rounded-xl text-left border transition-all active:scale-[0.98] group">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <i class="fas"
+                                            :class="targetFormat === fmt.mime ? 'fa-check-circle' : 'fa-circle text-gray-300 dark:text-[#333]'"></i>
+                                        <span class="text-xs font-bold uppercase" x-text="fmt.label"></span>
+                                    </div>
+                                    <span class="text-[9px] font-mono opacity-60" x-text="fmt.ext"></span>
+                                </div>
+                            </button>
+                        </template>
                     </div>
                 </div>
-            </template>
+
+                <hr class="border-[#DEE2E6] dark:border-[#3D3D3D]">
+
+                <div class="space-y-4" x-show="targetFormat !== 'image/png'" x-transition>
+                    <div class="flex justify-between items-center">
+                        <h4 class="text-xs font-black text-[#6C757D] uppercase tracking-widest">Quality</h4>
+                        <span class="text-xs font-bold font-mono text-[#0D7C3D]" x-text="quality + '%'"></span>
+                    </div>
+
+                    <div class="relative pt-1">
+                        <input type="range" x-model.number="quality" min="10" max="100" step="5"
+                            class="w-full h-1.5 bg-gray-200 dark:bg-[#333] rounded-lg appearance-none cursor-pointer accent-[#0D7C3D]">
+                        <div class="flex justify-between mt-2 text-[9px] font-bold text-[#ADB5BD] uppercase">
+                            <span>Small File</span>
+                            <span>High Detail</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div x-show="targetFormat === 'image/png'"
+                    class="p-4 bg-blue-50 dark:bg-blue-900/10 rounded-xl text-blue-600 dark:text-blue-400 text-xs">
+                    <i class="fas fa-info-circle mr-1"></i> PNG is lossless. Quality settings do not apply.
+                </div>
+
+                <div class="pt-2">
+                    <button @click="convertAndSave()" :disabled="isProcessing"
+                        class="w-full py-4 bg-[#212529] dark:bg-white hover:bg-black dark:hover:bg-gray-200 text-white dark:text-black rounded-2xl text-xs font-black uppercase tracking-widest shadow-xl transition-all active:scale-[0.98] disabled:opacity-50">
+                        <span x-show="!isProcessing">Convert Now</span>
+                        <span x-show="isProcessing"><i class="fas fa-spinner fa-spin mr-2"></i> Processing</span>
+                    </button>
+                </div>
+
+            </div>
         </div>
 
-        <!-- Stats Overlay -->
-        <div class="grid grid-cols-2 gap-4" x-show="file">
-            <div class="p-4 bg-[#F8F9FA] dark:bg-[#1A1A1A] rounded-2xl border border-[#DEE2E6] dark:border-[#3D3D3D]">
-                <p class="text-[9px] font-bold text-[#ADB5BD] uppercase mb-1">Source Size</p>
-                <p class="text-sm font-black text-[#212529] dark:text-[#E4E4E7]" x-text="formatSize(file.size)"></p>
-            </div>
-            <div class="p-4 bg-[#F8F9FA] dark:bg-[#1A1A1A] rounded-2xl border border-[#DEE2E6] dark:border-[#3D3D3D]">
-                <p class="text-[9px] font-bold text-[#ADB5BD] uppercase mb-1">Target Dimension</p>
-                <p class="text-sm font-black text-[#212529] dark:text-[#E4E4E7]" x-text="dimensions"></p>
-            </div>
-        </div>
     </div>
+
+    <input type="file" x-ref="fileInput" class="hidden" accept="image/*" @change="loadFile($event)">
 </div>
 {% endblock %}
 
 {% block tool_js_data %}
 {
+hideUpload: true,
+hideSample: false,
+
 file: null,
 previewUrl: '',
-targetFormat: 'image/png',
-quality: 90,
-dimensions: '0 x 0',
-formats: ['image/png', 'image/jpeg', 'image/webp'],
+targetFormat: 'image/webp',
+quality: 85,
+isProcessing: false,
 
-onReset() {
-this.file = null;
-this.previewUrl = '';
-this.dimensions = '0 x 0';
+formats: [
+{ mime: 'image/webp', label: 'WebP (Modern)', ext: '.webp' },
+{ mime: 'image/jpeg', label: 'JPEG (Standard)', ext: '.jpg' },
+{ mime: 'image/png', label: 'PNG (Lossless)', ext: '.png' }
+],
+
+init() {
+// Inherits from base
+this.hideUpload = true;
+this.hideSample = false;
 },
 
 async loadSample() {
@@ -147,37 +173,47 @@ try {
 const response = await fetch("{% static 'images/logos/logo.png' %}");
 const blob = await response.blob();
 const file = new File([blob], 'kiri_logo.png', { type: 'image/png' });
-this.handleFiles([file]);
+this.processFile(file);
 this.statusMessage = 'Kiri logo loaded as sample';
 } catch (err) {
 this.error = 'Failed to load sample logo';
 }
 },
 
-handleDrop(e) {
-this.dragging = false;
-const files = e.dataTransfer.files;
-if (files.length > 0) this.handleFiles(files);
+/* --- File Handling --- */
+loadFile(event) {
+const file = event.target.files?.[0] || event.dataTransfer?.files?.[0];
+if (!file) return;
+this.processFile(file);
 },
 
-handleFiles(files) {
-if (files.length > 0 && files[0].type.startsWith('image/')) {
-this.file = files[0];
+processFile(file) {
+if (!file.type.startsWith('image/')) {
+alert('Please select a valid image file');
+return;
+}
+
+this.file = file;
+
 const reader = new FileReader();
 reader.onload = (e) => {
 this.previewUrl = e.target.result;
-const img = new Image();
-img.onload = () => this.dimensions = `${img.width} × ${img.height}`;
-img.src = e.target.result;
+// Smart format selection: If png, suggest webp. If jpg, suggest webp.
+this.targetFormat = 'image/webp';
 };
-reader.readAsDataURL(this.file);
-this.statusMessage = 'Image loaded for processing';
-}
+reader.readAsDataURL(file);
 },
 
-convertImage(autoDownload = true) {
+handleDrop(e) {
+e.target.classList.remove('scale-[1.01]', 'border-[#0D7C3D]');
+this.loadFile(e);
+},
+
+/* --- Logic --- */
+convertAndSave() {
 if (!this.file) return;
 this.isProcessing = true;
+this.statusMessage = 'Converting...';
 
 const img = new Image();
 img.onload = () => {
@@ -185,25 +221,41 @@ const canvas = document.createElement('canvas');
 canvas.width = img.width;
 canvas.height = img.height;
 const ctx = canvas.getContext('2d');
+
+// Handle Transparency for JPEG
+if (this.targetFormat === 'image/jpeg') {
+ctx.fillStyle = '#FFFFFF'; // Fill white background
+ctx.fillRect(0, 0, canvas.width, canvas.height);
+}
+
 ctx.drawImage(img, 0, 0);
 
 canvas.toBlob((blob) => {
-if (autoDownload) {
-const ext = this.targetFormat.split('/')[1];
-this.downloadFile(blob, `${this.file.name.split('.')[0]}.${ext === 'jpeg' ? 'jpg' : ext}`, this.targetFormat);
-this.statusMessage = 'Image exported successfully';
+if (blob) {
+const originalName = this.file.name.substring(0, this.file.name.lastIndexOf('.')) || this.file.name;
+const ext = this.formats.find(f => f.mime === this.targetFormat).ext;
+const fileName = `${originalName}_converted${ext}`;
+
+this.downloadFile(blob, fileName, this.targetFormat);
+this.statusMessage = 'File exported successfully';
+} else {
+this.error = 'Conversion failed';
 }
 this.isProcessing = false;
 }, this.targetFormat, this.quality / 100);
+};
+img.onerror = () => {
+this.error = "Failed to load image data";
+this.isProcessing = false;
 };
 img.src = this.previewUrl;
 },
 
 formatSize(bytes) {
-if (bytes === 0) return '0 B';
+if (bytes === 0 || !bytes) return '0 B';
 const k = 1024;
 const i = Math.floor(Math.log(bytes) / Math.log(k));
-return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + ['B', 'KB', 'MB'][i];
+return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + ['B', 'KB', 'MB', 'GB'][i];
 }
 }
 {% endblock %}
@@ -211,20 +263,23 @@ return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + ['B', 'KB', 'MB']
 {% block extra_js_tool %}
 <style>
     .bg-checkered {
-        background-image: linear-gradient(45deg, #f0f0f0 25%, transparent 25%),
-            linear-gradient(-45deg, #f0f0f0 25%, transparent 25%),
-            linear-gradient(45deg, transparent 75%, #f0f0f0 75%),
-            linear-gradient(-45deg, transparent 75%, #f0f0f0 75%);
+        background-color: #ffffff;
+        background-image:
+            linear-gradient(45deg, #e9ecef 25%, transparent 25%),
+            linear-gradient(-45deg, #e9ecef 25%, transparent 25%),
+            linear-gradient(45deg, transparent 75%, #e9ecef 75%),
+            linear-gradient(-45deg, transparent 75%, #e9ecef 75%);
         background-size: 20px 20px;
         background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
     }
 
     .dark .bg-checkered {
-        background-image: linear-gradient(45deg, #1A1A1A 25%, transparent 25%),
-            linear-gradient(-45deg, #1A1A1A 25%, transparent 25%),
-            linear-gradient(45deg, transparent 75%, #1A1A1A 75%),
-            linear-gradient(-45deg, transparent 75%, #1A1A1A 75%);
         background-color: #121212;
+        background-image:
+            linear-gradient(45deg, #1a1a1a 25%, transparent 25%),
+            linear-gradient(-45deg, #1a1a1a 25%, transparent 25%),
+            linear-gradient(45deg, transparent 75%, #1a1a1a 75%),
+            linear-gradient(-45deg, transparent 75%, #1a1a1a 75%);
     }
 </style>
 {% endblock %}

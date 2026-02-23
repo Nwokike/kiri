@@ -1,4 +1,4 @@
-// Main JavaScript for Kiri Research Labs
+// Main JavaScript for Kiri Labs
 // Extracted from base.html for better maintainability
 
 document.addEventListener('DOMContentLoaded', () => {

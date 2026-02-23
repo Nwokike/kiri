@@ -1,4 +1,4 @@
-// Pyodide Runner for Kiri Research Labs
+// Pyodide Runner for Kiri Labs
 // Handles client-side execution of Python code blocks
 
 let pyodide = null;
@@ -46,7 +46,7 @@ window.runPythonCode = async function (code, outputElementId) {
         let result = await pyodide.runPythonAsync(code);
 
         // If result is not undefined and we didn't print anything, show result
-        if (result !== undefined && outputEl.innerText === '<span class="text-text-tertiary">Running...</span>') {
+        if (result !== undefined && outputEl.innerText === 'Running...') {
             outputEl.innerText = result;
         } else if (result !== undefined) {
             outputEl.innerText += "\n[Result]: " + result;

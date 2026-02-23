@@ -1,13 +1,22 @@
 from django.views.generic import ListView, CreateView, DetailView
-from django.urls import reverse_lazy
-from django.contrib.auth.mixins import LoginRequiredMixin
+from django.urls import reverse_lazy, reverse
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_not_required
 from django.contrib.contenttypes.models import ContentType
+from django.db.models import F, Prefetch
+
 from .models import Project
 from .forms import ProjectSubmissionForm
 from core.models import Comment
 from core.forms import CommentForm
+from users.models import UserIntegration
+from .utils import sync_project_metadata
+
+# Reusable mixin — staff-only access
+class StaffRequiredMixin(UserPassesTestMixin):
+    def test_func(self):
+        return self.request.user.is_staff
 
 @method_decorator(login_not_required, name='dispatch')
 class ProjectListView(ListView):
@@ -70,7 +79,7 @@ class ProjectDetailView(DetailView):
         context['comment_form'] = CommentForm()
         return context
 
-class ImportLandingView(LoginRequiredMixin, ListView):
+class ImportLandingView(StaffRequiredMixin, ListView):
     template_name = 'projects/import_landing.html'
     context_object_name = 'repos'
 
@@ -87,13 +96,13 @@ class ImportLandingView(LoginRequiredMixin, ListView):
         connected_map = {i.platform: i for i in integrations}
         
         platforms = [
-            {'id': 'github', 'name': 'GitHub', 'icon': 'fab fa-github', 'connected': bool(connected_map.get('github')), 'connect_url': '/accounts/github/login/?process=connect'},
-            {'id': 'huggingface', 'name': 'Hugging Face', 'icon': 'fas fa-robot text-[#FFD21E]', 'connected': bool(connected_map.get('huggingface')), 'connect_url': '/accounts/huggingface/login/?process=connect'},
+            {'id': 'github', 'name': 'GitHub', 'icon': 'fab fa-github', 'connected': bool(connected_map.get('github')), 'connect_url': reverse('github_login') + '?process=connect'},
+            {'id': 'huggingface', 'name': 'Hugging Face', 'icon': 'fas fa-robot text-[#FFD21E]', 'connected': bool(connected_map.get('huggingface')), 'connect_url': reverse('huggingface_login') + '?process=connect'},
         ]
         context['platforms'] = platforms
         return context
 
-class ProjectSubmitView(LoginRequiredMixin, CreateView):
+class ProjectSubmitView(StaffRequiredMixin, CreateView):
     model = Project
     form_class = ProjectSubmissionForm
     template_name = 'projects/project_form.html'
@@ -122,20 +131,6 @@ class ProjectSubmitView(LoginRequiredMixin, CreateView):
              from .utils import sync_project_metadata
              sync_project_metadata(self.object)
         except Exception:
-             pass # Don't block submission if sync fails
-        
-        # Trigger lane classification (async via native tasks)
-        try:
-            from kiri_project.tasks import classify_project_lane
-            classify_project_lane.enqueue(self.object.id)
-        except Exception:
-            pass  # Don't block submission if classification queuing fails
-             
-        # Trigger activity
-        try:
-             from activity.utils import create_action
-             create_action(self.request.user, 'submitted a project', self.object)
-        except Exception:
-             pass
+             pass  # Don't block submission if sync fails
 
         return response

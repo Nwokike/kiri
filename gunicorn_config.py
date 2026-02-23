@@ -1,4 +1,4 @@
-# Gunicorn configuration for Kiri Research Labs
+# Gunicorn configuration for Kiri Labs
 # Optimized for Google Cloud 1GB RAM VM
 
 # Bind to socket

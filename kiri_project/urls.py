@@ -22,12 +22,8 @@ urlpatterns = [
     path("", include("pwa.urls")),
     
     # Main Routes
-    path("library/", include("publications.urls", namespace="publications")),
     path("projects/", include("projects.urls", namespace="projects")),
-    path("nexus/", include("users.urls", namespace="users")),
     path("tools/", include("tools.urls", namespace="tools")),
-    path("discuss/", include("discussions.urls", namespace="discussions")),
-    path("feed/", include("activity.urls", namespace="activity")),
     
     # Core (Home, About, etc.) - Must be last
     path("", include("core.urls", namespace="core")),

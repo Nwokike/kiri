@@ -10,15 +10,11 @@ class ProjectInsightAdmin(admin.ModelAdmin):
 
 @admin.register(Project)
 class ProjectAdmin(admin.ModelAdmin):
-    # Added 'lane' to list_display
-    list_display = ('name', 'submitted_by', 'stars_count', 'lane', 'is_approved', 'is_hot', 'created_at')
-    
-    # Added 'lane' to list_filter
-    list_filter = ('is_approved', 'is_hot', 'lane', 'language', 'category', 'created_at')
-    
+    list_display = ('name', 'submitted_by', 'stars_count', 'category', 'is_approved', 'is_hot', 'created_at')
+    list_filter = ('is_approved', 'is_hot', 'language', 'category', 'created_at')
     search_fields = ('name', 'description', 'submitted_by__username', 'github_repo_url')
     prepopulated_fields = {'slug': ('name',)}
-    actions = ['approve_projects', 'reject_projects', 'mark_hot', 'sync_github', 'analyze_with_ai', 'reclassify_lane']
+    actions = ['approve_projects', 'reject_projects', 'mark_hot', 'sync_github', 'analyze_with_ai']
     
     @admin.action(description='Approve selected projects')
     def approve_projects(self, request, queryset):
@@ -41,17 +37,9 @@ class ProjectAdmin(admin.ModelAdmin):
                 count += 1
         self.message_user(request, f"Synced {count} projects.")
 
-    @admin.action(description='Analyze with AI (Advisor)')
+    @admin.action(description='Analyze with AI')
     def analyze_with_ai(self, request, queryset):
         from kiri_project.tasks import analyze_project_task
         for project in queryset:
-            analyze_project_task(project.id)
+            analyze_project_task.enqueue(project.id)
         self.message_user(request, f"Queued AI analysis for {queryset.count()} projects.")
-
-    @admin.action(description='Re-run Lane Classification')
-    def reclassify_lane(self, request, queryset):
-        from kiri_project.tasks import classify_project_lane
-        for project in queryset:
-            # Re-queue the task
-            classify_project_lane(project.id)
-        self.message_user(request, f"Queued classification for {queryset.count()} projects.")

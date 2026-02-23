@@ -1,4 +1,4 @@
-# WSGI config for Kiri Research Labs.
+# WSGI config for Kiri Labs.
 
 import os
 

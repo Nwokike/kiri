@@ -1,7 +1,7 @@
 {
   "name": "kiri",
   "version": "1.0.0",
-  "description": "Kiri Research Labs - The Post-Compute Research Lab",
+  "description": "Kiri Labs — Software & AI, built lightweight and efficient",
   "scripts": {
     "build": "npm run build:css",
     "build:css": "npx @tailwindcss/cli -i ./assets/css/input.css -o ./static/css/output.css --minify",

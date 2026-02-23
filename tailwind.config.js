@@ -4,7 +4,6 @@ module.exports = {
     './templates/**/*.html',
     './static/js/**/*.js',
     './core/**/*.py',
-    './publications/**/*.py',
     './projects/**/*.py',
     './users/**/*.py',
   ],

@@ -1,4 +1,4 @@
-# ASGI config for Kiri Research Labs.
+# ASGI config for Kiri Labs.
 
 import os
 

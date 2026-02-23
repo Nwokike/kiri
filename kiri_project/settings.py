@@ -1,5 +1,5 @@
 """
-Django settings for Kiri Research Labs (kiri.ng)
+Django settings for Kiri Labs (kiri.ng)
 Optimized for Google Cloud 1GB RAM VM deployment.
 """
 
@@ -31,10 +31,7 @@ CSRF_TRUSTED_ORIGINS = [
     "https://www.kiri.ng",
 ]
 
-# Audit 4.2: Testing setting
-TESTING = os.environ.get("TESTING", "False") == "True"
-
-# Audit 4.3: Contact Email
+# Contact Email
 CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "hello@kiri.ng")
 
 # Application definition
@@ -61,20 +58,17 @@ INSTALLED_APPS = [
     # Local
     "core",
     "users",
-    "publications",
     "projects",
     "tools",
-    "discussions",
-    "activity",
 ]
 
 SITE_ID = 1
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "core.middleware.ExceptionLoggingMiddleware",  # Audit 4.5: Log 500s to ErrorLog
-    "core.middleware.ContentSecurityPolicyMiddleware", # Native 6.0 CSP
-    "kiri_project.middleware.SecurityHeadersMiddleware",  # Studio COOP/COEP Headers
+    "core.middleware.ExceptionLoggingMiddleware",
+    "core.middleware.ContentSecurityPolicyMiddleware",
+
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -101,6 +95,7 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "kiri_project.context_processors.kiri_settings",
+                "kiri_project.context_processors.ecosystem_platforms",
             ],
         },
     },
@@ -191,14 +186,10 @@ AWS_S3_ENDPOINT_URL = os.environ.get("R2_ENDPOINT_URL")
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
 
-# Logging configuration to silence DisallowedHost noise
 LOGGING = {
     'version': 1,
     'disable_existing_loggers': False,
     'filters': {
-        'require_debug_false': {
-            '()': 'django.utils.log.RequireDebugFalse',
-        },
         'suppress_disallowed_host': {
             '()': 'core.logging.DisallowedHostFilter',
         },
@@ -271,7 +262,7 @@ SOCIALACCOUNT_PROVIDERS = {
 }
 SOCIALACCOUNT_LOGIN_ON_GET = True
 SOCIALACCOUNT_STORE_TOKENS = True
-ACCOUNT_SOCIALACCOUNT_ADAPTER = 'users.adapter.KiriSocialAccountAdapter'
+SOCIALACCOUNT_ADAPTER = 'users.adapter.KiriSocialAccountAdapter'
 ACCOUNT_FORMS = {
     'login': 'users.forms.CustomLoginForm',
     'signup': 'users.forms.CustomSignupForm',
@@ -377,20 +368,11 @@ if not DEBUG or TESTING:
     CSRF_COOKIE_HTTPONLY = True
     CSRF_COOKIE_SAMESITE = "Strict"
 
-# Logging
-LOGGING = {
-    "version": 1,
-    "disable_existing_loggers": False,
-    "handlers": {
-        "console": {"class": "logging.StreamHandler"},
-    },
-    "root": {"handlers": ["console"], "level": "INFO"},
-}
 
 # PWA Settings
 PWA_APP_NAME = "Kiri"
 PWA_APP_SHORT_NAME = "Kiri"
-PWA_APP_DESCRIPTION = "The Efficiency Frontier of Artificial Intelligence. Smart. Small. Scalable."
+PWA_APP_DESCRIPTION = "Software & AI tools, developer utilities, and project showcases by Kiri Labs. Built lightweight and efficient."
 PWA_APP_THEME_COLOR = '#2E9A4F'
 PWA_APP_BACKGROUND_COLOR = '#0F2F1B'
 PWA_APP_DISPLAY = 'standalone'

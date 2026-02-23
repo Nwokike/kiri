@@ -74,8 +74,8 @@
                     <p class="text-xs text-[#6C757D] dark:text-[#A1A1AA]">{{ user.email }}</p>
                 </div>
                 <div class="py-2">
-                    <a href="{% url 'users:profile' user.username %}" class="dropdown-item">
-                        <i class="fas fa-user w-5 text-center"></i> My Profile
+                    <a href="{% url 'core:about' %}" class="dropdown-item">
+                        <i class="fas fa-user w-5 text-center"></i> About
                     </a>
                     <a href="{% url 'socialaccount_connections' %}" class="dropdown-item">
                         <i class="fas fa-plug w-5 text-center"></i> Integrations

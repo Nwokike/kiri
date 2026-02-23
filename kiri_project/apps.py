@@ -7,7 +7,7 @@ from django.apps import AppConfig
 
 class KiriProjectConfig(AppConfig):
     name = 'kiri_project'
-    verbose_name = 'Kiri Research Labs'
+    verbose_name = 'Kiri Labs'
     
     def ready(self):
         # Register SQLite connection signal for PRAGMAs
@@ -33,6 +33,6 @@ def configure_sqlite_connection(sender, connection, **kwargs):
         # Store temp tables in memory
         cursor.execute("PRAGMA temp_store=MEMORY;")
         # 128MB memory-mapped I/O for faster reads
-        cursor.execute("PRAGMA mmap_size=134217728;")
+        cursor.execute("PRAGMA mmap_size=67108864;")
         # Limit WAL file size to 64MB
         cursor.execute("PRAGMA journal_size_limit=67108864;")

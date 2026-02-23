@@ -2,10 +2,10 @@
 
 {% block title %}Projects | Kiri{% endblock %}
 
-{% block meta_description %}Explore open-source AI projects, specialized SLMs, and research tools from the Kiri community. Intelligence on the edge.{% endblock %}
+{% block meta_description %}Explore our open-source projects and tools. Built lightweight and efficient.{% endblock %}
 
-{% block og_title %}Research Projects | Kiri Community Portfolio{% endblock %}
-{% block og_description %}Discover cutting-edge research projects focused on TinyML, hierarchical architectures, and compute efficiency.{% endblock %}
+{% block og_title %}Projects | Kiri Labs{% endblock %}
+{% block og_description %}Our open-source projects — software and AI, built small and efficient.{% endblock %}
 
 
 {% block content %}
@@ -16,20 +16,15 @@
             <div>
                 <h1 class="text-2xl font-bold text-[#212529] dark:text-white">Projects</h1>
                 <p class="text-[#6C757D] dark:text-[#A1A1AA] mt-1">
-                    Open-source projects and tools from the Kiri community.
+                    Our open-source projects and tools.
                 </p>
             </div>
 
             <div class="flex items-center gap-3">
-                {% if user.is_authenticated %}
+                {% if user.is_staff %}
                 <a href="{% url 'projects:create' %}"
                     class="px-4 py-2 bg-[#0D7C3D] text-white text-sm font-bold rounded-lg hover:bg-[#0A5C2C] transition-all shadow-sm">
                     <i class="fas fa-plus mr-2 text-[10px]"></i>New Project
-                </a>
-                {% else %}
-                <a href="{% url 'account_login' %}?next={{ request.path }}"
-                    class="px-4 py-2 border border-[#DEE2E6] text-[#6C757D] text-sm font-bold rounded-lg hover:bg-[#F8F9FA] dark:border-[#333] dark:text-[#A1A1AA] transition-all">
-                    Login to Submit
                 </a>
                 {% endif %}
             </div>
@@ -124,7 +119,7 @@
                 <i class="fas fa-folder-open text-3xl text-[#DEE2E6] dark:text-[#3D3D3D]"></i>
             </div>
             <h3 class="text-lg font-semibold text-[#212529] dark:text-white mb-2">No projects yet</h3>
-            <p class="text-[#6C757D] dark:text-[#A1A1AA]">Be the first to share a project!</p>
+            <p class="text-[#6C757D] dark:text-[#A1A1AA]">Projects will be added here soon.</p>
         </div>
         {% endfor %}
     </div>

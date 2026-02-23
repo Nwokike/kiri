@@ -1,5 +1,5 @@
 from django.contrib import admin
-from .models import Comment, Favorite, Notification, ErrorLog
+from .models import Comment, Favorite, Notification, ErrorLog, EcosystemPlatform
 
 
 @admin.register(Comment)
@@ -42,3 +42,11 @@ class ErrorLogAdmin(admin.ModelAdmin):
     def mark_as_resolved(self, request, queryset):
         queryset.update(is_resolved=True)
     mark_as_resolved.short_description = "Mark selected errors as resolved"
+
+
+@admin.register(EcosystemPlatform)
+class EcosystemPlatformAdmin(admin.ModelAdmin):
+    list_display = ['name', 'url', 'is_active', 'display_order']
+    list_filter = ['is_active']
+    list_editable = ['is_active', 'display_order']
+    search_fields = ['name', 'url']

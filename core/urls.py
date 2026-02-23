@@ -12,9 +12,7 @@ urlpatterns = [
     path('refund/', views.refund_policy, name='refund_policy'),
     path('health/', views.health, name='health'),
     
-    # --- New Studio Routes ---
-    path('studio/py/', views.studio_py, name='studio_py'),  
-    path('studio/js/', views.studio_js, name='studio_js'),
+
     
     # Notifications & Favorites
     path('notifications/', views.notifications_list, name='notifications'),

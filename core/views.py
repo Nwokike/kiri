@@ -12,13 +12,11 @@ from .forms import CommentForm
 
 @login_not_required
 def home(request):
-    """Homepage with fully dynamic content from database."""
+    """Homepage with dynamic content from database."""
     from projects.models import Project
-    from publications.models import Publication
-    from users.models import CustomUser
-    from django.db.models import Count
+    from django.db.models import Count, Sum
 
-    # Get featured projects - prioritize HOT, then sort by stars
+    # Featured projects - prioritize HOT, then sort by stars
     featured_projects = Project.objects.filter(
         is_approved=True
     ).annotate(
@@ -29,53 +27,32 @@ def home(request):
         )
     ).order_by('is_hot_order', '-stars_count').select_related('submitted_by')[:6]
 
-    # Get latest publications
-    latest_publications = Publication.objects.filter(
-        is_published=True
-    ).order_by('-created_at').select_related('author')[:3]
-
     # Dynamic stats
+    approved = Project.objects.filter(is_approved=True)
+    star_sum = approved.aggregate(total=Sum('stars_count'))['total'] or 0
     stats = {
-        'total_projects': Project.objects.filter(is_approved=True).count(),
-        'total_publications': Publication.objects.filter(is_published=True).count(),
-        'total_researchers': CustomUser.objects.filter(is_active=True).count(),
+        'total_projects': approved.count(),
+        'total_stars': f"{star_sum:,}",
+        'total_tools': 30,
     }
 
-    # Get project categories with counts
-    categories = Project.objects.filter(is_approved=True).values('category').annotate(
+    # Project categories with counts
+    categories = approved.values('category').annotate(
         count=Count('id')
-    ).order_by('-count')[:5]
+    ).order_by('-count')[:8]
 
-    # Get trending projects (most viewed in recent period)
-    trending_projects = Project.objects.filter(
-        is_approved=True
-    ).order_by('-view_count')[:3]
+    # Trending projects (most viewed)
+    trending_projects = approved.order_by('-view_count')[:5]
 
-    # Get latest discussions (Topics)
-    latest_topics = []
-    try:
-        from discussions.models import Topic
-        latest_topics = Topic.objects.order_by('-created_at')[:4]
-    except ImportError:
-        pass
-
-    # Get community activity (Recently favorite/notifications or Action app)
-    community_activity = []
-    try:
-        from activity.models import Action
-        # For guest/homepage, we show recent public actions
-        community_activity = Action.objects.select_related('user', 'target_ct').order_by('-created')[:5]
-    except ImportError:
-        pass
+    # Latest projects
+    latest_projects = approved.order_by('-created_at')[:4]
 
     return render(request, "home.html", {
         "featured_projects": featured_projects,
-        "latest_publications": latest_publications,
-        "latest_topics": latest_topics,
-        "community_activity": community_activity,
         "stats": stats,
         "categories": categories,
         "trending_projects": trending_projects,
+        "latest_projects": latest_projects,
     })
 
 
@@ -87,27 +64,7 @@ def about(request):
 
 
 
-def studio_py(request):
-    """
-    Renders PyStudio (Python/WASM).
-    Passes 'studio_type': 'py' to context.
-    """
-    context = {
-        'studio_type': 'py',
-        'page_title': 'PyStudio | Research Environment'
-    }
-    return render(request, 'core/kiri_studio.html', context)
 
-def studio_js(request):
-    """
-    Renders JS Studio (Node/WebContainer).
-    Passes 'studio_type': 'js' to context.
-    """
-    context = {
-        'studio_type': 'js',
-        'page_title': 'JS Studio | Web Environment'
-    }
-    return render(request, 'core/kiri_studio.html', context)
 
 @login_not_required
 def privacy(request):
@@ -310,31 +267,18 @@ def favorites_list(request):
     """Display user's favorited items."""
     from django.contrib.contenttypes.prefetch import GenericPrefetch
     from projects.models import Project
-    from publications.models import Publication
     
-    project_ct = ContentType.objects.get_for_model(Project)
-    pub_ct = ContentType.objects.get_for_model(Publication)
-    
-    # Use GenericPrefetch to avoid N+1 when accessing content_object
     favorites = Favorite.objects.filter(
         user=request.user
     ).select_related('content_type').prefetch_related(
         GenericPrefetch(
             'content_object',
-            [
-                Project.objects.select_related('submitted_by'),
-                Publication.objects.select_related('author'),
-            ]
+            [Project.objects.select_related('submitted_by')]
         )
     ).order_by('-created_at')
     
-    project_favorites = [f for f in favorites if f.content_type_id == project_ct.id]
-    publication_favorites = [f for f in favorites if f.content_type_id == pub_ct.id]
-    
     return render(request, 'core/favorites.html', {
         'favorites': favorites,
-        'project_favorites': project_favorites,
-        'publication_favorites': publication_favorites,
     })
 
 
@@ -423,7 +367,7 @@ def delete_comment(request, pk):
     if comment.author == request.user or request.user.is_staff:
         comment.delete()
         if request.htmx:
-            return HttpResponse('<div class="text-xs text-gray-500 italic p-2 bg-gray-50 dark:bg-[#2D2D2D] border border-dashed border-gray-200 dark:border-[#333] rounded">Comment deleted</div>')
+            return render(request, 'core/partials/comment_deleted_placeholder.html', {'comment_id': pk})
         return JsonResponse({'status': 'ok'})
     
     return HttpResponse("You don't have permission to delete this comment.", status=403)

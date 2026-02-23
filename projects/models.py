@@ -2,10 +2,10 @@ from django.db import models
 from django.conf import settings
 from django.utils.text import slugify
 
+
 class Project(models.Model):
-    """
-    The Colosseum: Showcase of projects.
-    """
+    """Project showcase for Kiri Labs."""
+    
     class Category(models.TextChoices):
         AI_NLP = 'ai_nlp', 'AI / NLP'
         AI_VISION = 'ai_vision', 'AI / Computer Vision'
@@ -28,7 +28,7 @@ class Project(models.Model):
 
     # Links
     github_repo_url = models.URLField(help_text="URL to the GitHub repository")
-    demo_url = models.URLField(blank=True, null=True, help_text="Live demo URL")
+    demo_url = models.URLField(blank=True, null=True, help_text="Live demo URL (e.g. Vercel/Cloudflare deployment)")
     huggingface_url = models.URLField(blank=True, help_text="Link to Hugging Face model/dataset")
 
     # Metrics (Synced from GitHub + Internal)
@@ -38,24 +38,10 @@ class Project(models.Model):
     language = models.CharField(max_length=50, blank=True)
     topics = models.JSONField(default=list, blank=True)
     
-    # Kiri State
+    # Status
     is_hot = models.BooleanField(default=False, help_text="Automated 'HOT' status based on engagement")
     is_approved = models.BooleanField(default=False)
     submitted_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="projects")
-    
-    # Traffic Controller: Execution Lane Classification
-    class Lane(models.TextChoices):
-        PY_STUDIO = 'P', 'PyStudio (Python/WASM)'
-        JS_STUDIO = 'J', 'JS Studio (Node/WebContainer)'
-        BINDER = 'B', 'Cloud Container (Binder)'
-        COLAB = 'C', 'GPU Cluster (Colab)'
-        PENDING = '?', 'Pending Classification'
-    
-    lane = models.CharField(max_length=1, choices=Lane.choices, default=Lane.PENDING)
-    execution_url = models.URLField(blank=True, null=True, help_text="Magic link for Binder/Colab")
-    lane_classification_reason = models.TextField(blank=True, help_text="AI explanation for lane choice")
-    start_command = models.CharField(max_length=255, blank=True, help_text="e.g., npm run dev, python manage.py runserver")
-    gist_id = models.CharField(max_length=64, blank=True, help_text="GitHub Gist ID for Binder/Colab config")
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -92,23 +78,17 @@ class Project(models.Model):
 
 
 class ProjectInsight(models.Model):
-    """
-    AI-generated insights for a project.
-    Populated by the AI Advisor service.
-    """
+    """AI-generated insights for a project."""
     project = models.OneToOneField(Project, on_delete=models.CASCADE, related_name='insight')
     
-    # AI Analysis
     summary = models.TextField(help_text="AI-generated 2-3 sentence summary")
     tech_stack = models.JSONField(default=list, help_text="Detected languages and frameworks")
     complexity_score = models.IntegerField(default=5, help_text="1-10 rating of code complexity")
     complexity_reason = models.TextField(blank=True, help_text="Why this score was given")
     
-    # Suggestions
     improvements = models.JSONField(default=list, help_text="List of suggested code improvements")
     roadmap = models.JSONField(default=list, help_text="Suggested next steps/features")
     
-    # Metadata
     last_analyzed_at = models.DateTimeField(auto_now=True)
     ai_model_used = models.CharField(max_length=50, default="gemini-2.5-flash")
     

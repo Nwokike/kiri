@@ -3,8 +3,9 @@ from turnstile.fields import TurnstileField
 from .models import Comment
 
 # Shared Tailwind CSS classes for forms
-TEXTAREA_CLASS = 'w-full p-3 rounded-lg border border-border bg-bg-primary text-text-primary focus:border-accent focus:ring-1 focus:ring-accent dark:bg-dark-surface dark:border-dark-border dark:text-dark-text dark:placeholder-dark-secondary'
-INPUT_CLASS = 'w-full p-3 rounded-lg border border-border bg-bg-primary text-text-primary focus:border-accent focus:ring-1 focus:ring-accent dark:bg-dark-surface dark:border-dark-border dark:text-dark-text dark:placeholder-dark-secondary'
+# Shared Tailwind classes for consistent styling
+TEXTAREA_CLASS = 'w-full p-3 rounded-lg border border-[#E4E4E7] bg-white text-[#18181B] focus:border-[#10B981] focus:ring-1 focus:ring-[#10B981] dark:bg-[#1E1E1E] dark:border-[#333] dark:text-[#E4E4E7] dark:placeholder-[#6C757D]'
+INPUT_CLASS = 'w-full p-3 rounded-lg border border-[#E4E4E7] bg-white text-[#18181B] focus:border-[#10B981] focus:ring-1 focus:ring-[#10B981] dark:bg-[#1E1E1E] dark:border-[#333] dark:text-[#E4E4E7] dark:placeholder-[#6C757D]'
 
 class CommentForm(forms.ModelForm):
     class Meta:

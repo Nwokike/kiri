@@ -2,26 +2,30 @@
 <!-- Trending Projects -->
 {% if trending_projects %}
 <div class="p-6 bg-white rounded-xl border border-[#DEE2E6] dark:bg-[#1E1E1E] dark:border-[#333]">
-    <h3 class="text-md font-bold text-[#212529] dark:text-white mb-6 flex items-center gap-2">
+    <h3 class="text-sm font-bold text-[#212529] dark:text-white mb-5 flex items-center gap-2 uppercase tracking-wider">
         <i class="fas fa-chart-line text-[#C4992E]"></i>
-        Trending Now
+        Trending
     </h3>
     <div class="space-y-4">
         {% for project in trending_projects %}
-        <a href="{% url 'projects:detail' project.slug %}" class="flex items-center gap-4 group">
+        <a href="{% url 'projects:detail' project.slug %}" class="flex items-center gap-3 group">
             <span
-                class="text-xl font-black text-[#F8F9FA] dark:text-[#2D2D2D] group-hover:text-[#E8F5ED] transition-colors leading-none">{{ forloop.counter }}</span>
+                class="w-7 h-7 rounded-lg bg-[#F8F9FA] dark:bg-[#2D2D2D] flex items-center justify-center text-xs font-black text-[#ADB5BD] dark:text-[#555] shrink-0">{{forloop.counter }}</span>
             <div class="flex-1 min-w-0">
                 <p
                     class="text-sm font-bold text-[#212529] dark:text-white truncate group-hover:text-[#0D7C3D] transition-colors">
                     {{ project.name }}
                 </p>
-                <p class="text-[11px] font-bold text-[#ADB5BD] uppercase tracking-tighter">
-                    {{ project.view_count }} Engagement points
+                <p class="text-[10px] font-bold text-[#ADB5BD] uppercase tracking-wider">
+                    {{ project.view_count }} views · {{ project.stars_count }} ★
                 </p>
             </div>
         </a>
         {% endfor %}
     </div>
+    <a href="{% url 'projects:list' %}"
+        class="block mt-4 pt-4 border-t border-[#F8F9FA] dark:border-[#2D2D2D] text-xs font-bold text-[#0D7C3D] hover:underline text-center">
+        View All Projects →
+    </a>
 </div>
 {% endif %}

@@ -60,57 +60,58 @@ def backup_db_to_r2():
         logger.error("Database file not found!")
         return
 
-        # 1. Prepare backup
-        timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
-        backup_name = f"backup_{timestamp}.sqlite3"
-        
-        # Calculate checksum before upload
-        local_md5 = calculate_file_md5(db_path)
-        logger.info(f"Local database MD5: {local_md5}")
-        
-        # 5.3: R2 credential checks
-        required_settings = ['AWS_S3_ENDPOINT_URL', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_STORAGE_BUCKET_NAME']
-        for s in required_settings:
-            if not getattr(settings, s, None):
-                logger.error(f"Missing required setting for backup: {s}")
-                return
-
-        s3 = boto3.client(
-            's3',
-            endpoint_url=settings.AWS_S3_ENDPOINT_URL,
-            aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
-            aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
-            region_name='auto' 
-        )
-        
-        try:
-            db_size = db_path.stat().st_size
-            # Upload with standard S3/R2 put_object behavior
-            with open(db_path, 'rb') as f:
-                s3.upload_fileobj(
-                    f, 
-                    settings.AWS_STORAGE_BUCKET_NAME, 
-                    f"backups/{backup_name}",
-                    ExtraArgs={'ContentType': 'application/x-sqlite3'}
-                )
-            
-            # 2. Verify Upload
-            metadata = s3.head_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=f"backups/{backup_name}")
-            remote_etag = metadata.get('ETag', '').strip('"')
-            
-            # 3.4: Handle multipart ETag (boto3 uses multipart for files > 8MB by default)
-            # If the ETag contains a hyphen, it's a multipart upload and won't match MD5
-            if '-' in remote_etag or db_size > 8 * 1024 * 1024:
-                logger.info(f"Backup {backup_name} uploaded. Skipping ETag match for large/multipart file.")
-            elif remote_etag == local_md5:
-                logger.info(f"Backup {backup_name} verified successfully (ETag match).")
-            else:
-                logger.error(f"Backup verification FAILED for {backup_name}. Local: {local_md5}, Remote: {remote_etag}")
-                return
-
-        except Exception as e:
-            logger.error(f"Failed to upload backup: {e}")
+    # 1. Prepare backup
+    timestamp = datetime.datetime.now().strftime('%Y%m%d_%H%M%S')
+    backup_name = f"backup_{timestamp}.sqlite3"
+    
+    # Calculate checksum before upload
+    from .utils import calculate_file_md5
+    local_md5 = calculate_file_md5(db_path)
+    logger.info(f"Local database MD5: {local_md5}")
+    
+    # 5.3: R2 credential checks
+    required_settings = ['AWS_S3_ENDPOINT_URL', 'AWS_ACCESS_KEY_ID', 'AWS_SECRET_ACCESS_KEY', 'AWS_STORAGE_BUCKET_NAME']
+    for s in required_settings:
+        if not getattr(settings, s, None):
+            logger.error(f"Missing required setting for backup: {s}")
             return
+
+    s3 = boto3.client(
+        's3',
+        endpoint_url=settings.AWS_S3_ENDPOINT_URL,
+        aws_access_key_id=settings.AWS_ACCESS_KEY_ID,
+        aws_secret_access_key=settings.AWS_SECRET_ACCESS_KEY,
+        region_name='auto' 
+    )
+    
+    try:
+        db_size = db_path.stat().st_size
+        # Upload with standard S3/R2 put_object behavior
+        with open(db_path, 'rb') as f:
+            s3.upload_fileobj(
+                f, 
+                settings.AWS_STORAGE_BUCKET_NAME, 
+                f"backups/{backup_name}",
+                ExtraArgs={'ContentType': 'application/x-sqlite3'}
+            )
+        
+        # 2. Verify Upload
+        metadata = s3.head_object(Bucket=settings.AWS_STORAGE_BUCKET_NAME, Key=f"backups/{backup_name}")
+        remote_etag = metadata.get('ETag', '').strip('"')
+        
+        # 3.4: Handle multipart ETag (boto3 uses multipart for files > 8MB by default)
+        # If the ETag contains a hyphen, it's a multipart upload and won't match MD5
+        if '-' in remote_etag or db_size > 8 * 1024 * 1024:
+            logger.info(f"Backup {backup_name} uploaded. Skipping ETag match for large/multipart file.")
+        elif remote_etag == local_md5:
+            logger.info(f"Backup {backup_name} verified successfully (ETag match).")
+        else:
+            logger.error(f"Backup verification FAILED for {backup_name}. Local: {local_md5}, Remote: {remote_etag}")
+            return
+
+    except Exception as e:
+        logger.error(f"Failed to upload backup: {e}")
+        return
 
     # 3. Cleanup old backups (Keep last 3)
     try:
@@ -184,80 +185,6 @@ def sync_github_stats():
             errors += 1
             
     logger.info(f"GitHub Sync Complete. Updated: {updated_count}, Errors: {errors}")
-
-
-@task()
-def classify_project_lane(project_id: int):
-    """
-    Background task to classify a project and generate execution config.
-    Called when a project is submitted or when user triggers re-classification.
-    
-    Uses AI (Gemini + Groq fallback) to analyze the repository and determine:
-    - Lane A: Client-side (WebContainer) - React, Vue, Node.js
-    - Lane B: Cloud Container (Binder) - Django, Flask, FastAPI
-    - Lane C: GPU Cluster (Colab) - PyTorch, TensorFlow, Transformers
-    """
-    from projects.models import Project
-    from projects.gist_service import GistService
-    from core.ai_service import AIService
-    
-    logger.info(f"Starting lane classification for project {project_id}")
-    
-    try:
-        project = Project.objects.get(id=project_id)
-    except Project.DoesNotExist:
-        logger.error(f"Project {project_id} not found")
-        return
-    
-    # 1. Fetch repository structure from GitHub
-    from projects.services import GitHubService
-    repo_files = GitHubService.fetch_structure(project.github_repo_url)
-    
-    if not repo_files:
-        logger.error(f"Failed to fetch repo structure for {project.github_repo_url}")
-        project.lane = 'P'  # Keep as pending
-        project.lane_classification_reason = "Failed to fetch repository structure"
-        project.save()
-        return
-    
-    # 2. AI Classification (Gemini + Groq fallback)
-    result = AIService.classify_repository_lane(repo_files)
-    
-    # 3. Save classification result
-    project.lane = result['lane']
-    project.lane_classification_reason = result.get('reason', '')
-    project.start_command = result.get('start_command', '')
-    
-    # 4. Generate magic link for Lanes B and C
-    if project.lane == 'B':
-        gist_id = GistService.create_binder_gist(project)
-        if gist_id:
-            project.gist_id = gist_id
-            project.execution_url = GistService.build_binder_url(
-                gist_id, 
-                port=8000 if 'django' in result.get('reason', '').lower() else 5000
-            )
-            logger.info(f"Created Binder execution URL for project {project_id}")
-        else:
-            logger.warning(f"Failed to create Binder gist for project {project_id}")
-    
-    elif project.lane == 'C':
-        notebook_json = AIService.generate_colab_notebook(
-            project.github_repo_url,
-            project.start_command
-        )
-        gist_id = GistService.create_colab_gist(project, notebook_json)
-        if gist_id:
-            project.gist_id = gist_id
-            project.execution_url = GistService.build_colab_url(gist_id)
-            logger.info(f"Created Colab execution URL for project {project_id}")
-        else:
-            logger.warning(f"Failed to create Colab gist for project {project_id}")
-    
-    # Lane A doesn't need server-side prep (runs in browser)
-    
-    project.save()
-    logger.info(f"Classified project {project_id} as Lane {project.lane}: {project.lane_classification_reason}")
 
 
 @task()

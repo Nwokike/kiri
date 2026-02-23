@@ -5,36 +5,43 @@
     <div class="flex items-center justify-between mb-6">
         <h2 class="text-xl font-bold text-[#212529] dark:text-white flex items-center gap-2">
             <i class="fas fa-fire text-[#C4992E]"></i>
-            Featured Research
+            Featured Projects
         </h2>
         <a href="{% url 'projects:list' %}" class="text-sm text-[#0D7C3D] hover:underline font-bold">
             View All <i class="fas fa-arrow-right ml-1"></i>
         </a>
     </div>
-    <div class="grid md:grid-cols-2 gap-6">
+    <div class="grid md:grid-cols-2 gap-5">
         {% for project in featured_projects %}
         <a href="{% url 'projects:detail' project.slug %}"
-            class="group block p-6 bg-white rounded-xl border border-[#DEE2E6] hover:border-[#0D7C3D] hover:shadow-lg transition-all dark:bg-[#1E1E1E] dark:border-[#3D3D3D] dark:hover:border-[#0D7C3D]">
-            <div class="flex items-start justify-between mb-4">
+            class="group block p-5 bg-white rounded-xl border border-[#DEE2E6] hover:border-[#0D7C3D] hover:shadow-lg transition-all dark:bg-[#1E1E1E] dark:border-[#3D3D3D] dark:hover:border-[#0D7C3D]">
+            <div class="flex items-start justify-between mb-3">
                 <span
-                    class="px-2.5 py-1 text-[9px] font-bold bg-[#E8F5ED] text-[#0D7C3D] rounded uppercase tracking-wider">
+                    class="px-2.5 py-1 text-[9px] font-bold bg-[#E8F5ED] text-[#0D7C3D] rounded uppercase tracking-wider dark:bg-[#0D7C3D]/10">
                     {{ project.language|default:"Project" }}
                 </span>
-                {% if project.is_hot %}
-                <span class="flex items-center gap-1 text-[9px] font-bold text-[#C4992E] uppercase">
-                    <i class="fas fa-fire"></i> Hot
-                </span>
-                {% endif %}
+                <div class="flex items-center gap-2">
+                    {% if project.demo_url %}
+                    <span class="flex items-center gap-1 text-[9px] font-bold text-blue-500 uppercase">
+                        <i class="fas fa-play-circle"></i> Live
+                    </span>
+                    {% endif %}
+                    {% if project.is_hot %}
+                    <span class="flex items-center gap-1 text-[9px] font-bold text-[#C4992E] uppercase">
+                        <i class="fas fa-fire"></i> Hot
+                    </span>
+                    {% endif %}
+                </div>
             </div>
             <h3
-                class="text-lg font-bold text-[#212529] dark:text-white mb-2 group-hover:text-[#0D7C3D] transition-colors leading-tight">
+                class="text-base font-bold text-[#212529] dark:text-white mb-2 group-hover:text-[#0D7C3D] transition-colors leading-tight">
                 {{ project.name }}
             </h3>
             <p class="text-sm text-[#6C757D] dark:text-[#A1A1AA] line-clamp-2 mb-4 leading-relaxed">
                 {{ project.description|truncatewords:20 }}
             </p>
             <div
-                class="flex items-center gap-5 pt-2 border-t border-[#F8F9FA] dark:border-[#2D2D2D] text-[11px] font-bold text-[#6C757D] dark:text-[#A1A1AA]">
+                class="flex items-center gap-5 pt-3 border-t border-[#F8F9FA] dark:border-[#2D2D2D] text-[11px] font-bold text-[#6C757D] dark:text-[#A1A1AA]">
                 <span class="flex items-center gap-1.5">
                     <i class="fas fa-star text-[#C4992E]"></i>
                     {{ project.stars_count }}
@@ -47,6 +54,11 @@
                     <i class="fas fa-eye"></i>
                     {{ project.view_count }}
                 </span>
+                {% if project.category %}
+                <span class="ml-auto px-2 py-0.5 bg-[#F8F9FA] dark:bg-[#2D2D2D] rounded text-[10px]">
+                    {{ project.category }}
+                </span>
+                {% endif %}
             </div>
         </a>
         {% endfor %}

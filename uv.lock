@@ -270,6 +270,7 @@ name = "kiri"
 version = "0.1.0"
 source = { virtual = "." }
 dependencies = [
+    { name = "asgiref" },
     { name = "boto3" },
     { name = "cryptography" },
     { name = "django" },
@@ -290,6 +291,7 @@ dependencies = [
 
 [package.metadata]
 requires-dist = [
+    { name = "asgiref", specifier = ">=3.8.1" },
     { name = "boto3", specifier = ">=1.42.25" },
     { name = "cryptography", specifier = ">=44.0.0" },
     { name = "django", specifier = ">=6.0.2" },

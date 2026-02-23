@@ -5,7 +5,7 @@ from django.contrib.contenttypes.models import ContentType
 
 class Comment(models.Model):
     """
-    Threaded comments for any content type (Projects, Publications).
+    Threaded comments for any content type (Projects, etc.).
     """
     author = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     content = models.TextField(max_length=10000)  # 10KB limit
@@ -37,7 +37,7 @@ class Comment(models.Model):
 
 class Favorite(models.Model):
     """
-    User's favorited items (projects, publications, tools).
+    User's favorited items (projects, tools).
     Supports GitHub star syncing when user has repo scope.
     """
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='favorites')
@@ -62,7 +62,7 @@ class Favorite(models.Model):
     def __str__(self):
         try:
             return f"{self.user.username} ❤️ {self.content_object}"
-        except:
+        except Exception:
             return f"{self.user.username} ❤️ [Deleted Item {self.content_type}/{self.object_id}]"
 
 
@@ -73,10 +73,10 @@ class Notification(models.Model):
     class Type(models.TextChoices):
         LIKE = 'like', 'Someone liked your content'
         COMMENT = 'comment', 'New comment on your content'
-        FOLLOW = 'follow', 'New follower'
         MENTION = 'mention', 'You were mentioned'
         SYSTEM = 'system', 'System notification'
         INTEGRATION = 'integration', 'Integration update'
+        INFO = 'info', 'Informational'
     
     recipient = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='notifications')
     notification_type = models.CharField(max_length=20, choices=Type.choices)
@@ -148,3 +148,27 @@ class ErrorLog(models.Model):
     
     def __str__(self):
         return f"[{self.level.upper()}] {self.path} - {self.message[:50]}"
+
+
+class EcosystemPlatform(models.Model):
+    """
+    External revenue platforms integrated into Kiri's navigation.
+    Managed via Django admin — no template changes needed.
+    """
+    name = models.CharField(max_length=100)
+    url = models.URLField()
+    icon_class = models.CharField(
+        max_length=100,
+        help_text="FontAwesome or custom icon class, e.g. 'fas fa-store'"
+    )
+    short_description = models.CharField(max_length=200, blank=True)
+    is_active = models.BooleanField(default=True)
+    display_order = models.PositiveIntegerField(default=0)
+
+    class Meta:
+        ordering = ['display_order', 'name']
+        verbose_name = 'Ecosystem Platform'
+        verbose_name_plural = 'Ecosystem Platforms'
+
+    def __str__(self):
+        return self.name

@@ -7,53 +7,51 @@
         <div class="relative z-10">
             <div
                 class="inline-flex items-center gap-2 px-3 py-1 bg-[#E8F5ED] text-[#0D7C3D] text-[10px] font-bold uppercase tracking-wider rounded-full mb-6 dark:bg-[#0D7C3D]/10">
-                <i class="fas fa-microchip"></i> Perspective
+                <span class="w-1.5 h-1.5 bg-[#0D7C3D] rounded-full animate-pulse"></span>
+                Software & AI
             </div>
             <h1
                 class="text-2xl md:text-4xl font-extrabold text-[#212529] dark:text-white mb-6 tracking-tight leading-tight max-w-3xl">
-                Smart, Small, and Scalable Research Tools.
+                Software & AI, Built Lightweight.
             </h1>
 
             <p class="text-base md:text-lg text-[#6C757D] dark:text-[#A1A1AA] max-w-2xl mb-10 leading-relaxed">
-                The Efficiency Frontier of Artificial Intelligence. Empowering researchers with state-of-the-art
-                tools and a collaborative community.
+                Our projects, tools, and everything we build — all in one place. Lightweight, efficient, and
+                always shipping.
             </p>
-
 
             <!-- Dynamic Stats Bar -->
             <div class="flex flex-nowrap gap-4 md:gap-10 mb-10 overflow-x-auto no-scrollbar">
                 <div class="flex flex-col min-w-max">
-                    <span
-                        class="text-xl md:text-2xl font-bold text-[#212529] dark:text-white">{{stats.total_projects}}</span>
-                    <span class="text-[10px] font-bold text-[#6C757D] uppercase tracking-widest">Projects</span>
+                    <span class="text-xl md:text-2xl font-bold text-[#212529] dark:text-white">{{ stats.total_projects }}</span>
+                    <span class="text-[10px] font-bold text-[#6C757D] uppercase tracking-widest">Open-Source
+                        Projects</span>
                 </div>
                 <div class="flex flex-col border-l border-[#DEE2E6] dark:border-[#333] pl-4 md:pl-10 min-w-max">
-                    <span
-                        class="text-xl md:text-2xl font-bold text-[#212529] dark:text-white">{{stats.total_publications}}</span>
-                    <span class="text-[10px] font-bold text-[#6C757D] uppercase tracking-widest">Publications</span>
+                    <span class="text-xl md:text-2xl font-bold text-[#212529] dark:text-white">{{ stats.total_tools }}+</span>
+                    <span class="text-[10px] font-bold text-[#6C757D] uppercase tracking-widest">Browser-Based
+                        Tools</span>
                 </div>
                 <div class="flex flex-col border-l border-[#DEE2E6] dark:border-[#333] pl-4 md:pl-10 min-w-max">
-                    <span
-                        class="text-xl md:text-2xl font-bold text-[#212529] dark:text-white">{{stats.total_researchers}}</span>
-                    <span class="text-[10px] font-bold text-[#6C757D] uppercase tracking-widest">Researchers</span>
+                    <span class="text-xl md:text-2xl font-bold text-[#212529] dark:text-white">{{ stats.total_stars }}</span>
+                    <span class="text-[10px] font-bold text-[#6C757D] uppercase tracking-widest">GitHub Stars</span>
                 </div>
             </div>
-
 
             <div class="flex flex-nowrap gap-3 md:gap-4 overflow-x-auto no-scrollbar py-2">
                 <a href="{% url 'projects:list' %}"
                     class="inline-flex items-center justify-center gap-2 px-4 md:px-6 py-2.5 bg-[#0D7C3D] text-white font-bold rounded-lg hover:bg-[#0A5C2C] transition-all shadow-md hover:shadow-lg text-xs md:text-sm whitespace-nowrap min-w-max">
                     <i class="fas fa-rocket text-[10px] md:text-xs"></i>
-                    Explore Research
+                    Explore Projects
                 </a>
-                <a href="{% url 'core:studio_py' %}"
+                <a href="{% url 'tools:index' %}"
                     class="inline-flex items-center justify-center gap-2 px-4 md:px-6 py-2.5 bg-white text-[#495057] font-bold rounded-lg hover:bg-[#F8F9FA] transition-all border border-[#DEE2E6] dark:bg-[#2D2D2D] dark:text-white dark:border-[#3D3D3D] dark:hover:bg-[#333] text-xs md:text-sm whitespace-nowrap min-w-max">
-                    <i class="fas fa-flask text-[10px] md:text-xs"></i>
-                    Launch Studio
+                    <i class="fas fa-wrench text-[10px] md:text-xs"></i>
+                    Browse Tools
                 </a>
             </div>
         </div>
-        <!-- Decorative elements shifted to classes -->
+        <!-- Decorative elements -->
         <div class="decorative-blob blob-gold top-0 right-0 w-80 h-80"></div>
         <div class="decorative-blob blob-white bottom-0 left-1/2 w-64 h-64 opacity-20"></div>
     </div>

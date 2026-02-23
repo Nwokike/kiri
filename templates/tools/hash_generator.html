@@ -1,7 +1,7 @@
 {% extends "tools/base_tool.html" %}
 {% load static %}
 
-{% block title %}Hash Generator & Verifier | Kiri Research{% endblock %}
+{% block title %}Hash Generator & Verifier | Kiri Labs{% endblock %}
 {% block meta_description %}Generate SHA-256, MD5, and SHA-512 hashes for text and files. Includes a built-in checksum verifier/comparator tool.{% endblock %}
 
 {% block tool_name %}Hash Tool{% endblock %}
@@ -158,7 +158,7 @@ Includes an integrity verifier to compare against expected checksums.
 
     async loadSample() {
         if (this.mode === 'text') {
-            this.inputText = "Kiri Research - Professional Client-Side Tools\n\nThis is a sample text used to demonstrate cryptographic hashing directly in your browser. All processing is 100% secure and happens on your device.";
+            this.inputText = "Kiri Labs - Professional Client-Side Tools\n\nThis is a sample text used to demonstrate cryptographic hashing directly in your browser. All processing is 100% secure and happens on your device.";
             this.calculate();
             this.statusMessage = 'Sample text loaded';
         } else {

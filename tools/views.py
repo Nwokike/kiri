@@ -53,9 +53,7 @@ def cron_generator(request):
 def jwt_parser(request):
     return render(request, 'tools/jwt_parser.html')
 
-@login_not_required
-def unit_converter(request):
-    return render(request, 'tools/unit_converter.html')
+
 
 @login_not_required
 def latex_editor(request):
@@ -81,9 +79,7 @@ def markdown_previewer(request):
 def html_entities(request):
     return render(request, 'tools/html_entities.html')
 
-@login_not_required
-def password_generator(request):
-    return render(request, 'tools/password_generator.html')
+
 
 @login_not_required
 def api_tester(request):
@@ -107,13 +103,7 @@ def pdf_merger(request):
 def pdf_text_extractor(request):
     return render(request, 'tools/pdf_text_extractor.html')
 
-@login_not_required
-def image_resizer(request):
-    return render(request, 'tools/image_resizer.html')
 
-@login_not_required
-def image_converter(request):
-    return render(request, 'tools/image_converter.html')
 
 @login_not_required
 def pdf_editor(request):
@@ -135,13 +125,7 @@ def pdf_to_image(request):
 def pdf_splitter(request):
     return render(request, 'tools/pdf_splitter.html')
 
-@login_not_required
-def heic_to_jpg(request):
-    return render(request, 'tools/heic_to_jpg.html')
 
-@login_not_required
-def image_compressor(request):
-    return render(request, 'tools/image_compressor.html')
 
 @login_not_required
 def exif_viewer(request):

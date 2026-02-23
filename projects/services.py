@@ -71,7 +71,7 @@ class GitHubService:
         api_url = f"{cls.BASE_API_URL}/{owner}/{repo}"
         headers = {
             'Accept': 'application/vnd.github.v3+json',
-            'User-Agent': 'Kiri-Research-Labs-Bot'
+            'User-Agent': 'Kiri-Labs-Bot'
         }
             
         try:
@@ -112,7 +112,7 @@ class GitHubService:
             
         try:
             url = f"https://raw.githubusercontent.com/{owner}/{repo}/HEAD/{path}"
-            headers = {'User-Agent': 'Kiri-Research-Labs-Bot'}
+            headers = {'User-Agent': 'Kiri-Labs-Bot'}
             response = requests.get(url, headers=headers, timeout=15)
             if response.status_code == 200:
                 content = response.text[:limit]
@@ -179,123 +179,3 @@ class GitHubService:
         result['readme'] = fetch_file('README.md', limit=5000)
         return result
 
-    # --- NEW WRITE CAPABILITIES (Phase 2) ---
-
-    @classmethod
-    def create_repository(cls, user, name, description, private=False):
-        """
-        Creates a new repository for the user.
-        Returns: (repo_data, error_message)
-        """
-        try:
-            # Get user's token
-            integration = user.integrations.filter(platform="github").first()
-            if not integration:
-                return None, "GitHub account not connected."
-
-            token = integration.get_decrypted_access_token()
-            headers = {
-                "Authorization": f"token {token}",
-                "Accept": "application/vnd.github.v3+json"
-            }
-            
-            payload = {
-                "name": name,
-                "description": description,
-                "private": private,
-                "auto_init": True  # Create with README so we can commit immediately
-            }
-            
-            resp = requests.post("https://api.github.com/user/repos", json=payload, headers=headers)
-            
-            if resp.status_code == 201:
-                return resp.json(), None
-            elif resp.status_code == 422:
-                return None, "Repository name already exists."
-            else:
-                return None, f"GitHub Error: {resp.status_code}"
-        except Exception as e:
-            logger.error(f"Create Repo Error: {e}")
-            return None, str(e)
-
-    @classmethod
-    def commit_files(cls, user, repo_full_name, files, commit_message="Update from Kiri Studio"):
-        """
-        Commits multiple files to a repo using the Git Tree API.
-        files: dict of {'filename': 'content'}
-        """
-        try:
-            integration = user.integrations.filter(platform="github").first()
-            if not integration:
-                return None, "GitHub not connected"
-            
-            token = integration.get_decrypted_access_token()
-            headers = {"Authorization": f"token {token}", "Accept": "application/vnd.github.v3+json"}
-            base_url = f"https://api.github.com/repos/{repo_full_name}"
-
-            # 1. Get reference to HEAD
-            ref_resp = requests.get(f"{base_url}/git/ref/heads/main", headers=headers)
-            if ref_resp.status_code != 200:
-                ref_resp = requests.get(f"{base_url}/git/ref/heads/master", headers=headers)
-            
-            if ref_resp.status_code != 200:
-                # If fresh empty repo, getting ref might fail. 
-                # But we used auto_init=True, so main should exist.
-                return None, "Could not find branch (main/master)"
-            
-            latest_commit_sha = ref_resp.json()["object"]["sha"]
-
-            # 2. Create Blobs (Files)
-            tree_items = []
-            for filename, content in files.items():
-                blob_resp = requests.post(f"{base_url}/git/blobs", json={
-                    "content": content,
-                    "encoding": "utf-8"
-                }, headers=headers)
-                
-                if blob_resp.status_code == 201:
-                    tree_items.append({
-                        "path": filename,
-                        "mode": "100644",
-                        "type": "blob",
-                        "sha": blob_resp.json()["sha"]
-                    })
-            
-            # 3. Create Tree
-            tree_resp = requests.post(f"{base_url}/git/trees", json={
-                "base_tree": latest_commit_sha,
-                "tree": tree_items
-            }, headers=headers)
-            
-            if tree_resp.status_code != 201:
-                return None, "Failed to create git tree"
-                
-            new_tree_sha = tree_resp.json()["sha"]
-
-            # 4. Create Commit
-            commit_resp = requests.post(f"{base_url}/git/commits", json={
-                "message": commit_message,
-                "tree": new_tree_sha,
-                "parents": [latest_commit_sha]
-            }, headers=headers)
-            
-            if commit_resp.status_code != 201:
-                return None, "Failed to create commit"
-                
-            new_commit_sha = commit_resp.json()["sha"]
-
-            # 5. Update Reference (Push)
-            branch_ref = ref_resp.json()['ref'].replace('refs/', '')
-            
-            push_resp = requests.patch(f"{base_url}/git/refs/{branch_ref}", json={
-                "sha": new_commit_sha
-            }, headers=headers)
-            
-            if push_resp.status_code == 200:
-                return push_resp.json(), None
-            else:
-                return None, "Failed to push commit"
-
-        except Exception as e:
-            logger.error(f"Commit Error: {e}")
-            return None, str(e)

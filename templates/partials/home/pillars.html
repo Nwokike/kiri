@@ -1,31 +1,30 @@
 {% load static %}
-<!-- The Pillars (Feature Grid) -->
+<!-- Feature Grid -->
 <section class="mb-16">
     <div class="grid md:grid-cols-3 gap-6">
-        <!-- Laboratory -->
+        <!-- Projects -->
         <div
             class="p-6 md:p-8 bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#333] rounded-xl hover:border-[#0D7C3D] transition-colors group">
 
             <div
                 class="w-12 h-12 bg-[#E8F5ED] dark:bg-[#0D7C3D]/10 rounded-lg flex items-center justify-center text-[#0D7C3D] mb-6">
-                <i class="fas fa-microscope text-xl"></i>
+                <i class="fas fa-briefcase text-xl"></i>
             </div>
             <h3
                 class="text-xl font-bold text-[#212529] dark:text-white mb-3 group-hover:text-[#0D7C3D] transition-colors">
-                Laboratory</h3>
+                Projects</h3>
             <p class="text-[#6C757D] dark:text-[#A1A1AA] text-sm leading-relaxed mb-6">
-                Access our extensive library of research publications, papers, and case studies across various AI
-                domains.
+                Our open-source projects with GitHub integration, live demos, and AI-powered analysis.
             </p>
-            <a href="{% url 'publications:list' %}"
+            <a href="{% url 'projects:list' %}"
                 class="inline-flex items-center gap-2 text-sm font-bold text-[#0D7C3D] hover:underline">
-                Browse Library <i class="fas fa-arrow-right text-[10px]"></i>
+                Browse Projects <i class="fas fa-arrow-right text-[10px]"></i>
             </a>
         </div>
 
-        <!-- Workshop -->
+        <!-- Tools -->
         <div
-            class="p-6 md:p-8 bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#333] rounded-xl hover:border-[#0D7C3D] transition-colors group">
+            class="p-6 md:p-8 bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#333] rounded-xl hover:border-[#C4992E] transition-colors group">
 
             <div
                 class="w-12 h-12 bg-[#FDF5E6] dark:bg-[#C4992E]/10 rounded-lg flex items-center justify-center text-[#C4992E] mb-6">
@@ -33,36 +32,35 @@
             </div>
             <h3
                 class="text-xl font-bold text-[#212529] dark:text-white mb-3 group-hover:text-[#C4992E] transition-colors">
-                Workshop</h3>
+                Tools Hub</h3>
             <p class="text-[#6C757D] dark:text-[#A1A1AA] text-sm leading-relaxed mb-6">
-                Build and test your models in our professional Kiri Studio environments for Python and JavaScript.
+                30+ browser-based developer utilities. JSON formatters, PDF editors, data profilers, and more — all
+                running locally.
             </p>
-            <div class="flex gap-4">
-                <a href="{% url 'core:studio_py' %}" class="text-sm font-bold text-[#C4992E] hover:underline">Py
-                    Studio</a>
-                <a href="{% url 'core:studio_js' %}" class="text-sm font-bold text-[#C4992E] hover:underline">JS
-                    Studio</a>
-            </div>
+            <a href="{% url 'tools:index' %}"
+                class="inline-flex items-center gap-2 text-sm font-bold text-[#C4992E] hover:underline">
+                Access Tools Hub <i class="fas fa-arrow-right text-[10px]"></i>
+            </a>
         </div>
 
-        <!-- Utility -->
+        <!-- About -->
         <div
-            class="p-6 md:p-8 bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#333] rounded-xl hover:border-[#0D7C3D] transition-colors group">
+            class="p-6 md:p-8 bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#333] rounded-xl hover:border-blue-600 transition-colors group">
 
             <div
                 class="w-12 h-12 bg-blue-50 dark:bg-blue-900/10 rounded-lg flex items-center justify-center text-blue-600 mb-6">
-                <i class="fas fa-bolt text-xl"></i>
+                <i class="fas fa-info-circle text-xl"></i>
             </div>
             <h3
                 class="text-xl font-bold text-[#212529] dark:text-white mb-3 group-hover:text-blue-600 transition-colors">
-                Utility</h3>
+                About Us</h3>
             <p class="text-[#6C757D] dark:text-[#A1A1AA] text-sm leading-relaxed mb-6">
-                Essential developer utilities, formatters, and converters to streamline your daily research
-                workflow.
+                Software and AI focused on being lightweight, small, and efficient. Learn more about what we do and
+                how we work.
             </p>
-            <a href="{% url 'tools:index' %}"
+            <a href="{% url 'core:about' %}"
                 class="inline-flex items-center gap-2 text-sm font-bold text-blue-600 hover:underline">
-                Access Tools Hub <i class="fas fa-arrow-right text-[10px]"></i>
+                Learn More <i class="fas fa-arrow-right text-[10px]"></i>
             </a>
         </div>
     </div>

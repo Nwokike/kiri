@@ -1,19 +1,19 @@
 import logging
 from django.core.exceptions import DisallowedHost
 
+
 class DisallowedHostFilter(logging.Filter):
     """
     Filter that silences DisallowedHost exceptions in logs.
-    These are usually caused by bots and script kiddies.
+    These are usually caused by bots and scanners.
     """
     def filter(self, record):
         if record.exc_info:
-            exc_type, exc_value, _ = record.exc_info
-            if issubclass(exc_type, DisallowedHost):
+            exc_type = record.exc_info[0]
+            if exc_type is not None and isinstance(exc_type, type) and issubclass(exc_type, DisallowedHost):
                 return False
-        
-        # Also catch the error message if it's already formatted
+
         if "Invalid HTTP_HOST header" in record.getMessage():
             return False
-            
+
         return True

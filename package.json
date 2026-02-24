@@ -1,11 +1,11 @@
 {
   "name": "kiri",
   "version": "1.0.0",
-  "description": "Kiri Labs — Software & AI, built lightweight and efficient",
+  "description": "Kiri Labs — Software & Utilities, built lightweight and efficient",
   "scripts": {
     "build": "npm run build:css",
-    "build:css": "npx @tailwindcss/cli -i ./assets/css/input.css -o ./static/css/output.css --minify",
-    "watch:css": "npx @tailwindcss/cli -i ./assets/css/input.css -o ./static/css/output.css --watch"
+    "build:css": "npx @tailwindcss/cli -i ./static/css/global.css -o ./static/css/output.css --minify",
+    "watch:css": "npx @tailwindcss/cli -i ./static/css/global.css -o ./static/css/output.css --watch"
   },
   "devDependencies": {
     "@tailwindcss/cli": "^4.1.18",

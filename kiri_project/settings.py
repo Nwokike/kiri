@@ -53,8 +53,6 @@ INSTALLED_APPS = [
     "users.providers.huggingface",  # Custom Hugging Face provider
     "django_htmx",
     "pwa",
-    "storages",             # S3/R2 Storage
-    "turnstile",            # Cloudflare Captcha
     # Local
     "core",
     "users",
@@ -157,31 +155,6 @@ WHITENOISE_CUSTOM_HEADERS = [
     }),
 ]
 
-# Storage Configuration (Cloudflare R2 for Prod / Media)
-STORAGES = {
-    "default": {
-        "BACKEND": "storages.backends.s3.S3Storage",
-        "OPTIONS": {
-            "bucket_name": os.environ.get("R2_BUCKET_NAME"),
-            "access_key": os.environ.get("R2_ACCESS_KEY_ID"),
-            "secret_key": os.environ.get("R2_SECRET_ACCESS_KEY"),
-            "endpoint_url": os.environ.get("R2_ENDPOINT_URL"),
-            "region_name": "auto",
-            "default_acl": "public-read",
-            "querystring_auth": False,
-        }
-    } if not DEBUG else {
-        "BACKEND": "django.core.files.storage.FileSystemStorage"
-    },
-    "staticfiles": {"BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage"},
-}
-
-# AWS / R2 Settings for Boto3 (Backups)
-AWS_ACCESS_KEY_ID = os.environ.get("R2_ACCESS_KEY_ID")
-AWS_SECRET_ACCESS_KEY = os.environ.get("R2_SECRET_ACCESS_KEY")
-AWS_STORAGE_BUCKET_NAME = os.environ.get("R2_BACKUP_BUCKET_NAME") or os.environ.get("R2_BUCKET_NAME")
-AWS_S3_ENDPOINT_URL = os.environ.get("R2_ENDPOINT_URL")
-
 # Media files
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
@@ -218,18 +191,13 @@ AUTHENTICATION_BACKENDS = [
 # Allauth settings
 ACCOUNT_LOGIN_METHODS = {"email"}
 ACCOUNT_SIGNUP_FIELDS = ["email*"]
-ACCOUNT_EMAIL_VERIFICATION = "mandatory"  # Required for code-based verification
+ACCOUNT_EMAIL_VERIFICATION = "none" 
 ACCOUNT_CONFIRM_EMAIL_ON_GET = True
 ACCOUNT_USER_MODEL_USERNAME_FIELD = "username"
 ACCOUNT_UNIQUE_EMAIL = True
 
-# Code-based email verification (OTP style)
-ACCOUNT_EMAIL_VERIFICATION_BY_CODE_ENABLED = True
-ACCOUNT_LOGIN_BY_CODE_ENABLED = True  # Magic code login
-
-# Rate limits (replaces deprecated ACCOUNT_EMAIL_CONFIRMATION_COOLDOWN)
+# Rate limits
 ACCOUNT_RATE_LIMITS = {
-    "confirm_email": "3/m",  # 3 requests per minute
     "login": "5/m",
     "login_failed": "10/m/ip",
 }
@@ -268,17 +236,6 @@ ACCOUNT_FORMS = {
     'signup': 'users.forms.CustomSignupForm',
 }
 
-# Cloudflare Turnstile Settings
-TURNSTILE_SITEKEY = os.environ.get("TURNSTILE_SITEKEY", "1x00000000000000000000AA") # Test key
-TURNSTILE_SECRET = os.environ.get("TURNSTILE_SECRETKEY") or os.environ.get("TURNSTILE_SECRET", "1x0000000000000000000000000000000AA") # Test key
-
-# AI Settings
-AI_MODEL_NAME_GEMINI = os.environ.get("GEMINI_MODEL", "gemini-2.5-flash")
-
-if not DEBUG and TURNSTILE_SITEKEY == "1x00000000000000000000AA":
-    import logging
-    logging.getLogger(__name__).warning("TURNSTILE_SITEKEY is set to test key in production!")
-
 # Django 6.0 Native Tasks Configuration
 TASKS = {
     "default": {
@@ -286,19 +243,8 @@ TASKS = {
     },
 }
 
-# Email
-if os.environ.get("EMAIL_HOST"):
-    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
-    EMAIL_HOST = os.environ.get("EMAIL_HOST")
-    EMAIL_PORT = int(os.environ.get("EMAIL_PORT", 587))
-    EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "True") == "True"
-    EMAIL_USE_SSL = os.environ.get("EMAIL_USE_SSL", "False") == "True"
-    EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER")
-    EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD")
-    EMAIL_FAIL_SILENTLY = not DEBUG  # Surface errors in development
-else:
-    EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-
+# Email - Console backend only (Showcase mode)
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@kiri.ng")
 SITE_URL = os.environ.get("SITE_URL", "https://kiri.ng")
 
@@ -324,7 +270,7 @@ if not DEBUG or TESTING:
         "'unsafe-inline'",
         "'unsafe-eval'",  # Required for Alpine.js
         "https://cdn.jsdelivr.net",
-        "https://challenges.cloudflare.com",
+        "https://cdn.jsdelivr.net",
         "https://cdnjs.cloudflare.com",
         "https://www.googletagmanager.com",
         "https://pagead2.googlesyndication.com",
@@ -355,7 +301,7 @@ if not DEBUG or TESTING:
         "https://unpkg.com",
         "blob:",
     )
-    CSP_FRAME_SRC = ("'self'", "https://challenges.cloudflare.com", "https://www.youtube-nocookie.com")
+    CSP_FRAME_SRC = ("'self'", "https://www.youtube-nocookie.com")
     CSP_OBJECT_SRC = ("'none'",)
     
     # Performance

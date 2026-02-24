@@ -1,7 +1,7 @@
 from django.db import models
 from django.conf import settings
 from django.utils.text import slugify
-
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 class Project(models.Model):
     """Project showcase for Kiri Labs."""
@@ -29,7 +29,7 @@ class Project(models.Model):
     # Links
     github_repo_url = models.URLField(help_text="URL to the GitHub repository")
     demo_url = models.URLField(blank=True, null=True, help_text="Live demo URL (e.g. Vercel/Cloudflare deployment)")
-    huggingface_url = models.URLField(blank=True, help_text="Link to Hugging Face model/dataset")
+    huggingface_url = models.URLField(blank=True, null=True, help_text="Link to Hugging Face model/dataset")
 
     # Metrics (Synced from GitHub + Internal)
     stars_count = models.IntegerField(default=0)
@@ -41,7 +41,13 @@ class Project(models.Model):
     # Status
     is_hot = models.BooleanField(default=False, help_text="Automated 'HOT' status based on engagement")
     is_approved = models.BooleanField(default=False)
-    submitted_by = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name="projects")
+    submitted_by = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.SET_NULL,
+        null=True,
+        blank=True,
+        related_name="projects",
+    )
     
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -75,28 +81,3 @@ class Project(models.Model):
     def get_absolute_url(self):
         from django.urls import reverse
         return reverse("projects:detail", kwargs={"slug": self.slug})
-
-
-class ProjectInsight(models.Model):
-    """AI-generated insights for a project."""
-    project = models.OneToOneField(Project, on_delete=models.CASCADE, related_name='insight')
-    
-    summary = models.TextField(help_text="AI-generated 2-3 sentence summary")
-    tech_stack = models.JSONField(default=list, help_text="Detected languages and frameworks")
-    complexity_score = models.IntegerField(default=5, help_text="1-10 rating of code complexity")
-    complexity_reason = models.TextField(blank=True, help_text="Why this score was given")
-    
-    improvements = models.JSONField(default=list, help_text="List of suggested code improvements")
-    roadmap = models.JSONField(default=list, help_text="Suggested next steps/features")
-    
-    last_analyzed_at = models.DateTimeField(auto_now=True)
-    ai_model_used = models.CharField(max_length=50, default="gemini-2.5-flash")
-    
-    class Meta:
-        ordering = ['-last_analyzed_at']
-        indexes = [
-            models.Index(fields=['complexity_score']),
-        ]
-
-    def __str__(self):
-        return f"Insight for {self.project.name}"

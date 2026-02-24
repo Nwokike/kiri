@@ -11,17 +11,4 @@ urlpatterns = [
     path('terms/', views.terms, name='terms'),
     path('refund/', views.refund_policy, name='refund_policy'),
     path('health/', views.health, name='health'),
-    
-
-    
-    # Notifications & Favorites
-    path('notifications/', views.notifications_list, name='notifications'),
-    path('notifications/read/<int:pk>/', views.mark_notification_read, name='mark_notification_read'),
-    path('notifications/clear/', views.mark_all_notifications_read, name='clear_notifications'),
-    path('favorites/', views.favorites_list, name='favorites'),
-    path('favorite/toggle/<int:content_type_id>/<int:object_id>/', views.toggle_favorite, name='toggle_favorite'),
-    
-    # Comments
-    path('comments/post/<int:content_type_id>/<int:object_id>/', views.add_comment, name='add_comment'),
-    path('comments/delete/<int:pk>/', views.delete_comment, name='delete_comment'),
 ]

@@ -125,10 +125,10 @@ class ProjectFormTests(TestCase):
             'github_repo_url': 'https://github.com/foo/bar',
             'topics': '["nlp", "cv", "transformers"]',
         })
-        del form.fields['turnstile']
         
         self.assertTrue(form.is_valid(), form.errors)
         self.assertEqual(form.cleaned_data['topics'], ['nlp', 'cv', 'transformers'])
+
 
 
 class ImportLandingViewTests(TestCase):

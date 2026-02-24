@@ -33,6 +33,7 @@ class StaticViewSitemap(Sitemap):
             'tools:markdown_to_pdf',
             'tools:image_to_pdf',
             'tools:pdf_to_image',
+       
             'tools:pdf_splitter',
             'tools:pdf_merger',
             'tools:pdf_text_extractor',

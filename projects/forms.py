@@ -1,45 +1,53 @@
+import json
 from django import forms
 from .models import Project
-from turnstile.fields import TurnstileField
+
 
 class ProjectSubmissionForm(forms.ModelForm):
-    turnstile = TurnstileField(theme='auto')
-
     class Meta:
         model = Project
         fields = [
-            'name', 
-            'description', 
-            'category', 
-            'github_repo_url', 
-            'demo_url', 
-            'huggingface_url', 
-            'language', 
-            'topics'
+            'name',
+            'description',
+            'category',
+            'github_repo_url',
+            'demo_url',
+            'huggingface_url',
+            'language',
+            'topics',
         ]
         widgets = {
             'description': forms.Textarea(attrs={
                 'rows': 4,
-                'class': 'w-full p-3 rounded-lg border border-border bg-bg-primary text-text-primary focus:border-brand-green focus:ring-1 focus:ring-brand-green dark:bg-dark-surface dark:border-dark-border dark:text-dark-text'
+                'placeholder': 'Describe the project in a few sentences...',
             }),
             'topics': forms.TextInput(attrs={
-                'placeholder': 'e.g. transformers, cv, nlp (comma separated)',
-                'class': 'w-full p-3 rounded-lg border border-border bg-bg-primary text-text-primary focus:border-brand-green focus:ring-1 focus:ring-brand-green dark:bg-dark-surface dark:border-dark-border dark:text-dark-text'
-            }),
-            'language': forms.TextInput(attrs={
-                'placeholder': 'e.g. Python, JavaScript',
-                'class': 'w-full p-3 rounded-lg border border-border bg-bg-primary text-text-primary focus:border-brand-green focus:ring-1 focus:ring-brand-green dark:bg-dark-surface dark:border-dark-border dark:text-dark-text'
+                'placeholder': 'e.g. nlp, transformer, edge-ai',
             }),
         }
         help_texts = {
-            'github_repo_url': 'Public GitHub repository URL (required for stats sync).',
-            'topics': 'Tags will be auto-synced from GitHub if left empty.',
+            'github_repo_url': 'Full GitHub repository URL (e.g. https://github.com/user/repo)',
+            'topics': 'Comma-separated tags. Auto-synced from GitHub if left empty.',
+            'demo_url': 'Optional live demo or paper URL.',
+            'huggingface_url': 'Optional Hugging Face model/dataset URL.',
         }
 
     def clean_topics(self):
-        # Convert comma separated string to list if entered manually
-        data = self.cleaned_data['topics']
-        if isinstance(data, str):
-            # Split by comma, strip whitespace, filtering empty strings
-            return [t.strip() for t in data.split(',') if t.strip()]
-        return data
+        data = self.cleaned_data.get('topics', '')
+        if not data:
+            return []
+        # Handle pre-filled JSON array strings (e.g. from import flow)
+        if isinstance(data, list):
+            topics = data
+        else:
+            try:
+                parsed = json.loads(data)
+                if isinstance(parsed, list):
+                    topics = parsed
+                else:
+                    topics = [str(parsed)]
+            except (json.JSONDecodeError, ValueError):
+                topics = [t.strip() for t in data.split(',') if t.strip()]
+        # Enforce limits
+        topics = [str(t)[:50] for t in topics[:20]]
+        return topics

@@ -6,8 +6,7 @@ from django.views.decorators.http import require_POST
 from django.db.models import Case, When, Value, IntegerField
 from django.core.cache import cache
 import nh3
-from .models import Comment, Favorite, Notification
-from .forms import CommentForm
+from .models import ErrorLog
 
 
 @login_not_required
@@ -80,41 +79,8 @@ def terms(request):
 
 @login_not_required
 def contact(request):
-    """Contact page with email form."""
-    from django.core.mail import send_mail
-    from django.conf import settings
-    from .forms import ContactForm
-    
-    success = False
-    email = None
-    
-    if request.method == 'POST':
-        form = ContactForm(request.POST)
-        if form.is_valid():
-            name = form.cleaned_data['name']
-            email = form.cleaned_data['email']
-            subject = form.cleaned_data['subject']
-            message = form.cleaned_data['message']
-            
-            try:
-                send_mail(
-                    subject=f"[Kiri Contact] {subject}",
-                    message=f"From: {name} <{email}>\n\n{message}",
-                    from_email=settings.DEFAULT_FROM_EMAIL,
-                    recipient_list=[settings.CONTACT_EMAIL],
-                    fail_silently=False,
-                )
-                success = True
-            except Exception as e:
-                form.add_error(None, f"Failed to send email: {e}")
-    else:
-        form = ContactForm()
-    
-    return render(request, "core/contact.html", {
-        'form': form,
-        'success': success,
-        'email': email,
-    })
+    """Contact page with static information."""
+    return render(request, "core/contact.html")
 
 
 @login_not_required
@@ -209,165 +175,4 @@ def silent_asset(request, filename):
     return HttpResponse("", content_type="application/javascript")
 
 
-@login_required
-@require_POST
-def add_comment(request, content_type_id, object_id):
-    """HTMX View to add a comment."""
-    content_type = get_object_or_404(ContentType, id=content_type_id)
-    obj = get_object_or_404(content_type.model_class(), id=object_id)
-    
-    # Rate Limiting (30s cooldown)
-    from django.conf import settings
-    is_testing = getattr(settings, 'TESTING', False)
-    cache_key = f"comment_rate_{request.user.id}"
-    
-    if not is_testing:
-        if cache.get(cache_key):
-            return HttpResponse("Please wait before commenting again.", status=429)
 
-    form = CommentForm(request.POST) 
-    if form.is_valid():
-        comment = form.save(commit=False)
-        
-        # Sanitize Content
-        comment.content = nh3.clean(
-            comment.content,
-            tags={'b', 'i', 'code', 'pre', 'strong', 'em'},
-            attributes={}
-        )
-        
-        comment.author = request.user
-        comment.content_object = obj
-        
-        parent_id = request.POST.get('parent_id')
-        if parent_id:
-            parent = get_object_or_404(Comment, id=parent_id)
-            comment.parent = parent
-            
-        comment.save()
-        
-        # Set rate limit
-        if not is_testing:
-            cache.set(cache_key, True, 30)
-        
-        # Return the new comment rendered as HTML
-        return render(request, 'core/partials/comment_item.html', {'comment': comment})
-    
-    # Return errors for HTMX to display
-    return render(request, 'core/partials/comment_form_errors.html', {
-        'errors': form.errors
-    }, status=400)
-
-
-# ============================================================================
-# FAVORITES
-# ============================================================================
-
-def favorites_list(request):
-    """Display user's favorited items."""
-    from django.contrib.contenttypes.prefetch import GenericPrefetch
-    from projects.models import Project
-    
-    favorites = Favorite.objects.filter(
-        user=request.user
-    ).select_related('content_type').prefetch_related(
-        GenericPrefetch(
-            'content_object',
-            [Project.objects.select_related('submitted_by')]
-        )
-    ).order_by('-created_at')
-    
-    return render(request, 'core/favorites.html', {
-        'favorites': favorites,
-    })
-
-
-@require_POST
-def toggle_favorite(request, content_type_id, object_id):
-    """Toggle favorite status for an item. HTMX compatible."""
-    content_type = get_object_or_404(ContentType, id=content_type_id)
-    obj = get_object_or_404(content_type.model_class(), id=object_id)
-    
-    favorite, created = Favorite.objects.get_or_create(
-        user=request.user,
-        content_type=content_type,
-        object_id=object_id,
-    )
-    
-    if not created:
-        # Already exists, remove it
-        favorite.delete()
-        is_favorited = False
-    else:
-        is_favorited = True
-        # Queue GitHub star sync if user has repo scope
-        try:
-            from kiri_project.tasks import sync_github_star
-            sync_github_star.enqueue(favorite.id)
-        except Exception as e:
-            import logging
-            logging.getLogger(__name__).warning(f"Failed to queue GitHub star sync: {e}")
-    
-    # Return updated button for HTMX
-    return render(request, 'core/partials/favorite_button.html', {
-        'obj': obj,
-        'content_type': content_type,
-        'is_favorited': is_favorited,
-    })
-
-
-# ============================================================================
-# NOTIFICATIONS
-# ============================================================================
-
-def notifications_list(request):
-    """Display user's notifications."""
-    # 4.1: Fix unread_count logic to count against full set
-    unread_count = Notification.objects.filter(recipient=request.user, is_read=False).count()
-    
-    notifications = Notification.objects.filter(
-        recipient=request.user
-    ).select_related('actor').order_by('-created_at')[:50]
-    
-    return render(request, 'core/notifications.html', {
-        'notifications': notifications,
-        'unread_count': unread_count,
-    })
-
-
-@require_POST
-def mark_notification_read(request, pk):
-    """Mark a single notification as read."""
-    notification = get_object_or_404(Notification, pk=pk, recipient=request.user)
-    notification.is_read = True
-    notification.save(update_fields=['is_read'])
-    
-    if request.htmx:
-        return HttpResponse('')
-    return JsonResponse({'status': 'ok'})
-
-
-@require_POST
-def mark_all_notifications_read(request):
-    """Mark all notifications as read."""
-    Notification.objects.filter(recipient=request.user, is_read=False).update(is_read=True)
-    
-    if request.htmx:
-        return render(request, 'core/partials/notifications_empty.html')
-    return JsonResponse({'status': 'ok'})
-
-
-@login_required
-@require_POST
-def delete_comment(request, pk):
-    """HTMX View to delete a comment."""
-    comment = get_object_or_404(Comment, pk=pk)
-    
-    # Permission Check: Author or Staff
-    if comment.author == request.user or request.user.is_staff:
-        comment.delete()
-        if request.htmx:
-            return render(request, 'core/partials/comment_deleted_placeholder.html', {'comment_id': pk})
-        return JsonResponse({'status': 'ok'})
-    
-    return HttpResponse("You don't have permission to delete this comment.", status=403)

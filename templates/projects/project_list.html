@@ -1,152 +1,116 @@
 {% extends "base.html" %}
+{% load static %}
 
-{% block title %}Projects | Kiri{% endblock %}
-
-{% block meta_description %}Explore our open-source projects and tools. Built lightweight and efficient.{% endblock %}
-
-{% block og_title %}Projects | Kiri Labs{% endblock %}
-{% block og_description %}Our open-source projects — software and AI, built small and efficient.{% endblock %}
-
+{% block title %}Projects — Kiri Research Labs{% endblock %}
+{% block meta_description %}Browse AI/ML research projects, developer tools, and open-source work from the Kiri Research
+community.{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-6 py-8">
-    <!-- Page Header -->
-    <header class="mb-8">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
-            <div>
-                <h1 class="text-2xl font-bold text-[#212529] dark:text-white">Projects</h1>
-                <p class="text-[#6C757D] dark:text-[#A1A1AA] mt-1">
-                    Our open-source projects and tools.
-                </p>
-            </div>
+<div class="max-w-7xl mx-auto px-4 py-8">
 
-            <div class="flex items-center gap-3">
-                {% if user.is_staff %}
-                <a href="{% url 'projects:create' %}"
-                    class="px-4 py-2 bg-[#0D7C3D] text-white text-sm font-bold rounded-lg hover:bg-[#0A5C2C] transition-all shadow-sm">
-                    <i class="fas fa-plus mr-2 text-[10px]"></i>New Project
-                </a>
+    <!-- Page Header -->
+    <div class="mb-8">
+        <h1 class="text-2xl font-bold text-[#212529] dark:text-white">Projects</h1>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">Showcasing AI, ML, and software research from our
+            community.</p>
+    </div>
+
+    <!-- Filters -->
+    <form method="get" class="flex flex-wrap gap-2 mb-6" id="filter-form">
+        <select name="category" onchange="this.form.submit()"
+            class="text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1E1E1E] px-3 py-1.5 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0D7C3D]">
+            <option value="">All Categories</option>
+            {% for value, label in categories %}
+            <option value="{{ value }}" {% if current_category == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
+        </select>
+
+        <select name="sort" onchange="this.form.submit()"
+            class="text-sm rounded-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-[#1E1E1E] px-3 py-1.5 text-gray-700 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-[#0D7C3D]">
+            <option value="-created_at" {% if current_sort == "-created_at" %}selected{% endif %}>Newest</option>
+            <option value="-stars_count" {% if current_sort == "-stars_count" %}selected{% endif %}>Most Stars</option>
+            <option value="name" {% if current_sort == "name" %}selected{% endif %}>A–Z</option>
+        </select>
+    </form>
+
+    <!-- Project Grid -->
+    {% if projects %}
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        {% for project in projects %}
+        <a href="{{ project.get_absolute_url }}"
+            class="group block bg-white dark:bg-[#1E1E1E] rounded-xl border border-gray-200 dark:border-gray-700 p-5 hover:shadow-md hover:border-[#0D7C3D]/50 transition-all duration-200">
+
+            <!-- Category Badge + Hot -->
+            <div class="flex items-center gap-2 mb-3">
+                <span
+                    class="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full bg-[#E8F5ED] text-[#0D7C3D] dark:bg-[#0D7C3D]/20 dark:text-[#4ADE80]">
+                    {{ project.get_category_display }}
+                </span>
+                {% if project.is_hot %}
+                <span
+                    class="text-[10px] font-bold uppercase tracking-wide px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
+                    🔥 Hot
+                </span>
                 {% endif %}
             </div>
-        </div>
 
-        <!-- Filters -->
-        <div class="flex flex-wrap items-center gap-2 mt-6">
-            <a href="{% url 'projects:list' %}"
-                class="px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all
-                {% if not request.GET.category and not request.GET.hot %}bg-[#0D7C3D] text-white shadow-sm{% else %}bg-white text-[#6C757D] border border-[#DEE2E6] hover:bg-[#F8F9FA] dark:bg-[#1E1E1E] dark:border-[#333] dark:text-[#A1A1AA]{% endif %}">
-                All
-            </a>
-            <a href="?category=ai_nlp"
-                class="px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all
-                {% if request.GET.category == 'ai_nlp' %}bg-[#0D7C3D] text-white shadow-sm{% else %}bg-white text-[#6C757D] border border-[#DEE2E6] hover:bg-[#F8F9FA] dark:bg-[#1E1E1E] dark:border-[#333] dark:text-[#A1A1AA]{% endif %}">
-                AI / NLP
-            </a>
-            <a href="?category=ai_vision"
-                class="px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all
-                {% if request.GET.category == 'ai_vision' %}bg-[#0D7C3D] text-white shadow-sm{% else %}bg-white text-[#6C757D] border border-[#DEE2E6] hover:bg-[#F8F9FA] dark:bg-[#1E1E1E] dark:border-[#333] dark:text-[#A1A1AA]{% endif %}">
-                Computer Vision
-            </a>
-            <a href="?hot=true"
-                class="px-3.5 py-1.5 text-xs font-bold rounded-lg transition-all
-                {% if request.GET.hot %}bg-[#C4992E] text-white shadow-sm{% else %}bg-white text-[#6C757D] border border-[#DEE2E6] hover:bg-[#F8F9FA] dark:bg-[#1E1E1E] dark:border-[#333] dark:text-[#A1A1AA]{% endif %}">
-                <i class="fas fa-fire mr-1"></i> Trending
-            </a>
+            <!-- Title -->
+            <h2
+                class="font-semibold text-[#212529] dark:text-white group-hover:text-[#0D7C3D] dark:group-hover:text-[#4ADE80] transition-colors line-clamp-1">
+                {{ project.name }}
+            </h2>
 
-            <div class="ml-auto">
-                <select onchange="window.location.href=this.value"
-                    class="px-3 py-1.5 bg-white border border-[#DEE2E6] rounded-lg text-xs font-bold text-[#6C757D] focus:outline-none focus:border-[#0D7C3D] dark:bg-[#1E1E1E] dark:border-[#333] dark:text-[#A1A1AA] appearance-none cursor-pointer">
-                    <option value="?sort=-created_at">Newest</option>
-                    <option value="?sort=-stars_count">Most Stars</option>
-                </select>
-            </div>
-        </div>
-    </header>
+            <!-- Description -->
+            <p class="mt-1.5 text-sm text-gray-500 dark:text-gray-400 line-clamp-2">{{ project.description }}</p>
 
-    <!-- Submission Area -->
-    <div id="submission-area" class="empty:hidden mb-6"></div>
-
-    <!-- Projects Grid -->
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {% for project in projects %}
-        <article
-            class="bg-white rounded-xl border border-[#DEE2E6] hover:border-[#0D7C3D] hover:shadow-md transition-all dark:bg-[#1E1E1E] dark:border-[#333] dark:hover:border-[#0D7C3D] group">
-            <div class="p-5">
-                <div class="flex items-start justify-between mb-3">
-                    <span
-                        class="px-2 py-1 text-[9px] font-bold bg-[#E8F5ED] text-[#0D7C3D] rounded uppercase tracking-wider dark:bg-[#0D7C3D]/10">
-                        {{ project.language|default:"Project" }}
-                    </span>
-                    {% if project.is_hot %}
-                    <span class="flex items-center gap-1 text-[9px] font-bold text-[#C4992E] uppercase tracking-wider">
-                        <i class="fas fa-fire"></i> HOT
-                    </span>
+            <!-- Meta -->
+            <div class="mt-4 flex items-center justify-between text-xs text-gray-400 dark:text-gray-500">
+                <div class="flex items-center gap-3">
+                    {% if project.language %}
+                    <span><i class="fas fa-circle text-[8px] mr-1 text-[#0D7C3D]"></i>{{ project.language }}</span>
+                    {% endif %}
+                    {% if project.stars_count %}
+                    <span><i class="fas fa-star mr-1"></i>{{ project.stars_count }}</span>
+                    {% endif %}
+                    {% if project.forks_count %}
+                    <span><i class="fas fa-code-branch mr-1"></i>{{ project.forks_count }}</span>
                     {% endif %}
                 </div>
-
-                <h3
-                    class="text-base font-bold text-[#212529] dark:text-white mb-2 group-hover:text-[#0D7C3D] transition-colors">
-                    <a href="{% url 'projects:detail' project.slug %}">{{ project.name }}</a>
-                </h3>
-
-                <p class="text-[13px] text-[#6C757D] dark:text-[#A1A1AA] line-clamp-2 mb-4 leading-relaxed">
-                    {{ project.description }}
-                </p>
-
-                <div
-                    class="flex items-center justify-between text-[11px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-tighter">
-                    <div class="flex items-center gap-3">
-                        <span class="flex items-center gap-1">
-                            <i class="fas fa-star text-[#C4992E] text-[10px]"></i>
-                            {{ project.stars_count }}
-                        </span>
-                        <span class="flex items-center gap-1">
-                            <i class="fas fa-code-branch text-[10px]"></i>
-                            {{ project.forks_count }}
-                        </span>
-                    </div>
-                    <a href="{{ project.github_repo_url }}" target="_blank"
-                        class="text-[#ADB5BD] hover:text-[#0D7C3D] transition-colors">
-                        <i class="fab fa-github text-base"></i>
-                    </a>
-                </div>
+                <span>{{ project.created_at|date:"M Y" }}</span>
             </div>
-        </article>
-        {% empty %}
-        <div class="col-span-full py-16 text-center">
-            <div
-                class="w-20 h-20 mx-auto mb-6 bg-[#F8F9FA] dark:bg-[#2D2D2D] rounded-full flex items-center justify-center">
-                <i class="fas fa-folder-open text-3xl text-[#DEE2E6] dark:text-[#3D3D3D]"></i>
-            </div>
-            <h3 class="text-lg font-semibold text-[#212529] dark:text-white mb-2">No projects yet</h3>
-            <p class="text-[#6C757D] dark:text-[#A1A1AA]">Projects will be added here soon.</p>
-        </div>
+
+        </a>
         {% endfor %}
     </div>
 
     <!-- Pagination -->
     {% if is_paginated %}
-    <div class="flex items-center justify-between mt-8 pt-6 border-t border-[#DEE2E6] dark:border-[#3D3D3D]">
-        <span class="text-sm text-[#6C757D] dark:text-[#A1A1AA]">
-            Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
-        </span>
-        <div class="flex items-center gap-2">
-            {% if page_obj.has_previous %}
-            <a href="?page={{ page_obj.previous_page_number }}"
-                class="px-4 py-2 text-sm text-[#0D7C3D] hover:bg-[#E8F5ED] rounded-lg transition-colors">
-                <i class="fas fa-chevron-left mr-1"></i> Previous
-            </a>
-            {% endif %}
-            {% if page_obj.has_next %}
-            <a href="?page={{ page_obj.next_page_number }}"
-                class="px-4 py-2 text-sm text-[#0D7C3D] hover:bg-[#E8F5ED] rounded-lg transition-colors">
-                Next <i class="fas fa-chevron-right ml-1"></i>
-            </a>
-            {% endif %}
-        </div>
+    <div class="mt-10 flex justify-center items-center gap-2">
+        {% if page_obj.has_previous %}
+        <a href="?page={{ page_obj.previous_page_number }}&category={{ current_category }}&sort={{ current_sort }}"
+            class="px-3 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+            <i class="fas fa-chevron-left mr-1"></i> Prev
+        </a>
+        {% endif %}
+        <span class="text-sm text-gray-500 dark:text-gray-400">Page {{ page_obj.number }} of {{
+            page_obj.paginator.num_pages }}</span>
+        {% if page_obj.has_next %}
+        <a href="?page={{ page_obj.next_page_number }}&category={{ current_category }}&sort={{ current_sort }}"
+            class="px-3 py-1.5 text-sm rounded-md border border-gray-300 dark:border-gray-600 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+            Next <i class="fas fa-chevron-right ml-1"></i>
+        </a>
+        {% endif %}
     </div>
     {% endif %}
-</div>
 
-<div class="h-20 md:hidden"></div>
+    {% else %}
+    <!-- Empty State -->
+    <div class="text-center py-24">
+        <i class="fas fa-folder-open text-4xl text-gray-300 dark:text-gray-600 mb-4 block"></i>
+        <h2 class="text-lg font-semibold text-gray-500 dark:text-gray-400">No projects yet</h2>
+        <p class="mt-1 text-sm text-gray-400">Check back soon — projects will appear here once approved.</p>
+    </div>
+    {% endif %}
+
+</div>
 {% endblock %}

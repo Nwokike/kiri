@@ -1,10 +1,11 @@
-from allauth.account.forms import LoginForm
-from turnstile.fields import TurnstileField
+from allauth.account.forms import LoginForm, SignupForm
+
 
 class CustomLoginForm(LoginForm):
-    turnstile = TurnstileField()
+    """Extended login form. Turnstile removed — rate limiting handled by allauth."""
+    pass
 
-from allauth.account.forms import SignupForm
 
 class CustomSignupForm(SignupForm):
-    turnstile = TurnstileField()
+    """Extended signup form. Turnstile removed — rate limiting handled by allauth."""
+    pass

@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Kiri — Software & AI Tools{% endblock %}
+{% block title %}Kiri — Software & Utilities{% endblock %}
 
-{% block meta_description %}30+ browser-based developer tools, AI-powered features, and project showcases from Kiri
+{% block meta_description %}30+ browser-based developer tools, productivity features, and project showcases from Kiri
 Labs. Lightweight, efficient, and all running locally.{% endblock %}
 
-{% block og_title %}Kiri Labs — AI Tools & Projects{% endblock %}
-{% block og_description %}30+ browser-based developer tools, AI-powered features, and project showcases.
+{% block og_title %}Kiri Labs — Tools & Projects{% endblock %}
+{% block og_description %}30+ browser-based developer tools, productivity features, and project showcases.
 Built lightweight and efficient.{% endblock %}
 {% block og_image %}{{ request.scheme }}://{{ request.get_host }}{% static 'images/logos/logo.png' %}{% endblock %}
 
@@ -72,7 +72,8 @@ Built lightweight and efficient.{% endblock %}
                             <div class="text-sm font-medium text-[#212529] dark:text-white truncate">{{ platform.name }}
                             </div>
                             {% if platform.short_description %}
-                            <div class="text-xs text-[#6C757D] dark:text-[#A1A1AA] truncate">{{ platform.short_description }}</div>
+                            <div class="text-xs text-[#6C757D] dark:text-[#A1A1AA] truncate">{{
+                                platform.short_description }}</div>
                             {% endif %}
                         </div>
                         <i class="fas fa-external-link-alt text-[9px] text-[#ADB5BD] ml-auto"></i>

@@ -20,10 +20,10 @@ Kiri is the platform for **Kiri Labs**. We showcase our projects, tools, and eve
 ## Platform Features
 
 ### Projects
-A curated showcase of our work. Each project links to its GitHub repository and can include a live demo URL.
+A curated showcase of our work. Each project links to its GitHub or Hugging Face repository and can include a live demo URL.
 
 ### Tools Hub
-30+ browser-based developer utilities (JSON formatter, PDF editor, SQL workbench, data profiler, etc.). All processing runs locally — no data leaves your browser.
+30+ browser-based developer utilities. All processing runs locally — no data leaves your browser.
 
 ### Playgrounds
 Client-side coding environments for Python (Pyodide), SQL (sql.js), and HTML/CSS/JS.
@@ -59,8 +59,3 @@ Multi-tier AI backend using 15+ models across Groq and Gemini providers with aut
 *   **Contact:** [nwokikeonyeka@gmail.com](mailto:nwokikeonyeka@gmail.com)
 
 ---
-
-## License
-**Copyright © 2024 - 2026 Kiri Research Labs. All rights reserved.**
-
-This software is proprietary. Unauthorized copying, modification, or distribution is strictly prohibited. For inquiries regarding licensing or partnerships, please contact Kiri Research Labs.

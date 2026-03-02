@@ -41,11 +41,7 @@ jobs:
           # 5. Run Migrations
           uv run python manage.py migrate
 
-          # 6. Build Tailwind CSS
-          npm install --production=false
-          npm run build
-
-          # 7. Collect Static and create cache table
+          # 6. Collect Static and create cache table
           uv run python manage.py collectstatic --noinput
           uv run python manage.py createcachetable
 

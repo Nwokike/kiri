@@ -17,6 +17,7 @@ db.sqlite3
 
 # Static files (collected)
 staticfiles/
+static/css/output.css
 
 # Media files
 media/
@@ -41,8 +42,8 @@ logs/
 # Node modules
 node_modules/
 
-# Huey task queue database
-huey.sqlite3
+
+
 
 # SQLite WAL files
 *.sqlite3-shm

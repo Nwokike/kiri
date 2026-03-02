@@ -1,50 +1,42 @@
 {% extends "base.html" %}
 
-{% block title %}Contact | Kiri{% endblock %}
+{% block title %}Contact | Kiri Labs{% endblock %}
 
-{% block meta_description %}Get in touch with Kiri Labs. Collaborate, provide feedback, or inquire about our work.{%
-endblock %}
+{% block meta_description %}
+Get in touch with Kiri Labs. Collaborate, provide feedback, or inquire about our software and AI tools.
+{% endblock %}
 
-{% block og_title %}Contact Kiri | Collaboration & Support{% endblock %}
-{% block og_description %}Have questions or ideas? Reach out to the Kiri Labs team.{% endblock %}
+{% block og_title %}Contact Kiri Labs | Collaboration & Support{% endblock %}
 
+{% block og_description %}
+Get in touch with Kiri Labs. Collaborate, provide feedback, or inquire about our software and AI tools.
+{% endblock %}
 
 {% block content %}
 <div class="max-w-2xl mx-auto px-4 py-12">
     <div class="text-center mb-8">
-        <h1 class="text-3xl font-bold text-[#212529] dark:text-white mb-2">Get in Touch</h1>
-        <p class="text-[#6C757D] dark:text-[#A1A1AA]">
-            Have a question, feedback, or want to collaborate? We'd love to hear from you.
-        </p>
+        <h1 class="text-3xl font-bold text-heading mb-2">Get in Touch</h1>
+        <p class="text-body"> Have a question, feedback, or want to collaborate? We'd love to hear from you. </p>
     </div>
-
-    <div class="bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-2xl p-8 shadow-sm text-center">
-        <div class="w-16 h-16 bg-[#E8F5ED] dark:bg-[#0D7C3D]/20 rounded-full flex items-center justify-center mx-auto mb-6">
-            <i class="fas fa-envelope text-[#0D7C3D] text-2xl"></i>
+    
+    <div class="card p-8 text-center">
+        <div class="w-16 h-16 bg-success-subtle rounded-full flex items-center justify-center mx-auto mb-6">
+            <i class="fas fa-envelope text-kiri-green text-2xl"></i>
         </div>
-        <h2 class="text-2xl font-semibold text-[#212529] dark:text-white mb-4">Connect with Kiri Labs</h2>
-        <p class="text-[#6C757D] dark:text-[#A1A1AA] mb-8 leading-relaxed">
-            We're always open to collaboration, feedback, and inquiries about our research and tools. 
-            Since we're focusing on keeping our platform lean and efficient, we've moved to direct email communication.
+        <h2 class="text-2xl font-semibold text-heading mb-4">Connect with Kiri Labs</h2>
+        
+        <p class="text-body mb-8 leading-relaxed"> 
+            We are always open to collaboration, feedback, and inquiries about our research and platforms. Drop us a line directly, and we will get back to you as soon as possible. 
         </p>
         
-        <div class="inline-flex items-center justify-center space-x-2 px-6 py-4 bg-[#F8F9FA] dark:bg-[#2D2D2D] rounded-xl border border-[#DEE2E6] dark:border-[#3D3D3D] group transition-all hover:border-[#0D7C3D]">
-            <i class="fas fa-paper-plane text-[#0D7C3D] group-hover:transform group-hover:translate-x-1 group-hover:-translate-y-1 transition-transform"></i>
-            <a href="mailto:hello@kiri.ng" class="text-lg font-medium text-[#212529] dark:text-white hover:text-[#0D7C3D] transition-colors">
-                hello@kiri.ng
+        <div class="inline-flex items-center justify-center space-x-2 px-6 py-4 bg-subtle rounded-xl border border-subtle group transition-all hover:border-kiri-green dark:hover:border-kiri-green">
+            <i class="fas fa-paper-plane text-kiri-green group-hover:transform group-hover:-translate-y-1 transition-transform"></i>
+            <a href="mailto:hello@kiri.ng" class="text-lg font-medium text-heading hover:text-kiri-green transition-colors"> 
+                hello@kiri.ng 
             </a>
         </div>
-        
-        <div class="mt-12 pt-8 border-t border-[#DEE2E6] dark:border-[#3D3D3D]">
-            <p class="text-sm text-[#6C757D] dark:text-[#A1A1AA]">
-                Current Location: Enugu, Nigeria
-            </p>
-        </div>
     </div>
+</div> 
 
-    <div class="mt-8 text-center text-sm text-[#6C757D] dark:text-[#A1A1AA]">
-        <p>You can also reach us directly at <a href="mailto:hello@kiri.ng"
-                class="text-[#0D7C3D] hover:underline">hello@kiri.ng</a></p>
-    </div>
-</div>
+<div class="h-20 md:hidden"></div>
 {% endblock %}

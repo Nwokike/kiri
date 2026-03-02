@@ -2,12 +2,15 @@
 {% load static %}
 
 {% block title %}PDF Splitter & Extractor | Kiri Labs{% endblock %}
-{% block meta_description %}Split PDF documents, extract specific pages, or batch separate files locally in your
-browser.{% endblock %}
+
+{% block meta_description %}
+Split PDF documents, extract specific pages, or batch separate files locally in your browser.
+{% endblock %}
 
 {% block tool_name %}PDF Splitter{% endblock %}
 {% block tool_icon %}fa-cut{% endblock %}
 {% block tool_title %}PDF Splitter{% endblock %}
+
 {% block tool_description %}
 Extract specific pages to a new PDF or split a document into separate files.
 Features visual page selection, range inputs (e.g., "1-10"), and bulk ZIP export.
@@ -20,7 +23,6 @@ Features visual page selection, range inputs (e.g., "1-10"), and bulk ZIP export
 <script>
     pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
 </script>
-
 <style>
     .page-card.selected {
         border-color: #0D7C3D;
@@ -36,118 +38,89 @@ Features visual page selection, range inputs (e.g., "1-10"), and bulk ZIP export
 
 {% block tool_body %}
 <div class="flex flex-col gap-8 min-h-[600px]">
-
     <div x-show="!pdfDoc"
-        class="flex-1 flex flex-col items-center justify-center p-12 border-2 border-dashed border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[2.5rem] bg-[#F8F9FA]/50 dark:bg-[#0a0a0a] hover:border-[#0D7C3D] hover:bg-white dark:hover:bg-[#121212] transition-all cursor-pointer group animate-fade-in"
-        @click="$refs.fileInput.click()" @dragover.prevent="$el.classList.add('border-[#0D7C3D]', 'scale-[1.01]')"
-        @dragleave.prevent="$el.classList.remove('border-[#0D7C3D]', 'scale-[1.01]')"
+        class="flex-1 flex flex-col items-center justify-center p-12 border-2 border-dashed border-subtle rounded-[2.5rem] bg-subtle hover:border-kiri-green hover:bg-surface dark:hover:bg-surface transition-all cursor-pointer group animate-fade-in"
+        @click="$refs.fileInput.click()" @dragover.prevent="$el.classList.add('border-kiri-green', 'scale-[1.01]')"
+        @dragleave.prevent="$el.classList.remove('border-kiri-green', 'scale-[1.01]')"
         @drop.prevent="handleDrop($event)">
-
         <div
-            class="w-24 h-24 bg-gradient-to-br from-[#0D7C3D] to-[#06401F] rounded-full flex items-center justify-center mb-8 shadow-2xl shadow-[#0D7C3D]/20 group-hover:scale-110 transition-transform duration-300">
+            class="w-24 h-24 bg-gradient-to-br from-kiri-green to-kiri-green-dark rounded-full flex items-center justify-center mb-8 shadow-2xl shadow-sm group-hover:scale-110 transition-transform duration-300">
             <i class="fas fa-file-pdf text-4xl text-white"></i>
         </div>
-        <h3 class="text-3xl font-black text-[#212529] dark:text-white mb-3 tracking-tight">Load PDF Document</h3>
-        <p class="text-[#6C757D] dark:text-[#A1A1AA] text-center max-w-sm mb-8 leading-relaxed">
-            Drag & Drop your PDF here.<br>
-            <span class="text-xs opacity-75 font-bold uppercase tracking-wide">Processed locally. No file limits.</span>
+        <h3 class="text-3xl font-black text-heading mb-3 tracking-tight">Load PDF Document</h3>
+        <p class="text-body text-center max-w-sm mb-8 leading-relaxed"> Drag & Drop your PDF here.<br> <span
+                class="text-xs opacity-75 font-bold uppercase tracking-wide">Processed locally. No file limits.</span>
         </p>
         <button
-            class="px-8 py-3 bg-[#212529] dark:bg-white text-white dark:text-black font-bold rounded-2xl hover:scale-105 transition-all shadow-lg">
-            Select PDF
-        </button>
+            class="px-8 py-3 bg-surface text-heading font-bold rounded-2xl hover:scale-105 transition-all shadow-lg">
+            Select PDF </button>
     </div>
-
     <div x-show="pdfDoc" x-cloak class="flex flex-col h-full gap-6 animate-slide-up">
-
-        <div
-            class="sticky top-4 z-30 bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-3xl p-4 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
-
+        <div class="sticky top-4 z-30 card p-4 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
             <div class="flex items-center gap-2 overflow-x-auto w-full md:w-auto no-scrollbar pb-2 md:pb-0">
                 <button @click="resetTool()"
-                    class="w-10 h-10 flex items-center justify-center rounded-xl bg-gray-100 dark:bg-[#2D2D2D] hover:text-red-500 transition-colors shrink-0">
-                    <i class="fas fa-times"></i>
-                </button>
-                <div class="h-8 w-px bg-[#DEE2E6] dark:bg-[#3D3D3D] mx-2 shrink-0"></div>
-
+                    class="w-10 h-10 flex items-center justify-center rounded-xl bg-subtle hover:text-red-500 transition-colors shrink-0">
+                    <i class="fas fa-times"></i> </button>
+                <div class="h-8 w-px bg-subtle mx-2 shrink-0"></div>
                 <button @click="selectAll()"
-                    class="px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-100 dark:hover:bg-[#2D2D2D] whitespace-nowrap transition-colors">
+                    class="px-4 py-2 rounded-xl text-xs font-bold hover:bg-subtle whitespace-nowrap transition-colors">
                     All
                 </button>
                 <button @click="selectedPages = []"
-                    class="px-4 py-2 rounded-xl text-xs font-bold hover:bg-gray-100 dark:hover:bg-[#2D2D2D] whitespace-nowrap transition-colors">
-                    None
-                </button>
-
+                    class="px-4 py-2 rounded-xl text-xs font-bold hover:bg-subtle whitespace-nowrap transition-colors">
+                    None </button>
                 <div class="relative group">
                     <input type="text" x-model="rangeInput" @keydown.enter="applyRange()" placeholder="e.g. 1-5, 8"
-                        class="w-32 px-3 py-2 bg-[#F8F9FA] dark:bg-[#121212] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl text-xs font-mono outline-none focus:border-[#0D7C3D] transition-all">
+                        class="w-32 px-3 py-2 form-input text-xs font-mono outline-none focus:border-kiri-green transition-all">
                     <button @click="applyRange()"
-                        class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-[#0D7C3D] hover:underline">
-                        APPLY
-                    </button>
+                        class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-kiri-green hover:underline">
+                        APPLY </button>
                 </div>
             </div>
-
             <div class="flex items-center gap-3 w-full md:w-auto">
                 <div
-                    class="flex items-center gap-2 px-3 py-2 bg-[#F8F9FA] dark:bg-[#121212] rounded-xl border border-[#DEE2E6] dark:border-[#3D3D3D] flex-1 md:flex-none">
-                    <span class="text-[10px] font-bold text-[#ADB5BD] uppercase">Action</span>
+                    class="flex items-center gap-2 px-3 py-2 bg-surface rounded-xl border border-subtle flex-1 md:flex-none">
+                    <span class="text-[10px] font-bold text-muted uppercase">Action</span>
                     <select x-model="mode"
-                        class="bg-transparent text-xs font-bold text-[#212529] dark:text-white outline-none cursor-pointer">
+                        class="bg-transparent text-xs font-bold text-heading outline-none cursor-pointer">
                         <option value="merge">Extract Combined PDF</option>
                         <option value="separate">Split into Individual Files</option>
                     </select>
                 </div>
-
                 <button @click="processSplit()" :disabled="loading || selectedPages.length === 0"
-                    class="px-6 py-3 bg-[#0D7C3D] hover:bg-[#0A5C2C] text-white rounded-xl text-xs font-bold shadow-lg transition-all active:scale-95 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed min-w-[140px] justify-center">
-                    <template x-if="!loading">
-                        <span class="flex items-center gap-2">
-                            <i class="fas" :class="mode === 'merge' ? 'fa-file-export' : 'fa-box-open'"></i>
-                            <span x-text="mode === 'merge' ? 'Extract' : 'Split'"></span>
-                            <span class="bg-white/20 px-1.5 py-0.5 rounded text-[10px]"
-                                x-text="selectedPages.length"></span>
-                        </span>
-                    </template>
-                    <template x-if="loading">
-                        <span><i class="fas fa-circle-notch fa-spin mr-2"></i> Working...</span>
-                    </template>
-                </button>
+                    class="px-6 py-3 bg-kiri-green hover:bg-kiri-green-dark text-white rounded-xl text-xs font-bold shadow-lg transition-all active:scale-95 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed min-w-[140px] justify-center">
+                    <template x-if="!loading"> <span class="flex items-center gap-2"> <i class="fas"
+                                :class="mode === 'merge' ? 'fa-file-export' : 'fa-box-open'"></i> <span
+                                x-text="mode === 'merge' ? 'Extract' : 'Split'"></span> <span
+                                class="bg-surface/20 px-1.5 py-0.5 rounded text-[10px]"
+                                x-text="selectedPages.length"></span> </span> </template>
+                    <template x-if="loading"> <span><i class="fas fa-circle-notch fa-spin mr-2"></i> Working...</span>
+                    </template> </button>
             </div>
         </div>
-
         <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 pb-12">
             <template x-for="page in pages" :key="page.num">
                 <div @click="toggleSelection(page.num)"
-                    class="page-card group relative aspect-[1/1.4] bg-white dark:bg-[#1E1E1E] rounded-2xl border-2 border-[#DEE2E6] dark:border-[#3D3D3D] cursor-pointer transition-all hover:border-[#0D7C3D] hover:shadow-lg overflow-hidden"
+                    class="page-card group relative aspect-[1/1.4] bg-surface rounded-2xl border-2 border-subtle cursor-pointer transition-all hover:border-kiri-green hover:shadow-lg overflow-hidden"
                     :class="{'selected': selectedPages.includes(page.num)}">
-
                     <div :id="'page-thumb-' + page.num"
                         class="w-full h-full flex items-center justify-center p-2 opacity-90 group-hover:opacity-100 transition-opacity">
-                        <div x-show="!page.rendered"
-                            class="animate-pulse w-full h-full bg-gray-100 dark:bg-[#2D2D2D] rounded-lg"></div>
+                        <div x-show="!page.rendered" class="animate-pulse w-full h-full bg-subtle rounded-lg"></div>
                     </div>
-
-                    <div class="absolute inset-0 bg-[#0D7C3D]/0 transition-colors"
-                        :class="selectedPages.includes(page.num) ? 'bg-[#0D7C3D]/10' : 'group-hover:bg-black/5 dark:group-hover:bg-white/5'">
+                    <div class="absolute inset-0 bg-kiri-green/0 transition-colors"
+                        :class="selectedPages.includes(page.num) ? 'bg-kiri-green/10' : 'group-hover:bg-black/5 dark:group-hover:bg-surface/5'">
                     </div>
-
                     <div
-                        class="check-indicator absolute top-3 right-3 w-6 h-6 bg-[#0D7C3D] text-white rounded-full flex items-center justify-center shadow-md transform scale-0 transition-transform duration-200">
+                        class="check-indicator absolute top-3 right-3 w-6 h-6 bg-kiri-green text-white rounded-full flex items-center justify-center shadow-md transform scale-0 transition-transform duration-200">
                         <i class="fas fa-check text-[10px]"></i>
                     </div>
-
                     <div
                         class="absolute bottom-3 left-1/2 -translate-x-1/2 px-3 py-1 bg-black/70 backdrop-blur rounded-full text-[10px] font-mono text-white font-bold shadow-sm pointer-events-none">
-                        Page <span x-text="page.num"></span>
-                    </div>
+                        Page <span x-text="page.num"></span> </div>
                 </div>
             </template>
         </div>
-
     </div>
-
     <input type="file" x-ref="fileInput" class="hidden" accept="application/pdf" @change="loadPdf($event)">
 </div>
 {% endblock %}
@@ -155,9 +128,7 @@ Features visual page selection, range inputs (e.g., "1-10"), and bulk ZIP export
 {% block tool_js_data %}
 {
 hideUpload: true,
-hideSample: true,
-
-// State
+hideSample: true, // State
 pdfDoc: null,
 pdfBytes: null,
 fileName: '',
@@ -166,42 +137,33 @@ selectedPages: [],
 loading: false,
 mode: 'merge',
 rangeInput: '',
-
 init() {
 // Inherits from base
 },
-
 /* --- Loading Logic --- */
 async loadPdf(event) {
-const file = event.target.files?.[0] || event.dataTransfer?.files?.[0];
+const file = event.target.files ? .[0] || event.dataTransfer ? .files ? .[0];
 if (!file || file.type !== 'application/pdf') {
 alert("Please select a valid PDF file.");
 return;
 }
-
 this.loading = true;
 this.statusMessage = "Reading PDF...";
 this.fileName = file.name;
-
 try {
-this.pdfBytes = await file.arrayBuffer();
-// Load document using PDF.js
+this.pdfBytes = await file.arrayBuffer(); // Load document using PDF.js
 const loadingTask = pdfjsLib.getDocument(this.pdfBytes.slice(0));
-this._pdfDoc = await loadingTask.promise;
-
-// Initialize page state
-this.pages = Array.from({ length: this._pdfDoc.numPages }, (_, i) => ({
+this._pdfDoc = await loadingTask.promise; // Initialize page state
+this.pages = Array.from({
+length: this._pdfDoc.numPages
+}, (_, i) => ({
 num: i + 1,
 rendered: false
 }));
-
 this.pdfDoc = true;
-this.selectedPages = [];
-
-// Start rendering thumbnails
+this.selectedPages = []; // Start rendering thumbnails
 this.$nextTick(() => this.renderThumbnails());
 this.statusMessage = `${this._pdfDoc.numPages} pages loaded`;
-
 } catch (err) {
 console.error(err);
 this.error = "Failed to load PDF. It might be password protected.";
@@ -209,28 +171,26 @@ this.error = "Failed to load PDF. It might be password protected.";
 this.loading = false;
 }
 },
-
 handleDrop(e) {
-e.target.classList.remove('border-[#0D7C3D]', 'scale-[1.01]');
+e.target.classList.remove('border-kiri-green', 'scale-[1.01]');
 this.loadPdf(e);
 },
-
 /* --- Rendering Logic --- */
 async renderThumbnails() {
 // Process pages sequentially to avoid freezing UI
 for (const page of this.pages) {
 if (page.rendered) continue;
-
 try {
 // Alpine proxies objects, we need the raw PDF object
-const pdfPage = await Alpine.raw(this._pdfDoc).getPage(page.num);
-
-// Calculate scale to fit thumbnail (width ~200px)
+const pdfPage = await Alpine.raw(this._pdfDoc).getPage(page.num); // Calculate scale to fit thumbnail (width ~200px)
 const desiredWidth = 200;
-const viewport = pdfPage.getViewport({ scale: 1 });
+const viewport = pdfPage.getViewport({
+scale: 1
+});
 const scale = desiredWidth / viewport.width;
-const scaledViewport = pdfPage.getViewport({ scale });
-
+const scaledViewport = pdfPage.getViewport({
+scale
+});
 const canvas = document.createElement('canvas');
 const context = canvas.getContext('2d');
 canvas.height = scaledViewport.height;
@@ -238,12 +198,10 @@ canvas.width = scaledViewport.width;
 canvas.style.width = '100%';
 canvas.style.height = '100%';
 canvas.style.objectFit = 'contain';
-
 await pdfPage.render({
 canvasContext: context,
 viewport: scaledViewport
 }).promise;
-
 const container = document.getElementById(`page-thumb-${page.num}`);
 if (container) {
 container.innerHTML = '';
@@ -255,7 +213,6 @@ console.warn(`Error rendering page ${page.num}`, e);
 }
 }
 },
-
 /* --- Selection Logic --- */
 toggleSelection(pageNum) {
 if (this.selectedPages.includes(pageNum)) {
@@ -264,17 +221,13 @@ this.selectedPages = this.selectedPages.filter(p => p !== pageNum);
 this.selectedPages = [...this.selectedPages, pageNum].sort((a, b) => a - b);
 }
 },
-
 selectAll() {
 this.selectedPages = this.pages.map(p => p.num);
 },
-
 applyRange() {
 if (!this.rangeInput) return;
-
 const newSelection = new Set(this.selectedPages);
 const parts = this.rangeInput.split(',');
-
 parts.forEach(part => {
 const range = part.trim().split('-');
 if (range.length === 2) {
@@ -287,39 +240,35 @@ for (let i = Math.min(start, end); i <= Math.max(start, end); i++) { if (i> 0 &&
             b)=> a - b);
             this.rangeInput = ''; // Clear input feedback
             },
-
             /* --- Processing Logic --- */
             async processSplit() {
             if (this.selectedPages.length === 0) return;
             this.loading = true;
             this.statusMessage = "Processing document...";
-
             try {
-            const { PDFDocument } = PDFLib;
+            const {
+            PDFDocument
+            } = PDFLib;
             const srcDoc = await PDFDocument.load(this.pdfBytes);
             const indices = this.selectedPages.map(p => p - 1); // PDF-lib uses 0-based index
-
-            if (this.mode === 'merge') {
-            // Create one PDF with selected pages
+            if (this.mode === 'merge') { // Create one PDF with selected pages
             const newDoc = await PDFDocument.create();
             const copiedPages = await newDoc.copyPages(srcDoc, indices);
             copiedPages.forEach(page => newDoc.addPage(page));
-
             const pdfBytes = await newDoc.save();
-            const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+            const blob = new Blob([pdfBytes], {
+            type: 'application/pdf'
+            });
             this.downloadFile(blob, `extracted_${this.fileName}`, 'application/pdf');
             this.statusMessage = "Extraction Complete";
-
-            } else {
-            // Split into separate files (ZIP)
+            } else { // Split into separate files (ZIP)
             const zip = new JSZip();
-
             for (let i = 0; i < indices.length; i++) { const idx=indices[i]; const pageNum=this.selectedPages[i]; const
                 singleDoc=await PDFDocument.create(); const [copiedPage]=await singleDoc.copyPages(srcDoc, [idx]);
                 singleDoc.addPage(copiedPage); const bytes=await singleDoc.save();
                 zip.file(`page_${pageNum}_${this.fileName}`, bytes); } const content=await zip.generateAsync({
                 type: "blob" }); this.downloadFile(content, `split_pages_${Date.now()}.zip`, "application/zip" );
                 this.statusMessage="ZIP Archive Created" ; } } catch (err) { console.error(err);
-                this.error="Processing failed: " + err.message; } finally { this.loading=false; } }, resetTool() {
+                this.error="Processing failed:" + err.message; } finally { this.loading=false; } }, resetTool() {
                 this.pdfDoc=null; this.pdfBytes=null; this.pages=[]; this.selectedPages=[]; if (this.$refs.fileInput)
                 this.$refs.fileInput.value='' ; } } {% endblock %}

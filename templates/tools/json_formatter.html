@@ -2,23 +2,25 @@
 {% load static %}
 
 {% block title %}JSON Formatter & Validator | Kiri Labs{% endblock %}
-{% block meta_description %}Clean up, validate, and format messy JSON data instantly. Support for 2 and 4-space
-indentation and minification.{% endblock %}
+
+{% block meta_description %}
+Clean up, validate, and format messy JSON data instantly. Support for 2 and 4-space indentation and minification.
+{% endblock %}
 
 {% block tool_name %}JSON Formatter{% endblock %}
 {% block tool_icon %}fa-code{% endblock %}
 {% block tool_title %}JSON Formatter & Beautifier{% endblock %}
+
 {% block tool_description %}
-Clean up messy JSON code instantly. Format, validate, and minify your data
-locally in your browser with full syntax highlighting.
+Clean up messy JSON code instantly. Format, validate, and minify your data locally in your browser with full syntax
+highlighting.
 {% endblock %}
 
 {% block tool_actions_right %}
 <button @click="download()"
-    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-[#0D7C3D] text-white hover:bg-[#0A5C2C]"
+    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-kiri-green text-white hover:bg-kiri-green-dark"
     x-show="output">
-    <i class="fas fa-download"></i>
-    <span>Download JSON</span>
+    <i class="fas fa-download"></i> <span>Download JSON</span>
 </button>
 {% endblock %}
 
@@ -28,46 +30,37 @@ locally in your browser with full syntax highlighting.
         <!-- Input Area -->
         <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between">
-                <span
-                    class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest flex items-center gap-2">
-                    <i class="fas fa-terminal text-[#0D7C3D]"></i> Raw JSON Data
-                </span>
-                <span class="text-[10px] text-[#A1A1AA]" x-text="input.length ? input.length + ' chars' : ''"></span>
+                <span class="text-[10px] font-bold text-body uppercase tracking-widest flex items-center gap-2">
+                    <i class="fas fa-terminal text-kiri-green"></i> Raw JSON Data </span>
+                <span class="text-[10px] text-muted" x-text="input.length ? input.length + ' chars' : ''"></span>
             </div>
             <textarea x-model="input" @input="convert()"
-                class="flex-1 w-full p-6 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[1.5rem] bg-white dark:bg-[#121212] text-[#212529] dark:text-[#E4E4E7] resize-none shadow-inner"
+                class="flex-1 w-full p-6 font-mono text-sm border border-subtle rounded-[1.5rem] bg-surface text-heading resize-none shadow-inner"
                 placeholder="Paste your JSON here or drag and drop a file..."></textarea>
-        </div>
-
-        <!-- Output Area -->
+        </div> <!-- Output Area -->
         <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between">
-                <span
-                    class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest flex items-center gap-2">
-                    <i class="fas fa-eye text-purple-500"></i> Formatted View
-                </span>
+                <span class="text-[10px] font-bold text-body uppercase tracking-widest flex items-center gap-2">
+                    <i class="fas fa-eye text-purple-500"></i> Formatted View </span>
                 <button @click="copyToClipboard(output)"
-                    class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase flex items-center gap-1.5"
+                    class="text-[10px] font-bold text-kiri-green hover:underline uppercase flex items-center gap-1.5"
                     x-show="output">
-                    <i class="fas" :class="copied ? 'fa-check' : 'fa-copy'"></i>
-                    <span x-text="copied ? 'Copied' : 'Copy'"></span>
-                </button>
+                    <i class="fas" :class="copied ? 'fa-check' : 'fa-copy'"></i> <span
+                        x-text="copied ? 'Copied' : 'Copy'"></span> </button>
             </div>
-            <div class="flex-1 rounded-[1.5rem] bg-[#121212] border border-[#3D3D3D] relative overflow-hidden group">
+            <div class="flex-1 rounded-[1.5rem] bg-surface border border-subtle relative overflow-hidden group">
                 <div class="w-full h-full p-6 overflow-auto custom-scrollbar">
                     <pre><code class="language-json" x-text="output"></code></pre>
-                </div>
-
-                <!-- Tools Overlay -->
+                </div> <!-- Tools Overlay -->
                 <div class="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <button @click="indent = 4; convert()"
-                        :class="indent === 4 ? 'bg-[#4ADE80] text-black' : 'bg-[#2D2D2D] text-white'"
+                        :class="indent === 4 ? 'bg-subtle text-black' : 'bg-subtle text-white'"
                         class="px-2 py-1 text-[9px] font-bold rounded-md">4 Space</button>
                     <button @click="indent = 2; convert()"
-                        :class="indent === 2 ? 'bg-[#4ADE80] text-black' : 'bg-[#2D2D2D] text-white'"
+                        :class="indent === 2 ? 'bg-subtle text-black' : 'bg-subtle text-white'"
                         class="px-2 py-1 text-[9px] font-bold rounded-md">2 Space</button>
                     <button @click="indent = 0; convert()"
-                        :class="indent === 0 ? 'bg-[#4ADE80] text-black' : 'bg-[#2D2D2D] text-white'"
+                        :class="indent === 0 ? 'bg-subtle text-black' : 'bg-subtle text-white'"
                         class="px-2 py-1 text-[9px] font-bold rounded-md">Minify</button>
                 </div>
             </div>
@@ -79,7 +72,10 @@ locally in your browser with full syntax highlighting.
 {% block tool_js_data %}
 {
 indent: 4,
-
+hideUpload: true,
+init() {
+// Initialization
+},
 loadSample() {
 this.input = JSON.stringify({
 project: "Sample Project",
@@ -94,20 +90,17 @@ tags: ["development", "productivity", "data"]
 }, null, 4);
 this.convert();
 },
-
 convert() {
 if (!this.input.trim()) {
 this.output = '';
 this.error = '';
 return;
 }
-
 try {
 const parsed = JSON.parse(this.input);
-this.output = this.indent === 0
-? JSON.stringify(parsed)
-: JSON.stringify(parsed, null, this.indent);
-
+this.output = this.indent === 0 ?
+JSON.stringify(parsed) :
+JSON.stringify(parsed, null, this.indent);
 this.error = '';
 this.statusMessage = 'JSON validated and formatted';
 this.$nextTick(() => Prism.highlightAll());
@@ -117,10 +110,15 @@ this.output = this.input; // Show raw on error
 this.$nextTick(() => Prism.highlightAll());
 }
 },
-
 download() {
 if (!this.output || this.error) return;
 this.downloadFile(this.output, 'formatted_kiri.json', 'application/json');
+},
+onReset() {
+this.input = '';
+this.output = '';
+this.error = '';
+this.statusMessage = 'Ready';
 }
 }
 {% endblock %}
@@ -129,11 +127,10 @@ this.downloadFile(this.output, 'formatted_kiri.json', 'application/json');
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
-
 <style>
     pre[class*="language-"],
     code[class*="language-"] {
-        @apply bg-transparent !important;
+        background-color: transparent !important;
         text-shadow: none !important;
     }
 
@@ -142,7 +139,8 @@ this.downloadFile(this.output, 'formatted_kiri.json', 'application/json');
     }
 
     .custom-scrollbar::-webkit-scrollbar-thumb {
-        @apply bg-[#3D3D3D] rounded-full;
+        background-color: var(--color-subtle);
+        border-radius: 9999px;
     }
 </style>
 {% endblock %}

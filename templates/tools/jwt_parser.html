@@ -2,12 +2,15 @@
 {% load static %}
 
 {% block title %}JWT Parser & Inspector | Kiri Labs{% endblock %}
-{% block meta_description %}Decode and inspect JSON Web Tokens (JWT) header and payload data locally in your browser.
-{%endblock %}
+
+{% block meta_description %}
+Decode and inspect JSON Web Tokens (JWT) header and payload data locally in your browser.
+{% endblock %}
 
 {% block tool_name %}JWT Parser{% endblock %}
 {% block tool_icon %}fa-shield-halved{% endblock %}
 {% block tool_title %}JSON Web Token Inspector{% endblock %}
+
 {% block tool_description %}
 Decode and inspect JSON Web Tokens (JWT) header and payload data.
 Identify claims, expiration times, and signature algorithms entirely in your browser.
@@ -15,10 +18,9 @@ Identify claims, expiration times, and signature algorithms entirely in your bro
 
 {% block tool_actions_right %}
 <button @click="download()"
-    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-[#0D7C3D] text-white hover:bg-[#0A5C2C]"
+    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-kiri-green text-white hover:bg-kiri-green-dark"
     x-show="input">
-    <i class="fas fa-download"></i>
-    <span>Save Decoded</span>
+    <i class="fas fa-download"></i> <span>Save Decoded</span>
 </button>
 {% endblock %}
 
@@ -28,50 +30,39 @@ Identify claims, expiration times, and signature algorithms entirely in your bro
         <!-- Input Token Area -->
         <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between">
-                <span
-                    class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest flex items-center gap-2">
-                    <i class="fas fa-key text-yellow-500"></i> Encoded Token (JWT)
-                </span>
-                <span class="text-[10px] text-[#A1A1AA]" x-text="input.length ? input.length + ' chars' : ''"></span>
+                <span class="text-[10px] font-bold text-body uppercase tracking-widest flex items-center gap-2">
+                    <i class="fas fa-key text-yellow-500"></i> Encoded Token (JWT) </span>
+                <span class="text-[10px] text-muted" x-text="input.length ? input.length + ' chars' : ''"></span>
             </div>
             <textarea x-model="input" @input="convert()"
-                class="flex-1 w-full p-6 font-mono text-xs border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[1.5rem] bg-white dark:bg-[#121212] text-[#212529] dark:text-[#E4E4E7] resize-none shadow-inner break-all"
+                class="flex-1 w-full p-6 font-mono text-xs border border-subtle rounded-[1.5rem] bg-surface text-heading resize-none shadow-inner break-all"
                 placeholder="Paste your JWT here..."></textarea>
-        </div>
-
-        <!-- Decoded Panels -->
+        </div> <!-- Decoded Panels -->
         <div class="flex flex-col gap-6 overflow-hidden">
             <!-- Header -->
             <div class="flex flex-col gap-3 flex-1 h-1/3">
-                <div class="flex items-center justify-between">
-                    <span class="text-[10px] font-bold text-rose-500 uppercase tracking-widest flex items-center gap-2">
-                        <i class="fas fa-cog"></i> Header (Algorithm & Typ)
-                    </span>
-                    <button @click="copyToClipboard(headerText)" x-show="headerText"
-                        class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase flex items-center gap-1.5">
-                        <i class="fas" :class="copied ? 'fa-check' : 'fa-copy'"></i>
-                        <span x-text="copied ? 'Copied' : 'Copy'"></span>
-                    </button>
+                <div class="flex items-center justify-between"> <span
+                        class="text-[10px] font-bold text-rose-500 uppercase tracking-widest flex items-center gap-2">
+                        <i class="fas fa-cog"></i> Header
+                        (Algorithm & Typ) </span> <button @click="copyToClipboard(headerText)" x-show="headerText"
+                        class="text-[10px] font-bold text-kiri-green hover:underline uppercase flex items-center gap-1.5">
+                        <i class="fas" :class="copied ? 'fa-check' : 'fa-copy'"></i> <span
+                            x-text="copied ? 'Copied' : 'Copy'"></span> </button> </div>
+                <div class="flex-1 rounded-2xl bg-surface border border-subtle overflow-auto p-4 custom-scrollbar">
+                    <pre><code class="language-json" x-text="headerText || '...'"></code></pre>
                 </div>
-                <div class="flex-1 rounded-2xl bg-[#121212] border border-[#3D3D3D] overflow-auto p-4 custom-scrollbar">
-                    <pre><code class="language-json" x-text="headerText || '...' "></code></pre>
-                </div>
-            </div>
-
-            <!-- Payload -->
+            </div> <!-- Payload -->
             <div class="flex flex-col gap-3 flex-[2] h-2/3">
-                <div class="flex items-center justify-between">
-                    <span class="text-[10px] font-bold text-blue-500 uppercase tracking-widest flex items-center gap-2">
-                        <i class="fas fa-database"></i> Payload (Data & Claims)
-                    </span>
-                    <button @click="copyToClipboard(payloadText)" x-show="payloadText"
-                        class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase flex items-center gap-1.5">
-                        <i class="fas" :class="copied ? 'fa-check' : 'fa-copy'"></i>
-                        <span x-text="copied ? 'Copied' : 'Copy'"></span>
-                    </button>
-                </div>
-                <div class="flex-1 rounded-2xl bg-[#121212] border border-[#3D3D3D] overflow-auto p-4 custom-scrollbar">
-                    <pre><code class="language-json" x-text="payloadText || '...' "></code></pre>
+                <div class="flex items-center justify-between"> <span
+                        class="text-[10px] font-bold text-blue-500 uppercase tracking-widest flex items-center gap-2">
+                        <i class="fas fa-database"></i>
+                        Payload (Data & Claims) </span> <button @click="copyToClipboard(payloadText)"
+                        x-show="payloadText"
+                        class="text-[10px] font-bold text-kiri-green hover:underline uppercase flex items-center gap-1.5">
+                        <i class="fas" :class="copied ? 'fa-check' : 'fa-copy'"></i> <span
+                            x-text="copied ? 'Copied' : 'Copy'"></span> </button> </div>
+                <div class="flex-1 rounded-2xl bg-surface border border-subtle overflow-auto p-4 custom-scrollbar">
+                    <pre><code class="language-json" x-text="payloadText || '...'"></code></pre>
                 </div>
             </div>
         </div>
@@ -82,49 +73,49 @@ Identify claims, expiration times, and signature algorithms entirely in your bro
 {% block tool_js_data %}
 {
 hideUpload: true,
-
 init() {
+// Initialization
 },
-
 headerText: '',
 payloadText: '',
-
 loadSample() {
 this.input =
 "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyLCJleHAiOjE4OTM0NTYwMDAsInJvbGUiOiJyZXNlYXJjaGVyIiwicGxhdGZvcm0iOiJraXJpIn0.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c";
 this.convert();
 },
-
 convert() {
 this.error = '';
 this.headerText = '';
 this.payloadText = '';
-
 if (!this.input.trim()) {
 this.statusMessage = 'Ready';
 return;
 }
-
 try {
 // jwt-decode auto-handles parts
 const decodedPayload = jwt_decode(this.input);
-const decodedHeader = jwt_decode(this.input, { header: true });
-
+const decodedHeader = jwt_decode(this.input, {
+header: true
+});
 this.headerText = JSON.stringify(decodedHeader, null, 4);
 this.payloadText = JSON.stringify(decodedPayload, null, 4);
 this.statusMessage = 'Token decoded successfully';
-
 this.$nextTick(() => Prism.highlightAll());
 } catch (e) {
 this.error = 'Invalid JWT: ' + e.message;
 this.statusMessage = 'Error decoding token';
 }
 },
-
 download() {
 if (!this.payloadText) return;
 const out = `HEADER:\n${this.headerText}\n\nPAYLOAD:\n${this.payloadText}`;
 this.downloadFile(out, 'decoded_jwt.txt', 'text/plain');
+},
+onReset() {
+this.input = '';
+this.headerText = '';
+this.payloadText = '';
+this.statusMessage = 'Ready';
 }
 }
 {% endblock %}
@@ -137,7 +128,7 @@ this.downloadFile(out, 'decoded_jwt.txt', 'text/plain');
 <style>
     pre[class*="language-"],
     code[class*="language-"] {
-        @apply bg-transparent !important;
+        background-color: transparent !important;
         text-shadow: none !important;
     }
 
@@ -146,7 +137,8 @@ this.downloadFile(out, 'decoded_jwt.txt', 'text/plain');
     }
 
     .custom-scrollbar::-webkit-scrollbar-thumb {
-        @apply bg-[#3D3D3D] rounded-full;
+        background-color: var(--color-subtle);
+        border-radius: 9999px;
     }
 </style>
 {% endblock %}

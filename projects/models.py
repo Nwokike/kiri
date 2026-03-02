@@ -1,7 +1,6 @@
 from django.db import models
 from django.conf import settings
 from django.utils.text import slugify
-from django.core.validators import MinValueValidator, MaxValueValidator
 
 class Project(models.Model):
     """Project showcase for Kiri Labs."""
@@ -60,7 +59,6 @@ class Project(models.Model):
             models.Index(fields=['is_approved', '-stars_count']),
             models.Index(fields=['is_approved', '-created_at']),
             models.Index(fields=['submitted_by']),
-            models.Index(fields=['slug']),
             models.Index(fields=['category']),
         ]
 

@@ -2,12 +2,16 @@
 {% load static %}
 
 {% block title %}Markdown to PDF Converter | Kiri Labs{% endblock %}
-{% block meta_description %}Convert Markdown documentation into professionally formatted PDF files locally. Supports
-code highlighting, tables, and custom styling with instant preview.{% endblock %}
+
+{% block meta_description %}
+Convert Markdown documentation into professionally formatted PDF files locally. Supports code highlighting, tables, and
+custom styling with instant preview.
+{% endblock %}
 
 {% block tool_name %}Markdown to PDF{% endblock %}
 {% block tool_icon %}fa-file-pdf{% endblock %}
 {% block tool_title %}Markdown to PDF Converter{% endblock %}
+
 {% block tool_description %}
 Convert Markdown documentation into professionally formatted PDF files.
 Supports code highlighting, tables, and custom styling entirely in your browser.
@@ -40,7 +44,7 @@ Supports code highlighting, tables, and custom styling entirely in your browser.
     }
 
     .preview-container::-webkit-scrollbar-thumb {
-        background-color: #DEE2E6;
+        background-color: var(--color-subtle);
         border-radius: 4px;
     }
 </style>
@@ -48,60 +52,42 @@ Supports code highlighting, tables, and custom styling entirely in your browser.
 
 {% block tool_body %}
 <div class="space-y-6">
-
     <div class="flex items-center gap-3">
-        <div
-            class="flex items-center gap-2 px-3 py-2 bg-gray-50 dark:bg-[#121212] rounded-lg border border-[#DEE2E6] dark:border-[#3D3D3D]">
-            <label class="text-[10px] font-bold text-[#6C757D] uppercase">Paper:</label>
-            <select x-model="format"
-                class="bg-transparent text-xs font-bold text-[#212529] dark:text-white outline-none cursor-pointer">
+        <div class="flex items-center gap-2 px-3 py-2 bg-subtle rounded-lg border border-subtle"> <label
+                class="text-[10px] font-bold text-muted uppercase">Paper:</label> <select x-model="format"
+                class="bg-transparent text-xs font-bold text-heading outline-none cursor-pointer">
                 <option value="a4">A4</option>
                 <option value="letter">Letter</option>
                 <option value="legal">Legal</option>
-            </select>
-        </div>
-
-        <button @click="renderMarkdown()"
-            class="px-4 py-2.5 bg-white dark:bg-[#2D2D2D] text-[#6C757D] dark:text-white border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl text-xs font-bold hover:bg-gray-50 dark:hover:bg-[#333] transition-all active:scale-95 flex items-center gap-2">
-            <i class="fas fa-sync-alt scale-x-[-1]"></i>
-            <span>Refresh Preview</span>
-        </button>
-
-        <button @click="downloadPDF()" :disabled="!input.trim() || loading"
-            class="px-6 py-2.5 bg-[#0D7C3D] hover:bg-[#0A5C2C] text-white rounded-xl text-xs font-bold shadow-lg transition-all active:scale-95 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-            <template x-if="!loading">
-                <i class="fas fa-file-download"></i>
-            </template>
-            <template x-if="loading">
-                <i class="fas fa-circle-notch fa-spin"></i>
-            </template>
-            <span x-text="loading ? 'Generating...' : 'Download PDF'"></span>
-        </button>
+            </select> </div> <button @click="renderMarkdown()"
+            class="px-4 py-2.5 bg-surface text-muted border border-subtle rounded-xl text-xs font-bold hover:bg-subtle transition-all active:scale-95 flex items-center gap-2">
+            <i class="fas fa-sync-alt scale-x-[-1]"></i> <span>Refresh Preview</span> </button> <button
+            @click="downloadPDF()" :disabled="!input.trim() || loading"
+            class="px-6 py-2.5 bg-kiri-green hover:bg-kiri-green-dark text-white rounded-xl text-xs font-bold shadow-lg transition-all active:scale-95 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
+            <template x-if="!loading"> <i class="fas fa-file-download"></i> </template>
+            <template x-if="loading"> <i class="fas fa-circle-notch fa-spin"></i> </template> <span
+                x-text="loading ? 'Generating...' : 'Download PDF'"></span> </button>
     </div>
-</div>
-
-<div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-auto lg:h-[600px]">
-    <div class="flex flex-col gap-2 h-full">
-        <div class="flex items-center justify-between px-2">
-            <span class="text-[10px] font-bold text-[#6C757D] uppercase tracking-widest">Markdown Input</span>
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-auto lg:h-[600px]">
+        <div class="flex flex-col gap-2 h-full">
+            <div class="flex items-center justify-between px-2"> <span
+                    class="text-[10px] font-bold text-muted uppercase tracking-widest">Markdown
+                    Input</span> </div> <textarea x-model="input" @input.debounce.300ms="renderMarkdown()"
+                class="flex-1 w-full p-6 font-mono text-sm border border-subtle rounded-[1.5rem] bg-surface text-heading resize-none shadow-inner outline-none focus:border-kiri-green transition-colors min-h-[300px] lg:h-full"
+                placeholder="# Start typing your document here..."></textarea>
         </div>
-        <textarea x-model="input" @input.debounce.300ms="renderMarkdown()"
-            class="flex-1 w-full p-6 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[1.5rem] bg-white dark:bg-[#121212] text-[#212529] dark:text-[#E4E4E7] resize-none shadow-inner outline-none focus:border-[#0D7C3D] transition-colors min-h-[300px] lg:h-full"
-            placeholder="# Start typing your document here..."></textarea>
-    </div>
-
-    <div class="flex flex-col gap-2 h-full">
-        <div class="flex items-center justify-between px-2">
-            <span class="text-[10px] font-bold text-[#6C757D] uppercase tracking-widest">PDF Preview</span>
-        </div>
-        <div
-            class="flex-1 bg-white border border-[#DEE2E6] rounded-[1.5rem] overflow-hidden shadow-sm relative min-h-[300px] lg:h-full">
-            <div class="absolute inset-0 overflow-auto preview-container bg-white">
-                <div id="pdf-content" class="markdown-body" x-html="renderedHtml"></div>
+        <div class="flex flex-col gap-2 h-full">
+            <div class="flex items-center justify-between px-2"> <span
+                    class="text-[10px] font-bold text-muted uppercase tracking-widest">PDF
+                    Preview</span> </div>
+            <div
+                class="flex-1 bg-surface border border-subtle rounded-[1.5rem] overflow-hidden shadow-sm relative min-h-[300px] lg:h-full">
+                <div class="absolute inset-0 overflow-auto preview-container bg-surface">
+                    <div id="pdf-content" class="markdown-body" x-html="renderedHtml"></div>
+                </div>
             </div>
         </div>
     </div>
-</div>
 </div>
 {% endblock %}
 
@@ -110,9 +96,7 @@ Supports code highlighting, tables, and custom styling entirely in your browser.
 input: '',
 format: 'a4',
 loading: false,
-
 renderedHtml: '',
-
 init() {
 this.persist('markdown_input', 'input');
 this.hideUpload = false;
@@ -120,7 +104,6 @@ this.hideSample = false;
 this.$watch('input', () => this.renderMarkdown());
 if (this.input) this.renderMarkdown();
 },
-
 renderMarkdown() {
 if (!this.input) {
 this.renderedHtml = '';
@@ -133,7 +116,6 @@ console.error("Marked error:", err);
 this.error = "Markdown parsing failed";
 }
 },
-
 loadSample() {
 this.input = `# Kiri Markdown Sample
 ## 1. Overview
@@ -144,7 +126,7 @@ This tool converts Markdown to professionally formatted PDF files.
 - **Fast**: Instant preview and generation.
 - **Clean**: Uses GitHub-style documentation theme.
 
-> "Simplicity is the ultimate sophistication." — Leonardo da Vinci
+> "Simplicity is the ultimate sophistication." - Leonardo da Vinci
 
 ## 2. Technical Details
 \`\`\`javascript
@@ -165,29 +147,33 @@ local: true
 this.renderMarkdown();
 this.statusMessage = "Sample Loaded";
 },
-
 async downloadPDF() {
 if (!this.input.trim()) return;
 this.loading = true;
 this.statusMessage = "Generating PDF...";
-
-// Ensure the content is rendered
 const element = document.getElementById('pdf-content');
-
 const opt = {
 margin: [15, 15],
 filename: 'kiri_markdown_export.pdf',
-image: { type: 'jpeg', quality: 0.98 },
+image: {
+type: 'jpeg',
+quality: 0.98
+},
 html2canvas: {
 scale: 2,
 useCORS: true,
 logging: false,
 letterRendering: true
 },
-jsPDF: { unit: 'mm', format: this.format, orientation: 'portrait' },
-pagebreak: { mode: ['avoid-all', 'css', 'legacy'] }
+jsPDF: {
+unit: 'mm',
+format: this.format,
+orientation: 'portrait'
+},
+pagebreak: {
+mode: ['avoid-all', 'css', 'legacy']
+}
 };
-
 try {
 await html2pdf().set(opt).from(element).save();
 this.statusMessage = "PDF Downloaded";

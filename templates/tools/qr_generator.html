@@ -2,12 +2,16 @@
 {% load static %}
 
 {% block title %}QR Code Generator | Kiri Labs{% endblock %}
-{% block meta_description %}Create professional QR codes for URLs, WiFi, Emails, and more. Customize colors, shapes, and
-logos with high-resolution export.{% endblock %}
+
+{% block meta_description %}
+Create professional QR codes for URLs, WiFi, Emails, and more. Customize colors, shapes, and logos with high-resolution
+export.
+{% endblock %}
 
 {% block tool_name %}QR Generator{% endblock %}
 {% block tool_icon %}fa-qrcode{% endblock %}
 {% block tool_title %}QR Code Generator{% endblock %}
+
 {% block tool_description %}
 Generate fully customized QR codes for any purpose.
 Supports WiFi credentials, VCards, and branding with logos. High-precision rendering.
@@ -42,101 +46,81 @@ Supports WiFi credentials, VCards, and branding with logos. High-precision rende
 
 {% block tool_body %}
 <div class="flex flex-col gap-8 min-h-[600px]">
-
     <div class="grid grid-cols-1 lg:grid-cols-[1.5fr,1fr] gap-8 items-start">
-
         <div class="space-y-6">
-
-            <div
-                class="bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[2rem] p-2 flex flex-wrap gap-2 shadow-sm">
+            <div class="bg-surface border border-subtle rounded-[2rem] p-2 flex flex-wrap gap-2 shadow-sm">
                 <template x-for="t in types" :key="t.id">
                     <button @click="setType(t.id)"
-                        :class="type === t.id ? 'bg-[#0D7C3D] text-white shadow-md' : 'text-[#6C757D] dark:text-[#A1A1AA] hover:bg-gray-100 dark:hover:bg-[#333]'"
+                        :class="type === t.id ? 'bg-kiri-green text-white shadow-md' : 'text-body hover:bg-subtle '"
                         class="flex-1 py-3 px-4 rounded-xl text-xs font-bold transition-all duration-200 flex items-center justify-center gap-2 min-w-[100px]">
-                        <i class="fas" :class="t.icon"></i> <span x-text="t.label"></span>
+                        <i class="fas" :class="t.icon"></i>
+                        <span x-text="t.label"></span>
                     </button>
                 </template>
             </div>
-
-            <div
-                class="bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[2.5rem] p-8 shadow-sm">
-
+            <div class="bg-surface border border-subtle rounded-[2.5rem] p-8 shadow-sm">
                 <div class="space-y-6 animate-fade-in">
                     <div class="flex items-center justify-between">
-                        <h4 class="text-xs font-black text-[#6C757D] uppercase tracking-widest">
-                            1. Enter Content
-                        </h4>
+                        <h4 class="text-xs font-black text-muted uppercase tracking-widest"> 1. Enter Content </h4>
                     </div>
-
                     <div x-show="['url', 'text'].includes(type)">
                         <input type="text" x-model="content" @input.debounce.300ms="update()"
-                            class="w-full px-5 py-4 bg-[#F8F9FA] dark:bg-[#121212] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-2xl text-sm outline-none focus:border-[#0D7C3D] transition-colors"
+                            class="w-full px-5 py-4 form-input rounded-2xl text-sm outline-none focus:border-kiri-green transition-colors"
                             :placeholder="type === 'url' ? 'https://example.com' : 'Enter your text here...'">
                     </div>
-
                     <div x-show="type === 'email'" class="space-y-4">
                         <input type="email" x-model="email.address" @input.debounce.300ms="update()"
                             placeholder="recipient@example.com"
-                            class="w-full px-5 py-4 bg-[#F8F9FA] dark:bg-[#121212] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-2xl text-sm outline-none focus:border-[#0D7C3D]">
+                            class="w-full px-5 py-4 form-input rounded-2xl text-sm outline-none focus:border-kiri-green">
                         <input type="text" x-model="email.subject" @input.debounce.300ms="update()"
                             placeholder="Subject Line"
-                            class="w-full px-5 py-4 bg-[#F8F9FA] dark:bg-[#121212] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-2xl text-sm outline-none focus:border-[#0D7C3D]">
+                            class="w-full px-5 py-4 form-input rounded-2xl text-sm outline-none focus:border-kiri-green">
                     </div>
-
                     <div x-show="type === 'phone'">
                         <input type="tel" x-model="phone" @input.debounce.300ms="update()" placeholder="+1 234 567 8900"
-                            class="w-full px-5 py-4 bg-[#F8F9FA] dark:bg-[#121212] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-2xl text-sm outline-none focus:border-[#0D7C3D]">
+                            class="w-full px-5 py-4 form-input rounded-2xl text-sm outline-none focus:border-kiri-green">
                     </div>
-
                     <div x-show="type === 'wifi'" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="md:col-span-2">
                             <input type="text" x-model="wifi.ssid" @input.debounce.300ms="update()"
                                 placeholder="Network Name (SSID)"
-                                class="w-full px-5 py-4 bg-[#F8F9FA] dark:bg-[#121212] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-2xl text-sm outline-none focus:border-[#0D7C3D]">
+                                class="w-full px-5 py-4 form-input rounded-2xl text-sm outline-none focus:border-kiri-green">
                         </div>
                         <input type="text" x-model="wifi.password" @input.debounce.300ms="update()"
                             placeholder="Password"
-                            class="w-full px-5 py-4 bg-[#F8F9FA] dark:bg-[#121212] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-2xl text-sm outline-none focus:border-[#0D7C3D]">
+                            class="w-full px-5 py-4 form-input rounded-2xl text-sm outline-none focus:border-kiri-green">
                         <select x-model="wifi.encryption" @change="update()"
-                            class="w-full px-5 py-4 bg-[#F8F9FA] dark:bg-[#121212] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-2xl text-sm outline-none focus:border-[#0D7C3D] cursor-pointer appearance-none">
+                            class="w-full px-5 py-4 form-input rounded-2xl text-sm outline-none focus:border-kiri-green cursor-pointer appearance-none">
                             <option value="WPA">WPA/WPA2</option>
                             <option value="WEP">WEP</option>
                             <option value="nopass">No Password</option>
                         </select>
                     </div>
                 </div>
-
-                <hr class="my-8 border-[#DEE2E6] dark:border-[#3D3D3D]">
-
+                <hr class="my-8 border-subtle">
                 <div class="space-y-6">
-                    <h4 class="text-xs font-black text-[#6C757D] uppercase tracking-widest">
-                        2. Customization
-                    </h4>
-
+                    <h4 class="text-xs font-black text-muted uppercase tracking-widest"> 2. Customization </h4>
                     <div class="flex gap-6">
-                        <div
-                            class="flex items-center gap-3 bg-[#F8F9FA] dark:bg-[#121212] p-3 pr-6 rounded-2xl border border-[#DEE2E6] dark:border-[#3D3D3D]">
+                        <div class="flex items-center gap-3 bg-surface p-3 pr-6 rounded-2xl border border-subtle">
                             <input type="color" x-model="color" @input="update()">
                             <div class="flex flex-col">
-                                <span class="text-[10px] font-bold text-[#6C757D] uppercase">Dots</span>
+                                <span class="text-[10px] font-bold text-muted uppercase">Dots</span>
                                 <span x-text="color" class="text-xs font-mono font-bold"></span>
                             </div>
                         </div>
-                        <div
-                            class="flex items-center gap-3 bg-[#F8F9FA] dark:bg-[#121212] p-3 pr-6 rounded-2xl border border-[#DEE2E6] dark:border-[#3D3D3D]">
+                        <div class="flex items-center gap-3 bg-surface p-3 pr-6 rounded-2xl border border-subtle">
                             <input type="color" x-model="bgColor" @input="update()">
                             <div class="flex flex-col">
-                                <span class="text-[10px] font-bold text-[#6C757D] uppercase">Background</span>
+                                <span class="text-[10px] font-bold text-muted uppercase">Background</span>
                                 <span x-text="bgColor" class="text-xs font-mono font-bold"></span>
                             </div>
                         </div>
                     </div>
-
                     <div class="grid grid-cols-2 gap-4">
                         <div>
-                            <label class="block text-[10px] font-bold text-[#6C757D] uppercase mb-2">Dot Pattern</label>
+                            <label class="block text-[10px] font-bold text-muted uppercase mb-2">Dot Pattern</label>
                             <select x-model="dotsType" @change="update()"
-                                class="w-full px-4 py-3 bg-[#F8F9FA] dark:bg-[#121212] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl text-xs font-bold outline-none cursor-pointer">
+                                class="w-full px-4 py-3 form-input text-xs font-bold outline-none cursor-pointer">
                                 <option value="square">Square</option>
                                 <option value="dots">Dots</option>
                                 <option value="rounded">Rounded</option>
@@ -146,37 +130,31 @@ Supports WiFi credentials, VCards, and branding with logos. High-precision rende
                             </select>
                         </div>
                         <div>
-                            <label class="block text-[10px] font-bold text-[#6C757D] uppercase mb-2">Corner
-                                Style</label>
+                            <label class="block text-[10px] font-bold text-muted uppercase mb-2">Corner Style</label>
                             <select x-model="cornerType" @change="update()"
-                                class="w-full px-4 py-3 bg-[#F8F9FA] dark:bg-[#121212] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl text-xs font-bold outline-none cursor-pointer">
+                                class="w-full px-4 py-3 form-input text-xs font-bold outline-none cursor-pointer">
                                 <option value="square">Square</option>
                                 <option value="dot">Dot</option>
                                 <option value="extra-rounded">Extra Rounded</option>
                             </select>
                         </div>
                     </div>
-
                     <div>
-                        <label class="block text-[10px] font-bold text-[#6C757D] uppercase mb-2">Center Logo</label>
+                        <label class="block text-[10px] font-bold text-muted uppercase mb-2">Center Logo</label>
                         <div class="flex items-center gap-4">
                             <label
-                                class="flex items-center justify-center w-16 h-16 rounded-2xl border-2 border-dashed border-[#DEE2E6] dark:border-[#3D3D3D] hover:border-[#0D7C3D] cursor-pointer bg-[#F8F9FA] dark:bg-[#121212] transition-colors relative overflow-hidden group">
+                                class="flex items-center justify-center w-16 h-16 rounded-2xl border-2 border-dashed border-subtle hover:border-kiri-green cursor-pointer bg-surface transition-colors relative overflow-hidden group">
                                 <template x-if="logo">
-                                    <img :src="logo" class="w-full h-full object-contain p-2">
-                                </template>
+                                    <img :src="logo" class="w-full h-full object-contain p-2"> </template>
                                 <template x-if="!logo">
-                                    <i class="fas fa-plus text-[#ADB5BD] group-hover:text-[#0D7C3D]"></i>
-                                </template>
+                                    <i class="fas fa-plus text-muted group-hover:text-kiri-green"></i> </template>
                                 <input type="file" @change="handleLogo($event)" accept="image/*" class="hidden">
                             </label>
-
                             <div x-show="logo" class="flex-1 space-y-2">
                                 <button @click="logo = ''; update()"
                                     class="text-xs font-bold text-red-500 hover:underline">Remove Logo</button>
                                 <div>
-                                    <label class="text-[9px] font-bold text-[#6C757D] uppercase">Error
-                                        Correction</label>
+                                    <label class="text-[9px] font-bold text-muted uppercase">Error Correction</label>
                                     <select x-model="errorCorrection" @change="update()"
                                         class="ml-2 bg-transparent text-xs font-bold outline-none">
                                         <option value="L">Low (7%)</option>
@@ -186,109 +164,124 @@ Supports WiFi credentials, VCards, and branding with logos. High-precision rende
                                     </select>
                                 </div>
                             </div>
-                            <div x-show="!logo" class="text-xs text-[#6C757D] max-w-[200px]">
-                                Upload a logo to place in the center. High error correction is recommended for logos.
-                            </div>
+                            <div x-show="!logo" class="text-xs text-muted max-w-[200px]"> Upload a logo to place in the
+                                center. High error
+                                correction is recommended for logos. </div>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
-
         <div class="sticky top-6 space-y-6">
             <div
-                class="bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[2.5rem] p-8 shadow-xl flex flex-col items-center gap-8 relative overflow-hidden">
-
-                <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-[#0D7C3D] to-[#2E9A4F]"></div>
-
+                class="bg-surface border border-subtle rounded-[2.5rem] p-8 shadow-xl flex flex-col items-center gap-8 relative overflow-hidden">
+                <div class="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-kiri-green to-kiri-green"></div>
                 <div class="text-center">
-                    <h3 class="text-lg font-black text-[#212529] dark:text-white">Live Preview</h3>
-                    <p class="text-xs text-[#6C757D]">Scan to test before downloading</p>
+                    <h3 class="text-lg font-black text-heading">Live Preview</h3>
+                    <p class="text-xs text-muted">Scan to test before downloading</p>
                 </div>
-
-                <div x-ref="qrContainer" class="p-4 bg-white rounded-xl shadow-inner border border-gray-100"></div>
-
+                <div x-ref="qrContainer" class="p-4 bg-surface rounded-xl shadow-inner border border-subtle"></div>
                 <div class="w-full grid grid-cols-2 gap-3">
                     <button @click="download('png')"
-                        class="flex items-center justify-center gap-2 px-6 py-4 bg-[#0D7C3D] hover:bg-[#0A5C2C] text-white rounded-2xl text-xs font-bold shadow-lg shadow-green-900/20 transition-all active:scale-95">
-                        <i class="fas fa-file-image"></i> PNG
-                    </button>
+                        class="flex items-center justify-center gap-2 px-6 py-4 bg-kiri-green hover:bg-kiri-green-dark text-white rounded-2xl text-xs font-bold shadow-lg shadow-green-900/20 transition-all active:scale-95">
+                        <i class="fas fa-file-image"></i> PNG </button>
                     <button @click="download('svg')"
-                        class="flex items-center justify-center gap-2 px-6 py-4 bg-[#212529] dark:bg-white text-white dark:text-black rounded-2xl text-xs font-bold shadow-lg transition-all active:scale-95">
-                        <i class="fas fa-code"></i> SVG
-                    </button>
+                        class="flex items-center justify-center gap-2 px-6 py-4 bg-surface text-heading rounded-2xl text-xs font-bold shadow-lg transition-all active:scale-95">
+                        <i class="fas fa-code"></i> SVG </button>
                 </div>
             </div>
-
             <div class="flex gap-2 overflow-x-auto pb-2 no-scrollbar">
                 <button @click="applyPreset('classic')"
-                    class="px-4 py-2 bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-full text-[10px] font-bold hover:border-[#0D7C3D] whitespace-nowrap">
-                    Classic
-                </button>
+                    class="px-4 py-2 bg-surface border border-subtle rounded-full text-[10px] font-bold hover:border-kiri-green whitespace-nowrap">
+                    Classic </button>
                 <button @click="applyPreset('kiri')"
-                    class="px-4 py-2 bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-full text-[10px] font-bold hover:border-[#0D7C3D] whitespace-nowrap">
-                    Kiri Brand
-                </button>
+                    class="px-4 py-2 bg-surface border border-subtle rounded-full text-[10px] font-bold hover:border-kiri-green whitespace-nowrap">
+                    Kiri Brand </button>
                 <button @click="applyPreset('dots')"
-                    class="px-4 py-2 bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-full text-[10px] font-bold hover:border-[#0D7C3D] whitespace-nowrap">
-                    Modern Dots
-                </button>
+                    class="px-4 py-2 bg-surface border border-subtle rounded-full text-[10px] font-bold hover:border-kiri-green whitespace-nowrap">
+                    Modern Dots </button>
             </div>
         </div>
-
     </div>
 </div>
 {% endblock %}
 
 {% block tool_js_data %}
 {
-qrCode: null,
-
-// Config
+qrCode: null, // Config
 type: 'url',
 content: '',
-email: { address: '', subject: '' },
+email: {
+address: '',
+subject: ''
+},
 phone: '',
-wifi: { ssid: '', password: '', encryption: 'WPA' },
-
-// Style
+wifi: {
+ssid: '',
+password: '',
+encryption: 'WPA'
+}, // Style
 color: '#000000',
 bgColor: '#ffffff',
 dotsType: 'square',
 cornerType: 'square',
 logo: '',
-errorCorrection: 'Q',
-
-// UI Data
-types: [
-{ id: 'url', label: 'Website', icon: 'fa-link' },
-{ id: 'text', label: 'Text', icon: 'fa-align-left' },
-{ id: 'email', label: 'Email', icon: 'fa-envelope' },
-{ id: 'phone', label: 'Phone', icon: 'fa-phone' },
-{ id: 'wifi', label: 'WiFi', icon: 'fa-wifi' },
+errorCorrection: 'Q', // UI Data
+types: [{
+id: 'url',
+label: 'Website',
+icon: 'fa-link'
+},
+{
+id: 'text',
+label: 'Text',
+icon: 'fa-align-left'
+},
+{
+id: 'email',
+label: 'Email',
+icon: 'fa-envelope'
+},
+{
+id: 'phone',
+label: 'Phone',
+icon: 'fa-phone'
+},
+{
+id: 'wifi',
+label: 'WiFi',
+icon: 'fa-wifi'
+},
 ],
-
 init() {
 this.hideUpload = true;
-this.hideSample = false;
-
-// Initialize Library
+this.hideSample = false; // Initialize Library
 this.qrCode = new QRCodeStyling({
 width: 280,
 height: 280,
 type: "svg",
 data: this.content,
 image: "",
-dotsOptions: { color: this.color, type: this.dotsType },
-backgroundOptions: { color: this.bgColor },
-imageOptions: { crossOrigin: "anonymous", margin: 8 },
-cornersSquareOptions: { type: this.cornerType },
-qrOptions: { errorCorrectionLevel: this.errorCorrection }
+dotsOptions: {
+color: this.color,
+type: this.dotsType
+},
+backgroundOptions: {
+color: this.bgColor
+},
+imageOptions: {
+crossOrigin: "anonymous",
+margin: 8
+},
+cornersSquareOptions: {
+type: this.cornerType
+},
+qrOptions: {
+errorCorrectionLevel: this.errorCorrection
+}
 });
-
 this.qrCode.append(this.$refs.qrContainer);
 },
-
 loadSample() {
 this.type = 'url';
 this.content = 'https://kiri.ng';
@@ -298,35 +291,39 @@ this.errorCorrection = 'H';
 this.update();
 this.statusMessage = "Kiri Brand QR Loaded";
 },
-
 setType(t) {
 this.type = t;
 // Set reasonable defaults to avoid empty QR
-if(t === 'url' && !this.content.startsWith('http')) this.content = 'https://kiri.ng';
-if(t === 'text') this.content = 'Hello Kiri';
+if (t === 'url' && !this.content.startsWith('http')) this.content = 'https://kiri.ng';
+if (t === 'text') this.content = 'Hello Kiri';
 this.update();
 },
-
 getQrData() {
 if (this.type === 'wifi') return `WIFI:T:${this.wifi.encryption};S:${this.wifi.ssid};P:${this.wifi.password};;`;
 if (this.type === 'email') return `mailto:${this.email.address}?subject=${encodeURIComponent(this.email.subject)}`;
 if (this.type === 'phone') return `tel:${this.phone}`;
 return this.content || ' ';
 },
-
 update() {
 if (!this.qrCode) return;
-
 this.qrCode.update({
 data: this.getQrData(),
-dotsOptions: { color: this.color, type: this.dotsType },
-backgroundOptions: { color: this.bgColor },
+dotsOptions: {
+color: this.color,
+type: this.dotsType
+},
+backgroundOptions: {
+color: this.bgColor
+},
 image: this.logo,
-cornersSquareOptions: { type: this.cornerType },
-qrOptions: { errorCorrectionLevel: this.errorCorrection }
+cornersSquareOptions: {
+type: this.cornerType
+},
+qrOptions: {
+errorCorrectionLevel: this.errorCorrection
+}
 });
 },
-
 handleLogo(event) {
 const file = event.target.files[0];
 if (file) {
@@ -339,7 +336,6 @@ this.update();
 reader.readAsDataURL(file);
 }
 },
-
 applyPreset(name) {
 if (name === 'classic') {
 this.color = '#000000';
@@ -356,16 +352,24 @@ this.cornerType = 'dot';
 }
 this.update();
 },
-
 download(ext) {
-this.qrCode.download({ name: "kiri_qr_code", extension: ext });
+this.qrCode.download({
+name: "kiri_qr_code",
+extension: ext
+});
 },
-
 resetTool() {
 this.type = 'url';
 this.content = 'https://kiri.ng';
-this.wifi = { ssid: '', password: '', encryption: 'WPA' };
-this.email = { address: '', subject: '' };
+this.wifi = {
+ssid: '',
+password: '',
+encryption: 'WPA'
+};
+this.email = {
+address: '',
+subject: ''
+};
 this.phone = '';
 this.logo = '';
 this.applyPreset('classic');

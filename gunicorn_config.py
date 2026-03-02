@@ -9,7 +9,6 @@ bind = "127.0.0.1:8000"
 workers = 2
 worker_class = "gthread"
 threads = 2
-worker_connections = 100
 timeout = 120
 keepalive = 5
 

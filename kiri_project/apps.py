@@ -32,7 +32,7 @@ def configure_sqlite_connection(sender, connection, **kwargs):
         cursor.execute("PRAGMA cache_size=2000;")
         # Store temp tables in memory
         cursor.execute("PRAGMA temp_store=MEMORY;")
-        # 128MB memory-mapped I/O for faster reads
-        cursor.execute("PRAGMA mmap_size=67108864;")
-        # Limit WAL file size to 64MB
-        cursor.execute("PRAGMA journal_size_limit=67108864;")
+        # 32MB memory-mapped I/O (optimized for 1GB RAM)
+        cursor.execute("PRAGMA mmap_size=33554432;")
+        # Limit WAL file size to 32MB
+        cursor.execute("PRAGMA journal_size_limit=33554432;")

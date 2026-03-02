@@ -2,12 +2,15 @@
 {% load static %}
 
 {% block title %}Professional Diff Viewer | Kiri Labs{% endblock %}
-{% block meta_description %}Compare text snippets side-by-side or line-by-line. Identify changes and differences
-instantly.{% endblock %}
+
+{% block meta_description %}
+Compare text snippets side-by-side or line-by-line. Identify changes and differences instantly.
+{% endblock %}
 
 {% block tool_name %}Diff Viewer{% endblock %}
 {% block tool_icon %}fa-columns{% endblock %}
 {% block tool_title %}Professional Diff Viewer{% endblock %}
+
 {% block tool_description %}
 Compare two text snippets side-by-side or line-by-line.
 Identify changes between code, documents, or data.
@@ -15,12 +18,12 @@ Identify changes between code, documents, or data.
 
 {% block tool_actions_left %}
 <div class="flex items-center gap-2">
-    <div class="flex bg-white dark:bg-[#1E1E1E] p-1 rounded-xl border border-[#DEE2E6] dark:border-[#3D3D3D] shadow-sm">
+    <div class="flex bg-surface p-1 rounded-xl border border-subtle shadow-sm">
         <button @click="outputFormat = 'line-by-line'; convert()"
-            :class="outputFormat === 'line-by-line' ? 'bg-[#0D7C3D] text-white' : 'text-[#6C757D] dark:text-[#A1A1AA] hover:bg-[#F1F3F5] dark:hover:bg-[#2D2D2D]'"
-            class="px-3 py-1.5 text-[10px] font-bold rounded-lg transition-all">Line-by-Line</button>
-        <button @click="outputFormat = 'side-by-side'; convert()"
-            :class="outputFormat === 'side-by-side' ? 'bg-[#0D7C3D] text-white' : 'text-[#6C757D] dark:text-[#A1A1AA] hover:bg-[#F1F3F5] dark:hover:bg-[#2D2D2D]'"
+            :class="outputFormat === 'line-by-line' ? 'bg-kiri-green text-white' : 'text-body hover:bg-subtle '"
+            class="px-3 py-1.5 text-[10px] font-bold rounded-lg transition-all">Line-by-Line</button> <button
+            @click="outputFormat = 'side-by-side'; convert()"
+            :class="outputFormat === 'side-by-side' ? 'bg-kiri-green text-white' : 'text-body hover:bg-subtle '"
             class="px-3 py-1.5 text-[10px] font-bold rounded-lg transition-all">Side-by-Side</button>
     </div>
 </div>
@@ -32,50 +35,39 @@ Identify changes between code, documents, or data.
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between">
-                <span
-                    class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest flex items-center gap-2">
-                    <i class="fas fa-file-alt text-gray-400"></i> Original Version
-                </span>
+                <span class="text-[10px] font-bold text-body uppercase tracking-widest flex items-center gap-2">
+                    <i class="fas fa-file-alt text-muted"></i> Original Version </span>
                 <button @click="$refs.fileInput1.click()"
-                    class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase flex items-center gap-1.5">
-                    <i class="fas fa-upload"></i> Upload
-                </button>
+                    class="text-[10px] font-bold text-kiri-green hover:underline uppercase flex items-center gap-1.5">
+                    <i class="fas fa-upload"></i> Upload </button>
                 <input type="file" x-ref="fileInput1" class="hidden" @change="uploadToField($event, 'input')">
             </div>
             <textarea x-model="input" @input="convert()"
-                class="w-full h-48 p-4 font-mono text-xs border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-2xl bg-white dark:bg-[#121212] text-[#212529] dark:text-[#E4E4E7] transition-all resize-none shadow-inner"
+                class="w-full h-48 p-4 font-mono text-xs border border-subtle rounded-2xl bg-surface text-heading transition-all resize-none shadow-inner"
                 placeholder="Paste original text..."></textarea>
         </div>
-
         <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between">
-                <span
-                    class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest flex items-center gap-2">
-                    <i class="fas fa-file-edit text-[#0D7C3D]"></i> Modified Version
-                </span>
+                <span class="text-[10px] font-bold text-body uppercase tracking-widest flex items-center gap-2">
+                    <i class="fas fa-file-edit text-kiri-green"></i> Modified Version </span>
                 <button @click="$refs.fileInput2.click()"
-                    class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase flex items-center gap-1.5">
-                    <i class="fas fa-upload"></i> Upload
-                </button>
+                    class="text-[10px] font-bold text-kiri-green hover:underline uppercase flex items-center gap-1.5">
+                    <i class="fas fa-upload"></i> Upload </button>
                 <input type="file" x-ref="fileInput2" class="hidden" @change="uploadToField($event, 'modified')">
             </div>
             <textarea x-model="modified" @input="convert()"
-                class="w-full h-48 p-4 font-mono text-xs border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-2xl bg-white dark:bg-[#121212] text-[#212529] dark:text-[#E4E4E7] transition-all resize-none shadow-inner"
+                class="w-full h-48 p-4 font-mono text-xs border border-subtle rounded-2xl bg-surface text-heading transition-all resize-none shadow-inner"
                 placeholder="Paste modified text..."></textarea>
         </div>
-    </div>
-
-    <!-- Comparison Result -->
+    </div> <!-- Comparison Result -->
     <div x-show="input || modified" class="animate-fade-in">
         <div class="flex items-center gap-3 mb-4">
-            <div class="h-px flex-1 bg-gradient-to-r from-transparent to-[#DEE2E6] dark:to-[#3D3D3D]"></div>
-            <span class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-[0.2em]">Comparison
-                Result</span>
+            <div class="h-px flex-1 bg-gradient-to-r from-transparent to-[#DEE2E6] dark:to-[#3D3D3D]"></div> <span
+                class="text-[10px] font-bold text-body uppercase tracking-[0.2em]">Comparison Result</span>
             <div class="h-px flex-1 bg-gradient-to-l from-transparent to-[#DEE2E6] dark:to-[#3D3D3D]"></div>
         </div>
-
         <div id="diff-output"
-            class="bg-white dark:bg-[#1E1E1E] rounded-2xl border border-[#DEE2E6] dark:border-[#3D3D3D] overflow-hidden shadow-inner min-h-[300px]">
+            class="bg-surface rounded-2xl border border-subtle overflow-hidden shadow-inner min-h-[300px]">
             <!-- Diff2Html will render here -->
         </div>
     </div>
@@ -87,7 +79,6 @@ Identify changes between code, documents, or data.
 hideUpload: true,
 modified: '',
 outputFormat: 'side-by-side',
-
 uploadToField(event, field) {
 const file = event.target.files[0];
 if (!file) return;
@@ -99,7 +90,6 @@ this.convert();
 };
 reader.readAsText(file);
 },
-
 loadSample() {
 this.input = `def fast_power(base, power):
 result = 1
@@ -122,13 +112,13 @@ return result`;
 this.statusMessage = 'Sample loaded';
 this.convert();
 },
-
 convert() {
 if (!this.input && !this.modified) return;
 this.$nextTick(() => {
 try {
 const diffString = Diff.createTwoFilesPatch('Original', 'Modified', this.input, this.modified);
 const targetElement = document.getElementById('diff-output');
+if (!targetElement) return;
 const diff2htmlUi = new Diff2HtmlUI(targetElement, diffString, {
 drawFileList: false,
 matching: 'lines',
@@ -143,9 +133,9 @@ this.error = 'Diff computation failed';
 }
 });
 },
-
 onReset() {
 this.modified = '';
+this.input = '';
 setTimeout(() => {
 const el = document.getElementById('diff-output');
 if (el) el.innerHTML = '';
@@ -158,7 +148,6 @@ if (el) el.innerHTML = '';
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/diff2html/bundles/css/diff2html.min.css">
 <script src="https://cdn.jsdelivr.net/npm/diff2html/bundles/js/diff2html-ui.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jsdiff/5.1.0/diff.min.js"></script>
-
 <style>
     .animate-fade-in {
         animation: fadeIn 0.5s ease-out;
@@ -187,7 +176,7 @@ if (el) el.innerHTML = '';
 
     .dark .d2h-file-wrapper {
         border-color: #3D3D3D !important;
-        bg-color: transparent !important;
+        background-color: transparent !important;
     }
 
     .dark .d2h-code-line-ctn {

@@ -1,8 +1,251 @@
 @import "tailwindcss";
 
-/* Global Theme & PWA Styles */
+@custom-variant dark (&:where(.dark, .dark *));
 
-/* Theme Toggle Icon Visibility */
+/* 1. SMART THEME TOKENS */
+@theme {
+    --color-kiri-green: #0D7C3D;
+    --color-kiri-green-dark: #0A5C2C;
+    --color-kiri-gold: #C4992E;
+
+    --color-heading: var(--kiri-heading);
+    --color-body: var(--kiri-body);
+    --color-text-muted: var(--kiri-muted);
+    
+    --color-surface: var(--kiri-surface);
+    --color-surface-subtle: var(--kiri-surface-subtle);
+    --color-border-subtle: var(--kiri-border);
+    --color-background: var(--kiri-bg);
+
+    --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    --font-mono: 'JetBrains Mono', ui-monospace, monospace;
+}
+
+@layer base {
+    :root {
+        --kiri-heading: #000000;
+        --kiri-body: #495057;
+        --kiri-muted: #6C757D;
+        --kiri-surface: #FFFFFF;
+        --kiri-surface-subtle: #F8F9FA;
+        --kiri-border: #DEE2E6;
+        --kiri-bg: #F8F9FA;
+    }
+
+    :root.dark {
+        --kiri-heading: #FFFFFF;
+        --kiri-body: #E0E0E0;
+        --kiri-muted: #A1A1AA;
+        --kiri-surface: #1E1E1E;
+        --kiri-surface-subtle: #121212;
+        --kiri-border: #3D3D3D;
+        --kiri-bg: #121212;
+    }
+
+    body {
+        @apply bg-background text-body font-sans;
+    }
+}
+
+:root {
+    --sidebar-width-expanded: 220px;
+    --sidebar-width-collapsed: 56px;
+}
+
+@layer components {
+
+    /* ==========================================================================
+       Layout & Cards
+       ========================================================================== */
+    .card {
+        @apply bg-surface border border-border-subtle rounded-xl;
+    }
+
+    .card-hover {
+        @apply hover:border-kiri-green hover:shadow-lg transition-all;
+    }
+
+    .page-header {
+        @apply fixed top-0 left-0 right-0 h-14 bg-surface border-b border-border-subtle flex items-center z-50;
+    }
+
+    .page-footer {
+        @apply bg-surface border-t border-border-subtle mt-auto;
+    }
+
+    .sidebar {
+        @apply fixed top-14 left-0 bottom-0 bg-surface border-r border-border-subtle z-40 transition-all duration-300 overflow-hidden hidden md:block;
+    }
+
+    .mobile-nav {
+        @apply md:hidden fixed bottom-0 left-0 right-0 h-16 bg-surface border-t border-border-subtle z-50 shadow-[0_-4px_12px_rgba(0,0,0,0.05)];
+    }
+
+    .dropdown-menu {
+        @apply absolute right-0 mt-2 w-56 bg-surface rounded-xl shadow-lg border border-border-subtle z-50 overflow-hidden;
+    }
+
+    .k-page-container {
+        @apply bg-background flex items-center justify-center;
+    }
+
+    /* ==========================================================================
+       Forms & Inputs 
+       ========================================================================== */
+    .form-input, 
+    .input-field,
+    .search-input,
+    .form-field input,
+    .form-field textarea,
+    .form-field select,
+    .vTextField,
+    .vURLField {
+        @apply w-full px-3 py-2 border border-border-subtle bg-surface-subtle text-body rounded-lg focus:border-kiri-green focus:ring-2 focus:ring-kiri-green/20 focus:bg-surface outline-none transition-all;
+    }
+
+    .search-input {
+        @apply h-10 pl-10 pr-4 text-sm;
+    }
+
+    /* ==========================================================================
+       Buttons
+       ========================================================================== */
+    .btn,
+    .btn-primary,
+    .btn-secondary {
+        @apply inline-flex items-center justify-center gap-2 px-5 py-2 text-sm font-semibold rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-offset-2;
+    }
+
+    .btn-primary {
+        @apply bg-gradient-to-r from-kiri-green to-kiri-green-dark text-white hover:from-[#0B6A34] hover:to-[#094F26] shadow-sm hover:shadow focus:ring-kiri-green/20;
+    }
+
+    .btn-secondary {
+        @apply bg-surface text-body hover:bg-surface-subtle border border-border-subtle shadow-sm hover:shadow;
+    }
+
+    .icon-btn,
+    .icon-btn-large,
+    .icon-btn-sm {
+        @apply flex items-center justify-center rounded-lg transition-colors focus:outline-none;
+    }
+
+    .icon-btn {
+        @apply w-10 h-10 text-body hover:bg-surface-subtle;
+    }
+
+    .icon-btn-large {
+        @apply w-14 h-14 text-body hover:bg-surface-subtle;
+    }
+
+    .icon-btn-sm {
+        @apply w-8 h-8 bg-surface-subtle text-body hover:bg-kiri-green hover:text-white;
+    }
+
+    /* ==========================================================================
+       Navigation
+       ========================================================================== */
+    .nav-link {
+        @apply flex items-center h-10 px-4 gap-3 text-body hover:bg-surface-subtle hover:text-kiri-green transition-colors;
+    }
+
+    .nav-link-active {
+        /* Fixed: Using pure utility classes here */
+        @apply bg-[#E8F5ED] dark:bg-kiri-green/10 text-kiri-green border-r-2 border-kiri-green;
+    }
+
+    .subnav-link {
+        @apply flex items-center h-9 px-4 gap-3 text-[12px] font-bold text-text-muted hover:text-kiri-green transition-colors;
+    }
+
+    .nav-label-text {
+        @apply text-[13px] font-bold whitespace-nowrap transition-opacity duration-200;
+    }
+
+    .section-label {
+        @apply text-[10px] font-bold text-[#ADB5BD] uppercase tracking-widest leading-none;
+    }
+
+    .mobile-nav-item {
+        @apply flex flex-col items-center justify-center gap-1 text-text-muted;
+    }
+
+    .mobile-nav-item-active {
+        @apply text-kiri-green;
+    }
+
+    .mobile-nav-label {
+        @apply text-[9px] font-bold uppercase tracking-tighter;
+    }
+
+    /* ==========================================================================
+       Alerts
+       ========================================================================== */
+    .alert,
+    .alert-success,
+    .alert-error,
+    .alert-warning,
+    .alert-info {
+        @apply p-3 text-sm font-bold rounded-lg border-l-4;
+    }
+
+    /* Fixed: Using pure utility classes instead of custom classes */
+    .alert-success {
+        @apply bg-[#E8F5ED] dark:bg-kiri-green/10 border-kiri-green text-kiri-green dark:text-green-400;
+    }
+
+    .alert-error {
+        @apply bg-red-50 dark:bg-red-900/10 border-red-500 text-red-700 dark:text-red-400;
+    }
+
+    .alert-warning {
+        @apply bg-[#FDF5E6] dark:bg-kiri-gold/10 border-kiri-gold text-[#8B6914] dark:text-yellow-400;
+    }
+
+    .alert-info {
+        @apply bg-blue-50 dark:bg-blue-900/10 border-blue-500 text-blue-700 dark:text-blue-400;
+    }
+
+    /* ==========================================================================
+       Utilities
+       ========================================================================== */
+    .divider {
+        @apply border-t border-border-subtle;
+    }
+
+    .border-subtle {
+        @apply border-border-subtle;
+    }
+
+    .bg-subtle {
+        @apply bg-surface-subtle;
+    }
+
+    .bg-surface {
+        @apply bg-surface;
+    }
+
+    .bg-success-subtle {
+        @apply bg-[#E8F5ED] dark:bg-kiri-green/10;
+    }
+
+    .bg-danger-subtle {
+        @apply bg-red-50 dark:bg-red-900/10;
+    }
+
+    .bg-warning-subtle {
+        @apply bg-[#FDF5E6] dark:bg-kiri-gold/10;
+    }
+
+    .bg-info-subtle {
+        @apply bg-blue-50 dark:bg-blue-900/10;
+    }
+}
+
+/* ==========================================================================
+   Global Interactions & PWA
+   ========================================================================== */
+
 #theme-icon-light,
 #theme-icon-dark {
     display: none;
@@ -16,7 +259,6 @@ html.dark #theme-icon-dark {
     display: flex;
 }
 
-/* PWA Button Appearance */
 #pwa-install-btn {
     transition: transform 0.3s ease, opacity 0.3s ease;
     opacity: 0;
@@ -28,19 +270,18 @@ html.dark #theme-icon-dark {
     transform: translateY(0);
 }
 
-/* Base Font & Layout Defaults */
-body {
-    font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+#pwa-install-btn.flex {
+    display: flex;
 }
 
-/* Sidebar states - desktop */
+/* Sidebar States */
 @media (min-width: 768px) {
     #sidebar {
-        width: 56px;
+        width: var(--sidebar-width-collapsed);
     }
 
     #sidebar.expanded {
-        width: 220px;
+        width: var(--sidebar-width-expanded);
     }
 
     #sidebar .nav-label {
@@ -52,7 +293,6 @@ body {
     }
 }
 
-/* Mobile sidebar - overlay style */
 @media (max-width: 767px) {
     #sidebar {
         width: 280px;
@@ -68,30 +308,11 @@ body {
     }
 }
 
-/* Dropdown menu styling */
 .dropdown-item {
-    display: flex;
-    align-items: center;
-    gap: 0.75rem;
-    padding: 0.5rem 1rem;
-    font-size: 0.875rem;
-    color: #495057;
-    transition: background-color 0.15s;
+    @apply flex items-center gap-3 px-4 py-2 text-sm text-body hover:bg-surface-subtle transition-colors;
 }
 
-.dropdown-item:hover {
-    background-color: #F8F9FA;
-}
-
-.dark .dropdown-item {
-    color: #A1A1AA;
-}
-
-.dark .dropdown-item:hover {
-    background-color: #2D2D2D;
-}
-
-/* Decorative Blobs for Hero */
+/* Decorative Blobs */
 .decorative-blob {
     position: absolute;
     border-radius: 50%;
@@ -105,4 +326,65 @@ body {
 
 .blob-white {
     background: rgba(255, 255, 255, 0.1);
+}
+
+/* Animations */
+@keyframes bounce-slow {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-5px); }
+}
+
+.animate-bounce-slow {
+    animation: bounce-slow 2s infinite;
+}
+
+/* ==========================================================================
+   Socialaccount Provider List Override
+   ========================================================================== */
+
+.socialaccount_providers {
+    display: contents;
+}
+
+.socialaccount_providers li {
+    list-style: none;
+    width: 100%;
+}
+
+.socialaccount_provider {
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    width: 100%;
+    padding: 0.75rem 1.25rem;
+    background-color: var(--color-surface);
+    color: var(--color-body) !important;
+    border: 1px solid var(--color-border-subtle);
+    border-radius: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    text-decoration: none !important;
+    transition: all 0.2s;
+}
+
+.socialaccount_provider:hover {
+    border-color: var(--color-kiri-green);
+    background-color: var(--color-surface-subtle);
+}
+
+/* Inject icons securely via CSS */
+a[href*="/github/"]::before {
+    content: "\f09b";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    font-size: 1.25rem;
+}
+
+a[href*="/huggingface/"]::before {
+    content: "\f544";
+    font-family: "Font Awesome 6 Free";
+    font-weight: 900;
+    color: #eab308;
+    font-size: 1.25rem;
 }

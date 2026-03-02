@@ -1,10 +1,10 @@
 {% load static %}
+
 <form method="post" hx-post="{% url 'projects:create_manual' %}" hx-target="#form-container" hx-swap="outerHTML">
     {% csrf_token %}
 
     {% if form.errors %}
-    <div
-        class="mb-4 p-3 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-700 text-xs text-red-700 dark:text-red-400">
+    <div class="mb-4 alert-error p-3 text-xs">
         <p class="font-semibold mb-1">Please correct the errors below:</p>
         {% for field in form %}
         {% for error in field.errors %}
@@ -18,18 +18,15 @@
     {% endif %}
 
     <div id="form-container" class="space-y-4">
-
         {% for field in form %}
         <div>
-            <label for="{{ field.id_for_label }}"
-                class="block text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">
+            <label for="{{ field.id_for_label }}" class="block text-xs font-semibold text-heading mb-1">
                 {{ field.label }}{% if field.field.required %} <span class="text-red-500">*</span>{% endif %}
             </label>
             {% if field.help_text %}
-            <p class="text-[11px] text-gray-400 dark:text-gray-500 mb-1">{{ field.help_text }}</p>
+            <p class="text-[11px] text-muted mb-1">{{ field.help_text }}</p>
             {% endif %}
-            <div
-                class="[&>input]:w-full [&>input]:rounded-lg [&>input]:border [&>input]:border-gray-300 [&>input]:dark:border-gray-600 [&>input]:bg-white [&>input]:dark:bg-[#2D2D2D] [&>input]:px-3 [&>input]:py-2 [&>input]:text-sm [&>input]:text-[#212529] [&>input]:dark:text-white [&>input]:focus:outline-none [&>input]:focus:ring-2 [&>input]:focus:ring-[#0D7C3D] [&>textarea]:w-full [&>textarea]:rounded-lg [&>textarea]:border [&>textarea]:border-gray-300 [&>textarea]:dark:border-gray-600 [&>textarea]:bg-white [&>textarea]:dark:bg-[#2D2D2D] [&>textarea]:px-3 [&>textarea]:py-2 [&>textarea]:text-sm [&>textarea]:text-[#212529] [&>textarea]:dark:text-white [&>textarea]:focus:outline-none [&>textarea]:focus:ring-2 [&>textarea]:focus:ring-[#0D7C3D] [&>select]:w-full [&>select]:rounded-lg [&>select]:border [&>select]:border-gray-300 [&>select]:dark:border-gray-600 [&>select]:bg-white [&>select]:dark:bg-[#2D2D2D] [&>select]:px-3 [&>select]:py-2 [&>select]:text-sm [&>select]:text-[#212529] [&>select]:dark:text-white [&>select]:focus:outline-none [&>select]:focus:ring-2 [&>select]:focus:ring-[#0D7C3D]">
+            <div class="form-field">
                 {{ field }}
             </div>
             {% if field.errors %}
@@ -39,15 +36,12 @@
         {% endfor %}
 
         <div class="pt-2 flex gap-3">
-            <button type="submit"
-                class="flex-1 py-2.5 bg-[#0D7C3D] hover:bg-[#0b6e35] text-white text-sm font-semibold rounded-lg transition-colors focus:outline-none focus:ring-2 focus:ring-[#0D7C3D] focus:ring-offset-2">
+            <button type="submit" class="btn-primary flex-1 py-2.5">
                 Submit Project
             </button>
-            <a href="{% url 'projects:list' %}"
-                class="px-4 py-2.5 text-sm font-medium rounded-lg border border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+            <a href="{% url 'projects:list' %}" class="btn-secondary px-4 py-2.5">
                 Cancel
             </a>
         </div>
-
     </div>
 </form>

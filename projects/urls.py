@@ -8,5 +8,6 @@ urlpatterns = [
     path('submit/', views.ProjectSubmitView.as_view(), name='create_manual'),
     path('new/', views.ImportLandingView.as_view(), name='create'),
     path('api/repo-files/', views.RepoFilesApiView.as_view(), name='api_repo_files'),
+    path('api/user-repos/', views.UserReposApiView.as_view(), name='api_user_repos'),
     path('<slug:slug>/', views.ProjectDetailView.as_view(), name='detail'),
 ]

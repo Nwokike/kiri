@@ -1,0 +1,136 @@
+{% extends "tools/base_tool.html" %}
+{% load static %}
+
+{% block tool_head %}
+<!-- imgly Background Removal -->
+<script src="https://cdn.jsdelivr.net/npm/@imgly/background-removal@latest/dist/index.js"></script>
+{% endblock %}
+
+{% block tool_js_data %}
+{
+hideUpload: true,
+isRemoving: false,
+originalImage: null,
+removedImage: null,
+async onFileLoaded(data) {
+// handled by local logic for background removal
+},
+handleFiles(files) {
+const file = files[0];
+if (!file || !file.type.startsWith('image/')) {
+this.error = 'Please upload a valid image file.';
+return;
+}
+this.file = file;
+this.originalImage = URL.createObjectURL(file);
+this.removedImage = null;
+this.statusMessage = 'Image loaded. Ready to remove background.';
+},
+async removeBackground() {
+if (!this.file) return;
+this.isRemoving = true;
+this.statusMessage = 'Removing background... This may take a few seconds (WASM processing).';
+this.error = '';
+try {
+const config = {
+progress: (p) => {
+this.statusMessage = `Processing... ${Math.round(p * 100)}%`;
+}
+};
+const blob = await imglyConfig.removeBackground(this.file, config);
+this.removedImage = URL.createObjectURL(blob);
+this.statusMessage = 'Background removed successfully!';
+} catch (err) {
+console.error(err);
+this.error = 'Failed to remove background. Please try a different image.';
+this.statusMessage = 'Error occurred';
+} finally {
+this.isRemoving = false;
+}
+},
+downloadResult() {
+if (!this.removedImage) return;
+const link = document.createElement('a');
+link.href = this.removedImage;
+link.download = `kiri-bg-removed-${Date.now()}.png`;
+link.click();
+},
+onReset() {
+this.originalImage = null;
+this.removedImage = null;
+this.isRemoving = false;
+this.file = null;
+}
+}
+{% endblock %}
+
+{% block tool_body %}
+<div class="space-y-8">
+    <!-- Upload Area -->
+    <div x-show="!originalImage" class="animate-fade-in">
+        <label @dragover.prevent="dragging = true" @dragleave.prevent="dragging = false"
+            @drop.prevent="dragging = false; handleFiles($event.dataTransfer.files)"
+            class="relative group cursor-pointer block border-2 border-dashed border-subtle rounded-3xl p-12 text-center transition-all hover:border-kiri-green hover:bg-kiri-green/5"
+            :class="dragging ? 'border-kiri-green bg-kiri-green/5' : ''">
+            <input type="file" class="hidden" accept="image/*" @change="handleFiles($event.target.files)">
+            <div
+                class="w-20 h-20 bg-kiri-green/10 rounded-2xl flex items-center justify-center text-kiri-green mx-auto mb-6 group-hover:scale-110 transition-transform">
+                <i class="fas fa-image text-3xl"></i>
+            </div>
+            <h3 class="text-xl font-bold text-heading mb-2">Drop your image here</h3>
+            <p class="text-body text-sm max-w-xs mx-auto mb-6"> Supports PNG, JPG, and WEBP. Processing is 100%
+                client-side. </p>
+            <span
+                class="inline-flex items-center gap-2 px-6 py-3 bg-kiri-green text-white rounded-xl text-sm font-bold shadow-lg shadow-sm group-hover:bg-kiri-green-dark transition-colors">
+                <i class="fas fa-plus"></i> Select Image </span>
+        </label>
+    </div> <!-- Preview Area -->
+    <template x-if="originalImage">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            <!-- Source -->
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h4 class="text-sm font-bold text-body uppercase tracking-wider">Original </h4> <button
+                        @click="onReset()" class="text-xs text-red-500 hover:text-red-700 font-bold">Change</button>
+                </div>
+                <div
+                    class="aspect-square rounded-2xl overflow-hidden bg-subtle border border-subtle flex items-center justify-center">
+                    <img :src="originalImage" class="max-h-full max-w-full object-contain"> </div>
+            </div> <!-- Result -->
+            <div class="space-y-4">
+                <div class="flex items-center justify-between">
+                    <h4 class="text-sm font-bold text-body uppercase tracking-wider">Result </h4> <span
+                        x-show="removedImage"
+                        class="text-[10px] px-2 py-0.5 bg-green-500/10 text-green-500 rounded-full font-bold">Processed</span>
+                </div>
+                <div
+                    class="aspect-square rounded-2xl overflow-hidden border border-subtle flex items-center justify-center relative bg-[url('https://grainy-gradients.vercel.app/noise.svg')] bg-repeat">
+                    <!-- Checkerboard background logic would be nice here but noise/gray is okay for now -->
+                    <template x-if="!removedImage && !isRemoving">
+                        <div class="text-center p-6"> <button @click="removeBackground()"
+                                class="px-8 py-4 bg-kiri-green text-white rounded-2xl font-extrabold shadow-xl hover:scale-105 active:scale-95 transition-all">
+                                Remove Background </button>
+                            <p class="mt-4 text-[10px] text-muted">Powered by On-Device AI</p>
+                        </div>
+                    </template>
+                    <template x-if="isRemoving">
+                        <div class="text-center"> <i class="fas fa-spinner fa-spin text-4xl text-kiri-green mb-4"></i>
+                            <p class="text-sm font-bold text-muted" x-text="statusMessage"></p>
+                        </div>
+                    </template>
+                    <template x-if="removedImage"> <img :src="removedImage"
+                            class="max-h-full max-w-full object-contain animate-fade-in"> </template>
+                </div>
+            </div>
+        </div>
+    </template>
+</div>
+{% endblock %}
+
+{% block tool_footer_right %}
+<template x-if="removedImage">
+    <button @click="downloadResult()"
+        class="inline-flex items-center gap-2 px-6 py-2.5 bg-kiri-green text-white rounded-xl text-xs font-extrabold hover:bg-kiri-green-dark transition-colors shadow-lg shadow-sm">
+        <i class="fas fa-download"></i> Download PNG </button>
+</template>
+{% endblock %}

@@ -2,12 +2,15 @@
 {% load static %}
 
 {% block title %}YAML & JSON Converter | Kiri Labs{% endblock %}
-{% block meta_description %}Convert between YAML and JSON formats. Supports complex nesting and multi-document YAML.{%
-endblock %}
+
+{% block meta_description %}
+Convert between YAML and JSON formats. Supports complex nesting and multi-document YAML.
+{% endblock %}
 
 {% block tool_name %}YAML & JSON{% endblock %}
 {% block tool_icon %}fa-file-code{% endblock %}
 {% block tool_title %}YAML & JSON Converter{% endblock %}
+
 {% block tool_description %}
 Convert between YAML and JSON formats.
 Supports complex nesting and multi-document YAML locally in your browser.
@@ -17,13 +20,13 @@ Supports complex nesting and multi-document YAML locally in your browser.
 
 {% block tool_actions_left %}
 <div class="flex items-center gap-2">
-    <span class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase">Direction:</span>
-    <div class="flex bg-white dark:bg-[#1E1E1E] p-1 rounded-lg border border-[#DEE2E6] dark:border-[#3D3D3D]">
+    <span class="text-[10px] font-bold text-body uppercase">Direction:</span>
+    <div class="flex bg-surface p-1 rounded-lg border border-subtle">
         <button @click="mode = 'y2j'; resetTool(); loadSample()"
-            :class="mode === 'y2j' ? 'bg-[#0D7C3D] text-white' : 'text-[#6C757D]'"
-            class="px-2 py-1 text-[9px] font-bold rounded-md transition-all">YAML to JSON</button>
-        <button @click="mode = 'j2y'; resetTool(); loadSample()"
-            :class="mode === 'j2y' ? 'bg-[#0D7C3D] text-white' : 'text-[#6C757D]'"
+            :class="mode === 'y2j' ? 'bg-kiri-green text-white' : 'text-muted'"
+            class="px-2 py-1 text-[9px] font-bold rounded-md transition-all">YAML to JSON</button> <button
+            @click="mode = 'j2y'; resetTool(); loadSample()"
+            :class="mode === 'j2y' ? 'bg-kiri-green text-white' : 'text-muted'"
             class="px-2 py-1 text-[9px] font-bold rounded-md transition-all">JSON to YAML</button>
     </div>
 </div>
@@ -31,10 +34,9 @@ Supports complex nesting and multi-document YAML locally in your browser.
 
 {% block tool_actions_right %}
 <button @click="download()"
-    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-[#0D7C3D] text-white hover:bg-[#0A5C2C]"
-    x-show="output" style="display: none;">
-    <i class="fas fa-download"></i>
-    <span x-text="mode === 'y2j' ? 'Download JSON' : 'Download YAML'"></span>
+    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-kiri-green text-white hover:bg-kiri-green-dark"
+    x-show="output">
+    <i class="fas fa-download"></i> <span x-text="mode === 'y2j' ? 'Download JSON' : 'Download YAML'"></span>
 </button>
 {% endblock %}
 
@@ -43,35 +45,29 @@ Supports complex nesting and multi-document YAML locally in your browser.
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[500px]">
         <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between">
-                <span
-                    class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest flex items-center gap-2">
+                <span class="text-[10px] font-bold text-body uppercase tracking-widest flex items-center gap-2">
                     <i class="fas"
-                        :class="mode === 'y2j' ? 'fa-file-invoice text-[#C4992E]' : 'fa-code text-blue-500'"></i>
-                    <span x-text="mode === 'y2j' ? 'Input YAML' : 'Input JSON'"></span>
-                </span>
-                <span class="text-[10px] text-[#A1A1AA]" x-text="input.length ? input.length + ' chars' : ''"></span>
+                        :class="mode === 'y2j' ? 'fa-file-invoice text-kiri-gold' : 'fa-code text-blue-500'"></i>
+                    <span x-text="mode === 'y2j' ? 'Input YAML' : 'Input JSON'"></span> </span>
+                <span class="text-[10px] text-muted" x-text="input.length ? input.length + ' chars' : ''"></span>
             </div>
             <textarea x-model="input" @input="convert()"
-                class="flex-1 w-full p-6 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[1.5rem] bg-white dark:bg-[#121212] text-[#212529] dark:text-[#E4E4E7] resize-none shadow-inner outline-none focus:border-[#0D7C3D]"
+                class="flex-1 w-full p-6 font-mono text-sm border border-subtle rounded-[1.5rem] bg-surface text-heading resize-none shadow-inner outline-none focus:border-kiri-green"
                 :placeholder="mode === 'y2j' ? 'Paste your YAML here...' : 'Paste your JSON here...'"></textarea>
         </div>
-
         <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between">
-                <span
-                    class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest flex items-center gap-2">
+                <span class="text-[10px] font-bold text-body uppercase tracking-widest flex items-center gap-2">
                     <i class="fas"
-                        :class="mode === 'y2j' ? 'fa-code-merge text-[#0D7C3D]' : 'fa-file-export text-orange-500'"></i>
-                    <span x-text="mode === 'y2j' ? 'Target JSON' : 'Target YAML'"></span>
-                </span>
+                        :class="mode === 'y2j' ? 'fa-code-merge text-kiri-green' : 'fa-file-export text-orange-500'"></i>
+                    <span x-text="mode === 'y2j' ? 'Target JSON' : 'Target YAML'"></span> </span>
                 <button @click="copyToClipboard(output)"
-                    class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase flex items-center gap-1.5"
-                    x-show="output" style="display: none;">
-                    <i class="fas" :class="copied ? 'fa-check' : 'fa-copy'"></i>
-                    <span x-text="copied ? 'Copied' : 'Copy'"></span>
-                </button>
+                    class="text-[10px] font-bold text-kiri-green hover:underline uppercase flex items-center gap-1.5"
+                    x-show="output">
+                    <i class="fas" :class="copied ? 'fa-check' : 'fa-copy'"></i> <span
+                        x-text="copied ? 'Copied' : 'Copy'"></span> </button>
             </div>
-            <div class="flex-1 rounded-[1.5rem] bg-[#121212] border border-[#3D3D3D] relative overflow-hidden group">
+            <div class="flex-1 rounded-[1.5rem] bg-surface border border-subtle relative overflow-hidden group">
                 <div class="w-full h-full p-6 overflow-auto custom-scrollbar">
                     <pre><code :class="'language-' + (mode === 'y2j' ? 'json' : 'yaml')" x-text="output"></code></pre>
                 </div>
@@ -84,12 +80,10 @@ Supports complex nesting and multi-document YAML locally in your browser.
 {% block tool_js_data %}
 {
 hideUpload: true,
-
 init() {
+// Initialization
 },
-
 mode: 'y2j',
-
 loadSample() {
 if (this.mode === 'y2j') {
 this.input = `version: "3.9"
@@ -118,14 +112,12 @@ timeout: 3000
 }
 this.convert();
 },
-
 convert() {
 if (!this.input || !this.input.trim()) {
 this.output = '';
 this.error = '';
 return;
 }
-
 try {
 if (this.mode === 'y2j') {
 const parsed = jsyaml.load(this.input);
@@ -136,9 +128,7 @@ const parsed = JSON.parse(this.input);
 this.output = jsyaml.dump(parsed);
 this.statusMessage = 'JSON converted to YAML';
 }
-this.error = '';
-
-// Wait for DOM update then highlight
+this.error = ''; // Wait for DOM update then highlight
 this.$nextTick(() => {
 if (window.Prism) {
 Prism.highlightAll();
@@ -150,12 +140,16 @@ this.output = '';
 this.statusMessage = 'Conversion failed';
 }
 },
-
 download() {
 if (!this.output || this.error) return;
 const ext = this.mode === 'y2j' ? 'json' : 'yaml';
 const mime = this.mode === 'y2j' ? 'application/json' : 'application/x-yaml';
 this.downloadFile(this.output, `kiri_config.${ext}`, mime);
+},
+onReset() {
+this.input = '';
+this.output = '';
+this.statusMessage = 'Ready';
 }
 }
 {% endblock %}
@@ -166,7 +160,6 @@ this.downloadFile(this.output, `kiri_config.${ext}`, mime);
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-yaml.min.js"></script>
-
 <style>
     pre[class*="language-"],
     code[class*="language-"] {
@@ -179,7 +172,7 @@ this.downloadFile(this.output, `kiri_config.${ext}`, mime);
     }
 
     .custom-scrollbar::-webkit-scrollbar-thumb {
-        background-color: #3D3D3D;
+        background-color: var(--color-subtle);
         border-radius: 9999px;
     }
 </style>

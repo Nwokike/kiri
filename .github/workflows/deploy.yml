@@ -41,7 +41,11 @@ jobs:
           # 5. Run Migrations
           uv run python manage.py migrate
 
-          # 6. Collect Static and create cache table
+          # 6. Build Tailwind CSS
+          npm install --production=false
+          npm run build
+
+          # 7. Collect Static and create cache table
           uv run python manage.py collectstatic --noinput
           uv run python manage.py createcachetable
 
@@ -56,13 +60,15 @@ jobs:
           sleep 5
 
           # 10. Health check with rollback
-          if ! curl -f http://localhost:8000/health/; then
+          if ! curl -H "Host: kiri.ng" -f http://localhost:8000/health/; then
             echo "Health check failed! Rolling back to $PREV_COMMIT"
             git checkout $PREV_COMMIT
             uv sync
             uv run python manage.py migrate
             uv run python manage.py collectstatic --noinput
             echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S systemctl restart kiri
+            echo "${{ secrets.SUDO_PASSWORD }}" | sudo -S systemctl restart nginx
+
             exit 1
           fi
 

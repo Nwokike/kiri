@@ -87,7 +87,9 @@ class UserIntegration(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     
     class Meta:
-        unique_together = ['user', 'platform']
+        constraints = [
+            models.UniqueConstraint(fields=['user', 'platform'], name='unique_user_platform')
+        ]
         indexes = [
             models.Index(fields=['user', 'is_primary']),
             models.Index(fields=['platform']),

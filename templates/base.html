@@ -5,67 +5,53 @@
 
 <head>
     <meta charset="UTF-8">
-    <link rel="stylesheet" href="{% static 'css/global.css' %}">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{% block title %}Kiri{% endblock %}</title>
     <meta name="description"
         content="{% block meta_description %}Open-source research tools, developer utilities, and project showcases. Built for edge intelligence and low-resource environments.{% endblock %}">
+
     <link rel="icon" type="image/x-icon" href="{% static 'favicon.ico' %}">
 
     <!-- Open Graph -->
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="Kiri Research">
+    <meta property="og:site_name" content="Kiri Labs">
     <meta property="og:url" content="{{ request.build_absolute_uri }}">
     <meta property="og:title" content="{% block og_title %}Kiri{% endblock %}">
     <meta property="og:description"
         content="{% block og_description %}Open-source research tools, developer utilities, and project showcases. Built for edge intelligence and low-resource environments.{% endblock %}">
     <meta property="og:image"
         content="{% block og_image %}{{ request.scheme }}://{{ request.get_host }}{% static 'images/logos/logo.png' %}{% endblock %}">
+
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:title" content="{% block twitter_title %}Kiri Labs — Tools & Projects{% endblock %}">
+    <meta property="twitter:title" content="{% block twitter_title %}Kiri Labs - Tools & Projects{% endblock %}">
+
     <meta name="csrf-token" content="{{ csrf_token }}">
 
     <!-- Inter Font (Local) -->
     <link rel="stylesheet" href="{% static 'css/fonts.css' %}">
-
     <!-- Font Awesome (Local) -->
     <link rel="stylesheet" href="{% static 'vendor/font-awesome/css/all.min.css' %}">
-
     <!-- Alpine.js (Local) -->
     <script defer src="{% static 'vendor/alpine/alpine.min.js' %}"></script>
 
-
     {% block extra_head %}{% endblock %}
 
-    <!-- Tailwind CSS -->
+    <!-- Tailwind CSS (includes global.css) -->
     <link rel="stylesheet" href="{% static 'css/output.css' %}">
-
     <!-- Theme Init -->
     <script src="{% static 'js/theme_init.js' %}"></script>
 
     {% if GOOGLE_ANALYTICS_ID %}
     <!-- Google tag (gtag.js) -->
+    <meta name="analytics-id" content="{{ GOOGLE_ANALYTICS_ID }}">
     <script async src="https://www.googletagmanager.com/gtag/js?id={{ GOOGLE_ANALYTICS_ID }}"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
-        function gtag() { dataLayer.push(arguments); }
-        gtag('js', new Date());
-        gtag('config', '{{ GOOGLE_ANALYTICS_ID }}');
-    </script>
-    {% endif %}
-
-    {% if ADSENSE_CLIENT_ID %}
-    <!-- Google AdSense -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client={{ ADSENSE_CLIENT_ID }}"
-        crossorigin="anonymous"></script>
+    <script src="{% static 'js/analytics.js' %}"></script>
     {% endif %}
 
     {% progressive_web_app_meta %}
-
 </head>
 
-<body class="h-full bg-[#F8F9FA] text-[#212529] dark:bg-[#121212] dark:text-[#E4E4E7]">
-
+<body class="h-full bg-subtle text-body">
     <!-- ===== HEADER ===== -->
     {% include "partials/header.html" %}
 
@@ -80,14 +66,17 @@
         <div class="min-h-full">
             <!-- Messages -->
             {% if messages %}
-            <div class="p-4 space-y-2">
+            <div class="fixed top-4 right-4 z-50 flex flex-col gap-3 pointer-events-none">
                 {% for message in messages %}
-                <div
-                    class="p-2.5 text-xs font-bold rounded-lg border-l-4 
-                    {% if message.tags == 'error' %}bg-red-50 border-red-500 text-red-700 dark:bg-red-900/20 dark:text-red-400
-                    {% elif message.tags == 'success' %}bg-[#E8F5ED] border-[#0D7C3D] text-[#0D7C3D] dark:bg-[#0D7C3D]/20 dark:text-[#4ADE80]
-                    {% else %}bg-[#FDF5E6] border-[#C4992E] text-[#8B6914] dark:bg-[#C4992E]/20 dark:text-[#FBBF24]{% endif %}">
-                    {{ message }}
+                <div class="pointer-events-auto px-4 py-3 rounded-xl border border-subtle bg-surface shadow-lg animate-fade-in-right flex items-center gap-3"
+                    role="alert" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)">
+                    <div
+                        class="w-2 h-2 rounded-full {% if message.tags == 'success' %}bg-kiri-green{% elif message.tags == 'error' %}bg-red-500{% else %}bg-blue-500{% endif %}">
+                    </div>
+                    <span class="text-xs font-bold text-heading">{{ message }}</span>
+                    <button @click="show = false" class="text-muted hover:text-body transition-colors">
+                        <i class="fas fa-times text-[10px]"></i>
+                    </button>
                 </div>
                 {% endfor %}
             </div>
@@ -100,9 +89,9 @@
         {% include "partials/footer.html" %}
     </main>
 
-    <!-- ===== PWA INSTALL BUTTON (Minimal & Functional) ===== -->
+    <!-- ===== PWA INSTALL BUTTON ===== -->
     <button id="pwa-install-btn"
-        class="hidden fixed bottom-24 md:bottom-8 right-6 w-9 h-9 bg-white dark:bg-[#2D2D2D] border border-gray-200 dark:border-gray-700 text-[#0D7C3D] dark:text-gray-300 rounded-full shadow-md hover:shadow-lg transition-all z-40 flex items-center justify-center group"
+        class="hidden fixed bottom-24 md:bottom-8 right-6 icon-box bg-surface border border-subtle text-kiri-green shadow-md hover:shadow-lg transition-all z-40 group rounded-full"
         title="Install Kiri App">
         <i class="fas fa-download text-xs group-hover:scale-110 transition-transform"></i>
     </button>
@@ -112,11 +101,6 @@
 
     <!-- Scripts -->
     <script src="{% static 'js/htmx.min.js' %}"></script>
-    <script>
-        document.body.addEventListener('htmx:configRequest', (event) => {
-            event.detail.headers['X-CSRFToken'] = document.querySelector('meta[name="csrf-token"]').content;
-        });
-    </script>
     <script src="{% static 'js/pwa_install.js' %}"></script>
     <script src="{% static 'js/main.js' %}"></script>
     {% block extra_js %}{% endblock %}

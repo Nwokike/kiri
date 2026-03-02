@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+{% load i18n %}
+{% load static %}
+{% load account socialaccount %}
+
+{% block title %}Staff Login | Kiri Labs{% endblock %}
+
+{% block content %}
+<div class="max-w-md mx-auto px-4 py-16">
+    
+    <div class="flex flex-col items-center mb-10 text-center">
+        <a href="/" class="w-16 h-16 flex items-center justify-center rounded-2xl bg-surface border border-subtle shadow-sm mb-6 hover:border-kiri-green transition-colors">
+            <img src="{% static 'images/logos/logo.webp' %}" alt="Kiri Labs" class="h-8 w-auto">
+        </a>
+        <h1 class="text-3xl font-extrabold text-heading">Staff Login</h1>
+        <p class="text-xs font-bold text-kiri-green uppercase tracking-widest mt-2 flex items-center gap-2">
+            <i class="fas fa-lock"></i> Authorized Access Only
+        </p>
+    </div>
+
+    <div class="card p-8 mb-8 shadow-lg border-t-4 border-t-kiri-green">
+        <form class="space-y-6" method="POST" action="{% url 'account_login' %}">
+            {% csrf_token %}
+
+            {% if form.errors %}
+            <div class="p-4 mb-6 bg-red-50 border border-red-200 rounded-lg">
+                {% for field, errors in form.errors.items %}
+                    {% for error in errors %}
+                        <p class="text-sm font-medium text-red-600 flex items-center gap-2">
+                            <i class="fas fa-triangle-exclamation"></i> {{ error }}
+                        </p>
+                    {% endfor %}
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="space-y-5">
+                <div class="space-y-2">
+                    <label for="id_login" class="block text-sm font-bold text-heading">Username</label>
+                    <input type="text" name="login" placeholder="staff_username" required id="id_login"
+                        class="form-input w-full focus:ring-kiri-green focus:border-kiri-green">
+                </div>
+
+                <div class="space-y-2">
+                    <label for="id_password" class="block text-sm font-bold text-heading">Password</label>
+                    <input type="password" name="password" placeholder="••••••••••••" required id="id_password"
+                        class="form-input w-full focus:ring-kiri-green focus:border-kiri-green">
+                </div>
+            </div>
+
+            <div class="flex items-center justify-between mt-2">
+                <label class="flex items-center gap-3 cursor-pointer group">
+                    <input type="checkbox" name="remember" id="id_remember"
+                        class="w-4 h-4 rounded border-subtle bg-surface text-kiri-green focus:ring-kiri-green focus:ring-opacity-20 transition-all">
+                    <span class="text-sm font-medium text-body group-hover:text-kiri-green transition-colors">Remember me</span>
+                </label>
+            </div>
+
+            {% if redirect_field_value %}
+            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+            {% endif %}
+
+            <button class="btn-primary w-full py-3 flex items-center justify-center gap-2 mt-4 transition-transform active:scale-95" type="submit">
+                Sign In <i class="fas fa-arrow-right text-[10px]"></i>
+            </button>
+        </form>
+    </div>
+
+    <div class="text-center">
+        <p class="text-xs text-muted">
+            Need access? <a href="mailto:hello@kiri.ng" class="text-kiri-green hover:underline">Contact the administrator</a>.
+        </p>
+    </div>
+    
+</div>
+{% endblock %}

@@ -2,12 +2,16 @@
 {% load static %}
 
 {% block title %}PDF Text Extractor | Kiri Labs{% endblock %}
-{% block meta_description %}Instantly pull raw text content from PDF documents. Our client-side engine parses files
-locally ensuring maximum privacy.{% endblock %}
+
+{% block meta_description %}
+Instantly pull raw text content from PDF documents. Our client-side engine parses files locally ensuring maximum
+privacy.
+{% endblock %}
 
 {% block tool_name %}PDF Extractor{% endblock %}
 {% block tool_icon %}fa-file-export{% endblock %}
 {% block tool_title %}PDF Text Extractor{% endblock %}
+
 {% block tool_description %}
 Extract raw text content from PDF documents.
 All processing is performed locally in your browser to maintain privacy.
@@ -15,10 +19,9 @@ All processing is performed locally in your browser to maintain privacy.
 
 {% block tool_actions_right %}
 <button @click="download()"
-    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-[#0D7C3D] text-white hover:bg-[#0A5C2C]"
+    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-kiri-green text-white hover:bg-kiri-green-dark"
     x-show="output">
-    <i class="fas fa-download"></i>
-    <span>Save Text</span>
+    <i class="fas fa-download"></i> <span>Save Text</span>
 </button>
 {% endblock %}
 
@@ -26,82 +29,62 @@ All processing is performed locally in your browser to maintain privacy.
 <div class="grid grid-cols-1 lg:grid-cols-4 gap-8 h-[550px]">
     <!-- Stats & Controls -->
     <div class="lg:col-span-1 space-y-6">
-        <div
-            class="p-6 bg-[#F8F9FA] dark:bg-[#1A1A1A] rounded-[2rem] border border-[#DEE2E6] dark:border-[#3D3D3D] shadow-inner">
-            <h3 class="text-[10px] font-bold text-[#ADB5BD] uppercase tracking-widest mb-6 px-1">Source Logic</h3>
-
+        <div class="p-6 bg-surface rounded-[2rem] border border-subtle shadow-inner">
+            <h3 class="text-[10px] font-bold text-muted uppercase tracking-widest mb-6 px-1">Source Logic</h3>
             <!-- Upload Slot (Custom) -->
             <div class="space-y-4">
                 <div @click="$refs.fileInput.click()"
-                    class="p-6 border-2 border-dashed border-[#DEE2E6] dark:border-[#3D3D3D] rounded-2xl hover:border-[#0D7C3D] transition-all cursor-pointer text-center group">
+                    class="p-6 border-2 border-dashed border-subtle rounded-2xl hover:border-kiri-green transition-all cursor-pointer text-center group">
                     <input type="file" x-ref="fileInput" class="hidden" accept="application/pdf"
                         @change="handleFiles($event.target.files)">
                     <i
-                        class="fas fa-file-pdf text-2xl text-[#6C757D] group-hover:text-[#0D7C3D] transition-colors mb-2"></i>
-                    <p class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase"
-                        x-text="file ? file.name : 'Choose PDF'"></p>
+                        class="fas fa-file-pdf text-2xl text-muted group-hover:text-kiri-green transition-colors mb-2"></i>
+                    <p class="text-[10px] font-bold text-body uppercase" x-text="file ? file.name : 'Choose PDF'"></p>
                 </div>
-
-                <div x-show="file"
-                    class="p-4 bg-white dark:bg-[#121212] rounded-xl border border-[#DEE2E6] dark:border-[#3D3D3D] animate-fade-in">
-                    <div class="flex justify-between items-center mb-1">
-                        <span class="text-[9px] font-bold text-[#ADB5BD] uppercase">Progress</span>
-                        <span class="text-[9px] font-bold text-[#0D7C3D]" x-text="progress + '%'"></span>
-                    </div>
-                    <div class="h-1 w-full bg-gray-100 dark:bg-[#2D2D2D] rounded-full overflow-hidden">
-                        <div class="h-full bg-[#0D7C3D] transition-all duration-300"
+                <div x-show="file" class="p-4 bg-surface rounded-xl border border-subtle animate-fade-in">
+                    <div class="flex justify-between items-center mb-1"> <span
+                            class="text-[9px] font-bold text-muted uppercase">Progress</span> <span
+                            class="text-[9px] font-bold text-kiri-green" x-text="progress + '%'"></span> </div>
+                    <div class="h-1 w-full bg-subtle rounded-full overflow-hidden">
+                        <div class="h-full bg-kiri-green transition-all duration-300"
                             :style="'width: ' + progress + '%'"></div>
                     </div>
-                </div>
-
-                <button @click="extract()" :disabled="!file || isProcessing"
-                    class="w-full py-4 bg-[#0D7C3D] text-white font-bold rounded-2xl hover:bg-[#0A5C2C] disabled:opacity-30 transition-all shadow-lg active:scale-95">
-                    <i class="fas fa-terminal mr-2"></i> Run Extraction
-                </button>
+                </div> <button @click="extract()" :disabled="!file || isProcessing"
+                    class="w-full py-4 bg-kiri-green text-white font-bold rounded-2xl hover:bg-kiri-green-dark disabled:opacity-30 transition-all shadow-lg active:scale-95">
+                    <i class="fas fa-terminal mr-2"></i> Run Extraction </button>
             </div>
         </div>
-
-        <div class="p-6 bg-white dark:bg-[#1E1E1E] rounded-[2rem] border border-[#DEE2E6] dark:border-[#3D3D3D] shadow-sm space-y-6"
-            x-show="output">
-            <h3 class="text-[10px] font-bold text-[#ADB5BD] uppercase tracking-widest px-1">Document Stats</h3>
+        <div class="p-6 card shadow-sm space-y-6" x-show="output">
+            <h3 class="text-[10px] font-bold text-muted uppercase tracking-widest px-1">Document Stats</h3>
             <div class="grid grid-cols-2 gap-4">
-                <div
-                    class="text-center p-3 bg-gray-50 dark:bg-[#121212] rounded-xl border border-[#F1F3F5] dark:border-[#3D3D3D]">
-                    <p class="text-sm font-black text-[#212529] dark:text-[#E4E4E7]" x-text="stats.words"></p>
-                    <p class="text-[8px] font-bold text-[#ADB5BD] uppercase tracking-tighter">Words</p>
+                <div class="text-center p-3 bg-subtle rounded-xl border border-subtle">
+                    <p class="text-sm font-black text-heading" x-text="stats.words"></p>
+                    <p class="text-[8px] font-bold text-muted uppercase tracking-tighter">Words</p>
                 </div>
-                <div
-                    class="text-center p-3 bg-gray-50 dark:bg-[#121212] rounded-xl border border-[#F1F3F5] dark:border-[#3D3D3D]">
-                    <p class="text-sm font-black text-[#212529] dark:text-[#E4E4E7]" x-text="stats.pages"></p>
-                    <p class="text-[8px] font-bold text-[#ADB5BD] uppercase tracking-tighter">Pages</p>
+                <div class="text-center p-3 bg-subtle rounded-xl border border-subtle">
+                    <p class="text-sm font-black text-heading" x-text="stats.pages"></p>
+                    <p class="text-[8px] font-bold text-muted uppercase tracking-tighter">Pages</p>
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Output Area -->
+    </div> <!-- Output Area -->
     <div class="lg:col-span-3 flex flex-col gap-3">
-        <div class="flex items-center justify-between px-2">
-            <span class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest">Parsed
-                Output Stream</span>
-            <button @click="copyToClipboard(output)" x-show="output"
-                class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase flex items-center gap-1.5">
-                <i class="fas" :class="copied ? 'fa-check' : 'fa-copy'"></i>
-                <span x-text="copied ? 'Copied' : 'Copy All'"></span>
-            </button>
-        </div>
+        <div class="flex items-center justify-between px-2"> <span
+                class="text-[10px] font-bold text-body uppercase tracking-widest">Parsed Output
+                Stream</span> <button @click="copyToClipboard(output)" x-show="output"
+                class="text-[10px] font-bold text-kiri-green hover:underline uppercase flex items-center gap-1.5"> <i
+                    class="fas" :class="copied ? 'fa-check' : 'fa-copy'"></i> <span
+                    x-text="copied ? 'Copied' : 'Copy All'"></span> </button> </div>
         <div
-            class="flex-1 rounded-[2.5rem] bg-white dark:bg-[#121212] border border-[#DEE2E6] dark:border-[#3D3D3D] shadow-sm relative overflow-hidden flex flex-col">
+            class="flex-1 rounded-[2.5rem] bg-surface border border-subtle shadow-sm relative overflow-hidden flex flex-col">
             <textarea readonly x-model="output"
-                class="flex-1 w-full p-10 font-mono text-xs leading-relaxed text-[#212529] dark:text-[#E4E4E7] bg-transparent resize-none outline-none custom-scrollbar"
-                placeholder="Awaiting PDF processing..."></textarea>
-
-            <!-- Dynamic Overlay -->
+                class="flex-1 w-full p-10 font-mono text-xs leading-relaxed text-heading bg-transparent resize-none outline-none custom-scrollbar"
+                placeholder="Awaiting PDF processing..."></textarea> <!-- Dynamic Overlay -->
             <div x-show="isProcessing"
-                class="absolute inset-0 bg-white/80 dark:bg-[#121212]/80 backdrop-blur-sm flex flex-col items-center justify-center animate-pulse">
-                <div class="w-12 h-12 border-4 border-[#0D7C3D] border-t-transparent rounded-full animate-spin mb-4">
+                class="absolute inset-0 bg-surface/80 /80 backdrop-blur-sm flex flex-col items-center justify-center animate-pulse">
+                <div class="w-12 h-12 border-4 border-kiri-green border-t-transparent rounded-full animate-spin mb-4">
                 </div>
-                <p class="text-[10px] font-bold text-[#0D7C3D] uppercase tracking-widest">Parsing Structure...</p>
+                <p class="text-[10px] font-bold text-kiri-green uppercase tracking-widest">Parsing Structure...</p>
             </div>
         </div>
     </div>
@@ -111,21 +94,21 @@ All processing is performed locally in your browser to maintain privacy.
 {% block tool_js_data %}
 {
 hideUpload: true,
-
 init() {
+// Initialization logic
 },
-
 file: null,
 progress: 0,
-stats: { words: 0, pages: 0 },
+stats: {
+words: 0,
+pages: 0
+},
 hideSample: true,
-
 handleDrop(e) {
 this.over = false;
 const files = e.dataTransfer.files;
 if (files.length > 0) this.handleFiles(files);
 },
-
 handleFiles(files) {
 if (files.length > 0 && files[0].type === 'application/pdf') {
 this.file = files[0];
@@ -134,26 +117,22 @@ this.progress = 0;
 this.statusMessage = 'PDF loaded';
 }
 },
-
 async extract() {
 if (!this.file || this.isProcessing) return;
 this.isProcessing = true;
 this.progress = 0;
 this.output = '';
 this.statusMessage = 'Extracting text content...';
-
 try {
 const arrayBuffer = await this.file.arrayBuffer();
 const pdf = await pdfjsLib.getDocument(arrayBuffer).promise;
 this.stats.pages = pdf.numPages;
-
 let fullText = '';
 for (let i = 1; i <= pdf.numPages; i++) { const page=await pdf.getPage(i); const content=await page.getTextContent();
     const pageText=content.items.map(item=> item.str).join(' ');
     fullText += `--- Page ${i} ---\n${pageText}\n\n`;
     this.progress = Math.round((i / pdf.numPages) * 100);
     }
-
     this.output = fullText;
     this.stats.words = fullText.trim().split(/\s+/).length;
     this.statusMessage = 'Extraction complete';
@@ -165,7 +144,6 @@ for (let i = 1; i <= pdf.numPages; i++) { const page=await pdf.getPage(i); const
     this.isProcessing = false;
     }
     },
-
     download() {
     if (!this.output) return;
     this.downloadFile(this.output, this.file.name.replace('.pdf', '_extracted.txt'), 'text/plain');
@@ -200,7 +178,8 @@ for (let i = 1; i <= pdf.numPages; i++) { const page=await pdf.getPage(i); const
         }
 
         .custom-scrollbar::-webkit-scrollbar-thumb {
-            @apply bg-[#DEE2E6] dark:bg-[#3D3D3D] rounded-full;
+            background-color: var(--color-subtle);
+            border-radius: 9999px;
         }
     </style>
     {% endblock %}

@@ -2,11 +2,15 @@
 {% load static %}
 
 {% block title %}Hash Generator & Verifier | Kiri Labs{% endblock %}
-{% block meta_description %}Generate SHA-256, MD5, and SHA-512 hashes for text and files. Includes a built-in checksum verifier/comparator tool.{% endblock %}
+
+{% block meta_description %}
+Generate SHA-256, MD5, and SHA-512 hashes for text and files. Includes a built-in checksum verifier/comparator tool.
+{% endblock %}
 
 {% block tool_name %}Hash Tool{% endblock %}
 {% block tool_icon %}fa-fingerprint{% endblock %}
 {% block tool_title %}Secure Hash Generator{% endblock %}
+
 {% block tool_description %}
 Generate cryptographic hashes (SHA-256, MD5, SHA-512) for text strings or files.
 Includes an integrity verifier to compare against expected checksums.
@@ -18,102 +22,91 @@ Includes an integrity verifier to compare against expected checksums.
 
 {% block tool_body %}
 <div class="flex flex-col gap-8 min-h-[600px]">
-
     <div class="space-y-4">
-        <div class="flex p-1 bg-gray-100 dark:bg-[#121212] rounded-xl w-fit border border-[#DEE2E6] dark:border-[#3D3D3D]">
-            <button @click="mode = 'text'; reset()" 
-                :class="mode === 'text' ? 'bg-white dark:bg-[#2D2D2D] text-[#0D7C3D] shadow-sm' : 'text-[#6C757D] hover:text-black dark:hover:text-white'"
+        <div class="flex p-1 bg-subtle rounded-xl w-fit border border-subtle">
+            <button @click="mode = 'text'; reset()"
+                :class="mode === 'text' ? 'bg-surface text-kiri-green shadow-sm' : 'text-muted hover:text-black dark:hover:text-white'"
                 class="px-6 py-2 rounded-lg text-xs font-bold transition-all">
-                <i class="fas fa-font mr-2"></i> Text String
-            </button>
-            <button @click="mode = 'file'; reset()" 
-                :class="mode === 'file' ? 'bg-white dark:bg-[#2D2D2D] text-[#0D7C3D] shadow-sm' : 'text-[#6C757D] hover:text-black dark:hover:text-white'"
+                <i class="fas fa-font mr-2"></i> Text String </button> <button @click="mode = 'file'; reset()"
+                :class="mode === 'file' ? 'bg-surface text-kiri-green shadow-sm' : 'text-muted hover:text-black dark:hover:text-white'"
                 class="px-6 py-2 rounded-lg text-xs font-bold transition-all">
-                <i class="fas fa-file mr-2"></i> File Checksum
-            </button>
+                <i class="fas fa-file mr-2"></i> File Checksum </button>
         </div>
-
         <div x-show="mode === 'text'" class="animate-fade-in">
             <textarea x-model="inputText" @input.debounce.300ms="calculate()"
-                class="w-full h-32 p-4 bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-2xl text-sm font-mono outline-none focus:border-[#0D7C3D] resize-none transition-colors shadow-sm"
+                class="w-full h-32 p-4 bg-surface border border-subtle rounded-2xl text-sm font-mono outline-none focus:border-kiri-green resize-none transition-colors shadow-sm"
                 placeholder="Type or paste content here to hash..."></textarea>
         </div>
-
         <div x-show="mode === 'file'" class="animate-fade-in">
-             <div x-show="!file" 
-                class="flex flex-col items-center justify-center p-10 border-2 border-dashed border-[#DEE2E6] dark:border-[#3D3D3D] rounded-2xl bg-[#F8F9FA]/50 dark:bg-[#0a0a0a] hover:border-[#0D7C3D] transition-all cursor-pointer group"
-                @click="$refs.fileInput.click()" @dragover.prevent="$el.classList.add('border-[#0D7C3D]')"
-                @dragleave.prevent="$el.classList.remove('border-[#0D7C3D]')" @drop.prevent="handleDrop($event)">
-                
-                <i class="fas fa-cloud-upload-alt text-3xl text-[#ADB5BD] mb-3 group-hover:text-[#0D7C3D] transition-colors"></i>
-                <p class="text-xs font-bold text-[#6C757D] dark:text-[#A1A1AA]">Drop file to calculate checksum</p>
-                <input type="file" x-ref="fileInput" class="hidden" @change="handleFile($event)">
+            <div x-show="!file"
+                class="flex flex-col items-center justify-center p-10 border-2 border-dashed border-subtle rounded-2xl bg-subtle hover:border-kiri-green transition-all cursor-pointer group"
+                @click="$refs.fileInput.click()" @dragover.prevent="$el.classList.add('border-kiri-green')"
+                @dragleave.prevent="$el.classList.remove('border-kiri-green')" @drop.prevent="handleDrop($event)">
+                <i
+                    class="fas fa-cloud-upload-alt text-3xl text-muted mb-3 group-hover:text-kiri-green transition-colors"></i>
+                <p class="text-xs font-bold text-body">Drop file to calculate checksum</p> <input type="file"
+                    x-ref="fileInput" class="hidden" @change="handleFile($event)">
             </div>
-            
-            <div x-show="file" class="flex items-center justify-between p-4 bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-2xl shadow-sm">
+            <div x-show="file"
+                class="flex items-center justify-between p-4 bg-surface border border-subtle rounded-2xl shadow-sm">
                 <div class="flex items-center gap-3 overflow-hidden">
-                    <div class="w-10 h-10 rounded-lg bg-[#0D7C3D]/10 text-[#0D7C3D] flex items-center justify-center shrink-0">
-                        <i class="fas fa-file-alt"></i>
-                    </div>
+                    <div
+                        class="w-10 h-10 rounded-lg bg-kiri-green/10 text-kiri-green flex items-center justify-center shrink-0">
+                        <i class="fas fa-file-alt"></i> </div>
                     <div class="min-w-0">
-                        <p class="text-sm font-bold text-[#212529] dark:text-white truncate" x-text="file?.name"></p>
-                        <p class="text-[10px] text-[#6C757D]" x-text="formatSize(file?.size)"></p>
+                        <p class="text-sm font-bold text-heading truncate" x-text="file?.name"></p>
+                        <p class="text-[10px] text-muted" x-text="formatSize(file?.size)"></p>
                     </div>
-                </div>
-                <button @click="reset()" class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-[#6C757D] hover:text-red-500 transition-colors">
-                    <i class="fas fa-times"></i>
-                </button>
+                </div> <button @click="reset()"
+                    class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-red-50 text-muted hover:text-red-500 transition-colors">
+                    <i class="fas fa-times"></i> </button>
             </div>
         </div>
     </div>
-
     <div class="flex flex-wrap gap-2">
         <template x-for="algo in availableAlgos">
             <label class="cursor-pointer">
                 <input type="checkbox" :value="algo" x-model="selectedAlgos" @change="calculate()" class="hidden peer">
-                <div class="px-3 py-1.5 rounded-lg border border-[#DEE2E6] dark:border-[#3D3D3D] bg-white dark:bg-[#1E1E1E] text-[10px] font-bold uppercase text-[#6C757D] peer-checked:bg-[#0D7C3D] peer-checked:text-white peer-checked:border-[#0D7C3D] transition-all hover:border-[#0D7C3D]/50 select-none">
+                <div
+                    class="px-3 py-1.5 rounded-lg border border-subtle bg-surface text-[10px] font-bold uppercase text-muted peer-checked:bg-kiri-green peer-checked:text-white peer-checked:border-kiri-green transition-all hover:border-kiri-green/50 select-none">
                     <span x-text="algo"></span>
                 </div>
             </label>
         </template>
     </div>
-
-    <hr class="border-[#DEE2E6] dark:border-[#3D3D3D]">
-
-    <div class="bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/20 rounded-2xl p-4 flex items-center gap-4">
-        <div class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-800/30 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
+    <hr class="border-subtle">
+    <div
+        class="bg-blue-50 dark:bg-blue-900/10 border border-blue-100 dark:border-blue-900/20 rounded-2xl p-4 flex items-center gap-4">
+        <div
+            class="w-8 h-8 rounded-full bg-blue-100 dark:bg-blue-800/30 flex items-center justify-center text-blue-600 dark:text-blue-400 shrink-0">
             <i class="fas fa-check-double text-xs"></i>
         </div>
-        <div class="flex-1">
-            <label class="text-[9px] font-bold text-blue-600/70 dark:text-blue-400/70 uppercase mb-1 block">Verify Integrity</label>
+        <div class="flex-1"> <label
+                class="text-[9px] font-bold text-blue-600/70 dark:text-blue-400/70 uppercase mb-1 block">Verify
+                Integrity</label>
             <input type="text" x-model="compareHash" placeholder="Paste expected hash to verify match..."
                 class="w-full bg-transparent text-xs font-mono text-blue-900 dark:text-blue-100 placeholder-blue-300 dark:placeholder-blue-700 outline-none">
         </div>
     </div>
-
     <div class="grid grid-cols-1 gap-4">
         <template x-for="algo in selectedAlgos" :key="algo">
-            <div class="group bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-2xl p-5 shadow-sm transition-all duration-300 relative overflow-hidden"
-                 :class="{'ring-2 ring-green-500 border-green-500 bg-green-50/50 dark:bg-green-900/10': isMatch(algo)}">
-                
-                <div x-show="isMatch(algo)" class="absolute top-0 right-0 bg-green-500 text-white px-3 py-1 rounded-bl-xl text-[10px] font-bold uppercase tracking-widest shadow-sm animate-bounce-in">
+            <div class="group bg-surface border border-subtle rounded-2xl p-5 shadow-sm transition-all duration-300 relative overflow-hidden"
+                :class="{'ring-2 ring-green-500 border-green-500 bg-green-50/50 dark:bg-green-900/10': isMatch(algo)}">
+                <div x-show="isMatch(algo)"
+                    class="absolute top-0 right-0 bg-green-500 text-white px-3 py-1 rounded-bl-xl text-[10px] font-bold uppercase tracking-widest shadow-sm animate-bounce-in">
                     <i class="fas fa-check-circle mr-1"></i> Match
                 </div>
-
-                <div class="flex justify-between items-center mb-2">
-                    <span class="text-[10px] font-black text-[#ADB5BD] uppercase tracking-widest" x-text="algo"></span>
-                    <button @click="copy(results[algo])" class="text-[#0D7C3D] hover:text-[#0A5C2C] opacity-0 group-hover:opacity-100 transition-opacity">
-                        <i class="far fa-copy"></i>
-                    </button>
-                </div>
-                
+                <div class="flex justify-between items-center mb-2"> <span
+                        class="text-[10px] font-black text-muted uppercase tracking-widest" x-text="algo"></span>
+                    <button @click="copy(results[algo])"
+                        class="text-kiri-green hover:text-kiri-green-dark opacity-0 group-hover:opacity-100 transition-opacity">
+                        <i class="far fa-copy"></i> </button> </div>
                 <div class="relative">
-                    <div class="font-mono text-xs text-[#212529] dark:text-[#E4E4E7] break-all leading-relaxed" 
-                         x-text="results[algo] || 'Waiting for input...'"></div>
-                    
-                    <div x-show="loading" class="absolute inset-0 bg-white/80 dark:bg-[#1E1E1E]/80 backdrop-blur-sm flex items-center">
-                        <div class="h-1.5 w-1/3 bg-gray-200 dark:bg-[#333] rounded-full overflow-hidden">
-                            <div class="h-full bg-[#0D7C3D] animate-progress"></div>
+                    <div class="font-mono text-xs text-heading break-all leading-relaxed"
+                        x-text="results[algo] || 'Waiting for input...'"></div>
+                    <div x-show="loading" class="absolute inset-0 bg-surface/80 /80 backdrop-blur-sm flex items-center">
+                        <div class="h-1.5 w-1/3 bg-subtle rounded-full overflow-hidden">
+                            <div class="h-full bg-kiri-green animate-progress"></div>
                         </div>
                     </div>
                 </div>
@@ -121,156 +114,139 @@ Includes an integrity verifier to compare against expected checksums.
         </template>
     </div>
 </div>
-
 <style>
     @keyframes progress {
-        0% { width: 0%; margin-left: 0; }
-        50% { width: 50%; margin-left: 25%; }
-        100% { width: 0%; margin-left: 100%; }
+        0% {
+            width: 0%;
+            margin-left: 0;
+        }
+
+        50% {
+            width: 50%;
+            margin-left: 25%;
+        }
+
+        100% {
+            width: 0%;
+            margin-left: 100%;
+        }
     }
-    .animate-progress { animation: progress 1.5s infinite ease-in-out; }
+
+    .animate-progress {
+        animation: progress 1.5s infinite ease-in-out;
+    }
 </style>
 {% endblock %}
 
 {% block tool_js_data %}
 {
-    hideUpload: true,
-    hideSample: false,
-    
-    // State
-    mode: 'text', // 'text' | 'file'
-    inputText: '',
-    file: null,
-    loading: false,
-    
-    // Options
-    availableAlgos: ['MD5', 'SHA-1', 'SHA-256', 'SHA-384', 'SHA-512'],
-    selectedAlgos: ['MD5', 'SHA-256'],
-    
-    // Results
-    results: {},
-    compareHash: '',
-    
-    init() {
-        this.hideUpload = true;
-        this.hideSample = false;
-    },
-
-    async loadSample() {
-        if (this.mode === 'text') {
-            this.inputText = "Kiri Labs - Professional Client-Side Tools\n\nThis is a sample text used to demonstrate cryptographic hashing directly in your browser. All processing is 100% secure and happens on your device.";
-            this.calculate();
-            this.statusMessage = 'Sample text loaded';
-        } else {
-            try {
-                this.statusMessage = 'Loading brand logo...';
-                // Using your static logo for consistency
-                const response = await fetch("{% static 'images/logos/logo.png' %}");
-                const blob = await response.blob();
-                this.file = new File([blob], 'kiri_brand_logo.png', { type: 'image/png' });
-                this.calculate();
-                this.statusMessage = 'Brand logo loaded as sample';
-            } catch (err) {
-                console.error(err);
-                this.error = 'Failed to load sample logo';
-            }
-        }
-    },
-
-    onReset() {
-        this.reset();
-    },
-
-    /* --- Core Logic --- */
-    async calculate() {
-        this.results = {};
-        
-        if (this.mode === 'text' && !this.inputText) return;
-        if (this.mode === 'file' && !this.file) return;
-
-        this.loading = true;
-        this.statusMessage = 'Calculating hashes...';
-
-        // Wait a tick to let UI update
-        await new Promise(r => setTimeout(r, 50));
-
-        try {
-            let dataBuffer;
-
-            if (this.mode === 'text') {
-                dataBuffer = new TextEncoder().encode(this.inputText);
-            } else {
-                dataBuffer = await this.file.arrayBuffer();
-            }
-
-            // Calculate each hash
-            for (const algo of this.selectedAlgos) {
-                if (algo === 'MD5') {
-                    // Use CryptoJS for MD5 (WebCrypto doesn't support it)
-                    const wordArray = CryptoJS.lib.WordArray.create(dataBuffer);
-                    this.results[algo] = CryptoJS.MD5(wordArray).toString();
-                } else {
-                    // Use Native WebCrypto for SHA family (Fastest)
-                    const hashBuffer = await crypto.subtle.digest(algo, dataBuffer);
-                    const hashArray = Array.from(new Uint8Array(hashBuffer));
-                    this.results[algo] = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
-                }
-            }
-            this.statusMessage = 'Calculation complete';
-
-        } catch (err) {
-            console.error(err);
-            this.error = "Hashing failed. File might be too large for browser memory.";
-        } finally {
-            this.loading = false;
-        }
-    },
-
-    /* --- File Handling --- */
-    handleFile(event) {
-        const file = event.target.files?.[0];
-        if (file) {
-            this.file = file;
-            this.calculate();
-        }
-    },
-
-    handleDrop(event) {
-        event.target.classList.remove('border-[#0D7C3D]');
-        const file = event.dataTransfer.files?.[0];
-        if (file) {
-            this.file = file;
-            this.calculate();
-        }
-    },
-
-    /* --- Utilities --- */
-    isMatch(algo) {
-        if (!this.compareHash || !this.results[algo]) return false;
-        return this.compareHash.trim().toLowerCase() === this.results[algo].toLowerCase();
-    },
-
-    copy(text) {
-        if (!text) return;
-        navigator.clipboard.writeText(text);
-        // Inherited status message update could go here
-    },
-
-    formatSize(bytes) {
-        if (!bytes) return '0 B';
-        const k = 1024;
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + ['B', 'KB', 'MB', 'GB'][i];
-    },
-
-    reset() {
-        this.inputText = '';
-        this.file = null;
-        this.results = {};
-        this.compareHash = '';
-        this.error = '';
-        this.statusMessage = 'Ready';
-        if (this.$refs.fileInput) this.$refs.fileInput.value = '';
-    }
+hideUpload: true,
+hideSample: false,
+mode: 'text',
+inputText: '',
+file: null,
+loading: false,
+availableAlgos: ['MD5', 'SHA-1', 'SHA-256', 'SHA-384', 'SHA-512'],
+selectedAlgos: ['MD5', 'SHA-256'],
+results: {},
+compareHash: '',
+init() {
+// Initialization logic
+},
+async loadSample() {
+if (this.mode === 'text') {
+this.inputText = "Kiri Labs - Professional Client-Side Tools\n\nThis is a sample text used to demonstrate cryptographic
+hashing directly in your browser. All processing is 100% secure and happens on your device.";
+this.calculate();
+this.statusMessage = 'Sample text loaded';
+} else {
+try {
+this.statusMessage = 'Loading brand logo...';
+const response = await fetch("{% static 'images/logos/logo.png' %}");
+const blob = await response.blob();
+this.file = new File([blob], 'kiri_brand_logo.png', {
+type: 'image/png'
+});
+this.calculate();
+this.statusMessage = 'Brand logo loaded as sample';
+} catch (err) {
+console.error(err);
+this.error = 'Failed to load sample logo';
+}
+}
+},
+onReset() {
+this.reset();
+},
+async calculate() {
+this.results = {};
+if (this.mode === 'text' && !this.inputText) return;
+if (this.mode === 'file' && !this.file) return;
+this.loading = true;
+this.statusMessage = 'Calculating hashes...';
+await new Promise(r => setTimeout(r, 50));
+try {
+let dataBuffer;
+if (this.mode === 'text') {
+dataBuffer = new TextEncoder().encode(this.inputText);
+} else {
+dataBuffer = await this.file.arrayBuffer();
+}
+for (const algo of this.selectedAlgos) {
+if (algo === 'MD5') {
+const wordArray = CryptoJS.lib.WordArray.create(dataBuffer);
+this.results[algo] = CryptoJS.MD5(wordArray).toString();
+} else {
+const hashBuffer = await crypto.subtle.digest(algo.replace('SHA-', 'SHA'), dataBuffer);
+const hashArray = Array.from(new Uint8Array(hashBuffer));
+this.results[algo] = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+}
+}
+this.statusMessage = 'Calculation complete';
+} catch (err) {
+console.error(err);
+this.error = "Hashing failed. File might be too large for browser memory.";
+} finally {
+this.loading = false;
+}
+},
+handleFile(event) {
+const file = event.target.files ? .[0];
+if (file) {
+this.file = file;
+this.calculate();
+}
+},
+handleDrop(event) {
+event.target.classList.remove('border-kiri-green');
+const file = event.dataTransfer.files ? .[0];
+if (file) {
+this.file = file;
+this.calculate();
+}
+},
+isMatch(algo) {
+if (!this.compareHash || !this.results[algo]) return false;
+return this.compareHash.trim().toLowerCase() === this.results[algo].toLowerCase();
+},
+copy(text) {
+if (!text) return;
+this.copyToClipboard(text);
+},
+formatSize(bytes) {
+if (!bytes) return '0 B';
+const k = 1024;
+const i = Math.floor(Math.log(bytes) / Math.log(k));
+return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + ['B', 'KB', 'MB', 'GB'][i];
+},
+reset() {
+this.inputText = '';
+this.file = null;
+this.results = {};
+this.compareHash = '';
+this.error = '';
+this.statusMessage = 'Ready';
+if (this.$refs.fileInput) this.$refs.fileInput.value = '';
+}
 }
 {% endblock %}

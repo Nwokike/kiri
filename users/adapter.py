@@ -1,4 +1,5 @@
 import logging
+from allauth.account.adapter import DefaultAccountAdapter
 from allauth.socialaccount.adapter import DefaultSocialAccountAdapter
 from django.contrib.auth import get_user_model
 from .models import UserIntegration
@@ -6,14 +7,18 @@ from .models import UserIntegration
 User = get_user_model()
 logger = logging.getLogger(__name__)
 
+class KiriAccountAdapter(DefaultAccountAdapter):
+    """Block all public signup - admin/invite-only."""
+    def is_open_for_signup(self, request):
+        return False
 
 class KiriSocialAccountAdapter(DefaultSocialAccountAdapter):
     """
     Universal social account adapter for all OAuth providers.
     Handles user creation and auto-creates UserIntegration records.
     """
-    
-    
+    def is_open_for_signup(self, request, sociallogin):
+        return False
     def pre_social_login(self, request, sociallogin):
         """
         Invoked before a social login is performed.
@@ -42,10 +47,6 @@ class KiriSocialAccountAdapter(DefaultSocialAccountAdapter):
                 user.github_username = github_login
             user.github_avatar_url = extra_data.get('avatar_url', '')
             user.bio = extra_data.get('bio') or ''
-            user.website = extra_data.get('blog') or ''
-            user.github_public_repos = extra_data.get('public_repos', 0)
-            
-            
         elif provider == 'huggingface':
             # Hugging Face specific fields
             user.username = extra_data.get('preferred_username', data.get('username', ''))
@@ -108,7 +109,11 @@ class KiriSocialAccountAdapter(DefaultSocialAccountAdapter):
         # Get token data
         token = sociallogin.token
         access_token = token.token if token else ''
+        # OAuth2 refresh tokens are stored in token.token_secret in allauth
         refresh_token = getattr(token, 'token_secret', '') if token else ''
+        if not refresh_token and token:
+             # Fallback check for different allauth versions/providers
+             refresh_token = getattr(token, 'refresh_token', '')
         
         # Determine scopes granted
         granted_scopes = []

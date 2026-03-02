@@ -180,12 +180,15 @@ class ProjectSubmitImportTests(TestCase):
 
 class RepoFilesApiTests(TestCase):
     def setUp(self):
-        self.user = User.objects.create_user(username='importer', password='password')
+        self.user = User.objects.create_user(username='importer', password='password', is_staff=True)
         self.url = reverse('projects:api_repo_files')
 
-    def test_api_requires_login(self):
+    def test_api_requires_staff(self):
+        """Non-staff users cannot access the repo files API."""
+        non_staff = User.objects.create_user(username='regular', password='password')
+        self.client.login(username='regular', password='password')
         response = self.client.get(self.url, {'url': 'https://github.com/foo/bar'})
-        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.status_code, 403)
 
     @patch('projects.services.GitHubService.fetch_structure')
     def test_fetch_files_success(self, mock_fetch):
@@ -204,3 +207,136 @@ class RepoFilesApiTests(TestCase):
         self.client.login(username='importer', password='password')
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 400)
+
+
+class HuggingFaceServiceTests(TestCase):
+    """Tests for the HuggingFaceService."""
+
+    @patch('projects.services.requests.get')
+    def test_fetch_user_repos_models(self, mock_get):
+        """HuggingFaceService returns model repos with correct structure."""
+        whoami_resp = MagicMock()
+        whoami_resp.status_code = 200
+        whoami_resp.json.return_value = {'name': 'testuser'}
+
+        models_resp = MagicMock()
+        models_resp.status_code = 200
+        models_resp.json.return_value = [
+            {
+                'modelId': 'testuser/my-model',
+                'pipeline_tag': 'text-generation',
+                'library_name': 'transformers',
+                'likes': 42,
+                'downloads': 1000,
+                'tags': ['nlp', 'gpt'],
+                'private': False,
+                'lastModified': '2026-01-01T00:00:00Z',
+            }
+        ]
+
+        datasets_resp = MagicMock()
+        datasets_resp.status_code = 200
+        datasets_resp.json.return_value = []
+
+        mock_get.side_effect = [whoami_resp, models_resp, datasets_resp]
+
+        from .services import HuggingFaceService
+        repos = HuggingFaceService.fetch_user_repos('fake-token')
+
+        self.assertEqual(len(repos), 1)
+        self.assertEqual(repos[0]['name'], 'my-model')
+        self.assertEqual(repos[0]['type'], 'model')
+        self.assertEqual(repos[0]['stars'], 42)
+
+    @patch('projects.services.requests.get')
+    def test_fetch_user_repos_auth_failure(self, mock_get):
+        """HuggingFaceService returns empty list on auth failure."""
+        whoami_resp = MagicMock()
+        whoami_resp.status_code = 401
+        mock_get.return_value = whoami_resp
+
+        from .services import HuggingFaceService
+        repos = HuggingFaceService.fetch_user_repos('bad-token')
+        self.assertEqual(repos, [])
+
+
+class UserReposApiTests(TestCase):
+    """Tests for UserReposApiView with platform data."""
+
+    def setUp(self):
+        self.staff = User.objects.create_user(username='admin', password='password', is_staff=True)
+        self.url = reverse('projects:api_user_repos')
+
+    def test_requires_staff(self):
+        """Non-staff users get 403."""
+        regular = User.objects.create_user(username='regular', password='password')
+        self.client.login(username='regular', password='password')
+        response = self.client.get(self.url, {'platform': 'github'})
+        self.assertEqual(response.status_code, 403)
+
+    def test_no_integration_returns_403(self):
+        """Staff user without integration gets 403."""
+        self.client.login(username='admin', password='password')
+        response = self.client.get(self.url, {'platform': 'github'})
+        self.assertEqual(response.status_code, 403)
+        data = response.json()
+        self.assertIn('error', data)
+
+    def test_unsupported_platform(self):
+        """Unsupported platform returns 400."""
+        self.client.login(username='admin', password='password')
+        response = self.client.get(self.url, {'platform': 'gitlab'})
+        # Will return 403 because no integration exists for gitlab
+        self.assertIn(response.status_code, [400, 403])
+
+
+class SyncMetadataTests(TestCase):
+    """Tests for sync_project_metadata utility."""
+
+    def setUp(self):
+        self.user = User.objects.create_user(username='syncer', password='password')
+        self.project = Project.objects.create(
+            name='Sync Test',
+            submitted_by=self.user,
+            github_repo_url='https://github.com/test/repo',
+            description='',
+        )
+
+    @patch('projects.utils.GitHubService.fetch_repo_data')
+    def test_sync_updates_metadata(self, mock_fetch):
+        """sync_project_metadata populates fields from GitHub API."""
+        mock_fetch.return_value = {
+            'stars_count': 100,
+            'forks_count': 25,
+            'language': 'Python',
+            'description': 'A test repo',
+            'topics': ['ai', 'nlp'],
+            'last_updated': '2026-01-01T00:00:00',
+        }
+        from .utils import sync_project_metadata
+        result = sync_project_metadata(self.project)
+        self.assertTrue(result)
+        self.project.refresh_from_db()
+        self.assertEqual(self.project.stars_count, 100)
+        self.assertEqual(self.project.forks_count, 25)
+        self.assertEqual(self.project.language, 'Python')
+
+    @patch('projects.utils.GitHubService.fetch_repo_data')
+    def test_sync_throttling(self, mock_fetch):
+        """sync_project_metadata respects 1-hour cooldown."""
+        from django.utils import timezone
+        self.project.last_synced_at = timezone.now()
+        self.project.save()
+
+        from .utils import sync_project_metadata
+        result = sync_project_metadata(self.project)
+        self.assertFalse(result)
+        mock_fetch.assert_not_called()
+
+    @patch('projects.utils.GitHubService.fetch_repo_data')
+    def test_sync_api_failure(self, mock_fetch):
+        """sync_project_metadata handles API failure gracefully."""
+        mock_fetch.return_value = None
+        from .utils import sync_project_metadata
+        result = sync_project_metadata(self.project)
+        self.assertFalse(result)

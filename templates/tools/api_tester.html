@@ -2,35 +2,34 @@
 {% load static %}
 
 {% block title %}HTTP API Tester & Debugger | Kiri Labs{% endblock %}
-{% block meta_description %}Advanced in-browser HTTP client. Test APIs, inspect headers, debug CORS issues, and generate
-cURL commands.{% endblock %}
+
+{% block meta_description %}
+Advanced in-browser HTTP client. Test APIs, inspect headers, debug CORS issues, and generate cURL commands.
+{% endblock %}
 
 {% block tool_name %}API Tester{% endblock %}
 {% block tool_icon %}fa-satellite-dish{% endblock %}
 {% block tool_title %}HTTP Endpoint Debugger{% endblock %}
+
 {% block tool_description %}
-A professional-grade HTTP client in your browser.
-Test endpoints, validate JSON payloads, inspect response headers, and export to cURL.
+A professional-grade HTTP client in your browser. Test endpoints, validate JSON payloads, inspect response headers, and
+export to cURL.
 {% endblock %}
 
 {% block tool_body %}
 <div class="space-y-8" x-cloak>
-
     <div class="grid grid-cols-1 lg:grid-cols-[1fr,300px] gap-8 items-start">
-
         <div class="space-y-6">
-
-            <div
-                class="p-6 bg-white dark:bg-[#1A1A1A] rounded-[2rem] border border-[#DEE2E6] dark:border-[#3D3D3D] shadow-sm space-y-4">
+            <div class="p-6 card shadow-sm space-y-4">
                 <div class="flex flex-col md:flex-row gap-3">
                     <div class="relative min-w-[120px]">
                         <select x-model="method"
-                            class="w-full h-full px-5 py-4 appearance-none bg-[#F8F9FA] dark:bg-[#121212] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-2xl font-black text-xs outline-none focus:border-[#0D7C3D] cursor-pointer text-center"
-                            :class="{
-                                'text-blue-600': method === 'GET',
-                                'text-green-600': method === 'POST',
-                                'text-orange-600': method === 'PUT',
-                                'text-red-600': method === 'DELETE'
+                            class="w-full h-full px-5 py-4 appearance-none form-input rounded-2xl font-black text-xs outline-none focus:border-kiri-green cursor-pointer text-center"
+                            :class="{ 
+                                'text-blue-600': method === 'GET', 
+                                'text-green-600': method === 'POST', 
+                                'text-orange-600': method === 'PUT', 
+                                'text-red-600': method === 'DELETE' 
                             }">
                             <option>GET</option>
                             <option>POST</option>
@@ -41,21 +40,19 @@ Test endpoints, validate JSON payloads, inspect response headers, and export to 
                             <option>OPTIONS</option>
                         </select>
                         <i
-                            class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-gray-400 pointer-events-none"></i>
+                            class="fas fa-chevron-down absolute right-4 top-1/2 -translate-y-1/2 text-[10px] text-muted pointer-events-none"></i>
                     </div>
-
                     <div class="flex-1 relative group">
                         <input type="text" x-model="url" @keydown.enter="send()"
                             placeholder="https://api.example.com/v1/resource"
-                            class="w-full h-full px-6 py-4 bg-[#F8F9FA] dark:bg-[#121212] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-2xl font-mono text-sm outline-none focus:border-[#0D7C3D] transition-all">
+                            class="w-full h-full px-6 py-4 form-input rounded-2xl font-mono text-sm outline-none focus:border-kiri-green transition-all">
                         <button x-show="url" @click="url = ''"
-                            class="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400 hover:text-red-500">
+                            class="absolute right-4 top-1/2 -translate-y-1/2 text-muted hover:text-red-500">
                             <i class="fas fa-times-circle"></i>
                         </button>
                     </div>
-
                     <button @click="send()" :disabled="loading || !url"
-                        class="px-8 py-4 bg-[#0D7C3D] text-white font-black rounded-2xl hover:bg-[#0A5C2C] disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 min-w-[120px]">
+                        class="btn-primary px-8 py-4 disabled:opacity-50 disabled:cursor-not-allowed transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2 min-w-[120px]">
                         <template x-if="!loading">
                             <span class="flex items-center gap-2">SEND <i class="fas fa-paper-plane text-xs"></i></span>
                         </template>
@@ -66,75 +63,70 @@ Test endpoints, validate JSON payloads, inspect response headers, and export to 
                 </div>
             </div>
 
-            <div
-                class="bg-white dark:bg-[#1A1A1A] rounded-[2rem] border border-[#DEE2E6] dark:border-[#3D3D3D] shadow-sm overflow-hidden">
-                <div class="flex overflow-x-auto border-b border-[#DEE2E6] dark:border-[#3D3D3D] no-scrollbar">
+            <div class="card shadow-sm overflow-hidden">
+                <div class="flex overflow-x-auto border-b border-subtle no-scrollbar">
                     <template x-for="t in ['params', 'headers', 'auth', 'body']">
                         <button @click="tab = t" x-show="t !== 'body' || method !== 'GET'"
-                            :class="tab === t ? 'text-[#0D7C3D] bg-[#0D7C3D]/5' : 'text-[#6C757D] dark:text-[#A1A1AA] hover:bg-gray-50 dark:hover:bg-[#222]'"
+                            :class="tab === t ? 'text-kiri-green bg-kiri-green/5' : 'text-body hover:bg-subtle '"
                             class="px-8 py-4 text-[10px] font-black uppercase tracking-widest transition-all relative whitespace-nowrap">
                             <span x-text="t"></span>
                             <span x-show="getCount(t) > 0" x-text="getCount(t)"
-                                class="ml-1 px-1.5 py-0.5 rounded-full bg-gray-200 dark:bg-[#333] text-[8px]"></span>
-                            <div x-show="tab === t" class="absolute bottom-0 left-0 w-full h-0.5 bg-[#0D7C3D]"></div>
+                                class="ml-1 px-1.5 py-0.5 rounded-full bg-subtle text-[8px]"></span>
+                            <div x-show="tab === t" class="absolute bottom-0 left-0 w-full h-0.5 bg-kiri-green"></div>
                         </button>
                     </template>
                     <div class="flex-1"></div>
                     <button @click="copyCurl()"
-                        class="px-6 py-4 text-[10px] font-black text-[#6C757D] hover:text-[#0D7C3D] uppercase tracking-widest border-l border-[#DEE2E6] dark:border-[#3D3D3D] transition-colors"
+                        class="px-6 py-4 text-[10px] font-black text-muted hover:text-kiri-green uppercase tracking-widest border-l border-subtle transition-colors"
                         title="Copy as cURL">
                         <i class="fas fa-terminal mr-1"></i> cURL
                     </button>
                 </div>
 
                 <div class="p-6 min-h-[200px]">
-
                     <div x-show="['params', 'headers'].includes(tab)" class="space-y-3">
                         <template x-for="(item, index) in (tab === 'params' ? params : headers)" :key="index">
                             <div class="flex gap-2 group">
                                 <input type="text" x-model="item.key" placeholder="Key"
-                                    class="flex-1 px-4 py-3 bg-[#F8F9FA] dark:bg-[#121212] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl text-xs font-mono outline-none focus:border-[#0D7C3D]">
+                                    class="flex-1 px-4 py-3 form-input text-xs font-mono outline-none focus:border-kiri-green">
                                 <input type="text" x-model="item.value" placeholder="Value"
-                                    class="flex-1 px-4 py-3 bg-[#F8F9FA] dark:bg-[#121212] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl text-xs font-mono outline-none focus:border-[#0D7C3D]">
+                                    class="flex-1 px-4 py-3 form-input text-xs font-mono outline-none focus:border-kiri-green">
                                 <button @click="removeItem(index)"
-                                    class="p-3 text-gray-300 hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100">
+                                    class="p-3 text-muted hover:text-red-500 transition-colors opacity-0 group-hover:opacity-100 focus:opacity-100">
                                     <i class="fas fa-trash-alt"></i>
                                 </button>
                             </div>
                         </template>
                         <button @click="addItem()"
-                            class="mt-2 text-[10px] font-bold text-[#0D7C3D] hover:underline flex items-center gap-1">
+                            class="mt-2 text-[10px] font-bold text-kiri-green hover:underline flex items-center gap-1">
                             <i class="fas fa-plus-circle"></i> ADD NEW ROW
                         </button>
                     </div>
 
                     <div x-show="tab === 'auth'" class="space-y-4 max-w-lg">
                         <div class="space-y-2">
-                            <label class="text-xs font-bold text-gray-500 uppercase">Authorization Type</label>
-                            <select x-model="authType"
-                                class="w-full px-4 py-3 bg-[#F8F9FA] dark:bg-[#121212] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl text-xs outline-none">
+                            <label class="text-xs font-bold text-muted uppercase">Authorization Type</label>
+                            <select x-model="authType" class="w-full px-4 py-3 form-input text-xs outline-none">
                                 <option value="none">No Auth</option>
                                 <option value="bearer">Bearer Token</option>
                                 <option value="basic">Basic Auth</option>
                             </select>
                         </div>
-
                         <div x-show="authType === 'bearer'" class="space-y-2 animate-fade-in">
-                            <label class="text-xs font-bold text-gray-500 uppercase">Token</label>
+                            <label class="text-xs font-bold text-muted uppercase">Token</label>
                             <input type="text" x-model="authToken" placeholder="e.g. eyJhbGciOiJIUzI1Ni..."
-                                class="w-full px-4 py-3 bg-[#F8F9FA] dark:bg-[#121212] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl text-xs font-mono outline-none focus:border-[#0D7C3D]">
+                                class="w-full px-4 py-3 form-input text-xs font-mono outline-none focus:border-kiri-green">
                         </div>
-
                         <div x-show="authType === 'basic'" class="grid grid-cols-2 gap-4 animate-fade-in">
                             <div class="space-y-2">
-                                <label class="text-xs font-bold text-gray-500 uppercase">Username</label>
+                                <label class="text-xs font-bold text-muted uppercase">Username</label>
                                 <input type="text" x-model="authUser"
-                                    class="w-full px-4 py-3 bg-[#F8F9FA] dark:bg-[#121212] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl text-xs outline-none focus:border-[#0D7C3D]">
+                                    class="w-full px-4 py-3 form-input text-xs outline-none focus:border-kiri-green">
                             </div>
                             <div class="space-y-2">
-                                <label class="text-xs font-bold text-gray-500 uppercase">Password</label>
+                                <label class="text-xs font-bold text-muted uppercase">Password</label>
                                 <input type="password" x-model="authPass"
-                                    class="w-full px-4 py-3 bg-[#F8F9FA] dark:bg-[#121212] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl text-xs outline-none focus:border-[#0D7C3D]">
+                                    class="w-full px-4 py-3 form-input text-xs outline-none focus:border-kiri-green">
                             </div>
                         </div>
                     </div>
@@ -142,63 +134,65 @@ Test endpoints, validate JSON payloads, inspect response headers, and export to 
                     <div x-show="tab === 'body'" class="h-full flex flex-col gap-2">
                         <div class="flex justify-end gap-2 mb-2">
                             <button @click="prettifyJson()"
-                                class="text-[10px] font-bold text-[#0D7C3D] hover:underline">PRETTIFY JSON</button>
-                            <button @click="body = ''"
-                                class="text-[10px] font-bold text-red-500 hover:underline">CLEAR</button>
+                                class="text-[10px] font-bold text-kiri-green hover:underline">
+                                PRETTIFY JSON
+                            </button>
+                            <button @click="body = ''" class="text-[10px] font-bold text-red-500 hover:underline">
+                                CLEAR
+                            </button>
                         </div>
                         <textarea x-model="body"
-                            class="w-full min-h-[200px] p-4 bg-[#F8F9FA] dark:bg-[#121212] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl font-mono text-xs outline-none focus:border-[#0D7C3D] resize-y"
-                            placeholder='{ "key": "value" }'></textarea>
-                        <p x-show="body && !isJsonValid" class="text-[10px] text-red-500 font-bold"><i
-                                class="fas fa-exclamation-triangle"></i> Invalid JSON</p>
+                            class="w-full min-h-[200px] p-4 form-input font-mono text-xs outline-none focus:border-kiri-green resize-y"
+                            placeholder='{"key":"value" }'></textarea>
+                        <p x-show="body && !isJsonValid" class="text-[10px] text-red-500 font-bold">
+                            <i class="fas fa-exclamation-triangle"></i> Invalid JSON
+                        </p>
                     </div>
                 </div>
             </div>
 
             <div x-show="responseStatus" class="space-y-4 animate-slide-up" x-cloak>
                 <div class="flex items-center justify-between">
-                    <h3 class="text-xs font-black text-gray-400 uppercase tracking-widest">Response</h3>
+                    <h3 class="text-xs font-black text-muted uppercase tracking-widest">Response</h3>
                     <div class="flex gap-2">
                         <span class="px-3 py-1 rounded-lg text-[10px] font-black uppercase border" :class="statusClass">
                             <span x-text="'STATUS: ' + responseStatus"></span>
                             <span x-text="statusText" class="ml-1 opacity-75"></span>
                         </span>
                         <span
-                            class="px-3 py-1 rounded-lg bg-gray-100 dark:bg-[#2D2D2D] border border-[#DEE2E6] dark:border-[#3D3D3D] text-[10px] font-black text-gray-500">
-                            <i class="far fa-clock mr-1"></i> <span x-text="responseTime + 'ms'"></span>
+                            class="px-3 py-1 rounded-lg bg-subtle border border-subtle text-[10px] font-black text-muted">
+                            <i class="far fa-clock mr-1"></i>
+                            <span x-text="responseTime + 'ms'"></span>
                         </span>
                     </div>
                 </div>
 
-                <div class="bg-[#1E1E1E] rounded-[2rem] border border-[#3D3D3D] overflow-hidden shadow-xl">
-                    <div class="flex border-b border-[#333] px-4">
+                <div class="bg-surface rounded-[2rem] border border-subtle overflow-hidden shadow-xl">
+                    <div class="flex border-b border-subtle px-4">
                         <button @click="resTab = 'body'"
-                            :class="resTab === 'body' ? 'text-white border-[#0D7C3D]' : 'text-gray-500 border-transparent'"
+                            :class="resTab === 'body' ? 'text-heading border-kiri-green' : 'text-muted border-transparent'"
                             class="px-4 py-3 text-[10px] font-bold uppercase border-b-2 transition-colors">Body</button>
                         <button @click="resTab = 'headers'"
-                            :class="resTab === 'headers' ? 'text-white border-[#0D7C3D]' : 'text-gray-500 border-transparent'"
+                            :class="resTab === 'headers' ? 'text-heading border-kiri-green' : 'text-muted border-transparent'"
                             class="px-4 py-3 text-[10px] font-bold uppercase border-b-2 transition-colors">Headers</button>
                     </div>
-
                     <div class="relative group">
                         <div x-show="resTab === 'body'" class="max-h-[500px] overflow-auto custom-scrollbar p-6">
                             <pre><code class="language-json text-xs" x-ref="codeBlock"></code></pre>
                         </div>
-
                         <div x-show="resTab === 'headers'" class="max-h-[500px] overflow-auto custom-scrollbar p-6">
                             <div class="grid grid-cols-[auto,1fr] gap-x-4 gap-y-2 text-xs font-mono">
                                 <template x-for="(val, key) in responseHeaders">
                                     <div class="contents">
                                         <span class="text-orange-400 text-right" x-text="key + ':'"></span>
-                                        <span class="text-[#A1A1AA] break-all" x-text="val"></span>
+                                        <span class="text-muted break-all" x-text="val"></span>
                                     </div>
                                 </template>
                             </div>
                         </div>
-
                         <button
                             @click="copyToClipboard(resTab === 'body' ? output : JSON.stringify(responseHeaders, null, 2))"
-                            class="absolute top-4 right-4 p-2 bg-white/10 hover:bg-white/20 rounded-lg text-white text-xs opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-md">
+                            class="absolute top-4 right-4 p-2 bg-subtle hover:bg-subtle-dark rounded-lg text-body text-xs opacity-0 group-hover:opacity-100 transition-opacity backdrop-blur-md">
                             <i class="far fa-copy"></i>
                         </button>
                     </div>
@@ -208,25 +202,23 @@ Test endpoints, validate JSON payloads, inspect response headers, and export to 
 
         <div class="hidden lg:block space-y-4">
             <div class="flex items-center justify-between">
-                <h3 class="text-xs font-black text-gray-400 uppercase tracking-widest">History</h3>
+                <h3 class="text-xs font-black text-muted uppercase tracking-widest">History</h3>
                 <button @click="history = []" class="text-[10px] text-red-500 hover:underline">Clear</button>
             </div>
-
             <div class="space-y-3 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
                 <template x-for="(item, idx) in history" :key="idx">
                     <button @click="loadFromHistory(item)"
-                        class="w-full p-4 bg-white dark:bg-[#1A1A1A] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-2xl hover:border-[#0D7C3D] text-left group transition-all">
+                        class="w-full p-4 bg-surface border border-subtle rounded-2xl hover:border-kiri-green text-left group transition-all">
                         <div class="flex items-center gap-2 mb-2">
-                            <span class="text-[9px] font-black px-1.5 py-0.5 rounded bg-gray-100 dark:bg-[#333]" :class="{
-                                    'text-blue-500': item.method === 'GET',
-                                    'text-green-500': item.method === 'POST',
-                                    'text-red-500': item.method === 'DELETE'
+                            <span class="text-[9px] font-black px-1.5 py-0.5 rounded bg-subtle" :class="{ 
+                                    'text-blue-500': item.method === 'GET', 
+                                    'text-green-500': item.method === 'POST', 
+                                    'text-red-500': item.method === 'DELETE' 
                                 }" x-text="item.method"></span>
-                            <span class="text-[10px] text-gray-400"
+                            <span class="text-[10px] text-muted"
                                 x-text="new Date(item.timestamp).toLocaleTimeString()"></span>
                         </div>
-                        <div class="text-xs font-mono truncate text-gray-600 dark:text-gray-300" x-text="item.url">
-                        </div>
+                        <div class="text-xs font-mono truncate text-muted" x-text="item.url"></div>
                         <div class="mt-2 flex gap-2">
                             <span class="text-[9px] px-1.5 rounded"
                                 :class="item.status < 300 ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'"
@@ -234,12 +226,11 @@ Test endpoints, validate JSON payloads, inspect response headers, and export to 
                         </div>
                     </button>
                 </template>
-                <div x-show="history.length === 0" class="text-center py-8 text-gray-400 text-xs">
+                <div x-show="history.length === 0" class="text-center py-8 text-muted text-xs">
                     No recent requests
                 </div>
             </div>
         </div>
-
     </div>
 </div>
 {% endblock %}
@@ -251,7 +242,6 @@ method: 'GET',
 url: '',
 tab: 'params',
 resTab: 'body',
-
 // Data Models
 params: [{ key: '', value: '' }],
 headers: [{ key: 'Content-Type', value: 'application/json' }],
@@ -260,7 +250,6 @@ authToken: '',
 authUser: '',
 authPass: '',
 body: '',
-
 // State
 loading: false,
 responseStatus: 0,
@@ -284,8 +273,12 @@ this.hideSample = true;
 
 // Computed checks
 get isJsonValid() {
-try { if(this.body) JSON.parse(this.body); return true; }
-catch { return false; }
+try {
+if(this.body) JSON.parse(this.body);
+return true;
+} catch {
+return false;
+}
 },
 
 getCount(type) {
@@ -315,20 +308,17 @@ this.body = JSON.stringify(obj, null, 4);
 // CURL Generator
 copyCurl() {
 let cmd = `curl -X ${this.method} "${this.buildUrl()}"`;
-
 // Headers
 const allHeaders = this.buildHeaders();
 for (const [key, val] of Object.entries(allHeaders)) {
 cmd += ` \\\n -H "${key}: ${val}"`;
 }
-
 // Body
 if (['POST', 'PUT', 'PATCH'].includes(this.method) && this.body) {
 // Escape single quotes for shell safety
 const safeBody = this.body.replace(/'/g, "'\\''");
 cmd += ` \\\n -d '${safeBody}'`;
 }
-
 this.copyToClipboard(cmd);
 alert('cURL command copied to clipboard!');
 },
@@ -341,7 +331,9 @@ this.params.forEach(p => {
 if (p.key) urlObj.searchParams.append(p.key, p.value);
 });
 return urlObj.toString();
-} catch { return this.url; }
+} catch {
+return this.url;
+}
 },
 
 buildHeaders() {
@@ -411,16 +403,16 @@ this.statusText = res.statusText;
 res.headers.forEach((val, key) => this.responseHeaders[key] = val);
 
 // Styling status
-if (res.status < 300) this.statusClass='bg-green-500/10 text-green-500 border-green-500/20' ; else if (res.status < 400)
-    this.statusClass='bg-blue-500/10 text-blue-500 border-blue-500/20' ; else if (res.status < 500)
-    this.statusClass='bg-orange-500/10 text-orange-500 border-orange-500/20' ; else
-    this.statusClass='bg-red-500/10 text-red-500 border-red-500/20' ; const contentType=res.headers.get('content-type');
-    if (contentType && contentType.includes('application/json')) { const json=await res.json();
-    this.output=JSON.stringify(json, null, 4); } else { this.output=await res.text(); } // Update DOM for Prism
-    this.$refs.codeBlock.textContent=this.output; this.$nextTick(()=> Prism.highlightElement(this.$refs.codeBlock));
+if (res.status < 300) { this.statusClass='bg-green-500/10 text-green-500 border-green-500/20' ; } else if (res.status <
+    400) { this.statusClass='bg-blue-500/10 text-blue-500 border-blue-500/20' ; } else if (res.status < 500) {
+    this.statusClass='bg-orange-500/10 text-orange-500 border-orange-500/20' ; } else {
+    this.statusClass='bg-red-500/10 text-red-500 border-red-500/20' ; } const
+    contentType=res.headers.get('content-type'); if (contentType && contentType.includes('application/json')) { const
+    json=await res.json(); this.output=JSON.stringify(json, null, 4); } else { this.output=await res.text(); } // Update
+    DOM for Prism this.$refs.codeBlock.textContent=this.output; this.$nextTick(()=>
+    Prism.highlightElement(this.$refs.codeBlock));
 
     this.addToHistory(res.status);
-
     } catch (e) {
     this.responseStatus = 'ERR';
     this.statusText = 'Network Error';
@@ -440,70 +432,4 @@ if (res.status < 300) this.statusClass='bg-green-500/10 text-green-500 border-gr
     <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
-
-    <style>
-        /* Custom Scrollbar */
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 6px;
-            height: 6px;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-track {
-            background: transparent;
-        }
-
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background-color: #DEE2E6;
-            border-radius: 20px;
-        }
-
-        .dark .custom-scrollbar::-webkit-scrollbar-thumb {
-            background-color: #3D3D3D;
-        }
-
-        /* Animations */
-        @keyframes slideUp {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
-        .animate-slide-up {
-            animation: slideUp 0.3s ease-out forwards;
-        }
-
-        @keyframes fadeIn {
-            from {
-                opacity: 0;
-            }
-
-            to {
-                opacity: 1;
-            }
-        }
-
-        .animate-fade-in {
-            animation: fadeIn 0.3s ease-out;
-        }
-
-        /* Prism Overrides */
-        pre[class*="language-"] {
-            margin: 0 !important;
-            background: transparent !important;
-            padding: 0 !important;
-            text-shadow: none !important;
-        }
-
-        code[class*="language-"],
-        pre[class*="language-"] {
-            font-family: 'JetBrains Mono', 'Fira Code', monospace !important;
-            font-size: 13px !important;
-        }
-    </style>
     {% endblock %}

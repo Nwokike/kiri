@@ -1,85 +1,65 @@
 {% load static %}
 <!-- ===== HEADER ===== -->
-<header
-    class="fixed top-0 left-0 right-0 h-14 bg-white border-b border-[#DEE2E6] flex items-center z-50 dark:bg-[#1E1E1E] dark:border-[#3D3D3D]">
-
+<header class="page-header">
     <!-- Left: Hamburger + Logo -->
     <div class="flex items-center h-full">
-        <button id="sidebar-toggle"
-            class="w-14 h-14 flex items-center justify-center text-[#495057] hover:bg-[#F8F9FA] dark:text-[#A1A1AA] dark:hover:bg-[#2D2D2D] transition-colors"
-            title="Toggle sidebar">
+        <button id="sidebar-toggle" class="icon-btn-large" title="Toggle sidebar">
             <i class="fas fa-bars text-lg"></i>
         </button>
-
-        <a href="/" class="flex items-center h-full hover:bg-[#F8F9FA] dark:hover:bg-[#2D2D2D] transition-colors">
-            <img src="{% static 'images/logos/logo.png' %}" alt="Kiri" class="h-9 w-auto">
+        <a href="/" class="flex items-center h-full hover:bg-subtle transition-colors">
+            <img src="{% static 'images/logos/logo.webp' %}" alt="Kiri" class="h-9 w-auto">
         </a>
-
     </div>
 
-    <!-- Center: Search Bar -->
-    <div class="flex-1 flex justify-center px-4">
-        <div class="relative w-full max-w-lg">
-            <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-[#ADB5BD]"></i>
-            <input type="text" placeholder="Search Kiri..." id="global-search" aria-label="Search across Kiri"
-                class="w-full h-10 pl-10 pr-4 bg-[#F8F9FA] border border-[#DEE2E6] rounded-lg text-sm focus:border-[#0D7C3D] focus:ring-2 focus:ring-[#0D7C3D]/20 focus:bg-white outline-none transition-all dark:bg-[#2D2D2D] dark:border-[#3D3D3D] dark:text-white dark:focus:bg-[#1E1E1E]">
-        </div>
-    </div>
+    <!-- Center: Spacer -->
+    <div class="flex-1"></div>
 
     <!-- Right: Actions -->
     <div class="flex items-center h-full gap-1 pr-2">
         <!-- Theme Toggle -->
-        <button id="theme-toggle"
-            class="w-10 h-10 flex items-center justify-center text-[#495057] hover:bg-[#F8F9FA] rounded-lg dark:text-[#A1A1AA] dark:hover:bg-[#2D2D2D] transition-colors focus:outline-none"
-            title="Toggle theme">
+        <button id="theme-toggle" class="icon-btn" title="Toggle theme">
             <i class="fas fa-moon" id="theme-icon-light"></i>
             <i class="fas fa-sun text-yellow-400" id="theme-icon-dark"></i>
         </button>
 
         {% if user.is_authenticated %}
-
         <!-- Profile Dropdown -->
         <div class="relative" id="profile-dropdown-container">
-            <button id="profile-dropdown-toggle"
-                class="w-10 h-10 flex items-center justify-center rounded-lg hover:bg-[#F8F9FA] dark:hover:bg-[#2D2D2D] transition-colors"
-                title="Profile menu">
+            <button id="profile-dropdown-toggle" class="icon-btn" title="Profile menu">
                 {% if user.avatar_url %}
                 <img src="{{ user.avatar_url }}" alt="{{ user.username }}" class="w-8 h-8 rounded-full">
                 {% else %}
                 <div
-                    class="w-8 h-8 rounded-full bg-gradient-to-br from-[#0D7C3D] to-[#0A5C2C] text-white flex items-center justify-center text-xs font-semibold">
+                    class="w-8 h-8 rounded-full bg-gradient-to-br from-kiri-green to-kiri-green-dark text-white flex items-center justify-center text-xs font-semibold">
                     {{ user.username|slice:":2"|upper }}
                 </div>
                 {% endif %}
             </button>
 
             <!-- Dropdown Menu -->
-            <div id="profile-dropdown"
-                class="hidden absolute right-0 mt-2 w-56 bg-white rounded-xl shadow-lg border border-[#DEE2E6] dark:bg-[#1E1E1E] dark:border-[#3D3D3D] z-50 overflow-hidden">
-                <div class="p-3 border-b border-[#DEE2E6] dark:border-[#3D3D3D]">
-                    <p class="font-medium text-[#212529] dark:text-white">{{ user.username }}</p>
-                    <p class="text-xs text-[#6C757D] dark:text-[#A1A1AA]">{{ user.email }}</p>
+            <div id="profile-dropdown" class="dropdown-menu hidden">
+                <div class="p-3 divider border-t-0 border-b">
+                    <p class="font-medium text-heading">{{ user.username }}</p>
+                    <p class="text-xs text-muted">Staff</p>
                 </div>
                 <div class="py-2">
                     <a href="{% url 'core:about' %}" class="dropdown-item">
                         <i class="fas fa-user w-5 text-center"></i> About
                     </a>
+                    <a href="{% url 'projects:create' %}" class="dropdown-item">
+                        <i class="fas fa-plus w-5 text-center"></i> New Project
+                    </a>
                     <a href="{% url 'socialaccount_connections' %}" class="dropdown-item">
                         <i class="fas fa-plug w-5 text-center"></i> Integrations
                     </a>
-                    <div class="my-1 mx-3 border-t border-[#DEE2E6] dark:border-[#3D3D3D]"></div>
-                    <a href="{% url 'account_logout' %}" class="dropdown-item text-red-500 hover:text-red-600">
+                    <div class="my-1 mx-3 divider"></div>
+                    <a href="{% url 'account_logout' %}"
+                        class="dropdown-item text-red-500 hover:text-red-600 hover:bg-subtle">
                         <i class="fas fa-sign-out-alt w-5 text-center"></i> Sign Out
                     </a>
                 </div>
             </div>
         </div>
-        {% else %}
-        <!-- Join Button -->
-        <a href="{% url 'account_login' %}"
-            class="ml-2 px-5 py-2 bg-gradient-to-r from-[#0D7C3D] to-[#0A5C2C] text-white text-sm font-semibold rounded-lg hover:from-[#0B6A34] hover:to-[#094F26] shadow-sm hover:shadow transition-all">
-            Join
-        </a>
         {% endif %}
     </div>
 </header>

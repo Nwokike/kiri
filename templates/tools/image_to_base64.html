@@ -2,12 +2,15 @@
 {% load static %}
 
 {% block title %}Image to Base64 Encoder | Kiri Labs{% endblock %}
-{% block meta_description %}Convert images into Base64 data strings for direct embedding in CSS, HTML, or JSON.
-{%endblock %}
+
+{% block meta_description %}
+Convert images into Base64 data strings for direct embedding in CSS, HTML, or JSON.
+{% endblock %}
 
 {% block tool_name %}Image to Base64{% endblock %}
 {% block tool_icon %}fa-image{% endblock %}
 {% block tool_title %}Image to Base64 Encoder{% endblock %}
+
 {% block tool_description %}
 Convert images into Base64 data strings for direct embedding in CSS, HTML, or JSON.
 All processing happens locally in your browser.
@@ -15,16 +18,16 @@ All processing happens locally in your browser.
 
 {% block tool_actions_left %}
 <div class="flex items-center gap-2">
-    <span class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase">Format:</span>
-    <div class="flex bg-white dark:bg-[#1E1E1E] p-1 rounded-lg border border-[#DEE2E6] dark:border-[#3D3D3D]">
+    <span class="text-[10px] font-bold text-body uppercase">Format:</span>
+    <div class="flex bg-surface p-1 rounded-lg border border-subtle">
         <button @click="outputType = 'raw'; convert()"
-            :class="outputType === 'raw' ? 'bg-[#0D7C3D] text-white' : 'text-[#6C757D]'"
+            :class="outputType === 'raw' ? 'bg-kiri-green text-white' : 'text-muted'"
             class="px-2 py-1 text-[9px] font-bold rounded-md">Raw</button>
         <button @click="outputType = 'css'; convert()"
-            :class="outputType === 'css' ? 'bg-[#0D7C3D] text-white' : 'text-[#6C757D]'"
+            :class="outputType === 'css' ? 'bg-kiri-green text-white' : 'text-muted'"
             class="px-2 py-1 text-[9px] font-bold rounded-md">CSS</button>
         <button @click="outputType = 'html'; convert()"
-            :class="outputType === 'html' ? 'bg-[#0D7C3D] text-white' : 'text-[#6C757D]'"
+            :class="outputType === 'html' ? 'bg-kiri-green text-white' : 'text-muted'"
             class="px-2 py-1 text-[9px] font-bold rounded-md">HTML</button>
     </div>
 </div>
@@ -34,10 +37,9 @@ All processing happens locally in your browser.
 
 {% block tool_actions_right %}
 <button @click="downloadOutput()"
-    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-[#0D7C3D] text-white hover:bg-[#0A5C2C]"
+    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-kiri-green text-white hover:bg-kiri-green-dark"
     x-show="output">
-    <i class="fas fa-download"></i>
-    <span>Save String</span>
+    <i class="fas fa-download"></i> <span>Save String</span>
 </button>
 {% endblock %}
 
@@ -46,53 +48,43 @@ All processing happens locally in your browser.
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
         <!-- Upload & Preview -->
         <div class="space-y-4">
-            <label
-                class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest block">Input
-                Image</label>
+            <label class="text-[10px] font-bold text-body uppercase tracking-widest block">Input Image</label>
             <div @dragover.prevent="over = true" @dragleave.prevent="over = false" @drop.prevent="handleDrop($event)"
-                :class="over ? 'border-[#0D7C3D] bg-[#0D7C3D]/5' : 'border-[#DEE2E6] dark:border-[#3D3D3D]'"
-                class="h-72 border-2 border-dashed rounded-[2rem] bg-[#F8F9FA]/50 dark:bg-[#1A1A1A]/50 flex flex-col items-center justify-center p-6 text-center transition-all cursor-pointer relative group overflow-hidden"
+                :class="over ? 'border-kiri-green bg-kiri-green/5' : 'border-subtle'"
+                class="h-72 border-2 border-dashed rounded-[2rem] bg-subtle backdrop-blur-md flex flex-col items-center justify-center p-6 text-center transition-all cursor-pointer relative group overflow-hidden"
                 @click="$refs.fileInput.click()">
-
                 <div x-show="!input" class="space-y-4">
                     <div
-                        class="w-16 h-16 rounded-full bg-white dark:bg-[#2D2D2D] shadow-sm flex items-center justify-center text-gray-400 group-hover:text-[#0D7C3D] transition-all">
+                        class="w-16 h-16 rounded-full bg-surface shadow-sm flex items-center justify-center text-muted group-hover:text-kiri-green transition-all">
                         <i class="fas fa-cloud-upload-alt text-2xl"></i>
                     </div>
                     <div>
-                        <p class="text-sm font-bold text-[#212529] dark:text-white">Drag & drop image here</p>
-                        <p class="text-xs text-[#6C757D] dark:text-[#A1A1AA] mt-1">or <span
-                                class="text-[#0D7C3D] underline">click to browse</span></p>
+                        <p class="text-sm font-bold text-heading">Drag & drop image here</p>
+                        <p class="text-xs text-body mt-1">or <span class="text-kiri-green underline">click to
+                                browse</span></p>
                     </div>
                 </div>
-
                 <template x-if="input">
                     <div class="relative w-full h-full flex items-center justify-center p-4">
                         <img :src="input" class="max-h-full max-w-full rounded-xl shadow-xl border border-white/20">
                     </div>
                 </template>
             </div>
-            <div x-show="input" class="flex items-center justify-between px-2">
-                <span class="text-[10px] font-bold text-[#A1A1AA] uppercase tracking-widest" x-text="fileName"></span>
-                <span class="text-[10px] font-bold text-[#A1A1AA]" x-text="formatSize(input.length)"></span>
-            </div>
-        </div>
-
-        <!-- Result Card -->
+            <div x-show="input" class="flex items-center justify-between px-2"> <span
+                    class="text-[10px] font-bold text-muted uppercase tracking-widest" x-text="fileName"></span> <span
+                    class="text-[10px] font-bold text-muted" x-text="formatSize(input.length)"></span> </div>
+        </div> <!-- Result Card -->
         <div class="flex flex-col h-72 lg:h-[350px] space-y-4">
             <div class="flex justify-between items-center">
-                <label class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest">Base64
-                    Output</label>
+                <label class="text-[10px] font-bold text-body uppercase tracking-widest">Base64 Output</label>
                 <button @click="copyToClipboard(output)" x-show="output"
-                    class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase flex items-center gap-1.5">
-                    <i class="fas" :class="copied ? 'fa-check' : 'fa-copy'"></i>
-                    <span x-text="copied ? 'Copied' : 'Copy Result'"></span>
-                </button>
+                    class="text-[10px] font-bold text-kiri-green hover:underline uppercase flex items-center gap-1.5">
+                    <i class="fas" :class="copied ? 'fa-check' : 'fa-copy'"></i> <span
+                        x-text="copied ? 'Copied' : 'Copy Result'"></span> </button>
             </div>
-            <div
-                class="flex-1 relative rounded-2xl border border-[#DEE2E6] dark:border-[#3D3D3D] bg-[#F8F9FA] dark:bg-[#121212] overflow-hidden shadow-inner">
+            <div class="flex-1 relative rounded-2xl border border-subtle bg-surface overflow-hidden shadow-inner">
                 <textarea readonly x-model="output"
-                    class="w-full h-full p-6 font-mono text-[10px] bg-transparent text-[#6C757D] dark:text-[#A1A1AA] resize-none outline-none break-all"
+                    class="w-full h-full p-6 font-mono text-[10px] bg-transparent text-body resize-none outline-none break-all"
                     placeholder="Base64 data will appear here..."></textarea>
             </div>
         </div>
@@ -104,10 +96,9 @@ All processing happens locally in your browser.
 {
 hideUpload: true,
 hideSample: false,
-
 init() {
+// Initialization logic
 },
-
 file: null,
 input: '',
 output: '',
@@ -117,12 +108,12 @@ rawBase64: '',
 over: false,
 copied: false,
 statusMessage: '',
-
 onReset() {
 this.rawBase64 = '';
 this.fileName = '';
+this.input = '';
+this.output = '';
 },
-
 async loadSample() {
 try {
 const response = await fetch("{% static 'images/logos/logo.png' %}");
@@ -140,27 +131,22 @@ reader.readAsDataURL(blob);
 this.error = 'Failed to load sample logo';
 }
 },
-
 handleDrop(e) {
 this.over = false;
 const files = e.dataTransfer.files;
 if (files.length > 0) this.processImage(files[0]);
 },
-
 handleFileUpload(event) {
 const file = event.target.files[0];
 if (file) this.processImage(file);
 },
-
 processImage(file) {
 if (!file.type.startsWith('image/')) {
 this.error = 'Please select a valid image file.';
 return;
 }
-
 this.fileName = file.name;
 this.statusMessage = 'Encoding ' + file.name + '...';
-
 const reader = new FileReader();
 reader.onload = (e) => {
 this.input = e.target.result;
@@ -170,10 +156,8 @@ this.statusMessage = 'Image encoded successfully';
 };
 reader.readAsDataURL(file);
 },
-
 convert() {
 if (!this.rawBase64) return;
-
 if (this.outputType === 'raw') {
 this.output = this.rawBase64.split(',')[1];
 } else if (this.outputType === 'css') {
@@ -182,15 +166,14 @@ this.output = `background-image: url("${this.rawBase64}");`;
 this.output = `<img src="${this.rawBase64}" alt="Base64 Image">`;
 }
 },
-
-formatSize(bytes) {
-if (bytes === 0) return '0 B';
+formatSize(chars) {
+if (chars === 0) return '0 B';
+const bytes = (chars * 3) / 4;
 const k = 1024;
 const sizes = ['B', 'KB', 'MB'];
 const i = Math.floor(Math.log(bytes) / Math.log(k));
 return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
 },
-
 downloadOutput() {
 if (!this.output) return;
 this.downloadFile(this.output, 'base64_string.txt', 'text/plain');

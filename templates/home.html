@@ -1,20 +1,23 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Kiri — Software & Utilities{% endblock %}
+{% block title %}Kiri - Software & Utilities{% endblock %}
 
-{% block meta_description %}30+ browser-based developer tools, productivity features, and project showcases from Kiri
-Labs. Lightweight, efficient, and all running locally.{% endblock %}
+{% block meta_description %}
+30+ browser-based developer tools, productivity features, and project showcases from Kiri Labs. Lightweight, efficient,
+and all running locally.
+{% endblock %}
 
-{% block og_title %}Kiri Labs — Tools & Projects{% endblock %}
-{% block og_description %}30+ browser-based developer tools, productivity features, and project showcases.
-Built lightweight and efficient.{% endblock %}
+{% block og_title %}Kiri Labs - Tools & Projects{% endblock %}
+
+{% block og_description %}
+30+ browser-based developer tools, productivity features, and project showcases. Built lightweight and efficient.
+{% endblock %}
+
 {% block og_image %}{{ request.scheme }}://{{ request.get_host }}{% static 'images/logos/logo.png' %}{% endblock %}
-
 
 {% block content %}
 <div class="max-w-7xl mx-auto px-4 md:px-6 py-8">
-
     <!-- Hero Section -->
     {% include "partials/home/hero.html" %}
 
@@ -31,52 +34,28 @@ Built lightweight and efficient.{% endblock %}
 
         <!-- Right: Sidebar -->
         <div class="space-y-6">
-            <!-- Join CTA (for guests) -->
-            {% if not user.is_authenticated %}
-            <div
-                class="p-6 bg-gradient-to-br from-[#E8F5ED] to-[#d4edda] border border-[#0D7C3D]/10 rounded-xl dark:from-[#0D7C3D]/10 dark:to-[#0D7C3D]/5 dark:border-[#0D7C3D]/20 relative overflow-hidden">
-                <div class="absolute top-0 right-0 w-32 h-32 bg-[#0D7C3D]/5 rounded-full -mr-16 -mt-16"></div>
-                <div class="absolute bottom-0 left-0 w-20 h-20 bg-[#0D7C3D]/5 rounded-full -ml-10 -mb-10"></div>
-                <div class="relative">
-                    <h3 class="text-lg font-bold text-[#212529] dark:text-white mb-2">Get Started</h3>
-                    <p class="text-sm text-[#6C757D] dark:text-[#A1A1AA] mb-5 leading-relaxed">
-                        Explore {{ stats.total_tools }}+ browser-based tools and open-source projects.
-                    </p>
-                    <a href="{% url 'tools:index' %}"
-                        class="flex items-center justify-center gap-2 w-full py-3 bg-[#0D7C3D] text-white text-sm font-bold rounded-lg hover:bg-[#0A5C2C] transition-all shadow-sm hover:shadow-md">
-                        Explore Tools
-                        <i class="fas fa-arrow-right text-[10px]"></i>
-                    </a>
-                </div>
-            </div>
-            {% endif %}
-
             <!-- Ecosystem Platforms -->
             {% if ecosystem_platforms %}
-            <div class="p-6 bg-white border border-[#DEE2E6] rounded-xl dark:bg-[#1E1E1E] dark:border-[#333]">
-                <h3
-                    class="text-sm font-bold text-[#212529] dark:text-white uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <i class="fas fa-globe text-[#0D7C3D]"></i>
-                    Our Platforms
+            <div class="card p-6">
+                <h3 class="text-sm font-bold text-heading uppercase tracking-wider mb-4 flex items-center gap-2">
+                    <i class="fas fa-globe text-kiri-green"></i> Our Platforms
                 </h3>
                 <div class="space-y-2">
                     {% for platform in ecosystem_platforms %}
                     <a href="{{ platform.url }}" target="_blank" rel="noopener"
-                        class="flex items-center gap-3 p-3 rounded-lg hover:bg-[#F8F9FA] dark:hover:bg-[#2D2D2D] transition-colors group">
+                        class="flex items-center gap-3 p-3 rounded-lg hover:bg-subtle transition-colors group">
                         <div
-                            class="w-9 h-9 bg-[#F8F9FA] dark:bg-[#2D2D2D] rounded-lg flex items-center justify-center group-hover:bg-[#E8F5ED] dark:group-hover:bg-[#0D7C3D]/10 transition-colors">
+                            class="w-9 h-9 bg-subtle rounded-lg flex items-center justify-center group-hover:bg-success-subtle transition-colors">
                             <i
-                                class="{{ platform.icon_class }} text-sm text-[#6C757D] dark:text-[#A1A1AA] group-hover:text-[#0D7C3D] transition-colors"></i>
+                                class="{{ platform.icon_class }} text-sm text-body group-hover:text-kiri-green transition-colors"></i>
                         </div>
                         <div class="min-w-0">
-                            <div class="text-sm font-medium text-[#212529] dark:text-white truncate">{{ platform.name }}
-                            </div>
+                            <div class="text-sm font-medium text-heading truncate">{{ platform.name }}</div>
                             {% if platform.short_description %}
-                            <div class="text-xs text-[#6C757D] dark:text-[#A1A1AA] truncate">{{
-                                platform.short_description }}</div>
+                            <div class="text-xs text-muted truncate">{{ platform.short_description }}</div>
                             {% endif %}
                         </div>
-                        <i class="fas fa-external-link-alt text-[9px] text-[#ADB5BD] ml-auto"></i>
+                        <i class="fas fa-external-link-alt text-[9px] text-muted ml-auto"></i>
                     </a>
                     {% endfor %}
                 </div>
@@ -91,25 +70,22 @@ Built lightweight and efficient.{% endblock %}
 
             <!-- Latest Projects -->
             {% if latest_projects %}
-            <div class="p-6 bg-white rounded-xl border border-[#DEE2E6] dark:bg-[#1E1E1E] dark:border-[#333]">
-                <h3
-                    class="text-sm font-bold text-[#212529] dark:text-white mb-4 flex items-center gap-2 uppercase tracking-wider">
-                    <i class="fas fa-clock text-blue-500"></i>
-                    Recently Added
+            <div class="card p-6">
+                <h3 class="text-sm font-bold text-heading mb-4 flex items-center gap-2 uppercase tracking-wider">
+                    <i class="fas fa-clock text-blue-500"></i> Recently Added
                 </h3>
                 <div class="space-y-3">
                     {% for project in latest_projects %}
                     <a href="{% url 'projects:detail' project.slug %}" class="flex items-center gap-3 group">
-                        <div
-                            class="w-8 h-8 bg-[#F8F9FA] dark:bg-[#2D2D2D] rounded-lg flex items-center justify-center shrink-0">
-                            <i class="fas fa-folder-open text-xs text-[#ADB5BD]"></i>
+                        <div class="w-8 h-8 bg-subtle rounded-lg flex items-center justify-center shrink-0">
+                            <i class="fas fa-folder-open text-xs text-muted"></i>
                         </div>
                         <div class="min-w-0 flex-1">
                             <p
-                                class="text-sm font-medium text-[#212529] dark:text-white truncate group-hover:text-[#0D7C3D] transition-colors">
+                                class="text-sm font-medium text-heading truncate group-hover:text-kiri-green transition-colors">
                                 {{ project.name }}
                             </p>
-                            <p class="text-[10px] text-[#ADB5BD] uppercase tracking-wider">
+                            <p class="text-[10px] text-muted uppercase tracking-wider">
                                 {{ project.language|default:"Project" }} · {{ project.created_at|timesince }} ago
                             </p>
                         </div>

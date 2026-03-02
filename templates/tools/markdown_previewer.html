@@ -2,12 +2,15 @@
 {% load static %}
 
 {% block title %}Markdown Live Previewer | Kiri Labs{% endblock %}
-{% block meta_description %}Draft and visualize documentation with GitHub Flavored Markdown (GFM) support and syntax
-highlighting.{% endblock %}
+
+{% block meta_description %}
+Draft and visualize documentation with GitHub Flavored Markdown (GFM) support and syntax highlighting.
+{% endblock %}
 
 {% block tool_name %}MD Preview{% endblock %}
 {% block tool_icon %}fa-file-lines{% endblock %}
 {% block tool_title %}Markdown Live Previewer{% endblock %}
+
 {% block tool_description %}
 Draft and visualize your documentation with our Markdown engine.
 Supports GitHub Flavored Markdown (GFM) and syntax highlighting.
@@ -15,10 +18,9 @@ Supports GitHub Flavored Markdown (GFM) and syntax highlighting.
 
 {% block tool_actions_right %}
 <button @click="downloadHtml()"
-    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-[#0D7C3D] text-white hover:bg-[#0A5C2C]"
+    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-kiri-green text-white hover:bg-kiri-green-dark"
     x-show="input">
-    <i class="fas fa-code"></i>
-    <span>Export HTML</span>
+    <i class="fas fa-code"></i> <span>Export HTML</span>
 </button>
 {% endblock %}
 
@@ -28,36 +30,28 @@ Supports GitHub Flavored Markdown (GFM) and syntax highlighting.
         <!-- Editor -->
         <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between">
-                <span
-                    class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest flex items-center gap-2">
-                    <i class="fab fa-markdown text-blue-500"></i> Markdown Source
-                </span>
-                <span class="text-[10px] text-[#A1A1AA]" x-text="input.length ? input.length + ' chars' : ''"></span>
+                <span class="text-[10px] font-bold text-body uppercase tracking-widest flex items-center gap-2">
+                    <i class="fab fa-markdown text-blue-500"></i> Markdown Source </span>
+                <span class="text-[10px] text-muted" x-text="input.length ? input.length + ' chars' : ''"></span>
             </div>
             <textarea x-model="input" @input="convert()"
-                class="flex-1 w-full p-6 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[2rem] bg-white dark:bg-[#121212] text-[#212529] dark:text-[#E4E4E7] resize-none shadow-inner outline-none focus:border-[#0D7C3D] transition-all"
+                class="flex-1 w-full p-6 font-mono text-sm border border-subtle rounded-[2rem] bg-surface text-heading resize-none shadow-inner outline-none focus:border-kiri-green transition-all"
                 placeholder="Type your markdown here..."></textarea>
-        </div>
-
-        <!-- Preview -->
+        </div> <!-- Preview -->
         <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between">
-                <span
-                    class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest flex items-center gap-2">
-                    <i class="fas fa-eye text-[#0D7C3D]"></i> Live Preview
-                </span>
+                <span class="text-[10px] font-bold text-body uppercase tracking-widest flex items-center gap-2">
+                    <i class="fas fa-eye text-kiri-green"></i> Live Preview </span>
                 <button @click="copyToClipboard(rendered)" x-show="rendered"
-                    class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase flex items-center gap-1.5">
-                    <i class="fas" :class="copied ? 'fa-check' : 'fa-copy'"></i>
-                    <span x-text="copied ? 'Copied HTML' : 'Copy HTML'"></span>
+                    class="text-[10px] font-bold text-kiri-green hover:underline uppercase flex items-center gap-1.5">
+                    <i class="fas" :class="copied ? 'fa-check' : 'fa-copy'"></i> <span
+                        x-text="copied ? 'Copied HTML' : 'Copy HTML'"></span>
                 </button>
             </div>
-            <div
-                class="flex-1 rounded-[2rem] bg-white dark:bg-[#1A1A1A] border border-[#DEE2E6] dark:border-[#3D3D3D] relative overflow-hidden shadow-sm">
+            <div class="flex-1 rounded-[2rem] bg-surface border border-subtle relative overflow-hidden shadow-sm">
                 <div id="markdown-output"
                     class="prose dark:prose-invert max-w-none w-full h-full overflow-auto p-10 custom-scrollbar"
-                    x-html="rendered">
-                </div>
+                    x-html="rendered"> </div>
             </div>
         </div>
     </div>
@@ -67,16 +61,13 @@ Supports GitHub Flavored Markdown (GFM) and syntax highlighting.
 {% block tool_js_data %}
 {
 rendered: '',
-
 init() {
 this.hideUpload = true;
 this.hideSample = false;
 this.convert();
 },
-
 loadSample() {
 this.input = `# Project Documentation
-
 This is a sample of **Markdown** rendering. All processing happens locally in your browser.
 
 ## Features
@@ -99,14 +90,12 @@ console.log("Hello, " + name);
 | Privacy | Local |`;
 this.convert();
 },
-
 convert() {
 if (!this.input.trim()) {
 this.rendered = '';
 this.statusMessage = 'Ready';
 return;
 }
-
 try {
 const rawHtml = marked.parse(this.input);
 this.rendered = DOMPurify.sanitize(rawHtml);
@@ -115,10 +104,14 @@ this.statusMessage = 'Rendered GFM';
 this.error = 'Render error';
 }
 },
-
 downloadHtml() {
 if (!this.rendered) return;
 this.downloadFile(this.rendered, 'preview.html', 'text/html');
+},
+onReset() {
+this.input = '';
+this.rendered = '';
+this.statusMessage = 'Ready';
 }
 }
 {% endblock %}
@@ -126,22 +119,21 @@ this.downloadFile(this.rendered, 'preview.html', 'text/html');
 {% block extra_js_tool %}
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
-
 <style>
     #markdown-output h1 {
-        @apply text-3xl font-black mb-6 pb-4 border-b border-gray-100 dark:border-gray-800;
+        @apply text-3xl font-black mb-6 pb-4 border-b border-subtle;
     }
 
     #markdown-output h2 {
-        @apply text-xl font-bold mt-10 mb-4 text-[#0D7C3D];
+        @apply text-xl font-bold mt-10 mb-4 text-kiri-green;
     }
 
     #markdown-output code {
-        @apply bg-gray-100 dark:bg-[#2D2D2D] px-1.5 py-0.5 rounded text-sm font-mono text-[#0D7C3D];
+        @apply bg-subtle px-1.5 py-0.5 rounded text-sm font-mono text-kiri-green;
     }
 
     #markdown-output pre {
-        @apply bg-[#121212] p-6 rounded-2xl border border-gray-800 overflow-x-auto my-6 shadow-xl;
+        @apply bg-surface p-6 rounded-2xl border border-subtle overflow-x-auto my-6 shadow-xl;
     }
 
     #markdown-output ul {
@@ -149,7 +141,7 @@ this.downloadFile(this.rendered, 'preview.html', 'text/html');
     }
 
     #markdown-output blockquote {
-        @apply border-l-4 border-[#0D7C3D] pl-6 py-2 italic text-[#6C757D] dark:text-[#A1A1AA] bg-[#0D7C3D]/5 rounded-r-xl my-6;
+        @apply border-l-4 border-kiri-green pl-6 py-2 italic text-body bg-kiri-green/5 rounded-r-xl my-6;
     }
 
     #markdown-output table {
@@ -157,11 +149,11 @@ this.downloadFile(this.rendered, 'preview.html', 'text/html');
     }
 
     #markdown-output th {
-        @apply border-b border-gray-200 dark:border-gray-700 p-3 text-left font-black uppercase tracking-widest text-[#ADB5BD];
+        @apply border-b border-subtle p-3 text-left font-black uppercase tracking-widest text-muted;
     }
 
     #markdown-output td {
-        @apply border-b border-gray-100 dark:border-gray-800 p-3;
+        @apply border-b border-subtle p-3;
     }
 
     .custom-scrollbar::-webkit-scrollbar {
@@ -169,7 +161,8 @@ this.downloadFile(this.rendered, 'preview.html', 'text/html');
     }
 
     .custom-scrollbar::-webkit-scrollbar-thumb {
-        @apply bg-[#DEE2E6] dark:bg-[#3D3D3D] rounded-full;
+        background-color: var(--color-subtle);
+        border-radius: 9999px;
     }
 </style>
 {% endblock %}

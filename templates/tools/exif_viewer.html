@@ -2,12 +2,16 @@
 {% load static %}
 
 {% block title %}Exif Viewer & Remover | Kiri Labs{% endblock %}
-{% block meta_description %}View and remove hidden EXIF metadata (GPS, camera details, date) from your photos to protect
-your privacy. Works 100% locally in your browser.{% endblock %}
+
+{% block meta_description %}
+View and remove hidden EXIF metadata (GPS, camera details, date) from your photos to protect your privacy. Works 100%
+locally in your browser.
+{% endblock %}
 
 {% block tool_name %}Exif Tool{% endblock %}
 {% block tool_icon %}fa-camera-retro{% endblock %}
 {% block tool_title %}Exif Viewer & Remover{% endblock %}
+
 {% block tool_description %}
 Inspect hidden metadata in your photos (Location, Camera Settings, Software).
 Strip sensitive data instantly before sharing. Supports JPEG images.
@@ -16,7 +20,6 @@ Strip sensitive data instantly before sharing. Supports JPEG images.
 {% block tool_head %}
 <script src="https://cdn.jsdelivr.net/npm/exifr/dist/full.umd.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/piexifjs/1.0.6/piexif.js"></script>
-
 <style>
     /* Tag Chip Styling */
     .meta-row {
@@ -35,73 +38,55 @@ Strip sensitive data instantly before sharing. Supports JPEG images.
 
 {% block tool_body %}
 <div class="flex flex-col gap-8 min-h-[600px]">
-
     <div x-show="!file"
-        class="flex-1 flex flex-col items-center justify-center p-12 border-2 border-dashed border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[2.5rem] bg-[#F8F9FA]/50 dark:bg-[#0a0a0a] hover:border-[#0D7C3D] hover:bg-white dark:hover:bg-[#121212] transition-all cursor-pointer group animate-fade-in"
-        @click="$refs.fileInput.click()" @dragover.prevent="$el.classList.add('border-[#0D7C3D]', 'scale-[1.01]')"
-        @dragleave.prevent="$el.classList.remove('border-[#0D7C3D]', 'scale-[1.01]')"
+        class="flex-1 flex flex-col items-center justify-center p-12 border-2 border-dashed border-subtle rounded-[2.5rem] bg-subtle hover:border-kiri-green hover:bg-surface dark:hover:bg-surface transition-all cursor-pointer group animate-fade-in"
+        @click="$refs.fileInput.click()" @dragover.prevent="$el.classList.add('border-kiri-green', 'scale-[1.01]')"
+        @dragleave.prevent="$el.classList.remove('border-kiri-green', 'scale-[1.01]')"
         @drop.prevent="handleDrop($event)">
-
         <div
-            class="w-24 h-24 bg-gradient-to-br from-[#0D7C3D] to-[#06401F] rounded-full flex items-center justify-center mb-8 shadow-2xl shadow-[#0D7C3D]/20 group-hover:scale-110 transition-transform duration-300">
+            class="w-24 h-24 bg-gradient-to-br from-kiri-green to-kiri-green-dark rounded-full flex items-center justify-center mb-8 shadow-2xl shadow-sm group-hover:scale-110 transition-transform duration-300">
             <i class="fas fa-camera text-4xl text-white"></i>
         </div>
-        <h3 class="text-3xl font-black text-[#212529] dark:text-white mb-3 tracking-tight">Inspect Photo</h3>
-        <p class="text-[#6C757D] dark:text-[#A1A1AA] text-center max-w-sm mb-8 leading-relaxed">
-            Drag & Drop a JPEG image to reveal hidden data.<br>
-            <span class="text-xs opacity-75 font-bold uppercase tracking-wide">100% Client-Side Processing</span>
-        </p>
+        <h3 class="text-3xl font-black text-heading mb-3 tracking-tight">Inspect Photo</h3>
+        <p class="text-body text-center max-w-sm mb-8 leading-relaxed"> Drag & Drop a JPEG image to reveal hidden
+            data.<br> <span class="text-xs opacity-75 font-bold uppercase tracking-wide">100% Client-Side
+                Processing</span> </p>
         <button
-            class="px-8 py-3 bg-[#212529] dark:bg-white text-white dark:text-black font-bold rounded-2xl hover:scale-105 transition-all shadow-lg">
-            Select Photo
-        </button>
+            class="px-8 py-3 bg-surface text-heading font-bold rounded-2xl hover:scale-105 transition-all shadow-lg">
+            Select Photo </button>
     </div>
-
     <div x-show="file" x-cloak class="flex flex-col gap-6 animate-slide-up">
-
-        <div
-            class="bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-3xl p-6 shadow-sm flex flex-col lg:flex-row items-center justify-between gap-6">
+        <div class="card p-6 shadow-sm flex flex-col lg:flex-row items-center justify-between gap-6">
             <div class="flex items-center gap-6 w-full lg:w-auto">
                 <div class="relative group">
-                    <img :src="previewUrl"
-                        class="w-20 h-20 rounded-2xl object-cover shadow-md border border-[#DEE2E6] dark:border-[#3D3D3D]">
+                    <img :src="previewUrl" class="w-20 h-20 rounded-2xl object-cover shadow-md border border-subtle">
                     <div
-                        class="absolute -top-2 -right-2 w-6 h-6 bg-[#0D7C3D] text-white rounded-full flex items-center justify-center text-xs font-bold shadow-sm">
+                        class="absolute -top-2 -right-2 w-6 h-6 bg-kiri-green text-white rounded-full flex items-center justify-center text-xs font-bold shadow-sm">
                         <i class="fas fa-check"></i>
                     </div>
                 </div>
                 <div>
-                    <h3 class="font-bold text-[#212529] dark:text-white truncate max-w-[200px] lg:max-w-md"
-                        x-text="file?.name"></h3>
-                    <p class="text-xs font-mono text-[#6C757D]"
+                    <h3 class="font-bold text-heading truncate max-w-[200px] lg:max-w-md" x-text="file?.name"></h3>
+                    <p class="text-xs font-mono text-muted"
                         x-text="file ? formatSize(file.size) + ' • ' + file.type : ''"></p>
                 </div>
             </div>
-
             <div class="flex flex-wrap items-center gap-3 w-full lg:w-auto">
                 <button @click="resetTool()"
-                    class="px-6 py-3 rounded-xl bg-gray-100 dark:bg-[#2D2D2D] text-[#6C757D] dark:text-[#A1A1AA] font-bold text-xs hover:bg-gray-200 dark:hover:bg-[#333] transition-colors">
-                    Close
-                </button>
-                <div class="h-8 w-px bg-[#DEE2E6] dark:bg-[#3D3D3D] hidden lg:block"></div>
-
+                    class="px-6 py-3 rounded-xl bg-subtle text-body font-bold text-xs hover:bg-subtle transition-colors">
+                    Close </button>
+                <div class="h-8 w-px bg-subtle hidden lg:block"></div>
                 <button @click="downloadJson()" x-show="Object.keys(meta).length > 0"
-                    class="px-6 py-3 rounded-xl border border-[#DEE2E6] dark:border-[#3D3D3D] text-[#6C757D] dark:text-[#A1A1AA] font-bold text-xs hover:bg-gray-50 dark:hover:bg-[#2D2D2D] transition-colors flex items-center gap-2">
-                    <i class="fas fa-code"></i> JSON
-                </button>
-
+                    class="px-6 py-3 rounded-xl border border-subtle text-body font-bold text-xs hover:bg-subtle transition-colors flex items-center gap-2">
+                    <i class="fas fa-code"></i> JSON </button>
                 <button @click="removeMetadata()" x-show="!cleanedUrl"
                     class="flex-1 lg:flex-none px-8 py-3 bg-red-500 hover:bg-red-600 text-white rounded-xl text-xs font-bold shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2">
-                    <i class="fas fa-eraser"></i> Remove Exif
-                </button>
-
+                    <i class="fas fa-eraser"></i> Remove Exif </button>
                 <button @click="downloadCleaned()" x-show="cleanedUrl"
-                    class="flex-1 lg:flex-none px-8 py-3 bg-[#0D7C3D] hover:bg-[#0A5C2C] text-white rounded-xl text-xs font-bold shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 animate-bounce-in">
-                    <i class="fas fa-download"></i> Download Clean Image
-                </button>
+                    class="flex-1 lg:flex-none px-8 py-3 bg-kiri-green hover:bg-kiri-green-dark text-white rounded-xl text-xs font-bold shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 animate-bounce-in">
+                    <i class="fas fa-download"></i> Download Clean Image </button>
             </div>
         </div>
-
         <div x-show="cleanedUrl"
             class="p-4 bg-green-100 dark:bg-green-900/20 border border-green-200 dark:border-green-900/30 rounded-2xl flex items-center gap-3 text-green-700 dark:text-green-400 animate-fade-in">
             <i class="fas fa-check-circle text-xl"></i>
@@ -111,97 +96,82 @@ Strip sensitive data instantly before sharing. Supports JPEG images.
                     for download.</p>
             </div>
         </div>
-
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-
             <div class="space-y-6">
-                <div
-                    class="bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-3xl p-6 shadow-sm h-full flex flex-col">
+                <div class="card p-6 shadow-sm h-full flex flex-col">
                     <h4
-                        class="font-black text-xs uppercase text-[#ADB5BD] mb-4 tracking-widest flex items-center justify-between">
+                        class="font-black text-xs uppercase text-muted mb-4 tracking-widest flex items-center justify-between">
                         <span><i class="fas fa-map-marker-alt mr-2"></i> Location</span>
                         <span x-show="meta.latitude" class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
                     </h4>
-
                     <template x-if="meta.latitude">
                         <div class="flex-1 flex flex-col gap-4">
-                            <div class="aspect-video w-full rounded-2xl bg-[#F8F9FA] dark:bg-[#121212] flex flex-col items-center justify-center text-[#6C757D] relative overflow-hidden group cursor-pointer border border-[#DEE2E6] dark:border-[#3D3D3D]"
+                            <div class="aspect-video w-full rounded-2xl bg-surface flex flex-col items-center justify-center text-muted relative overflow-hidden group cursor-pointer border border-subtle"
                                 @click="openMap()">
                                 <div
                                     class="absolute inset-0 bg-[url('https://upload.wikimedia.org/wikipedia/commons/e/ec/World_map_blank_without_borders.svg')] opacity-10 bg-center bg-cover">
                                 </div>
                                 <i
-                                    class="fas fa-map-marked-alt text-4xl mb-2 group-hover:scale-110 transition-transform text-[#0D7C3D]"></i>
+                                    class="fas fa-map-marked-alt text-4xl mb-2 group-hover:scale-110 transition-transform text-kiri-green"></i>
                                 <span class="text-xs font-bold underline decoration-2 decoration-[#0D7C3D]">View on
                                     Google Maps</span>
                             </div>
-
                             <div class="grid grid-cols-2 gap-3">
-                                <div
-                                    class="p-3 bg-[#F8F9FA] dark:bg-[#252525] rounded-xl border border-[#DEE2E6] dark:border-[#3D3D3D]">
-                                    <div class="text-[9px] font-black text-[#ADB5BD] uppercase">Latitude</div>
-                                    <div class="font-mono text-xs font-bold text-[#212529] dark:text-white"
+                                <div class="p-3 bg-subtle rounded-xl border border-subtle">
+                                    <div class="text-[9px] font-black text-muted uppercase">Latitude</div>
+                                    <div class="font-mono text-xs font-bold text-heading"
                                         x-text="meta.latitude.toFixed(6)"></div>
                                 </div>
-                                <div
-                                    class="p-3 bg-[#F8F9FA] dark:bg-[#252525] rounded-xl border border-[#DEE2E6] dark:border-[#3D3D3D]">
-                                    <div class="text-[9px] font-black text-[#ADB5BD] uppercase">Longitude</div>
-                                    <div class="font-mono text-xs font-bold text-[#212529] dark:text-white"
+                                <div class="p-3 bg-subtle rounded-xl border border-subtle">
+                                    <div class="text-[9px] font-black text-muted uppercase">Longitude</div>
+                                    <div class="font-mono text-xs font-bold text-heading"
                                         x-text="meta.longitude.toFixed(6)"></div>
                                 </div>
                             </div>
                         </div>
                     </template>
-
                     <template x-if="!meta.latitude">
                         <div class="flex-1 flex flex-col items-center justify-center text-center py-10 opacity-50">
-                            <i class="fas fa-location-slash text-4xl mb-3 text-gray-300"></i>
+                            <i class="fas fa-location-slash text-4xl mb-3 text-muted"></i>
                             <p class="text-xs font-bold">No GPS Data</p>
                             <p class="text-[10px]">This photo does not contain location info.</p>
                         </div>
                     </template>
                 </div>
             </div>
-
-            <div
-                class="lg:col-span-2 bg-white dark:bg-[#1E1E1E] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-3xl p-6 shadow-sm flex flex-col">
+            <div class="lg:col-span-2 card p-6 shadow-sm flex flex-col">
                 <div class="flex items-center justify-between mb-6">
-                    <h4 class="font-black text-xs uppercase text-[#ADB5BD] tracking-widest">
+                    <h4 class="font-black text-xs uppercase text-muted tracking-widest">
                         <i class="fas fa-database mr-2"></i> Metadata Tags (<span
                             x-text="Object.keys(filteredMeta).length"></span>)
                     </h4>
-
                     <div class="relative w-48">
                         <input type="text" x-model="searchQuery" placeholder="Filter tags..."
-                            class="w-full pl-8 pr-3 py-2 bg-[#F8F9FA] dark:bg-[#2D2D2D] rounded-lg text-xs font-bold outline-none focus:ring-1 focus:ring-[#0D7C3D] transition-all">
-                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-[10px] text-gray-400"></i>
+                            class="w-full pl-8 pr-3 py-2 bg-subtle rounded-lg text-xs font-bold outline-none focus:ring-1 focus: transition-all">
+                        <i class="fas fa-search absolute left-3 top-1/2 -translate-y-1/2 text-[10px] text-muted"></i>
                     </div>
                 </div>
-
                 <div class="overflow-y-auto max-h-[400px] custom-scrollbar pr-2">
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
                         <template x-for="(value, key) in filteredMeta" :key="key">
                             <div x-show="key.toLowerCase().includes(searchQuery.toLowerCase())"
-                                class="meta-row p-3 rounded-xl border border-[#DEE2E6] dark:border-[#333] flex flex-col">
-                                <span class="text-[9px] font-black text-[#0D7C3D] uppercase truncate"
+                                class="meta-row p-3 rounded-xl border border-subtle flex flex-col">
+                                <span class="text-[9px] font-black text-kiri-green uppercase truncate"
                                     x-text="formatKey(key)"></span>
-                                <span class="text-xs font-mono text-[#212529] dark:text-[#E9ECEF] break-words"
+                                <span class="text-xs font-mono text-heading break-words"
                                     x-text="formatValue(value)"></span>
                             </div>
                         </template>
                     </div>
-
                     <template x-if="Object.keys(filteredMeta).length === 0">
-                        <div class="text-center py-12 text-[#ADB5BD]">
+                        <div class="text-center py-12 text-muted">
                             <p class="text-xs font-bold">No EXIF data found.</p>
                         </div>
                     </template>
                 </div>
             </div>
-
         </div>
     </div>
-
     <input type="file" x-ref="fileInput" class="hidden" accept="image/jpeg, image/jpg" @change="loadFile($event)">
 </div>
 {% endblock %}
@@ -215,26 +185,28 @@ previewUrl: null,
 cleanedUrl: null,
 meta: {},
 searchQuery: '',
-
 init() {
 this.hideUpload = true;
 this.hideSample = false;
 },
-
 async loadSample() {
 try {
 const response = await fetch("{% static 'images/logos/logo.png' %}");
 const blob = await response.blob();
-const file = new File([blob], 'kiri_brand_logo.png', { type: 'image/png' });
-
-// Re-use logic from loadFile but for the direct file object
+const file = new File([blob], 'kiri_brand_logo.png', {
+type: 'image/png'
+}); // Re-use logic from loadFile but for the direct file object
 this.resetTool();
 this.file = file;
 this.previewUrl = URL.createObjectURL(file);
 this.statusMessage = 'Analyzing brand logo...';
-
 const output = await exifr.parse(file, {
-tiff: true, exif: true, gps: true, iptc: true, xmp: true, mergeOutput: true
+tiff: true,
+exif: true,
+gps: true,
+iptc: true,
+xmp: true,
+mergeOutput: true
 });
 this.meta = output || {};
 this.statusMessage = 'Analysis complete';
@@ -243,12 +215,10 @@ console.error(e);
 this.statusMessage = 'Sample analysis failed';
 }
 },
-
 get filteredMeta() {
 const blocked = ['Thumbnail', 'MakerNote', 'UserComment', 'ICCProfile', 'ApplicationNotes'];
 const filtered = {};
 if (!this.meta) return filtered;
-
 Object.entries(this.meta).forEach(([k, v]) => {
 // Filter out binary data, huge objects, or blocked keys
 if (!blocked.includes(k) && typeof v !== 'object' && !(v instanceof Uint8Array)) {
@@ -259,22 +229,18 @@ filtered[k] = v;
 });
 return filtered;
 },
-
 /* --- File Handling --- */
 async loadFile(event) {
-const file = event.target.files?.[0] || event.dataTransfer?.files?.[0];
+const file = event.target.files ? .[0] || event.dataTransfer ? .files ? .[0];
 if (!file) return;
-
 if (!file.type.includes('jpeg') && !file.type.includes('jpg')) {
 alert('Currently only JPEG/JPG images are supported for Exif manipulation.');
 return;
 }
-
 this.resetTool(); // FIXED: Was incorrectly calling this.onReset()
 this.file = file;
 this.previewUrl = URL.createObjectURL(file);
 this.statusMessage = 'Analyzing metadata...';
-
 try {
 // Parse generic EXIF, GPS, IPTC, XMP
 const output = await exifr.parse(file, {
@@ -286,7 +252,6 @@ xmp: true,
 icc: false,
 mergeOutput: true // Flatten the object
 });
-
 this.meta = output || {};
 this.statusMessage = 'Analysis complete';
 } catch (e) {
@@ -295,25 +260,20 @@ this.statusMessage = 'No readable metadata found';
 this.meta = {};
 }
 },
-
 handleDrop(e) {
-e.target.classList.remove('border-[#0D7C3D]', 'scale-[1.01]');
+e.target.classList.remove('border-kiri-green', 'scale-[1.01]');
 this.loadFile(e);
 },
-
 /* --- Actions --- */
 async removeMetadata() {
 if (!this.file) return;
 this.statusMessage = "Removing metadata...";
-
 const reader = new FileReader();
 reader.onload = (e) => {
 try {
 const originalDataUrl = e.target.result;
 // piexif.remove strips Exif from the DataURL string
-const cleanDataUrl = piexif.remove(originalDataUrl);
-
-// Convert Base64 back to Blob for download
+const cleanDataUrl = piexif.remove(originalDataUrl); // Convert Base64 back to Blob for download
 const byteString = atob(cleanDataUrl.split(',')[1]);
 const mimeString = cleanDataUrl.split(',')[0].split(':')[1].split(';')[0];
 const ab = new ArrayBuffer(byteString.length);

@@ -2,12 +2,16 @@
 {% load static %}
 
 {% block title %}URL Encoder & Decoder | Kiri Labs{% endblock %}
-{% block meta_description %}Securely encode or decode URL components for safe data transmission. Ideal for debugging API
-calls and cleaning up tracking parameters.{% endblock %}
+
+{% block meta_description %}
+Securely encode or decode URL components for safe data transmission. Ideal for debugging API calls and cleaning up
+tracking parameters.
+{% endblock %}
 
 {% block tool_name %}URL Encoder{% endblock %}
 {% block tool_icon %}fa-link{% endblock %}
 {% block tool_title %}URL Encoder & Decoder{% endblock %}
+
 {% block tool_description %}
 Securely encode or decode URL components to ensure safe data transmission across different web systems.
 Ideal for debugging API calls and cleaning up tracking parameters.
@@ -15,12 +19,11 @@ Ideal for debugging API calls and cleaning up tracking parameters.
 
 {% block tool_actions_left %}
 <div class="flex items-center gap-2">
-    <div class="flex bg-white dark:bg-[#1E1E1E] p-1 rounded-xl border border-[#DEE2E6] dark:border-[#3D3D3D] shadow-sm">
+    <div class="flex bg-surface p-1 rounded-xl border border-subtle shadow-sm">
         <button @click="mode = 'encode'; convert()"
-            :class="mode === 'encode' ? 'bg-[#0D7C3D] text-white' : 'text-[#6C757D] dark:text-[#A1A1AA]'"
-            class="px-4 py-1.5 text-[10px] font-bold rounded-lg transition-all">Encode</button>
-        <button @click="mode = 'decode'; convert()"
-            :class="mode === 'decode' ? 'bg-[#0D7C3D] text-white' : 'text-[#6C757D] dark:text-[#A1A1AA]'"
+            :class="mode === 'encode' ? 'bg-kiri-green text-white' : 'text-body'"
+            class="px-4 py-1.5 text-[10px] font-bold rounded-lg transition-all">Encode</button> <button
+            @click="mode = 'decode'; convert()" :class="mode === 'decode' ? 'bg-kiri-green text-white' : 'text-body'"
             class="px-4 py-1.5 text-[10px] font-bold rounded-lg transition-all">Decode</button>
     </div>
 </div>
@@ -28,10 +31,9 @@ Ideal for debugging API calls and cleaning up tracking parameters.
 
 {% block tool_actions_right %}
 <button @click="download()"
-    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-[#0D7C3D] text-white hover:bg-[#0A5C2C]"
+    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-kiri-green text-white hover:bg-kiri-green-dark"
     x-show="output">
-    <i class="fas fa-download"></i>
-    <span>Save String</span>
+    <i class="fas fa-download"></i> <span>Save String</span>
 </button>
 {% endblock %}
 
@@ -40,31 +42,24 @@ Ideal for debugging API calls and cleaning up tracking parameters.
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[400px]">
         <!-- Input Area -->
         <div class="flex flex-col gap-3">
-            <div class="flex items-center justify-between">
-                <span class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest"
-                    x-text="mode === 'encode' ? 'Raw URL/Text' : 'Encoded String'"></span>
-            </div>
+            <div class="flex items-center justify-between"> <span
+                    class="text-[10px] font-bold text-body uppercase tracking-widest"
+                    x-text="mode === 'encode' ? 'Raw URL/Text' : 'Encoded String'"></span> </div>
             <textarea x-model="input" @input="convert()"
-                class="flex-1 w-full p-6 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[1.5rem] bg-white dark:bg-[#121212] text-[#212529] dark:text-[#E4E4E7] resize-none shadow-inner"
+                class="flex-1 w-full p-6 font-mono text-sm border border-subtle rounded-[1.5rem] bg-surface text-heading resize-none shadow-inner"
                 :placeholder="mode === 'encode' ? 'Enter URL to encode...' : 'Enter string to decode...'"></textarea>
-        </div>
-
-        <!-- Output Area -->
+        </div> <!-- Output Area -->
         <div class="flex flex-col gap-3">
-            <div class="flex items-center justify-between">
-                <span
-                    class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest">Result</span>
+            <div class="flex items-center justify-between"> <span
+                    class="text-[10px] font-bold text-body uppercase tracking-widest">Result</span>
                 <button @click="copyToClipboard(output)"
-                    class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase flex items-center gap-1.5"
-                    x-show="output">
-                    <i class="fas" :class="copied ? 'fa-check' : 'fa-copy'"></i>
-                    <span x-text="copied ? 'Copied' : 'Copy'"></span>
-                </button>
+                    class="text-[10px] font-bold text-kiri-green hover:underline uppercase flex items-center gap-1.5"
+                    x-show="output"> <i class="fas" :class="copied ? 'fa-check' : 'fa-copy'"></i> <span
+                        x-text="copied ? 'Copied' : 'Copy'"></span> </button>
             </div>
-            <div
-                class="flex-1 rounded-[1.5rem] bg-[#F8F9FA] dark:bg-[#121212] border border-[#DEE2E6] dark:border-[#3D3D3D] relative overflow-hidden group">
+            <div class="flex-1 rounded-[1.5rem] bg-surface border border-subtle relative overflow-hidden group">
                 <textarea readonly x-model="output"
-                    class="w-full h-full p-6 font-mono text-sm bg-transparent text-[#212529] dark:text-[#E4E4E7] resize-none outline-none"
+                    class="w-full h-full p-6 font-mono text-sm bg-transparent text-heading resize-none outline-none"
                     placeholder="Output will appear here..."></textarea>
             </div>
         </div>
@@ -76,7 +71,9 @@ Ideal for debugging API calls and cleaning up tracking parameters.
 {
 hideUpload: true,
 mode: 'encode',
-
+init() {
+// Initialization
+},
 loadSample() {
 if (this.mode === 'encode') {
 this.input = "https://kiri.ng/search?q=data science&category=research&verified=true";
@@ -85,7 +82,6 @@ this.input = "https%3A%2F%2Fkiri.ng%2Fsearch%3Fq%3Ddata%20science%26category%3Dr
 }
 this.convert();
 },
-
 convert() {
 this.error = '';
 if (!this.input.trim()) {
@@ -93,7 +89,6 @@ this.output = '';
 this.statusMessage = 'Ready';
 return;
 }
-
 try {
 if (this.mode === 'encode') {
 this.output = encodeURIComponent(this.input);
@@ -108,10 +103,14 @@ this.output = '';
 this.statusMessage = 'Operation failed';
 }
 },
-
 download() {
 if (!this.output || this.error) return;
 this.downloadFile(this.output, 'url_processed.txt', 'text/plain');
+},
+onReset() {
+this.input = '';
+this.output = '';
+this.statusMessage = 'Ready';
 }
 }
 {% endblock %}

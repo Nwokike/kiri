@@ -4,6 +4,7 @@ Optimized for Google Cloud 1GB RAM VM deployment.
 """
 
 import os
+import sys
 from pathlib import Path
 from dotenv import load_dotenv
 
@@ -64,17 +65,16 @@ SITE_ID = 1
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
-    "core.middleware.ExceptionLoggingMiddleware",
-    "core.middleware.ContentSecurityPolicyMiddleware",
-
     "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "django.contrib.auth.middleware.LoginRequiredMiddleware", # Native 6.0 Global Auth
+    "django.contrib.auth.middleware.LoginRequiredMiddleware",  # Native 6.0 Global Auth
+    "core.middleware.ExceptionLoggingMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "django.middleware.csp.ContentSecurityPolicyMiddleware",
     "allauth.account.middleware.AccountMiddleware",
     "django_htmx.middleware.HtmxMiddleware",
 ]
@@ -188,13 +188,9 @@ AUTHENTICATION_BACKENDS = [
     "allauth.account.auth_backends.AuthenticationBackend",
 ]
 
-# Allauth settings
-ACCOUNT_LOGIN_METHODS = {"email"}
-ACCOUNT_SIGNUP_FIELDS = ["email*"]
-ACCOUNT_EMAIL_VERIFICATION = "none" 
-ACCOUNT_CONFIRM_EMAIL_ON_GET = True
-ACCOUNT_USER_MODEL_USERNAME_FIELD = "username"
-ACCOUNT_UNIQUE_EMAIL = True
+# Allauth - Staff-Only (sole proprietorship, no public signup)
+ACCOUNT_LOGIN_METHODS = {"username"}
+ACCOUNT_EMAIL_VERIFICATION = "none"
 
 # Rate limits
 ACCOUNT_RATE_LIMITS = {
@@ -206,20 +202,19 @@ ACCOUNT_RATE_LIMITS = {
 SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
 SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
 
+ACCOUNT_LOGOUT_ON_GET = True
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
-# OAuth Providers (GitHub, GitLab, Bitbucket, Hugging Face)
+# OAuth Providers (GitHub, Hugging Face)
 SOCIALACCOUNT_PROVIDERS = {
     "github": {
         "APP": {
             "client_id": os.environ.get("GITHUB_CLIENT_ID", ""),
             "secret": os.environ.get("GITHUB_SECRET", ""),
         },
-        # Full scopes for: profile, email, starring repos, push/create repos
         "SCOPE": ["read:user", "user:email", "public_repo", "repo"],
     },
-    # Hugging Face - custom provider
     "huggingface": {
         "APP": {
             "client_id": os.environ.get("HUGGINGFACE_CLIENT_ID", ""),
@@ -228,13 +223,11 @@ SOCIALACCOUNT_PROVIDERS = {
         "SCOPE": ["openid", "profile", "email", "read-repos", "write-repos", "inference-api"],
     },
 }
-SOCIALACCOUNT_LOGIN_ON_GET = True
+SOCIALACCOUNT_LOGIN_ON_GET = False
 SOCIALACCOUNT_STORE_TOKENS = True
+SOCIALACCOUNT_AUTO_SIGNUP = False  # Block account creation via OAuth
 SOCIALACCOUNT_ADAPTER = 'users.adapter.KiriSocialAccountAdapter'
-ACCOUNT_FORMS = {
-    'login': 'users.forms.CustomLoginForm',
-    'signup': 'users.forms.CustomSignupForm',
-}
+ACCOUNT_ADAPTER = 'users.adapter.KiriAccountAdapter'  # Blocks public signup
 
 # Django 6.0 Native Tasks Configuration
 TASKS = {
@@ -243,16 +236,14 @@ TASKS = {
     },
 }
 
-# Email - Console backend only (Showcase mode)
+# Email disabled - staff contacts admin directly for password issues
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
-DEFAULT_FROM_EMAIL = os.environ.get("DEFAULT_FROM_EMAIL", "noreply@kiri.ng")
 SITE_URL = os.environ.get("SITE_URL", "https://kiri.ng")
 
-import sys
-TESTING = 'test' in sys.argv
+IS_TESTING = 'test' in sys.argv
 
-if not DEBUG or TESTING:
-    SECURE_SSL_REDIRECT = not TESTING  
+if not DEBUG or IS_TESTING:
+    SECURE_SSL_REDIRECT = not IS_TESTING
     SECURE_CONTENT_TYPE_NOSNIFF = True
     SECURE_REFERRER_POLICY = "strict-origin-when-cross-origin"
     X_FRAME_OPTIONS = "DENY"
@@ -262,56 +253,56 @@ if not DEBUG or TESTING:
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-    
-    # Content Security Policy
-    CSP_DEFAULT_SRC = ("'self'",)
-    CSP_SCRIPT_SRC = (
-        "'self'",
-        "'unsafe-inline'",
-        "'unsafe-eval'",  # Required for Alpine.js
-        "https://cdn.jsdelivr.net",
-        "https://cdn.jsdelivr.net",
-        "https://cdnjs.cloudflare.com",
-        "https://www.googletagmanager.com",
-        "https://pagead2.googlesyndication.com",
-        "https://static.cloudflareinsights.com",
-        "https://adservice.google.com",
-        "https://unpkg.com",
-        "blob:",
-    )
-    CSP_STYLE_SRC = (
-        "'self'",
-        "'unsafe-inline'",
-        "https://fonts.googleapis.com",
-        "https://cdnjs.cloudflare.com",
-    )
-    CSP_FONT_SRC = (
-        "'self'",
-        "https://fonts.gstatic.com",
-        "https://cdnjs.cloudflare.com",
-    )
-    CSP_IMG_SRC = ("'self'", "data:", "https:", "https://unpkg.com", "blob:")
-    CSP_CONNECT_SRC = (
-        "'self'", 
-        "https://cdn.jsdelivr.net", 
-        "https://huggingface.co",
-        "https://www.google-analytics.com",
-        "https://region1.google-analytics.com",
-        "https://stats.g.doubleclick.net",
-        "https://unpkg.com",
-        "blob:",
-    )
-    CSP_FRAME_SRC = ("'self'", "https://www.youtube-nocookie.com")
-    CSP_OBJECT_SRC = ("'none'",)
-    
+
+    # Content Security Policy (Django 6.0 built-in)
+    # Using REPORT_ONLY for gradual rollout — switch to SECURE_CSP to enforce
+    SECURE_CSP_REPORT_ONLY = {
+        "default-src": ["'self'"],
+        "script-src": [
+            "'self'",
+            "'unsafe-inline'",
+            "'unsafe-eval'",  # Required for Alpine.js (standard build)
+            "https://cdn.jsdelivr.net",
+            "https://cdnjs.cloudflare.com",
+            "https://www.googletagmanager.com",
+            "https://pagead2.googlesyndication.com",
+            "https://static.cloudflareinsights.com",
+            "https://adservice.google.com",
+            "https://unpkg.com",
+            "blob:",
+        ],
+        "style-src": [
+            "'self'",
+            "'unsafe-inline'",
+            "https://fonts.googleapis.com",
+            "https://cdnjs.cloudflare.com",
+        ],
+        "font-src": [
+            "'self'",
+            "https://fonts.gstatic.com",
+            "https://cdnjs.cloudflare.com",
+        ],
+        "img-src": ["'self'", "data:", "https:", "https://unpkg.com", "blob:"],
+        "connect-src": [
+            "'self'",
+            "https://cdn.jsdelivr.net",
+            "https://huggingface.co",
+            "https://www.google-analytics.com",
+            "https://region1.google-analytics.com",
+            "https://stats.g.doubleclick.net",
+            "https://unpkg.com",
+            "blob:",
+        ],
+        "frame-src": ["'self'", "https://www.youtube-nocookie.com"],
+        "object-src": ["'none'"],
+    }
+
     # Performance
     CONN_MAX_AGE = 60
     DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
     FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
-    
-    
+
     # CSRF Cookie settings
-    CSRF_COOKIE_HTTPONLY = True
     CSRF_COOKIE_SAMESITE = "Strict"
 
 

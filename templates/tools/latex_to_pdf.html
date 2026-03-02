@@ -1,0 +1,142 @@
+{% extends "tools/base_tool.html" %}
+{% load static %}
+
+{% block tool_head %}
+<!-- LaTeX.js and html2pdf.js -->
+<script src="https://cdn.jsdelivr.net/npm/latex.js/dist/latex.mjs" type="module"></script>
+<script src="https://cdn.jsdelivr.net/npm/html2pdf.js-stable-fix@1.0.0/dist/html2pdf.bundle.min.js"></script>
+<style>
+    #latex-preview-container {
+        font-family: 'Computer Modern', serif;
+        line-height: 1.5;
+        padding: 40px;
+        background: white;
+        color: black;
+        min-height: 297mm;
+        /* A4 aspect ratio */
+        width: 210mm;
+        margin: 0 auto;
+        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+    }
+
+    .latex-editor-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 24px;
+        height: 600px;
+    }
+
+    @media (max-width: 1024px) {
+        .latex-editor-grid {
+            grid-template-columns: 1fr;
+            height: auto;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block tool_js_data %}
+{
+input: '\\documentclass{article}\n\\begin{document}\nHello from \\textbf{Kiri Tools}!\n\nThis is a LaTeX document
+compiled entirely in your browser.\n\n\\begin{equation}\ne^{i\\pi} + 1 = 0\n\\end{equation}\n\\end{document}',
+hideUpload: false,
+init() {
+this.$watch('input', () => this.renderLatex());
+// Initial render after small delay for library load
+setTimeout(() => this.renderLatex(), 500);
+},
+renderLatex() {
+if (!this.input) return;
+const container = document.getElementById('latex-preview');
+if (!container) return;
+try {
+// We use a dynamic import or global access for latex.js since it's a module
+import('https://cdn.jsdelivr.net/npm/latex.js/dist/latex.mjs').then(latex => {
+const generator = new latex.HtmlGenerator({
+hyphenate: false
+});
+const doc = latex.parse(this.input, {
+generator: generator
+});
+container.innerHTML = '';
+container.appendChild(doc.domFragment());
+this.statusMessage = 'Rendered successfully';
+this.error = '';
+}).catch(err => {
+console.error(err);
+});
+} catch (e) {
+this.error = 'LaTeX Syntax Error: ' + e.message;
+}
+},
+async generatePDF() {
+const element = document.getElementById('latex-preview-container');
+this.statusMessage = 'Generating PDF...';
+const opt = {
+margin: 0,
+filename: 'document.pdf',
+image: {
+type: 'jpeg',
+quality: 0.98
+},
+html2canvas: {
+scale: 2,
+useCORS: true
+},
+jsPDF: {
+unit: 'mm',
+format: 'a4',
+orientation: 'portrait'
+}
+};
+try {
+await html2pdf().set(opt).from(element).save();
+this.statusMessage = 'PDF downloaded!';
+} catch (err) {
+this.error = 'PDF Generation failed';
+}
+},
+loadSample() {
+this.input = '\\documentclass{article}\n\\begin{document}\n\\title{Research Report}\n\\author{Anonymous
+Researcher}\n\\maketitle\n\n\\section{Introduction}\nThis tool allows you to write LaTeX and generate PDFs
+instantly.\n\n\\section{Mathematics}\nThe quadratic formula is:\n\\begin{equation}\nx = \\frac{-b \\pm \\sqrt{b^2 -
+4ac}}{2a}\n\\end{equation}\n\n\\end{document}';
+this.renderLatex();
+},
+onReset() {
+this.input = '';
+const container = document.getElementById('latex-preview');
+if (container) container.innerHTML = '';
+this.statusMessage = 'Ready';
+}
+}
+{% endblock %}
+
+{% block tool_body %}
+<div class="space-y-6">
+    <div class="latex-editor-grid">
+        <!-- Editor -->
+        <div class="flex flex-col h-full"> <label
+                class="text-[10px] font-bold text-muted uppercase tracking-widest mb-2 px-2">LaTeX
+                Source</label> <textarea x-model="input"
+                class="flex-1 w-full bg-surface border border-subtle rounded-2xl p-6 font-mono text-sm resize-none focus:ring-2 focus: outline-none"
+                placeholder="Enter LaTeX code here..."></textarea> </div> <!-- Preview -->
+        <div class="flex flex-col h-full"> <label
+                class="text-[10px] font-bold text-muted uppercase tracking-widest mb-2 px-2">Live Preview
+                (A4)</label>
+            <div class="flex-1 overflow-auto bg-subtle rounded-2xl border border-subtle p-4">
+                <div id="latex-preview-container">
+                    <div id="latex-preview"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block tool_footer_right %}
+<button @click="generatePDF()"
+    class="inline-flex items-center gap-2 px-6 py-2.5 bg-kiri-green text-white rounded-xl text-xs font-extrabold hover:bg-kiri-green-dark transition-colors shadow-lg">
+    <i class="fas fa-file-pdf"></i> Download PDF
+</button>
+{% endblock %}

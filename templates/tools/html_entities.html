@@ -2,12 +2,15 @@
 {% load static %}
 
 {% block title %}HTML Entity Encoder & Decoder | Kiri Labs{% endblock %}
-{% block meta_description %}Convert special characters into HTML entities or restore them to plain text for web
-development.{% endblock %}
+
+{% block meta_description %}
+Convert special characters into HTML entities or restore them to plain text for web development.
+{% endblock %}
 
 {% block tool_name %}HTML Entities{% endblock %}
 {% block tool_icon %}fa-code{% endblock %}
 {% block tool_title %}HTML Entity Encoder & Decoder{% endblock %}
+
 {% block tool_description %}
 Convert special characters into HTML entities or restore them to plain text.
 Essential for correct character rendering in templates and web applications.
@@ -17,12 +20,11 @@ Essential for correct character rendering in templates and web applications.
 
 {% block tool_actions_left %}
 <div class="flex items-center gap-2">
-    <div class="flex bg-white dark:bg-[#1E1E1E] p-1 rounded-xl border border-[#DEE2E6] dark:border-[#3D3D3D] shadow-sm">
+    <div class="flex bg-surface p-1 rounded-xl border border-subtle shadow-sm">
         <button @click="mode = 'encode'; convert()"
-            :class="mode === 'encode' ? 'bg-[#0D7C3D] text-white' : 'text-[#6C757D] dark:text-[#A1A1AA]'"
-            class="px-4 py-1.5 text-[10px] font-bold rounded-lg transition-all">Encode</button>
-        <button @click="mode = 'decode'; convert()"
-            :class="mode === 'decode' ? 'bg-[#0D7C3D] text-white' : 'text-[#6C757D] dark:text-[#A1A1AA]'"
+            :class="mode === 'encode' ? 'bg-kiri-green text-white' : 'text-body'"
+            class="px-4 py-1.5 text-[10px] font-bold rounded-lg transition-all">Encode</button> <button
+            @click="mode = 'decode'; convert()" :class="mode === 'decode' ? 'bg-kiri-green text-white' : 'text-body'"
             class="px-4 py-1.5 text-[10px] font-bold rounded-lg transition-all">Decode</button>
     </div>
 </div>
@@ -30,10 +32,9 @@ Essential for correct character rendering in templates and web applications.
 
 {% block tool_actions_right %}
 <button @click="download()"
-    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-[#0D7C3D] text-white hover:bg-[#0A5C2C]"
+    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-kiri-green text-white hover:bg-kiri-green-dark"
     x-show="output">
-    <i class="fas fa-download"></i>
-    <span>Save Text</span>
+    <i class="fas fa-download"></i> <span>Save Text</span>
 </button>
 {% endblock %}
 
@@ -42,33 +43,24 @@ Essential for correct character rendering in templates and web applications.
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[400px]">
         <!-- Input Area -->
         <div class="flex flex-col gap-3">
-            <div class="flex items-center justify-between">
-                <span class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest"
-                    x-text="mode === 'encode' ? 'Raw Text' : 'HTML Entities'"></span>
-                <span class="text-[10px] text-[#A1A1AA]" x-text="input.length ? input.length + ' chars' : ''"></span>
-            </div>
+            <div class="flex items-center justify-between"> <span
+                    class="text-[10px] font-bold text-body uppercase tracking-widest"
+                    x-text="mode === 'encode' ? 'Raw Text' : 'HTML Entities'"></span> <span
+                    class="text-[10px] text-muted" x-text="input.length ? input.length + ' chars' : ''"></span> </div>
             <textarea x-model="input" @input="convert()"
-                class="flex-1 w-full p-6 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[1.5rem] bg-white dark:bg-[#121212] text-[#212529] dark:text-[#E4E4E7] resize-none shadow-inner"
+                class="flex-1 w-full p-6 font-mono text-sm border border-subtle rounded-[1.5rem] bg-surface text-heading resize-none shadow-inner"
                 :placeholder="mode === 'encode' ? 'Enter text to encode...' : 'Enter entities to decode...'"></textarea>
-        </div>
-
-        <!-- Output Area -->
+        </div> <!-- Output Area -->
         <div class="flex flex-col gap-3">
-            <div class="flex items-center justify-between">
-                <span
-                    class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest">Processed
-                    Output</span>
-                <button @click="copyToClipboard(output)"
-                    class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase flex items-center gap-1.5"
-                    x-show="output">
-                    <i class="fas" :class="copied ? 'fa-check' : 'fa-copy'"></i>
-                    <span x-text="copied ? 'Copied' : 'Copy'"></span>
-                </button>
-            </div>
-            <div
-                class="flex-1 rounded-[1.5rem] bg-[#F8F9FA] dark:bg-[#121212] border border-[#DEE2E6] dark:border-[#3D3D3D] relative overflow-hidden group">
+            <div class="flex items-center justify-between"> <span
+                    class="text-[10px] font-bold text-body uppercase tracking-widest">Processed
+                    Output</span> <button @click="copyToClipboard(output)"
+                    class="text-[10px] font-bold text-kiri-green hover:underline uppercase flex items-center gap-1.5"
+                    x-show="output"> <i class="fas" :class="copied ? 'fa-check' : 'fa-copy'"></i> <span
+                        x-text="copied ? 'Copied' : 'Copy'"></span> </button> </div>
+            <div class="flex-1 rounded-[1.5rem] bg-surface border border-subtle relative overflow-hidden group">
                 <textarea readonly x-model="output"
-                    class="w-full h-full p-6 font-mono text-sm bg-transparent text-[#212529] dark:text-[#E4E4E7] resize-none outline-none"
+                    class="w-full h-full p-6 font-mono text-sm bg-transparent text-heading resize-none outline-none"
                     placeholder="Result will appear here..."></textarea>
             </div>
         </div>
@@ -80,7 +72,9 @@ Essential for correct character rendering in templates and web applications.
 {
 hideUpload: true,
 mode: 'encode',
-
+init() {
+// Initialization
+},
 loadSample() {
 if (this.mode === 'encode') {
 this.input = `<html>
@@ -91,25 +85,22 @@ this.input = `<html>
 
 </html>`;
 } else {
-this.input = `&lt;html&gt;
-&lt;body&gt;
-&lt;p&gt;Welcome to &quot;Kiri&quot; &amp; the team!&lt;/p&gt;
-&lt;/body&gt;
+this.input = `&lt;html&gt; &lt;body&gt; &lt;p&gt;Welcome to &quot;Kiri&quot; &amp; the team!&lt;/p&gt; &lt;/body&gt;
 &lt;/html&gt;`;
 }
 this.convert();
 },
-
 convert() {
 if (!this.input.trim()) {
 this.output = '';
 this.statusMessage = 'Ready';
 return;
 }
-
 try {
 if (this.mode === 'encode') {
-this.output = he.encode(this.input, { 'useNamedReferences': true });
+this.output = he.encode(this.input, {
+'useNamedReferences': true
+});
 this.statusMessage = 'Text encoded for HTML';
 } else {
 this.output = he.decode(this.input);
@@ -120,10 +111,14 @@ this.error = 'Encoding error: ' + e.message;
 this.output = '';
 }
 },
-
 download() {
 if (!this.output) return;
 this.downloadFile(this.output, `processed_${this.mode}.txt`, 'text/plain');
+},
+onReset() {
+this.input = '';
+this.output = '';
+this.statusMessage = 'Ready';
 }
 }
 {% endblock %}

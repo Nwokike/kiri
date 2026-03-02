@@ -2,12 +2,15 @@
 {% load static %}
 
 {% block title %}JSON Schema Validator | Kiri Labs{% endblock %}
-{% block meta_description %}Validate JSON data against structural schema standards. Supports Draft-07, 2019-09, and
-2020-12.{% endblock %}
+
+{% block meta_description %}
+Validate JSON data against structural schema standards. Supports Draft-07, 2019-09, and 2020-12.
+{% endblock %}
 
 {% block tool_name %}Schema Verifier{% endblock %}
 {% block tool_icon %}fa-microchip{% endblock %}
 {% block tool_title %}JSON Schema Validator{% endblock %}
+
 {% block tool_description %}
 Validate your JSON data payloads against schema standards.
 Ensure data integrity with checks against draft-07, 2019-09, and 2020-12.
@@ -19,49 +22,39 @@ Ensure data integrity with checks against draft-07, 2019-09, and 2020-12.
         <!-- JSON Input -->
         <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between px-2">
-                <span
-                    class="text-[10px] font-black text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest flex items-center gap-2">
-                    <i class="fas fa-file-code text-blue-500"></i> Local Data (JSON)
-                </span>
+                <span class="text-[10px] font-black text-body uppercase tracking-widest flex items-center gap-2">
+                    <i class="fas fa-file-code text-blue-500"></i> Local Data (JSON) </span>
                 <button @click="loadSample()"
-                    class="text-[10px] font-black text-[#0D7C3D] hover:underline uppercase">Hydrate Sample</button>
+                    class="text-[10px] font-black text-kiri-green hover:underline uppercase">Hydrate Sample</button>
             </div>
             <textarea x-model="input" @input="convert()"
-                class="flex-1 w-full p-8 font-mono text-xs border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[2.5rem] bg-white dark:bg-[#121212] text-[#212529] dark:text-[#E4E4E7] resize-none shadow-inner outline-none focus:border-[#0D7C3D] transition-all"
+                class="flex-1 w-full p-8 font-mono text-xs border border-subtle rounded-[2.5rem] bg-surface text-heading resize-none shadow-inner outline-none focus:border-kiri-green transition-all"
                 placeholder="Paste object data here..."></textarea>
-        </div>
-
-        <!-- Schema Input & Validation Overlay -->
+        </div> <!-- Schema Input & Validation Overlay -->
         <div class="flex flex-col gap-8 h-full">
             <div class="flex flex-col flex-1 gap-3">
                 <div class="flex items-center justify-between px-2">
-                    <span
-                        class="text-[10px] font-black text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest flex items-center gap-2">
-                        <i class="fas fa-project-diagram text-[#0D7C3D]"></i> Target Schema
-                    </span>
+                    <span class="text-[10px] font-black text-body uppercase tracking-widest flex items-center gap-2">
+                        <i class="fas fa-project-diagram text-kiri-green"></i> Target Schema </span>
                 </div>
                 <div class="flex-1 relative">
                     <textarea x-model="schemaInput" @input="convert()"
-                        class="w-full h-full p-8 font-mono text-xs border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[2.5rem] bg-white dark:bg-[#121212] text-[#212529] dark:text-[#E4E4E7] resize-none shadow-inner outline-none focus:border-[#0D7C3D] transition-all"
+                        class="w-full h-full p-8 font-mono text-xs border border-subtle rounded-[2.5rem] bg-surface text-heading resize-none shadow-inner outline-none focus:border-kiri-green transition-all"
                         placeholder="Paste JSON Schema here..."></textarea>
                 </div>
-            </div>
-
-            <!-- Validation Result Dashboard -->
+            </div> <!-- Validation Result Dashboard -->
             <div class="p-8 rounded-[2.5rem] border-2 transition-all duration-500 shadow-xl overflow-hidden"
-                :class="valid === null ? 'bg-white dark:bg-[#1A1A1A] border-[#DEE2E6] dark:border-[#3D3D3D] grayscale' : (valid ? 'bg-[#0D7C3D]/5 border-[#0D7C3D] text-[#0D7C3D]' : 'bg-red-500/5 border-red-500 text-red-500')">
-
+                :class="valid === null ? 'bg-surface border-subtle grayscale' : (valid ? 'bg-kiri-green/5 border-kiri-green text-kiri-green' : 'bg-red-500/5 border-red-500 text-red-500')">
                 <template x-if="valid === null">
                     <div class="h-full flex flex-col items-center justify-center py-6 opacity-30">
                         <i class="fas fa-shield-halved text-4xl mb-4"></i>
                         <p class="text-[10px] font-black uppercase tracking-widest">Awaiting Manifest</p>
                     </div>
                 </template>
-
                 <template x-if="valid === true">
                     <div class="flex flex-col items-center justify-center text-center py-4 animate-scale-up">
                         <div
-                            class="w-16 h-16 rounded-full bg-[#0D7C3D] text-white flex items-center justify-center shadow-lg mb-6">
+                            class="w-16 h-16 rounded-full bg-kiri-green text-white flex items-center justify-center shadow-lg mb-6">
                             <i class="fas fa-check text-2xl"></i>
                         </div>
                         <h4 class="text-lg font-black uppercase tracking-[0.2em] mb-2">Validation Passed</h4>
@@ -69,7 +62,6 @@ Ensure data integrity with checks against draft-07, 2019-09, and 2020-12.
                             schema exactly.</p>
                     </div>
                 </template>
-
                 <template x-if="valid === false">
                     <div class="animate-shake">
                         <div class="flex items-center gap-4 mb-6">
@@ -110,7 +102,6 @@ schemaInput: '',
 valid: null,
 errors: [],
 ajv: null,
-
 init() {
 this.hideUpload = true;
 this.hideSample = false;
@@ -118,7 +109,6 @@ try {
 if (typeof ajv7 !== 'undefined') {
 this.ajv = new ajv7();
 } else if (typeof Ajv !== 'undefined') {
-// Some bundles use 'Ajv' instead of 'ajv7'
 this.ajv = new Ajv();
 } else {
 this.error = 'AJV library failed to load. Please check your internet connection.';
@@ -128,58 +118,73 @@ this.error = 'Failed to initialize validation engine: ' + e.message;
 }
 this.convert();
 },
-
 convert() {
 if (!this.input.trim() || !this.schemaInput.trim()) {
 this.valid = null;
 return;
 }
-
 try {
 const data = JSON.parse(this.input);
 const schema = JSON.parse(this.schemaInput);
-
 if (!this.ajv) {
 this.statusMessage = 'Initialization incomplete';
 return;
 }
-
 const validateFn = this.ajv.compile(schema);
 this.valid = validateFn(data);
 this.errors = validateFn.errors || [];
 this.statusMessage = this.valid ? 'Validation passed' : 'Validation failed';
 } catch (e) {
 this.valid = false;
-this.errors = [{ instancePath: 'SYNTAX', message: e.message }];
+this.errors = [{
+instancePath: 'SYNTAX',
+message: e.message
+}];
 this.statusMessage = 'Syntax Error';
 }
 },
-
 loadSample() {
 this.schemaInput = JSON.stringify({
 $schema: "https://json-schema.org/draft/2020-12/schema",
 title: "Research Node",
 type: "object",
 properties: {
-id: { type: "number", minimum: 1 },
-tier: { enum: ["PRO", "LITE", "RESEARCH"] },
+id: {
+type: "number",
+minimum: 1
+},
+tier: {
+enum: ["PRO", "LITE", "RESEARCH"]
+},
 metadata: {
 type: "object",
 required: ["origin"],
-properties: { origin: { type: "string", minLength: 3 } }
+properties: {
+origin: {
+type: "string",
+minLength: 3
+}
+}
 }
 },
 required: ["id", "tier"]
 }, null, 4);
-
 this.input = JSON.stringify({
 id: 1024,
 tier: "RESEARCH",
-metadata: { origin: "Kiri-Core" }
+metadata: {
+origin: "Kiri-Core"
+}
 }, null, 4);
-
 this.convert();
 this.statusMessage = 'Sample schema and payload loaded';
+},
+onReset() {
+this.input = '';
+this.schemaInput = '';
+this.valid = null;
+this.errors = [];
+this.statusMessage = 'Ready';
 }
 }
 {% endblock %}
@@ -236,7 +241,8 @@ this.statusMessage = 'Sample schema and payload loaded';
     }
 
     .custom-scrollbar::-webkit-scrollbar-thumb {
-        @apply bg-[#DEE2E6] dark:bg-[#3D3D3D] rounded-full;
+        background-color: var(--color-subtle);
+        border-radius: 9999px;
     }
 </style>
 {% endblock %}

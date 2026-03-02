@@ -1,59 +1,48 @@
-{% load static %}
 <!-- Hero Section -->
 <section class="mb-12">
-    <div
-        class="relative overflow-hidden rounded-xl bg-white border border-[#DEE2E6] dark:bg-[#1E1E1E] dark:border-[#333] p-6 md:p-12 shadow-sm">
-
+    <div class="card relative p-6 md:p-12 overflow-hidden shadow-sm">
         <div class="relative z-10">
             <div
-                class="inline-flex items-center gap-2 px-3 py-1 bg-[#E8F5ED] text-[#0D7C3D] text-[10px] font-bold uppercase tracking-wider rounded-full mb-6 dark:bg-[#0D7C3D]/10">
-                <span class="w-1.5 h-1.5 bg-[#0D7C3D] rounded-full animate-pulse"></span>
+                class="inline-flex items-center gap-2 px-3 py-1 bg-success-subtle text-kiri-green text-[10px] font-bold uppercase tracking-wider rounded-full mb-6">
+                <span class="w-1.5 h-1.5 bg-kiri-green rounded-full animate-pulse"></span>
                 Software & Tools
             </div>
-            <h1
-                class="text-2xl md:text-4xl font-extrabold text-[#212529] dark:text-white mb-6 tracking-tight leading-tight max-w-3xl">
+
+            <h1 class="text-2xl md:text-4xl font-extrabold text-heading mb-6 tracking-tight leading-tight max-w-3xl">
                 Software & Tools, Built Lightweight.
             </h1>
 
-            <p class="text-base md:text-lg text-[#6C757D] dark:text-[#A1A1AA] max-w-2xl mb-10 leading-relaxed">
-                Our projects, tools, and everything we build — all in one place. Lightweight, efficient, and
-                always shipping.
+            <p class="text-base md:text-lg text-muted max-w-2xl mb-10 leading-relaxed">
+                Our projects, tools, and everything we build - all in one place. Lightweight, efficient, and always
+                shipping.
             </p>
 
             <!-- Dynamic Stats Bar -->
             <div class="flex flex-nowrap gap-4 md:gap-10 mb-10 overflow-x-auto no-scrollbar">
                 <div class="flex flex-col min-w-max">
-                    <span class="text-xl md:text-2xl font-bold text-[#212529] dark:text-white">{{ stats.total_projects
-                        }}</span>
-                    <span class="text-[10px] font-bold text-[#6C757D] uppercase tracking-widest">Open-Source
-                        Projects</span>
+                    <span class="text-xl md:text-2xl font-bold text-heading">{{ stats.total_projects }}</span>
+                    <span class="text-[10px] font-bold text-muted uppercase tracking-widest">Open-Source Projects</span>
                 </div>
-                <div class="flex flex-col border-l border-[#DEE2E6] dark:border-[#333] pl-4 md:pl-10 min-w-max">
-                    <span class="text-xl md:text-2xl font-bold text-[#212529] dark:text-white">{{ stats.total_tools
-                        }}+</span>
-                    <span class="text-[10px] font-bold text-[#6C757D] uppercase tracking-widest">Browser-Based
-                        Tools</span>
+                <div class="flex flex-col border-l border-subtle pl-4 md:pl-10 min-w-max">
+                    <span class="text-xl md:text-2xl font-bold text-heading">{{ stats.total_tools }}</span>
+                    <span class="text-[10px] font-bold text-muted uppercase tracking-widest">Browser-Based Tools</span>
                 </div>
-                <div class="flex flex-col border-l border-[#DEE2E6] dark:border-[#333] pl-4 md:pl-10 min-w-max">
-                    <span class="text-xl md:text-2xl font-bold text-[#212529] dark:text-white">{{ stats.total_stars
-                        }}</span>
-                    <span class="text-[10px] font-bold text-[#6C757D] uppercase tracking-widest">GitHub Stars</span>
+                <div class="flex flex-col border-l border-subtle pl-4 md:pl-10 min-w-max">
+                    <span class="text-xl md:text-2xl font-bold text-heading">{{ stats.total_stars }}k</span>
+                    <span class="text-[10px] font-bold text-muted uppercase tracking-widest">Stars</span>
                 </div>
             </div>
 
             <div class="flex flex-nowrap gap-3 md:gap-4 overflow-x-auto no-scrollbar py-2">
-                <a href="{% url 'projects:list' %}"
-                    class="inline-flex items-center justify-center gap-2 px-4 md:px-6 py-2.5 bg-[#0D7C3D] text-white font-bold rounded-lg hover:bg-[#0A5C2C] transition-all shadow-md hover:shadow-lg text-xs md:text-sm whitespace-nowrap min-w-max">
-                    <i class="fas fa-rocket text-[10px] md:text-xs"></i>
-                    Explore Projects
+                <a href="{% url 'projects:list' %}" class="btn-primary min-w-max">
+                    <i class="fas fa-rocket text-[10px] md:text-xs"></i> Explore Projects
                 </a>
-                <a href="{% url 'tools:index' %}"
-                    class="inline-flex items-center justify-center gap-2 px-4 md:px-6 py-2.5 bg-white text-[#495057] font-bold rounded-lg hover:bg-[#F8F9FA] transition-all border border-[#DEE2E6] dark:bg-[#2D2D2D] dark:text-white dark:border-[#3D3D3D] dark:hover:bg-[#333] text-xs md:text-sm whitespace-nowrap min-w-max">
-                    <i class="fas fa-wrench text-[10px] md:text-xs"></i>
-                    Browse Tools
+                <a href="{% url 'tools:index' %}" class="btn-secondary min-w-max">
+                    <i class="fas fa-wrench text-[10px] md:text-xs"></i> Browse Tools
                 </a>
             </div>
         </div>
+
         <!-- Decorative elements -->
         <div class="decorative-blob blob-gold top-0 right-0 w-80 h-80"></div>
         <div class="decorative-blob blob-white bottom-0 left-1/2 w-64 h-64 opacity-20"></div>

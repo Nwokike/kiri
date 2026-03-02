@@ -2,45 +2,58 @@
 {% load static %}
 
 {% block extra_head %}
+<!-- Tool-specific CSS -->
+<link rel="stylesheet" href="{% static 'css/tool_base.css' %}">
 {% block tool_head %}{% endblock %}
 {% endblock %}
 
+{% block title %}{{ tool.title }}{% endblock %}
+{% block meta_description %}{{ tool.description }}{% endblock %}
+
+<!-- SEO Overrides -->
+{% block og_title %}{{ tool.title }}{% endblock %}
+{% block og_description %}{{ tool.description }}{% endblock %}
+{% block twitter_title %}{{ tool.title }}{% endblock %}
+
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 py-8" x-data="toolSetup()">
-    <nav class="mb-8 text-sm flex items-center text-[#6C757D] dark:text-[#A1A1AA]">
-        <a href="{% url 'tools:index' %}" class="hover:text-[#0D7C3D] transition-colors flex items-center group">
-            <i class="fas fa-arrow-left mr-2 group-hover:-translate-x-1 transition-transform"></i> Tools
+<script>
+    window.currentToolData = {% block tool_js_data %}{ } {% endblock %};
+</script>
+<div class="max-w-7xl mx-auto px-4 py-8 tool-container" x-data="window.toolSetup(window.currentToolData)">
+    <nav class="mb-8 text-sm flex items-center text-muted">
+        <a href="{% url 'tools:index' %}" class="hover:text-kiri-green transition-colors flex items-center group">
+            <i class="fas fa-arrow-left mr-2 group-hover:-translate-x-1 transition-transform"></i>
+            Tools
         </a>
         <span class="mx-3 opacity-30">/</span>
-        <span class="text-[#212529] dark:text-white font-semibold">{% block tool_name %}{% endblock %}</span>
+        <span class="text-heading font-semibold">{{ tool.name }}</span>
     </nav>
 
     <div class="mb-10">
         <div class="flex flex-col md:flex-row md:items-center gap-4 md:gap-6">
             <div
-                class="w-16 h-16 rounded-2xl bg-gradient-to-br from-[#0D7C3D] to-[#2E9A4F] flex items-center justify-center text-white shadow-lg shadow-[#0D7C3D]/20 shrink-0">
-                <i class="fas {% block tool_icon %}fa-tools{% endblock %} text-2xl"></i>
+                class="w-16 h-16 rounded-2xl bg-gradient-to-br from-kiri-green to-kiri-green flex items-center justify-center text-white shadow-sm shrink-0">
+                <i class="fas {{ tool.icon|default:'fa-tools' }} text-2xl"></i>
             </div>
             <div>
-                <h1 class="text-3xl font-extrabold text-[#212529] dark:text-white leading-tight tracking-tight">
-                    {% block tool_title %}{% endblock %}
+                <h1 class="text-3xl font-extrabold text-heading leading-tight tracking-tight">
+                    {{ tool.title }}
                 </h1>
-                <p class="text-[#6C757D] dark:text-[#A1A1AA] text-sm md:text-base mt-1 max-w-2xl leading-relaxed">
-                    {% block tool_description %}{% endblock %}
+                <p class="text-body text-sm md:text-base mt-1 max-w-2xl leading-relaxed">
+                    {{ tool.description }}
                 </p>
             </div>
         </div>
     </div>
 
-    <div
-        class="bg-white dark:bg-[#1E1E1E] rounded-[2rem] border border-[#DEE2E6] dark:border-[#3D3D3D] shadow-2xl shadow-black/5 overflow-hidden transition-all duration-300">
+    <div class="card !p-0 overflow-hidden transition-all duration-300">
         <div
-            class="border-b border-[#DEE2E6] dark:border-[#3D3D3D] bg-[#F8F9FA]/50 dark:bg-[#1A1A1A]/50 backdrop-blur-md px-6 py-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            class="border-b border-subtle bg-subtle backdrop-blur-md px-6 py-4 flex flex-col lg:flex-row lg:items-center justify-between gap-4">
             <div class="flex flex-wrap items-center gap-2">
                 {% block tool_actions_left %}{% endblock %}
                 <button @click="$refs.fileInput.click()" x-show="!hideUpload"
-                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-white dark:bg-[#2D2D2D] text-[#212529] dark:text-white border border-[#DEE2E6] dark:border-[#3D3D3D] hover:bg-[#F1F3F5] dark:hover:bg-[#3D3D3D]">
-                    <i class="fas fa-file-upload text-[#0D7C3D]"></i>
+                    class="btn-secondary !w-auto !py-2.5 !px-4 !text-xs flex items-center gap-2 shadow-sm font-bold">
+                    <i class="fas fa-file-upload text-kiri-green"></i>
                     <span>Upload File</span>
                 </button>
                 <input type="file" x-ref="fileInput" class="hidden" @change="handleFileUpload($event)"
@@ -50,12 +63,12 @@
             <div class="flex flex-wrap items-center gap-2">
                 {% block tool_actions_right %}{% endblock %}
                 <button @click="loadSample()" x-show="!hideSample"
-                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-white dark:bg-[#2D2D2D] text-[#212529] dark:text-white border border-[#DEE2E6] dark:border-[#3D3D3D] hover:bg-[#F1F3F5] dark:hover:bg-[#3D3D3D]">
+                    class="btn-secondary !w-auto !py-2.5 !px-4 !text-xs flex items-center gap-2 shadow-sm font-bold">
                     <i class="fas fa-vial text-purple-500"></i>
                     <span>Load Sample</span>
                 </button>
-                <button @click="resetTool()" x-show="!hideReset"
-                    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-white dark:bg-[#2D2D2D] text-red-500 border border-[#DEE2E6] dark:border-[#3D3D3D] hover:bg-red-50 dark:hover:bg-red-900/10">
+                <button @click="resetTool()"
+                    class="btn-secondary !w-auto !py-2.5 !px-4 !text-xs text-red-500 hover:text-red-600 flex items-center gap-2 shadow-sm font-bold border-danger-subtle hover:bg-danger-subtle">
                     <i class="fas fa-undo"></i>
                     <span>Reset</span>
                 </button>
@@ -67,12 +80,13 @@
         </div>
 
         <div
-            class="bg-[#F8F9FA]/50 dark:bg-[#1A1A1A]/50 border-t border-[#DEE2E6] dark:border-[#3D3D3D] px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
-            <div class="flex items-center gap-4 text-[11px] font-medium text-[#6C757D] dark:text-[#A1A1AA]">
-                <span class="flex items-center gap-1.5 px-2 py-1 bg-[#0D7C3D]/10 text-[#0D7C3D] rounded-lg">
-                    <i class="fas fa-user-shield"></i> 100% Private Tool
+            class="bg-subtle border-t border-subtle px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-4 text-[11px] font-medium text-muted">
+                <span class="flex items-center gap-1.5 px-2 py-1 bg-success-subtle text-kiri-green rounded-lg">
+                    <i class="fas fa-user-shield"></i>
+                    100% Private Tool
                 </span>
-                <span class="w-1 h-1 bg-[#DEE2E6] dark:bg-[#3D3D3D] rounded-full hidden md:block"></span>
+                <span class="w-1 h-1 bg-subtle rounded-full hidden md:block"></span>
                 <span x-text="statusMessage || 'Ready for processing'" class="italic"></span>
             </div>
             <div class="flex items-center gap-3">
@@ -93,197 +107,9 @@
         </div>
     </template>
 </div>
+{% endblock %}
 
-<style>
-    @keyframes bounce-in {
-        0% {
-            transform: translate(-50%, 2rem);
-            opacity: 0;
-        }
-
-        60% {
-            transform: translate(-50%, -0.5rem);
-            opacity: 1;
-        }
-
-        100% {
-            transform: translate(-50%, 0);
-            opacity: 1;
-        }
-    }
-
-    .animate-bounce-in {
-        animation: bounce-in 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
-    }
-
-    textarea,
-    input[type="text"],
-    input[type="number"],
-    select {
-        transition-property: all;
-        transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-        transition-duration: 150ms;
-        outline: 2px solid transparent;
-        outline-offset: 2px;
-        border-radius: 0.75rem;
-    }
-
-    textarea:focus,
-    input[type="text"]:focus,
-    input[type="number"]:focus,
-    select:focus {
-        border-color: #0D7C3D;
-        --tw-ring-color: rgba(13, 124, 61, 0.1);
-        --tw-ring-offset-shadow: var(--tw-ring-inset) 0 0 0 var(--tw-ring-offset-width) var(--tw-ring-offset-color);
-        --tw-ring-shadow: var(--tw-ring-inset) 0 0 0 calc(4px + var(--tw-ring-offset-width)) var(--tw-ring-color);
-        box-shadow: var(--tw-ring-offset-shadow), var(--tw-ring-shadow), var(--tw-shadow, 0 0 #0000);
-    }
-
-    ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
-    }
-
-    ::-webkit-scrollbar-track {
-        background: transparent;
-    }
-
-    ::-webkit-scrollbar-thumb {
-        background-color: #DEE2E6;
-        border-radius: 9999px;
-    }
-
-    ::-webkit-scrollbar-thumb:hover {
-        background-color: #ADB5BD;
-    }
-
-    @media (prefers-color-scheme: dark) {
-        ::-webkit-scrollbar-thumb {
-            background-color: #3D3D3D;
-        }
-
-        ::-webkit-scrollbar-thumb:hover {
-            background-color: #525252;
-        }
-    }
-</style>
-
-<script>
-    function toolSetup() {
-        return {
-            input: '',
-            file: null,
-            output: '',
-            error: '',
-            statusMessage: '',
-            copied: false,
-            hideReset: false,
-            hideSample: false,
-            isProcessing: false,
-            dragging: false,
-            over: false,
-            hideUpload: false,
-
-            async handleFileUpload(event) {
-                const file = event.target.files[0];
-                if (!file) return;
-
-                this.file = file;
-                this.statusMessage = `Reading ${file.name}...`;
-                this.error = '';
-
-                if (typeof this.handleFiles === 'function') {
-                    this.handleFiles([file]);
-                    return;
-                }
-
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    this.input = e.target.result;
-                    this.statusMessage = `${file.name} loaded`;
-                    if (typeof this.convert === 'function') this.convert();
-                };
-                reader.onerror = () => {
-                    this.error = 'Failed to read file';
-                    this.statusMessage = 'Load error';
-                };
-                reader.readAsText(file);
-            },
-
-            downloadFile(content, filename, mimeType) {
-                if (!content) return;
-                try {
-                    const blob = new Blob([content], { type: mimeType });
-                    const url = URL.createObjectURL(blob);
-                    const link = document.createElement("a");
-                    link.setAttribute("href", url);
-                    link.setAttribute("download", filename);
-                    document.body.appendChild(link);
-                    link.click();
-                    document.body.removeChild(link);
-                    URL.revokeObjectURL(url);
-                    this.statusMessage = 'File downloaded';
-                } catch (err) {
-                    this.error = 'Download failed';
-                }
-            },
-
-            async copyToClipboard(text) {
-                if (!text) return;
-                try {
-                    await navigator.clipboard.writeText(text);
-                    this.copied = true;
-                    const oldMsg = this.statusMessage;
-                    this.statusMessage = '✓ Copied to clipboard';
-                    setTimeout(() => {
-                        this.copied = false;
-                        this.statusMessage = oldMsg;
-                    }, 2000);
-                } catch (err) {
-                    this.error = 'Copy failed';
-                }
-            },
-
-            resetTool() {
-                this.input = '';
-                this.output = '';
-                this.error = '';
-                this.statusMessage = 'Ready';
-                if (this.$refs.fileInput) this.$refs.fileInput.value = '';
-                if (typeof this.onReset === 'function') this.onReset();
-            },
-
-            loadSample() {
-                this.statusMessage = 'Sample loading not implemented for this tool';
-            },
-
-            persist(key, propertyName, defaultValue = null) {
-                const storageKey = `kiri_persist_${key}`;
-                const saved = localStorage.getItem(storageKey);
-
-                if (saved !== null) {
-                    try {
-                        this[propertyName] = JSON.parse(saved);
-                    } catch (e) {
-                        this[propertyName] = defaultValue !== null ? defaultValue : this[propertyName];
-                    }
-                } else if (defaultValue !== null) {
-                    this[propertyName] = defaultValue;
-                }
-
-                this.$watch(propertyName, (val) => {
-                    localStorage.setItem(storageKey, JSON.stringify(val));
-                });
-            },
-
-            clearPersist(key) {
-                localStorage.removeItem(`kiri_persist_${key}`);
-            },
-
-            // Spread child tool data safely
-            ...{% block tool_js_data %} { } {% endblock %}
-        }
-    }
-</script>
+{% block extra_js %}
+<script src="{% static 'js/tool_base.js' %}"></script>
 {% block extra_js_tool %}{% endblock %}
 {% endblock %}

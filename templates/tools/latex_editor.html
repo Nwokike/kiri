@@ -2,12 +2,15 @@
 {% load static %}
 
 {% block title %}LaTeX Equation Editor & Previewer | Kiri Labs{% endblock %}
-{% block meta_description %}Compose mathematical formulas with real-time LaTeX rendering for documentation and papers.
-{%endblock %}
+
+{% block meta_description %}
+Compose mathematical formulas with real-time LaTeX rendering for documentation and papers.
+{% endblock %}
 
 {% block tool_name %}LaTeX Editor{% endblock %}
 {% block tool_icon %}fa-square-root-variable{% endblock %}
 {% block tool_title %}LaTeX Equation Editor{% endblock %}
+
 {% block tool_description %}
 Compose mathematical formulas with real-time rendering.
 Ideal for writing technical documentation and papers with integrated preview.
@@ -17,9 +20,8 @@ Ideal for writing technical documentation and papers with integrated preview.
 
 {% block tool_actions_right %}
 <button @click="copyForMarkdown()"
-    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-[#0D7C3D] text-white hover:bg-[#0A5C2C]">
-    <i class="fas fa-copy"></i>
-    <span>Copy for MD</span>
+    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-kiri-green text-white hover:bg-kiri-green-dark">
+    <i class="fas fa-copy"></i> <span>Copy for MD</span>
 </button>
 {% endblock %}
 
@@ -29,63 +31,46 @@ Ideal for writing technical documentation and papers with integrated preview.
         <!-- Editor Column -->
         <div class="flex flex-col gap-4">
             <div class="flex items-center justify-between">
-                <span
-                    class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest flex items-center gap-2">
-                    <i class="fas fa-keyboard text-gray-400"></i> TeX/LaTeX Source
-                </span>
+                <span class="text-[10px] font-bold text-body uppercase tracking-widest flex items-center gap-2">
+                    <i class="fas fa-keyboard text-muted"></i> TeX/LaTeX Source </span>
                 <div class="flex gap-2">
-                    <button @click="insert('\\frac{}{}')"
-                        class="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-[9px] font-bold hover:bg-[#0D7C3D] hover:text-white transition-colors">Frac</button>
-                    <button @click="insert('\\sqrt{}')"
-                        class="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-[9px] font-bold hover:bg-[#0D7C3D] hover:text-white transition-colors">Sqrt</button>
-                    <button @click="insert('\\int_{}^{}')"
-                        class="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-[9px] font-bold hover:bg-[#0D7C3D] hover:text-white transition-colors">Int</button>
+                    <button @click="insert('\\\\frac{}{}')"
+                        class="px-2 py-1 bg-subtle rounded text-[9px] font-bold hover:bg-kiri-green hover:text-white transition-colors">Frac</button>
+                    <button @click="insert('\\\\sqrt{}')"
+                        class="px-2 py-1 bg-subtle rounded text-[9px] font-bold hover:bg-kiri-green hover:text-white transition-colors">Sqrt</button>
+                    <button @click="insert('\\\\int_{}^{}')"
+                        class="px-2 py-1 bg-subtle rounded text-[9px] font-bold hover:bg-kiri-green hover:text-white transition-colors">Int</button>
                 </div>
             </div>
             <textarea x-model="input" @input.debounce.250ms="render()" x-ref="textarea"
-                class="flex-1 w-full p-8 font-mono text-base border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[2rem] bg-white dark:bg-[#121212] text-[#212529] dark:text-[#E4E4E7] resize-none shadow-inner outline-none focus:border-[#0D7C3D] transition-all"
+                class="flex-1 w-full p-8 font-mono text-base border border-subtle rounded-[2rem] bg-surface text-heading resize-none shadow-inner outline-none focus:border-kiri-green transition-all"
                 placeholder="E = mc^2"></textarea>
-
             <div class="grid grid-cols-2 gap-4">
-                <button @click="sample('\\nabla \\cdot \\mathbf{E} = \\frac{\\rho}{\\epsilon_0}')"
-                    class="p-3 bg-[#F8F9FA] dark:bg-[#1A1A1A] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl text-[10px] font-bold uppercase hover:border-[#0D7C3D] transition-all">Maxwell's
-                    Eq</button>
-                <button
-                    @click="sample('i\\hbar\\frac{\\partial}{\\partial t}\\Psi(\\mathbf{r},t) = \\hat{H}\\Psi(\\mathbf{r},t)')"
-                    class="p-3 bg-[#F8F9FA] dark:bg-[#1A1A1A] border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl text-[10px] font-bold uppercase hover:border-[#0D7C3D] transition-all">Schrödinger</button>
+                <button @click="sample('\\\\nabla \\\\cdot \\\\mathbf{E} = \\\\frac{\\\\rho}{\\\\epsilon_0}')"
+                    class="p-3 bg-surface border border-subtle rounded-xl text-[10px] font-bold uppercase hover:border-kiri-green transition-all">Maxwell's
+                    Eq</button> <button
+                    @click="sample('i\\\\hbar\\\\frac{\\\\partial}{\\\\partial t}\\\\Psi(\\\\mathbf{r},t) = \\\\hat{H}\\\\Psi(\\\\mathbf{r},t)')"
+                    class="p-3 bg-surface border border-subtle rounded-xl text-[10px] font-bold uppercase hover:border-kiri-green transition-all">Schrödinger</button>
             </div>
-        </div>
-
-        <!-- Preview Column -->
+        </div> <!-- Preview Column -->
         <div class="flex flex-col gap-4">
             <div class="flex items-center justify-between">
-                <span
-                    class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest flex items-center gap-2">
-                    <i class="fas fa-eye text-[#0D7C3D]"></i> Equation Preview
-                </span>
-                <span class="text-[9px] font-bold text-[#A1A1AA] italic">Rendered via MathJax 3</span>
+                <span class="text-[10px] font-bold text-body uppercase tracking-widest flex items-center gap-2">
+                    <i class="fas fa-eye text-kiri-green"></i> Equation Preview </span>
+                <span class="text-[9px] font-bold text-muted italic">Rendered via MathJax 3</span>
             </div>
             <div
-                class="flex-1 rounded-[2rem] bg-white dark:bg-[#1A1A1A] border border-[#DEE2E6] dark:border-[#3D3D3D] relative flex items-center justify-center p-12 overflow-auto shadow-sm group">
-                <div id="latex-preview" class="text-4xl text-[#212529] dark:text-white transition-all duration-500">
-                </div>
-
-                <!-- Reset Overlay -->
-                <button @click="onReset()"
-                    class="absolute top-4 right-4 text-[#ADB5BD] hover:text-red-500 transition-colors">
-                    <i class="fas fa-trash-alt"></i>
-                </button>
+                class="flex-1 rounded-[2rem] bg-surface border border-subtle relative flex items-center justify-center p-12 overflow-auto shadow-sm group">
+                <div id="latex-preview" class="text-4xl text-heading transition-all duration-500"> </div>
+                <!-- Reset Overlay --> <button @click="onReset()"
+                    class="absolute top-4 right-4 text-muted hover:text-red-500 transition-colors"> <i
+                        class="fas fa-trash-alt"></i> </button>
             </div>
-
-            <div class="p-6 bg-[#0D7C3D]/5 border border-[#0D7C3D]/10 rounded-2xl flex items-center gap-4">
-                <div
-                    class="w-10 h-10 rounded-full bg-white dark:bg-[#2D2D2D] flex items-center justify-center shadow-sm">
-                    <i class="fas fa-lightbulb text-[#C4992E]"></i>
-                </div>
-                <p class="text-xs text-[#6C757D] dark:text-[#A1A1AA] leading-relaxed">
-                    <strong class="text-[#212529] dark:text-white">Pro Tip:</strong> Use <code
-                        class="bg-gray-100 dark:bg-gray-800 px-1 rounded">\\text{...}</code> for embedded fonts.
-                </p>
+            <div class="p-6 bg-kiri-green/5 border border-kiri-green/10 rounded-2xl flex items-center gap-4">
+                <div class="w-10 h-10 rounded-full bg-surface flex items-center justify-center shadow-sm"> <i
+                        class="fas fa-lightbulb text-kiri-gold"></i> </div>
+                <p class="text-xs text-body leading-relaxed"> <strong class="text-heading">Pro Tip:</strong> Use <code
+                        class="bg-subtle px-1 rounded">\\text{...}</code> for embedded fonts. </p>
             </div>
         </div>
     </div>
@@ -95,6 +80,9 @@ Ideal for writing technical documentation and papers with integrated preview.
 {% block tool_js_data %}
 {
 hideUpload: true,
+init() {
+// Initialization
+},
 insert(val) {
 const area = this.$refs.textarea;
 const start = area.selectionStart;
@@ -103,28 +91,23 @@ this.input = this.input.substring(0, start) + val + this.input.substring(end);
 area.focus();
 this.$nextTick(() => this.render());
 },
-
 loadSample() {
 this.input = '\\nabla \\cdot \\mathbf{E} = \\frac{\\rho}{\\epsilon_0}';
 this.render();
 this.statusMessage = 'Sample Maxwell equation loaded';
 },
-
 sample(val) {
 this.input = val;
 this.render();
 this.statusMessage = 'Sample loaded';
 },
-
 render() {
 const preview = document.getElementById('latex-preview');
 if (!preview) return;
-
 if (!this.input.trim()) {
 preview.innerHTML = '<span class="opacity-20 text-xs uppercase tracking-widest font-bold">Awaiting Input</span>';
 return;
 }
-
 preview.innerHTML = '$$' + this.input + '$$';
 if (window.MathJax) {
 MathJax.typesetPromise([preview]).then(() => {
@@ -134,14 +117,13 @@ this.error = 'Latex error: ' + err.message;
 });
 }
 },
-
 copyForMarkdown() {
 this.copyToClipboard('$$' + this.input + '$$');
 },
-
 onReset() {
 this.input = '';
 this.render();
+this.statusMessage = 'Ready';
 }
 }
 {% endblock %}

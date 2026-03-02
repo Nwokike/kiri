@@ -2,12 +2,16 @@
 {% load static %}
 
 {% block title %}Live Regex Tester & Debugger | Kiri Labs{% endblock %}
-{% block meta_description %}Test and debug regular expressions with real-time matching and capture group highlighting.
-Optimized for JavaScript regex engine.{% endblock %}
+
+{% block meta_description %}
+Test and debug regular expressions with real-time matching and capture group highlighting. Optimized for JavaScript
+regex engine.
+{% endblock %}
 
 {% block tool_name %}Regex Tester{% endblock %}
 {% block tool_icon %}fa-asterisk{% endblock %}
 {% block tool_title %}Live Regex Tester & Debugger{% endblock %}
+
 {% block tool_description %}
 Test and debug your regular expressions with real-time matching and capture group highlighting.
 Optimized for JavaScript regex engine with instant feedback on large text blocks.
@@ -15,13 +19,13 @@ Optimized for JavaScript regex engine with instant feedback on large text blocks
 
 {% block tool_actions_left %}
 <div class="flex items-center gap-2">
-    <span class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase">Flags:</span>
-    <div class="flex bg-white dark:bg-[#1E1E1E] p-1 rounded-lg border border-[#DEE2E6] dark:border-[#3D3D3D]">
-        <button @click="toggleFlag('g')" :class="flags.includes('g') ? 'bg-[#0D7C3D] text-white' : 'text-[#6C757D]'"
-            class="px-2 py-1 text-[9px] font-bold rounded-md">g</button>
-        <button @click="toggleFlag('i')" :class="flags.includes('i') ? 'bg-[#0D7C3D] text-white' : 'text-[#6C757D]'"
-            class="px-2 py-1 text-[9px] font-bold rounded-md">i</button>
-        <button @click="toggleFlag('m')" :class="flags.includes('m') ? 'bg-[#0D7C3D] text-white' : 'text-[#6C757D]'"
+    <span class="text-[10px] font-bold text-body uppercase">Flags:</span>
+    <div class="flex bg-surface p-1 rounded-lg border border-subtle">
+        <button @click="toggleFlag('g')" :class="flags.includes('g') ? 'bg-kiri-green text-white' : 'text-muted'"
+            class="px-2 py-1 text-[9px] font-bold rounded-md">g</button> <button @click="toggleFlag('i')"
+            :class="flags.includes('i') ? 'bg-kiri-green text-white' : 'text-muted'"
+            class="px-2 py-1 text-[9px] font-bold rounded-md">i</button> <button @click="toggleFlag('m')"
+            :class="flags.includes('m') ? 'bg-kiri-green text-white' : 'text-muted'"
             class="px-2 py-1 text-[9px] font-bold rounded-md">m</button>
     </div>
 </div>
@@ -29,68 +33,59 @@ Optimized for JavaScript regex engine with instant feedback on large text blocks
 
 {% block tool_actions_right %}
 <button @click="downloadMatches()"
-    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-[#0D7C3D] text-white hover:bg-[#0A5C2C]"
+    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-kiri-green text-white hover:bg-kiri-green-dark"
     x-show="matches.length">
-    <i class="fas fa-download"></i>
-    <span>Export Matches</span>
+    <i class="fas fa-download"></i> <span>Export Matches</span>
 </button>
 {% endblock %}
 
 {% block tool_body %}
 <div class="space-y-6">
     <!-- Regex Input -->
-    <div class="flex flex-col gap-3">
-        <label class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest">Regular
+    <div class="flex flex-col gap-3"> <label class="text-[10px] font-bold text-body uppercase tracking-widest">Regular
             Expression</label>
         <div class="relative group">
             <div
-                class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-[#6C757D] font-mono text-lg">
-                /</div>
-            <input type="text" x-model="regex" @input="convert()"
-                class="w-full pl-8 pr-16 py-4 font-mono text-lg border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-2xl bg-white dark:bg-[#121212] text-[#212529] dark:text-white shadow-inner focus:border-[#0D7C3D] outline-none transition-all"
+                class="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-muted font-mono text-lg">
+                /</div> <input type="text" x-model="regex" @input="convert()"
+                class="w-full pl-8 pr-16 py-4 font-mono text-lg border border-subtle rounded-2xl bg-surface text-heading shadow-inner focus:border-kiri-green outline-none transition-all"
                 placeholder="([a-z]+)">
             <div
-                class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-[#6C757D] font-mono text-lg">
+                class="absolute inset-y-0 right-0 pr-4 flex items-center pointer-events-none text-muted font-mono text-lg">
                 /<span x-text="flags" class="text-purple-500"></span></div>
         </div>
     </div>
-
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[400px]">
         <!-- Test String Area -->
         <div class="flex flex-col gap-3">
-            <div class="flex items-center justify-between">
-                <span class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest">Test
-                    String</span>
-                <span class="text-[10px] text-[#A1A1AA]" x-text="input.length ? input.length + ' chars' : ''"></span>
-            </div>
-            <textarea x-model="input" @input="convert()"
-                class="flex-1 w-full p-6 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[1.5rem] bg-white dark:bg-[#121212] text-[#212529] dark:text-[#E4E4E7] resize-none shadow-inner"
+            <div class="flex items-center justify-between"> <span
+                    class="text-[10px] font-bold text-body uppercase tracking-widest">Test String</span>
+                <span class="text-[10px] text-muted" x-text="input.length ? input.length + ' chars' : ''"></span>
+            </div> <textarea x-model="input" @input="convert()"
+                class="flex-1 w-full p-6 font-mono text-sm border border-subtle rounded-[1.5rem] bg-surface text-heading resize-none shadow-inner"
                 placeholder="Content to test against..."></textarea>
-        </div>
-
-        <!-- Findings Area -->
+        </div> <!-- Findings Area -->
         <div class="flex flex-col gap-3">
-            <div class="flex items-center justify-between">
-                <span class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest">Matches
-                    (<span x-text="matches.length"></span>)</span>
-            </div>
-            <div
-                class="flex-1 flex flex-col rounded-[1.5rem] bg-[#F8F9FA] dark:bg-[#121212] border border-[#DEE2E6] dark:border-[#3D3D3D] overflow-hidden">
+            <div class="flex items-center justify-between"> <span
+                    class="text-[10px] font-bold text-body uppercase tracking-widest">Matches (<span
+                        x-text="matches.length"></span>)</span> </div>
+            <div class="flex-1 flex flex-col rounded-[1.5rem] bg-surface border border-subtle overflow-hidden">
                 <div class="flex-1 overflow-auto p-4 space-y-2 custom-scrollbar">
                     <template x-for="(match, i) in matches" :key="i">
                         <div
-                            class="p-3 bg-white dark:bg-[#1E1E1E] rounded-xl border border-[#DEE2E6] dark:border-[#3D3D3D] flex items-start gap-3 shadow-sm group">
-                            <span class="px-1.5 py-0.5 bg-[#0D7C3D]/10 text-[#0D7C3D] text-[9px] font-bold rounded mt-1"
+                            class="p-3 bg-surface rounded-xl border border-subtle flex items-start gap-3 shadow-sm group">
+                            <span
+                                class="px-1.5 py-0.5 bg-kiri-green/10 text-kiri-green text-[9px] font-bold rounded mt-1"
                                 x-text="i+1"></span>
-                            <div class="flex-1 font-mono text-xs break-all" x-text="match"></div>
-                            <button @click="copyToClipboard(match)"
-                                class="opacity-0 group-hover:opacity-100 transition-opacity text-[#6C757D] hover:text-[#0D7C3D]"><i
+                            <div class="flex-1 font-mono text-xs break-all" x-text="match"></div> <button
+                                @click="copyToClipboard(match)"
+                                class="opacity-0 group-hover:opacity-100 transition-opacity text-muted hover:text-kiri-green"><i
                                     class="fas fa-copy"></i></button>
                         </div>
                     </template>
                     <div x-show="!matches.length && !error"
-                        class="h-full flex flex-col items-center justify-center text-[#A1A1AA] opacity-50">
-                        <i class="fas fa-search text-3xl mb-2"></i>
+                        class="h-full flex flex-col items-center justify-center text-muted opacity-50"> <i
+                            class="fas fa-search text-3xl mb-2"></i>
                         <p class="text-xs">No matches found</p>
                     </div>
                 </div>
@@ -106,13 +101,14 @@ hideUpload: true,
 regex: '[a-zA-Z]+',
 flags: 'gm',
 matches: [],
-
+init() {
+// Initialization
+},
 loadSample() {
-this.input = `Welcome to Kiri Labs. Contact us at support@kiri.ng for any technical queries.`;
+this.input = `Welcome to Kiri Labs. Contact us at hello@kiri.ng for any technical queries.`;
 this.regex = "[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}";
 this.convert();
 },
-
 toggleFlag(f) {
 if (this.flags.includes(f)) {
 this.flags = this.flags.replace(f, '');
@@ -121,13 +117,11 @@ this.flags += f;
 }
 this.convert();
 },
-
 convert() {
 if (!this.regex || !this.input) {
 this.matches = [];
 return;
 }
-
 try {
 const re = new RegExp(this.regex, this.flags);
 const rawMatches = this.input.match(re);
@@ -139,10 +133,15 @@ this.matches = [];
 this.statusMessage = 'Invalid Regex';
 }
 },
-
 downloadMatches() {
 if (!this.matches.length) return;
 this.downloadFile(this.matches.join('\n'), 'regex_matches.txt', 'text/plain');
+},
+onReset() {
+this.input = '';
+this.regex = '';
+this.matches = [];
+this.statusMessage = 'Ready';
 }
 }
 {% endblock %}

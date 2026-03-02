@@ -60,6 +60,11 @@ function initSidebar() {
         }, 300);
     }
 
+    // Helper to get CSS variables
+    const getCssVar = (name) => getComputedStyle(document.documentElement).getPropertyValue(name).trim() || '220px';
+    const sidebarExpandedWidth = () => getCssVar('--sidebar-width-expanded');
+    const sidebarCollapsedWidth = () => getCssVar('--sidebar-width-collapsed') || '56px';
+
     sidebarToggle?.addEventListener('click', () => {
         if (isMobile()) {
             if (sidebar?.classList.contains('mobile-open')) {
@@ -70,7 +75,7 @@ function initSidebar() {
         } else {
             sidebar?.classList.toggle('expanded');
             if (mainContent) {
-                mainContent.style.paddingLeft = sidebar?.classList.contains('expanded') ? '220px' : '56px';
+                mainContent.style.paddingLeft = sidebar?.classList.contains('expanded') ? sidebarExpandedWidth() : sidebarCollapsedWidth();
             }
         }
     });
@@ -81,12 +86,12 @@ function initSidebar() {
     if (!isMobile() && sidebar) {
         sidebar.addEventListener('mouseenter', () => {
             sidebar.classList.add('expanded');
-            if (mainContent) mainContent.style.paddingLeft = '220px';
+            if (mainContent) mainContent.style.paddingLeft = sidebarExpandedWidth();
         });
         sidebar.addEventListener('mouseleave', () => {
             if (!sidebar.dataset.pinned) {
                 sidebar.classList.remove('expanded');
-                if (mainContent) mainContent.style.paddingLeft = '56px';
+                if (mainContent) mainContent.style.paddingLeft = sidebarCollapsedWidth();
                 // Dispatch event to close tool lists
                 window.dispatchEvent(new CustomEvent('sidebar-collapsed'));
             }
@@ -116,3 +121,14 @@ function initProfileDropdown() {
         }
     });
 }
+
+// ============================================================================
+// HTMX Configuration
+// ============================================================================
+
+document.body.addEventListener('htmx:configRequest', (event) => {
+    const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+    if (csrfTokenMeta) {
+        event.detail.headers['X-CSRFToken'] = csrfTokenMeta.content;
+    }
+});

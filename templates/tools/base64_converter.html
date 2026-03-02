@@ -2,12 +2,16 @@
 {% load static %}
 
 {% block title %}Base64 Text Encoder & Decoder | Kiri Labs{% endblock %}
-{% block meta_description %}Fast and secure Base64 conversion for raw text and data. Perform encoding and decoding
-entirely in your browser for maximum privacy.{% endblock %}
+
+{% block meta_description %}
+Fast and secure Base64 conversion for raw text and data. Perform encoding and decoding entirely in your browser for
+maximum privacy.
+{% endblock %}
 
 {% block tool_name %}Base64 Converter{% endblock %}
 {% block tool_icon %}fa-exchange-alt{% endblock %}
 {% block tool_title %}Text Base64 Encoder & Decoder{% endblock %}
+
 {% block tool_description %}
 Base64 conversion for text and data.
 Everything runs locally in your browser to maintain privacy.
@@ -15,12 +19,11 @@ Everything runs locally in your browser to maintain privacy.
 
 {% block tool_actions_left %}
 <div class="flex items-center gap-2">
-    <div class="flex bg-white dark:bg-[#1E1E1E] p-1 rounded-xl border border-[#DEE2E6] dark:border-[#3D3D3D] shadow-sm">
+    <div class="flex bg-surface p-1 rounded-xl border border-subtle shadow-sm">
         <button @click="mode = 'encode'; convert()"
-            :class="mode === 'encode' ? 'bg-[#0D7C3D] text-white' : 'text-[#6C757D] dark:text-[#A1A1AA]'"
-            class="px-4 py-1.5 text-[10px] font-bold rounded-lg transition-all">Encode</button>
-        <button @click="mode = 'decode'; convert()"
-            :class="mode === 'decode' ? 'bg-[#0D7C3D] text-white' : 'text-[#6C757D] dark:text-[#A1A1AA]'"
+            :class="mode === 'encode' ? 'bg-kiri-green text-white' : 'text-body'"
+            class="px-4 py-1.5 text-[10px] font-bold rounded-lg transition-all">Encode</button> <button
+            @click="mode = 'decode'; convert()" :class="mode === 'decode' ? 'bg-kiri-green text-white' : 'text-body'"
             class="px-4 py-1.5 text-[10px] font-bold rounded-lg transition-all">Decode</button>
     </div>
 </div>
@@ -28,10 +31,9 @@ Everything runs locally in your browser to maintain privacy.
 
 {% block tool_actions_right %}
 <button @click="download()"
-    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-[#0D7C3D] text-white hover:bg-[#0A5C2C]"
+    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-kiri-green text-white hover:bg-kiri-green-dark"
     x-show="output">
-    <i class="fas fa-download"></i>
-    <span>Download Result</span>
+    <i class="fas fa-download"></i> <span>Download Result</span>
 </button>
 {% endblock %}
 
@@ -40,32 +42,23 @@ Everything runs locally in your browser to maintain privacy.
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[400px]">
         <!-- Input Area -->
         <div class="flex flex-col gap-3">
-            <div class="flex items-center justify-between">
-                <span class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest"
-                    x-text="mode === 'encode' ? 'Input Text' : 'Base64 String'"></span>
-            </div>
+            <div class="flex items-center justify-between"> <span
+                    class="text-[10px] font-bold text-body uppercase tracking-widest"
+                    x-text="mode === 'encode' ? 'Input Text' : 'Base64 String'"></span> </div>
             <textarea x-model="input" @input="convert()"
-                class="flex-1 w-full p-6 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-[1.5rem] bg-white dark:bg-[#121212] text-[#212529] dark:text-[#E4E4E7] resize-none shadow-inner"
+                class="flex-1 w-full p-6 font-mono text-sm border border-subtle rounded-[1.5rem] bg-surface text-heading resize-none shadow-inner"
                 :placeholder="mode === 'encode' ? 'Enter text to encode...' : 'Enter Base64 to decode...'"></textarea>
-        </div>
-
-        <!-- Output Area -->
+        </div> <!-- Output Area -->
         <div class="flex flex-col gap-3">
-            <div class="flex items-center justify-between">
-                <span
-                    class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest">Conversion
-                    Result</span>
-                <button @click="copyToClipboard(output)"
-                    class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase flex items-center gap-1.5"
-                    x-show="output">
-                    <i class="fas" :class="copied ? 'fa-check' : 'fa-copy'"></i>
-                    <span x-text="copied ? 'Copied' : 'Copy'"></span>
-                </button>
-            </div>
-            <div
-                class="flex-1 rounded-[1.5rem] bg-[#F8F9FA] dark:bg-[#121212] border border-[#DEE2E6] dark:border-[#3D3D3D] relative overflow-hidden group">
+            <div class="flex items-center justify-between"> <span
+                    class="text-[10px] font-bold text-body uppercase tracking-widest">Conversion
+                    Result</span> <button @click="copyToClipboard(output)"
+                    class="text-[10px] font-bold text-kiri-green hover:underline uppercase flex items-center gap-1.5"
+                    x-show="output"> <i class="fas" :class="copied ? 'fa-check' : 'fa-copy'"></i> <span
+                        x-text="copied ? 'Copied' : 'Copy'"></span> </button> </div>
+            <div class="flex-1 rounded-[1.5rem] bg-surface border border-subtle relative overflow-hidden group">
                 <textarea readonly x-model="output"
-                    class="w-full h-full p-6 font-mono text-sm bg-transparent text-[#212529] dark:text-[#E4E4E7] resize-none outline-none"
+                    class="w-full h-full p-6 font-mono text-sm bg-transparent text-heading resize-none outline-none"
                     placeholder="Result will appear here..."></textarea>
             </div>
         </div>
@@ -77,10 +70,9 @@ Everything runs locally in your browser to maintain privacy.
 {
 hideUpload: true,
 mode: 'encode',
-
 init() {
+// Initialization logic
 },
-
 loadSample() {
 if (this.mode === 'encode') {
 this.input = "Standardized text sample for local processing.";
@@ -89,7 +81,6 @@ this.input = "U3RhbmRhcmRpemVkIHRleHQgc2FtcGxlIGZvciBsb2NhbCBwcm9jZXNzaW5nLg==";
 }
 this.convert();
 },
-
 convert() {
 this.error = '';
 if (!this.input.trim()) {
@@ -97,7 +88,6 @@ this.output = '';
 this.statusMessage = 'Ready';
 return;
 }
-
 try {
 if (this.mode === 'encode') {
 // Handle Unicode strings correctly
@@ -115,7 +105,6 @@ this.output = '';
 this.statusMessage = 'Conversion failed';
 }
 },
-
 download() {
 if (!this.output || this.error) return;
 const filename = this.mode === 'encode' ? 'encoded.b64' : 'decoded.txt';

@@ -2,12 +2,16 @@
 {% load static %}
 
 {% block title %}Universal SQL Workbench | Kiri Labs{% endblock %}
-{% block meta_description %}A full-featured client-side SQL IDE. Emulate MySQL, PostgreSQL, and SQL Server syntax
-directly in your browser with schema visualization and data export.{% endblock %}
+
+{% block meta_description %}
+A full-featured client-side SQL IDE. Emulate MySQL, PostgreSQL, and SQL Server syntax directly in your browser with
+schema visualization and data export.
+{% endblock %}
 
 {% block tool_name %}SQL Workbench{% endblock %}
 {% block tool_icon %}fa-server{% endblock %}
 {% block tool_title %}Universal SQL Workbench{% endblock %}
+
 {% block tool_description %}
 A full-featured client-side SQL IDE. Emulates MySQL, PostgreSQL, and SQL Server environments for practice, testing, and
 formatting.
@@ -88,20 +92,18 @@ formatting.
 {% block tool_body %}
 <div x-init="init()" class="flex flex-col gap-4">
     <div
-        class="flex flex-wrap items-center justify-between gap-4 p-3 bg-white dark:bg-[#1E1E1E] border border-gray-200 dark:border-[#333] rounded-xl shadow-sm">
+        class="flex flex-wrap items-center justify-between gap-4 p-3 bg-surface border border-subtle rounded-xl shadow-sm">
         <div class="flex items-center gap-3">
             <div
                 class="flex items-center gap-2 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg border border-blue-100 dark:border-blue-900/30">
                 <i class="fas fa-database text-xs"></i>
                 <span class="text-xs font-bold" x-text="currentDB">kiri_db</span>
             </div>
-
-            <div class="h-6 w-px bg-gray-300 dark:bg-[#444]"></div>
-
+            <div class="h-6 w-px bg-gray-300"></div>
             <div class="flex items-center gap-2">
-                <span class="text-[10px] uppercase font-bold text-gray-500">Mode:</span>
+                <span class="text-[10px] uppercase font-bold text-muted">Mode:</span>
                 <select x-model="dialect" @change="changeDialect()"
-                    class="bg-transparent text-xs font-bold outline-none cursor-pointer dark:text-white">
+                    class="bg-transparent text-xs font-bold outline-none cursor-pointer">
                     <option value="mysql">MySQL</option>
                     <option value="postgres">PostgreSQL</option>
                     <option value="sqlite">SQLite</option>
@@ -117,20 +119,18 @@ formatting.
                 <i class="fas fa-trash-alt"></i>
             </button>
             <button @click="runQuery()"
-                class="px-6 py-2 bg-[#0D7C3D] hover:bg-[#0A5C2C] text-white rounded-lg text-xs font-bold shadow-lg shadow-green-900/20 active:scale-95 flex items-center gap-2 transition-all">
-                <i class="fas fa-play"></i> <span class="hidden sm:inline">Execute</span>
+                class="px-6 py-2 bg-kiri-green hover:bg-kiri-green-dark text-white rounded-lg text-xs font-bold shadow-lg shadow-green-900/20 active:scale-95 flex items-center gap-2 transition-all">
+                <i class="fas fa-play"></i>
+                <span class="hidden sm:inline">Execute</span>
             </button>
         </div>
     </div>
 
     <div class="workbench-grid">
-
-        <div
-            class="area-sidebar bg-white dark:bg-[#1E1E1E] border border-gray-200 dark:border-[#333] rounded-xl flex flex-col overflow-hidden">
-            <div
-                class="p-3 bg-gray-50 dark:bg-[#252525] border-b border-gray-100 dark:border-[#333] flex justify-between items-center">
-                <span class="text-xs font-bold uppercase text-gray-500">Tables</span>
-                <button @click="refreshSchema()" class="text-gray-400 hover:text-[#0D7C3D]"><i
+        <div class="area-sidebar bg-surface border border-subtle rounded-xl flex flex-col overflow-hidden">
+            <div class="p-3 bg-subtle border-b border-subtle flex justify-between items-center">
+                <span class="text-xs font-bold uppercase text-muted">Tables</span>
+                <button @click="refreshSchema()" class="text-muted hover:text-kiri-green"><i
                         class="fas fa-sync-alt text-xs"></i></button>
             </div>
             <div class="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar">
@@ -143,86 +143,82 @@ formatting.
                 <template x-for="table in tables" :key="table.tableid">
                     <div class="group">
                         <button @click="quickSelect(table.tableid)"
-                            class="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-[#2D2D2D] flex items-center gap-2 transition-colors">
-                            <i class="fas fa-table text-gray-400 text-xs"></i>
-                            <span class="text-xs font-mono text-gray-700 dark:text-gray-300 truncate"
-                                x-text="table.tableid"></span>
+                            class="w-full text-left px-3 py-2 rounded-lg hover:bg-subtle flex items-center gap-2 transition-colors">
+                            <i class="fas fa-table text-muted text-xs"></i>
+                            <span class="text-xs font-mono text-body truncate" x-text="table.tableid"></span>
                         </button>
                     </div>
                 </template>
             </div>
-            <div class="p-3 border-t border-gray-200 dark:border-[#333]">
-                <p class="text-[10px] font-bold text-gray-400 mb-2 uppercase">Snippets</p>
+
+            <div class="p-3 border-t border-subtle">
+                <p class="text-[10px] font-bold text-muted mb-2 uppercase">Snippets</p>
                 <div class="flex gap-2 flex-wrap">
                     <button @click="insertSnippet('create')"
-                        class="px-2 py-1 bg-gray-100 dark:bg-[#333] hover:bg-gray-200 rounded text-[10px] font-mono">CREATE</button>
+                        class="px-2 py-1 bg-subtle hover:bg-subtle rounded text-[10px] font-mono">CREATE</button>
                     <button @click="insertSnippet('select')"
-                        class="px-2 py-1 bg-gray-100 dark:bg-[#333] hover:bg-gray-200 rounded text-[10px] font-mono">SELECT</button>
+                        class="px-2 py-1 bg-subtle hover:bg-subtle rounded text-[10px] font-mono">SELECT</button>
                     <button @click="insertSnippet('insert')"
-                        class="px-2 py-1 bg-gray-100 dark:bg-[#333] hover:bg-gray-200 rounded text-[10px] font-mono">INSERT</button>
+                        class="px-2 py-1 bg-subtle hover:bg-subtle rounded text-[10px] font-mono">INSERT</button>
                 </div>
             </div>
         </div>
 
         <div
-            class="area-editor flex flex-col bg-[#2e3440] rounded-xl overflow-hidden shadow-inner border border-gray-700 relative">
-            <div class="flex items-center justify-between px-4 py-2 bg-[#3b4252] border-b border-[#4c566a]">
-                <span class="text-xs text-gray-400 font-mono">Query Editor 1.sql</span>
-                <span class="text-[10px] text-gray-500">Ctrl+Enter to Run</span>
+            class="area-editor flex flex-col bg-subtle rounded-xl overflow-hidden shadow-inner border border-subtle relative">
+            <div class="flex items-center justify-between px-4 py-2 bg-subtle border-b border-subtle">
+                <span class="text-xs text-muted font-mono">Query Editor 1.sql</span>
+                <span class="text-[10px] text-muted">Ctrl+Enter to Run</span>
             </div>
             <div class="flex-1 relative">
                 <div x-ref="editor" class="h-full"></div>
             </div>
         </div>
 
-        <div
-            class="area-results bg-white dark:bg-[#1E1E1E] border border-gray-200 dark:border-[#333] rounded-xl flex flex-col overflow-hidden shadow-sm">
-            <div
-                class="flex items-center justify-between px-4 py-2 bg-gray-50 dark:bg-[#252525] border-b border-gray-100 dark:border-[#333]">
+        <div class="area-results bg-surface border border-subtle rounded-xl flex flex-col overflow-hidden shadow-sm">
+            <div class="flex items-center justify-between px-4 py-2 bg-subtle border-b border-subtle">
                 <div class="flex items-center gap-2">
-                    <span class="text-xs font-bold uppercase text-gray-500">Output</span>
+                    <span class="text-xs font-bold uppercase text-muted">Output</span>
                     <span x-show="lastExecutionTime"
                         class="text-[10px] px-2 py-0.5 rounded-full bg-green-100 text-green-700"
                         x-text="lastExecutionTime + 'ms'"></span>
                 </div>
                 <div class="flex gap-2" x-show="results && results.length > 0">
                     <button @click="exportData('csv')"
-                        class="text-gray-500 hover:text-[#0D7C3D] text-xs font-bold flex items-center gap-1"><i
-                            class="fas fa-file-csv"></i> CSV</button>
+                        class="text-muted hover:text-kiri-green text-xs font-bold flex items-center gap-1">
+                        <i class="fas fa-file-csv"></i> CSV
+                    </button>
                     <button @click="exportData('json')"
-                        class="text-gray-500 hover:text-[#0D7C3D] text-xs font-bold flex items-center gap-1"><i
-                            class="fas fa-code"></i> JSON</button>
+                        class="text-muted hover:text-kiri-green text-xs font-bold flex items-center gap-1">
+                        <i class="fas fa-code"></i> JSON
+                    </button>
                 </div>
             </div>
-
-            <div class="flex-1 overflow-auto relative bg-white dark:bg-[#151515] custom-scrollbar">
-
+            <div class="flex-1 overflow-auto relative bg-surface custom-scrollbar">
                 <div x-show="error" class="p-4 text-red-500 font-mono text-sm bg-red-50/50 dark:bg-red-900/10">
                     <i class="fas fa-exclamation-triangle mr-2"></i>
                     <span x-text="error"></span>
                 </div>
-
                 <div x-show="!error && (!results || results.length === 0) && successMsg"
                     class="p-4 text-green-600 font-mono text-sm">
                     <i class="fas fa-check mr-2"></i>
                     <span x-text="successMsg"></span>
                 </div>
-
                 <template x-if="results && results.length > 0">
                     <table class="w-full text-left border-collapse">
                         <thead>
-                            <tr class="bg-gray-100 dark:bg-[#2D2D2D]">
+                            <tr class="bg-subtle">
                                 <template x-for="key in Object.keys(results[0])">
-                                    <th class="p-3 text-xs font-bold text-gray-600 dark:text-gray-300 border-b border-gray-200 dark:border-[#444] whitespace-nowrap sticky top-0 bg-gray-100 dark:bg-[#2D2D2D]"
+                                    <th class="p-3 text-xs font-bold text-muted border-b border-subtle whitespace-nowrap sticky top-0 bg-subtle"
                                         x-text="key"></th>
                                 </template>
                             </tr>
                         </thead>
                         <tbody>
                             <template x-for="(row, idx) in results" :key="idx">
-                                <tr class="hover:bg-gray-50 dark:hover:bg-[#1E1E1E] group">
+                                <tr class="hover:bg-subtle dark:hover:bg-surface group">
                                     <template x-for="val in Object.values(row)">
-                                        <td class="p-3 text-xs border-b border-gray-100 dark:border-[#333] font-mono text-gray-700 dark:text-gray-400 whitespace-nowrap max-w-[200px] overflow-hidden text-ellipsis"
+                                        <td class="p-3 text-xs border-b border-subtle font-mono text-body whitespace-nowrap max-w-[200px] overflow-hidden text-ellipsis"
                                             x-text="val === null ? 'NULL' : val"></td>
                                     </template>
                                 </tr>
@@ -232,7 +228,6 @@ formatting.
                 </template>
             </div>
         </div>
-
     </div>
 </div>
 {% endblock %}
@@ -311,7 +306,7 @@ alasql('ATTACH INDEXEDDB DATABASE ' + this.currentDB);
 alasql('USE ' + this.currentDB);
 this.refreshSchema();
 this.statusMessage = 'SQL Workbench Ready (Persistent)';
-} catch(e) {
+} catch (e) {
 console.error("DB Init Error", e);
 // Fallback to memory
 alasql(`CREATE DATABASE IF NOT EXISTS ${this.currentDB}`);
@@ -336,7 +331,7 @@ this.statusMessage = `Switched to ${this.dialect.toUpperCase()} mode`;
 
 runQuery() {
 const sql = this.editor.getValue();
-if(!sql.trim()) return;
+if (!sql.trim()) return;
 
 this.error = null;
 this.results = null;
@@ -344,7 +339,6 @@ this.successMsg = null;
 this.lastExecutionTime = null;
 
 const start = performance.now();
-
 try {
 const res = alasql(sql);
 const end = performance.now();
@@ -354,7 +348,7 @@ if (Array.isArray(res) && res.length > 0) {
 // If multiple queries, AlaSQL returns array of arrays.
 // We pick the last selection result.
 let lastData = [...res].reverse().find(r => Array.isArray(r));
-if(lastData) {
+if (lastData) {
 this.results = lastData;
 } else {
 this.successMsg = "Query executed successfully.";
@@ -367,7 +361,6 @@ this.successMsg = "Command executed.";
 
 this.refreshSchema();
 this.statusMessage = 'Query executed';
-
 } catch (err) {
 this.error = err.message;
 this.statusMessage = 'Query failed';
@@ -377,7 +370,6 @@ this.statusMessage = 'Query failed';
 refreshSchema() {
 const tables = alasql(`SHOW TABLES`);
 this.tables = tables || [];
-
 const hintTables = {};
 this.tables.forEach(t => {
 hintTables[t.tableid] = [];
@@ -391,14 +383,14 @@ this.runQuery();
 },
 
 resetDB() {
-if(confirm("Wipe entire persistent database? This cannot be undone.")) {
+if (confirm("Wipe entire persistent database? This cannot be undone.")) {
 try {
 alasql(`DROP INDEXEDDB DATABASE ${this.currentDB}`);
 this.initDB();
 this.results = null;
 this.editor.setValue('');
 this.statusMessage = 'Storage wiped';
-} catch(e) {
+} catch (e) {
 // Fallback for memory
 alasql(`DROP DATABASE ${this.currentDB}`);
 this.initDB();
@@ -408,19 +400,19 @@ this.initDB();
 
 insertSnippet(type) {
 let snippet = '';
-if(type === 'create') snippet = "CREATE TABLE new_table (\n\tid INT,\n\tname VARCHAR(100)\n);";
-if(type === 'select') snippet = "SELECT * FROM table_name WHERE id > 0;";
-if(type === 'insert') snippet = "INSERT INTO table_name VALUES (1, 'Value');";
+if (type === 'create') snippet = "CREATE TABLE new_table (\n\tid INT,\n\tname VARCHAR(100)\n);";
+if (type === 'select') snippet = "SELECT * FROM table_name WHERE id > 0;";
+if (type === 'insert') snippet = "INSERT INTO table_name VALUES (1, 'Value');";
 this.editor.replaceSelection(snippet);
 this.editor.focus();
 },
 
 exportData(format) {
-if(!this.results) return;
+if (!this.results) return;
 const opts = { headers: true };
 const fileName = `export_${new Date().getTime()}`;
 
-if(format === 'csv') {
+if (format === 'csv') {
 alasql(`SELECT * INTO CSV("${fileName}.csv", ?) FROM ?`, [opts, this.results]);
 } else {
 alasql(`SELECT * INTO JSON("${fileName}.json") FROM ?`, [this.results]);

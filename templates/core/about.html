@@ -3,193 +3,130 @@
 
 {% block title %}About | Kiri Labs{% endblock %}
 
-{% block meta_description %}Learn about Kiri Labs, our focus on TinyML, SLMs, and efficient AI for edge deployment.{%endblock %}
+{% block meta_description %}
+Kiri Labs builds lightweight, smart, and efficient software and AI solutions. Discover our platforms.
+{% endblock %}
 
 {% block og_title %}About Kiri Labs{% endblock %}
-{% block og_description %}Discover how we engineer compute-optimal systems and adaptive tokenizers for edge hardware.
-Intelligence scalable to zero.{% endblock %}
 
+{% block og_description %}
+Kiri Labs builds lightweight, smart, and efficient software and AI solutions. Discover our platforms.
+{% endblock %}
 
 {% block content %}
 <div class="max-w-7xl mx-auto px-6 py-8">
-
     <section class="mb-12">
-        <div
-            class="relative overflow-hidden rounded-xl bg-white border border-[#DEE2E6] dark:bg-[#1E1E1E] dark:border-[#333] p-8 md:p-12 shadow-sm">
+        <div class="card p-8 md:p-12 relative overflow-hidden">
             <div class="relative z-10 flex flex-col md:flex-row md:items-center gap-6 justify-center w-full">
                 <img src="{% static 'images/logos/logo.png' %}" alt="Kiri Labs"
                     class="h-20 w-auto object-contain shrink-0">
                 <div class="text-center md:text-left">
-                    <h1 class="text-2xl md:text-3xl font-extrabold text-[#212529] dark:text-white mb-2 tracking-tight">
-                        Built Small. Built Smart.
-                    </h1>
-                    <p class="text-lg text-[#6C757D] dark:text-[#A1A1AA] max-w-xl leading-relaxed">
-                        Software and AI that stays lightweight, small, and efficient.
-                    </p>
+                    <h1 class="text-2xl md:text-3xl font-extrabold text-heading mb-2 tracking-tight"> Built Small. Built
+                        Smart. </h1>
+                    <p class="text-lg text-body max-w-xl leading-relaxed"> Software and AI that stays lightweight,
+                        small, and efficient. </p>
                 </div>
-            </div>
-            <!-- Decorative elements matching Home page -->
-            <div class="decorative-blob blob-gold top-0 right-0 w-80 h-80 opacity-20"></div>
+            </div> <div class="decorative-blob blob-gold top-0 right-0 w-80 h-80 opacity-20"></div>
             <div class="decorative-blob blob-white bottom-0 left-1/2 w-64 h-64 opacity-10"></div>
         </div>
-    </section>
-
-    <!-- Main Content Grid -->
+    </section> 
+    
     <div class="grid lg:grid-cols-3 gap-8 mb-12">
-        <!-- Left: Who We Are -->
         <div class="lg:col-span-2">
-            <div class="p-6 bg-white rounded-xl border border-[#DEE2E6] dark:bg-[#1E1E1E] dark:border-[#3D3D3D]">
-                <h2 class="text-xl font-semibold text-[#212529] dark:text-white mb-4 flex items-center gap-2">
-                    <i class="fas fa-building text-[#0D7C3D]"></i>
-                    Who We Are
-                </h2>
+            <div class="card p-6 h-full">
+                <h2 class="text-xl font-semibold text-heading mb-4 flex items-center gap-2"> <i
+                        class="fas fa-building text-kiri-green"></i> Who We
+                    Are </h2>
                 <div class="space-y-4">
-                    <p class="text-[#495057] dark:text-[#E4E4E7] leading-relaxed">
-                        <strong>Kiri Labs</strong> builds software and AI. We showcase our projects, tools, and
-                        everything we work on. Our focus is on keeping things lightweight, small, and efficient.
-                    </p>
-                    <p class="text-sm text-[#6C757D] dark:text-[#A1A1AA] leading-relaxed">
-                        We believe great software doesn't need to be heavy. Everything we build is designed to
-                        do more with less.
-                    </p>
+                    <p class="text-body leading-relaxed"> <strong>Kiri Labs</strong> builds software and artificial intelligence. We develop tools, platforms, and digital solutions with a strict focus on performance. </p>
+                    <p class="text-sm text-muted leading-relaxed"> We believe great software doesn't need to be heavy—everything we engineer is designed to do more with less. </p>
                 </div>
             </div>
-        </div>
-
-        <!-- Right: Focus Areas -->
+        </div> 
+        
         <div>
-            <div class="p-6 bg-white rounded-xl border border-[#DEE2E6] dark:bg-[#1E1E1E] dark:border-[#3D3D3D] h-full">
-                <h3 class="text-lg font-semibold text-[#212529] dark:text-white mb-4 flex items-center gap-2">
-                    <i class="fas fa-bullseye text-[#C4992E]"></i>
-                    What We Value
-                </h3>
+            <div class="card p-6 h-full">
+                <h3 class="text-lg font-semibold text-heading mb-4 flex items-center gap-2"> <i
+                        class="fas fa-bullseye text-kiri-gold"></i> What We
+                    Value </h3>
                 <ul class="space-y-3">
-                    <li class="flex items-start gap-3 text-sm">
-                        <i class="fas fa-check text-[#0D7C3D] mt-0.5"></i>
-                        <span class="text-[#495057] dark:text-[#A1A1AA]">Lightweight over bloated</span>
+                    <li class="flex items-start gap-3 text-sm"> <i class="fas fa-check text-kiri-green mt-0.5"></i>
+                        <span class="text-body">Lightweight over bloated</span>
                     </li>
-                    <li class="flex items-start gap-3 text-sm">
-                        <i class="fas fa-check text-[#0D7C3D] mt-0.5"></i>
-                        <span class="text-[#495057] dark:text-[#A1A1AA]">Small over complex</span>
+                    <li class="flex items-start gap-3 text-sm"> <i class="fas fa-check text-kiri-green mt-0.5"></i>
+                        <span class="text-body">Small over
+                            complex</span>
                     </li>
-                    <li class="flex items-start gap-3 text-sm">
-                        <i class="fas fa-check text-[#0D7C3D] mt-0.5"></i>
-                        <span class="text-[#495057] dark:text-[#A1A1AA]">Efficient over excessive</span>
+                    <li class="flex items-start gap-3 text-sm"> <i class="fas fa-check text-kiri-green mt-0.5"></i>
+                        <span class="text-body">Efficient
+                            over excessive</span>
                     </li>
-                    <li class="flex items-start gap-3 text-sm">
-                        <i class="fas fa-check text-[#0D7C3D] mt-0.5"></i>
-                        <span class="text-[#495057] dark:text-[#A1A1AA]">Shipping over theorizing</span>
+                    <li class="flex items-start gap-3 text-sm"> <i class="fas fa-check text-kiri-green mt-0.5"></i>
+                        <span class="text-body">Shipping
+                            over theorizing</span>
                     </li>
                 </ul>
             </div>
         </div>
-    </div>
-
-    <!-- Featured Platforms -->
+    </div> 
+    
     <section class="mb-12">
         <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl font-semibold text-[#212529] dark:text-white flex items-center gap-2">
-                <i class="fas fa-rocket text-[#0D7C3D]"></i>
-                Our Platforms
-            </h2>
+            <h2 class="text-xl font-semibold text-heading flex items-center gap-2"> <i
+                    class="fas fa-rocket text-kiri-green"></i> Our Platforms </h2>
         </div>
         <div class="grid sm:grid-cols-2 gap-4">
-            <!-- Imara -->
-            <a href="https://imara.africa/" target="_blank"
-                class="group p-5 bg-white rounded-xl border border-[#DEE2E6] hover:border-[#0D7C3D] hover:shadow-lg transition-all dark:bg-[#1E1E1E] dark:border-[#3D3D3D] dark:hover:border-[#0D7C3D]">
+            <a href="https://imara.africa/" target="_blank" rel="noopener noreferrer" class="card card-hover p-5 group flex flex-col h-full">
                 <div class="mb-4">
-                    <img src="{% static 'images/logos/imara.png' %}" alt="Imara" class="h-12 w-12 object-contain">
+                    <img src="{% static 'images/logos/imara.webp' %}" alt="Imara"
+                        class="h-12 w-12 object-contain filter group-hover:brightness-110 transition-all">
                 </div>
-                <h3
-                    class="text-[#212529] dark:text-white font-semibold mb-2 group-hover:text-[#0D7C3D] transition-colors">
+                <h3 class="text-heading font-semibold mb-2 group-hover:text-kiri-green transition-colors">
                     Imara
                 </h3>
-                <p class="text-xs text-[#6C757D] dark:text-[#A1A1AA] mb-4 leading-relaxed">
+                <p class="text-xs text-muted mb-4 leading-relaxed flex-1">
                     Digital bodyguard protecting against online gender-based violence.
                 </p>
-                <span class="text-xs text-[#0D7C3D] font-semibold flex items-center gap-1">
+                <span class="text-xs text-kiri-green font-semibold flex items-center gap-1">
                     Visit <i class="fas fa-external-link-alt"></i>
                 </span>
             </a>
 
-            <!-- SpanInsight -->
-            <a href="https://spaninsight.com/" target="_blank"
-                class="group p-5 bg-white rounded-xl border border-[#DEE2E6] hover:border-[#0D7C3D] hover:shadow-lg transition-all dark:bg-[#1E1E1E] dark:border-[#3D3D3D] dark:hover:border-[#0D7C3D]">
+            <a href="https://igboarchives.com.ng/" target="_blank" rel="noopener noreferrer"
+                class="card card-hover p-5 group flex flex-col h-full">
                 <div class="mb-4">
-                    <img src="{% static 'images/logos/spaninsight.webp' %}" alt="SpanInsight"
-                        class="h-12 w-12 object-contain">
+                    <img src="{% static 'images/logos/igboarchives.webp' %}" alt="Igbo Archives"
+                        class="h-12 w-12 object-contain filter group-hover:brightness-110 transition-all">
                 </div>
-                <h3
-                    class="text-[#212529] dark:text-white font-semibold mb-2 group-hover:text-[#0D7C3D] transition-colors">
-                    SpanInsight
-                </h3>
-                <p class="text-xs text-[#6C757D] dark:text-[#A1A1AA] mb-4 leading-relaxed">
-                    Data intelligence platform for collection and dashboard analytics.
-                </p>
-                <span class="text-xs text-[#0D7C3D] font-semibold flex items-center gap-1">
-                    Visit <i class="fas fa-external-link-alt"></i>
-                </span>
-            </a>
-
-            <!-- Igbo Archives -->
-            <a href="https://igboarchives.com.ng" target="_blank"
-                class="group p-5 bg-white rounded-xl border border-[#DEE2E6] hover:border-[#0D7C3D] hover:shadow-lg transition-all dark:bg-[#1E1E1E] dark:border-[#3D3D3D] dark:hover:border-[#0D7C3D]">
-                <div class="mb-4">
-                    <img src="{% static 'images/logos/igboarchives.png' %}" alt="Igbo Archives"
-                        class="h-12 w-12 object-contain">
-                </div>
-                <h3
-                    class="text-[#212529] dark:text-white font-semibold mb-2 group-hover:text-[#0D7C3D] transition-colors">
+                <h3 class="text-heading font-semibold mb-2 group-hover:text-kiri-green transition-colors">
                     Igbo Archives
                 </h3>
-                <p class="text-xs text-[#6C757D] dark:text-[#A1A1AA] mb-4 leading-relaxed">
+                <p class="text-xs text-muted mb-4 leading-relaxed flex-1">
                     Modern archive preserving Igbo cultural heritage digitally.
                 </p>
-                <span class="text-xs text-[#0D7C3D] font-semibold flex items-center gap-1">
-                    Visit <i class="fas fa-external-link-alt"></i>
-                </span>
-            </a>
-
-            <!-- Akili -->
-            <a href="https://akili-jwe7.onrender.com" target="_blank"
-                class="group p-5 bg-white rounded-xl border border-[#DEE2E6] hover:border-[#0D7C3D] hover:shadow-lg transition-all dark:bg-[#1E1E1E] dark:border-[#3D3D3D] dark:hover:border-[#0D7C3D]">
-                <div class="mb-4">
-                    <img src="{% static 'images/logos/akili.png' %}" alt="Akili" class="h-12 w-12 object-contain">
-                </div>
-                <h3
-                    class="text-[#212529] dark:text-white font-semibold mb-2 group-hover:text-[#0D7C3D] transition-colors">
-                    Akili
-                </h3>
-                <p class="text-xs text-[#6C757D] dark:text-[#A1A1AA] mb-4 leading-relaxed">
-                    Innovative learning platform with KaTeX support and quizzes.
-                </p>
-                <span class="text-xs text-[#0D7C3D] font-semibold flex items-center gap-1">
+                <span class="text-xs text-kiri-green font-semibold flex items-center gap-1">
                     Visit <i class="fas fa-external-link-alt"></i>
                 </span>
             </a>
         </div>
-    </section>
-
-    <!-- Contact CTA -->
-    <section
-        class="p-6 md:p-8 bg-white rounded-xl border border-[#DEE2E6] text-center dark:bg-[#1E1E1E] dark:border-[#3D3D3D]">
-        <h2 class="text-xl font-semibold text-[#212529] dark:text-white mb-2">Registration & Compliance</h2>
-        <p class="text-sm text-[#6C757D] dark:text-[#A1A1AA] mb-4 max-w-2xl mx-auto">
-            Kiri Research Labs is officially registered as a technology business in Nigeria.<br>
+    </section> 
+    
+    <section class="card p-6 md:p-8 text-center">
+        <h2 class="text-xl font-semibold text-heading mb-2">Registration & Compliance</h2>
+        <p class="text-sm text-body mb-4 max-w-2xl mx-auto"> Kiri Labs is officially registered as a technology
+            business in Nigeria.<br>
             <strong>CAC Registration No:</strong> 9317920 | <strong>SMEDAN ID:</strong> SUID-2621-6457-9859-4343
         </p>
         <div class="flex flex-wrap justify-center gap-4">
-            <a href="{% url 'core:terms' %}" class="text-[#0D7C3D] hover:underline text-sm font-medium">Terms of
+            <a href="{% url 'core:terms' %}" class="text-kiri-green hover:underline text-sm font-medium">Terms of
                 Service</a>
-            <a href="{% url 'core:privacy' %}" class="text-[#0D7C3D] hover:underline text-sm font-medium">Privacy
+            <a href="{% url 'core:privacy' %}" class="text-kiri-green hover:underline text-sm font-medium">Privacy
                 Policy</a>
-            <a href="{% url 'core:refund_policy' %}" class="text-[#0D7C3D] hover:underline text-sm font-medium">Refund
+            <a href="{% url 'core:refund_policy' %}" class="text-kiri-green hover:underline text-sm font-medium">Refund
                 Policy</a>
         </div>
     </section>
+</div> 
 
-</div>
-
-<!-- Mobile Spacer -->
 <div class="h-20 md:hidden"></div>
 {% endblock %}

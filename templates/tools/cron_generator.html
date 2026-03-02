@@ -2,12 +2,16 @@
 {% load static %}
 
 {% block title %}Cron Expression Builder | Kiri Labs{% endblock %}
-{% block meta_description %}Generate and validate cron expressions for scheduled tasks. Visual selection tool with
-real-time human-readable translations.{% endblock %}
+
+{% block meta_description %}
+Generate and validate cron expressions for scheduled tasks. Visual selection tool with real-time human-readable
+translations.
+{% endblock %}
 
 {% block tool_name %}Cron Generator{% endblock %}
 {% block tool_icon %}fa-clock{% endblock %}
 {% block tool_title %}Cron Expression Builder{% endblock %}
+
 {% block tool_description %}
 Generate and validate cron expressions for your scheduled tasks and automation pipelines.
 Visual selection tool that translates syntax into human-readable descriptions in real-time.
@@ -19,58 +23,46 @@ Visual selection tool that translates syntax into human-readable descriptions in
     <div class="space-y-4 overflow-auto pr-4 custom-scrollbar">
         <template x-for="part in parts" :key="part.name">
             <div
-                class="p-4 bg-white dark:bg-[#1A1A1A] rounded-2xl border border-[#DEE2E6] dark:border-[#3D3D3D] hover:border-[#0D7C3D] transition-colors group">
+                class="p-4 bg-surface rounded-2xl border border-subtle hover:border-kiri-green transition-colors group">
                 <div class="flex justify-between items-center mb-3">
-                    <label class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest"
+                    <label class="text-[10px] font-bold text-body uppercase tracking-widest"
                         x-text="part.label"></label>
-                    <span class="text-[10px] font-mono text-[#0D7C3D] font-bold bg-[#0D7C3D]/10 px-2 py-0.5 rounded"
+                    <span class="text-[10px] font-mono text-kiri-green font-bold bg-kiri-green/10 px-2 py-0.5 rounded"
                         x-text="part.value"></span>
                 </div>
                 <select x-model="part.value" @change="generate()"
-                    class="w-full p-3 text-sm font-bold border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-xl bg-[#F8F9FA] dark:bg-[#121212] text-[#212529] dark:text-white outline-none focus:border-[#0D7C3D] transition-all">
+                    class="w-full p-3 text-sm font-bold border border-subtle rounded-xl bg-surface text-heading outline-none focus:border-kiri-green transition-all">
                     <template x-for="option in part.options" :key="option.v">
                         <option :value="option.v" x-text="option.l"></option>
                     </template>
                 </select>
             </div>
         </template>
-    </div>
-
-    <!-- Live Display Card -->
+    </div> <!-- Live Display Card -->
     <div class="flex flex-col justify-center">
-        <div
-            class="p-10 bg-[#F8F9FA] dark:bg-[#121212] rounded-[3rem] border border-[#DEE2E6] dark:border-[#3D3D3D] text-center shadow-inner relative group">
-            <div class="absolute top-6 left-1/2 -translate-x-1/2">
-                <span class="text-[10px] font-bold text-[#ADB5BD] uppercase tracking-[0.4em]">Expression</span>
-            </div>
-
+        <div class="p-10 bg-surface rounded-[3rem] border border-subtle text-center shadow-inner relative group">
+            <div class="absolute top-6 left-1/2 -translate-x-1/2"> <span
+                    class="text-[10px] font-bold text-muted uppercase tracking-[0.4em]">Expression</span> </div>
             <div class="my-10">
-                <div class="text-4xl font-mono font-bold text-[#0D7C3D] selection:bg-[#0D7C3D] selection:text-white"
+                <div class="text-4xl font-mono font-bold text-kiri-green selection:bg-kiri-green selection:text-white"
                     x-text="input"></div>
             </div>
-
-            <div class="flex justify-center gap-3">
-                <button @click="copyToClipboard(input)"
-                    class="px-6 py-2.5 bg-[#0D7C3D] text-white text-xs font-bold rounded-xl hover:bg-[#0A5C2C] transition-all shadow-lg active:scale-95 flex items-center gap-2">
-                    <i class="fas" :class="copied ? 'fa-check' : 'fa-copy'"></i>
-                    <span x-text="copied ? 'Copied' : 'Copy Cron'"></span>
-                </button>
+            <div class="flex justify-center gap-3"> <button @click="copyToClipboard(input)"
+                    class="px-6 py-2.5 bg-kiri-green text-white text-xs font-bold rounded-xl hover:bg-kiri-green-dark transition-all shadow-lg active:scale-95 flex items-center gap-2">
+                    <i class="fas" :class="copied ? 'fa-check' : 'fa-copy'"></i> <span
+                        x-text="copied ? 'Copied' : 'Copy Cron'"></span> </button>
                 <button @click="download()"
-                    class="px-6 py-2.5 border border-[#DEE2E6] dark:border-[#3D3D3D] text-[#6C757D] dark:text-white text-xs font-bold rounded-xl hover:bg-white dark:hover:bg-[#2D2D2D] transition-all shadow-sm">
-                    <i class="fas fa-file-code"></i>
-                </button>
+                    class="px-6 py-2.5 border border-subtle text-muted text-xs font-bold rounded-xl hover:bg-surface transition-all shadow-sm">
+                    <i class="fas fa-file-code"></i> </button>
             </div>
         </div>
-
         <div
-            class="mt-8 p-6 bg-[#0D7C3D]/5 border border-[#0D7C3D]/10 rounded-2xl flex items-start gap-4 animate-fade-in">
-            <div class="w-10 h-10 rounded-full bg-[#0D7C3D]/10 flex items-center justify-center text-[#0D7C3D]">
-                <i class="fas fa-info"></i>
-            </div>
+            class="mt-8 p-6 bg-kiri-green/5 border border-kiri-green/10 rounded-2xl flex items-start gap-4 animate-fade-in">
+            <div class="w-10 h-10 rounded-full bg-kiri-green/10 flex items-center justify-center text-kiri-green"> <i
+                    class="fas fa-info"></i> </div>
             <div>
-                <p class="text-[10px] font-bold text-[#0D7C3D] uppercase tracking-widest mb-1">Human Readable</p>
-                <p class="text-xs text-[#6C757D] dark:text-[#A1A1AA] font-bold leading-relaxed italic"
-                    x-text="description"></p>
+                <p class="text-[10px] font-bold text-kiri-green uppercase tracking-widest mb-1">Human Readable</p>
+                <p class="text-xs text-body font-bold leading-relaxed italic" x-text="description"></p>
             </div>
         </div>
     </div>
@@ -81,30 +73,118 @@ Visual selection tool that translates syntax into human-readable descriptions in
 {
 hideUpload: true,
 hideSample: true,
-parts: [
-{ name: 'min', label: 'Minute', value: '*', options: [{ v: '*', l: 'Every minute' }, { v: '0', l: '0' }, { v: '*/5', l:
-'Every 5 minutes' }, { v: '*/15', l: 'Every 15 minutes' }, { v: '30', l: '30' }] },
-{ name: 'hour', label: 'Hour', value: '*', options: [{ v: '*', l: 'Every hour' }, { v: '0', l: 'Midnight' }, { v: '12',
-l: 'Noon' }, { v: '*/2', l: 'Every 2 hours' }, { v: '9', l: '9 AM' }, { v: '17', l: '5 PM' }] },
-{ name: 'dom', label: 'Day of Month', value: '*', options: [{ v: '*', l: 'Every day' }, { v: '1', l: '1st' }, { v: '15',
-l: '15th' }, { v: 'L', l: 'Last day' }, { v: '*/2', l: 'Every 2nd day' }] },
-{ name: 'month', label: 'Month', value: '*', options: [{ v: '*', l: 'Every month' }, { v: '1', l: 'January' }, { v: '6',
-l: 'June' }, { v: '12', l: 'December' }] },
-{ name: 'dow', label: 'Day of Week', value: '*', options: [{ v: '*', l: 'Every day' }, { v: '0', l: 'Sunday' }, { v:
-'1-5', l: 'Weekdays' }, { v: '6,0', l: 'Weekends' }] }
+parts: [{
+name: 'min',
+label: 'Minute',
+value: '*',
+options: [{
+v: '*',
+l: 'Every minute'
+}, {
+v: '0',
+l: '0'
+}, {
+v: '*/5',
+l: 'Every 5 minutes'
+}, {
+v: '*/15',
+l: 'Every 15 minutes'
+}, {
+v: '30',
+l: '30'
+}]
+},
+{
+name: 'hour',
+label: 'Hour',
+value: '*',
+options: [{
+v: '*',
+l: 'Every hour'
+}, {
+v: '0',
+l: 'Midnight'
+}, {
+v: '12',
+l: 'Noon'
+}, {
+v: '*/2',
+l: 'Every 2 hours'
+}, {
+v: '9',
+l: '9 AM'
+}, {
+v: '17',
+l: '5 PM'
+}]
+},
+{
+name: 'dom',
+label: 'Day of Month',
+value: '*',
+options: [{
+v: '*',
+l: 'Every day'
+}, {
+v: '1',
+l: '1st'
+}, {
+v: '15',
+l: '15th'
+}, {
+v: 'L',
+l: 'Last day'
+}, {
+v: '*/2',
+l: 'Every 2nd day'
+}]
+},
+{
+name: 'month',
+label: 'Month',
+value: '*',
+options: [{
+v: '*',
+l: 'Every month'
+}, {
+v: '1',
+l: 'January'
+}, {
+v: '6',
+l: 'June'
+}, {
+v: '12',
+l: 'December'
+}]
+},
+{
+name: 'dow',
+label: 'Day of Week',
+value: '*',
+options: [{
+v: '*',
+l: 'Every day'
+}, {
+v: '0',
+l: 'Sunday'
+}, {
+v: '1-5',
+l: 'Weekdays'
+}, {
+v: '6,0',
+l: 'Weekends'
+}]
+}
 ],
 description: 'Runs every minute of every day.',
-
 init() {
 this.generate();
 },
-
 generate() {
 this.input = this.parts.map(p => p.value).join(' ');
 this.updateDescription();
 this.statusMessage = 'Cron updated';
 },
-
 updateDescription() {
 // Basic mapping for human readability
 const labels = this.parts.map(p => {
@@ -113,7 +193,6 @@ return opt ? opt.l.toLowerCase() : p.value;
 });
 this.description = `Executes ${labels[0]} at ${labels[1]} during ${labels[2]} of ${labels[3]} on ${labels[4]}.`;
 },
-
 download() {
 if (!this.input) return;
 this.downloadFile(this.input, 'kiri_cron.txt', 'text/plain');
@@ -144,7 +223,8 @@ this.downloadFile(this.input, 'kiri_cron.txt', 'text/plain');
     }
 
     .custom-scrollbar::-webkit-scrollbar-thumb {
-        @apply bg-[#DEE2E6] dark:bg-[#3D3D3D] rounded-full;
+        background-color: var(--color-subtle);
+        border-radius: 9999px;
     }
 </style>
 {% endblock %}

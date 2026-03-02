@@ -1,11 +1,9 @@
 from django.db import models
 from django.conf import settings
-from django.contrib.contenttypes.fields import GenericForeignKey
-from django.contrib.contenttypes.models import ContentType
 
 class ErrorLog(models.Model):
     """
-    Local error logging for admin (replaces Sentry).
+    Local error logging for admin.
     Captures 500 errors and other application exceptions.
     """
     ERROR_LEVELS = [
@@ -50,7 +48,7 @@ class ErrorLog(models.Model):
 class EcosystemPlatform(models.Model):
     """
     External revenue platforms integrated into Kiri's navigation.
-    Managed via Django admin — no template changes needed.
+    Managed via Django admin - no template changes needed.
     """
     name = models.CharField(max_length=100)
     url = models.URLField()

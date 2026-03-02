@@ -22,7 +22,7 @@ class UserIntegrationAdmin(admin.ModelAdmin):
     list_filter = ["platform", "has_repo_scope", "has_write_scope", "is_primary", "tokens_encrypted"]
     search_fields = ["user__username", "platform_username"]
     raw_id_fields = ["user"]
-    # Protect encrypted token fields — show masked versions only
+    # Protect encrypted token fields - show masked versions only
     exclude = ["access_token", "refresh_token"]
     readonly_fields = ["masked_access_token", "masked_refresh_token", "tokens_encrypted", "created_at", "updated_at"]
     

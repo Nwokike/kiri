@@ -2,12 +2,15 @@
 {% load static %}
 
 {% block title %}Bulk UUID v4 Generator | Kiri Labs{% endblock %}
-{% block meta_description %}Generate secure Version 4 Universally Unique Identifiers (UUIDs) in bulk for database, API,
-and system development.{% endblock %}
+
+{% block meta_description %}
+Generate secure Version 4 Universally Unique Identifiers (UUIDs) in bulk for database, API, and system development.
+{% endblock %}
 
 {% block tool_name %}UUID Generator{% endblock %}
 {% block tool_icon %}fa-fingerprint{% endblock %}
 {% block tool_title %}Bulk UUID v4 Generator{% endblock %}
+
 {% block tool_description %}
 Generate secure Version 4 Universally Unique Identifiers (UUIDs) for your database,
 API development, or distributed systems research.
@@ -15,11 +18,10 @@ API development, or distributed systems research.
 
 {% block tool_actions_left %}
 <div class="flex items-center gap-2">
-    <div class="flex bg-white dark:bg-[#1E1E1E] p-1 rounded-xl border border-[#DEE2E6] dark:border-[#3D3D3D] shadow-sm">
-        <button @click="uppercase = false; generate()"
-            :class="!uppercase ? 'bg-[#0D7C3D] text-white' : 'text-[#6C757D]'"
-            class="px-3 py-1.5 text-[10px] font-bold rounded-lg transition-all">Lowercase</button>
-        <button @click="uppercase = true; generate()" :class="uppercase ? 'bg-[#0D7C3D] text-white' : 'text-[#6C757D]'"
+    <div class="flex bg-surface p-1 rounded-xl border border-subtle shadow-sm">
+        <button @click="uppercase = false; generate()" :class="!uppercase ? 'bg-kiri-green text-white' : 'text-muted'"
+            class="px-3 py-1.5 text-[10px] font-bold rounded-lg transition-all">Lowercase</button> <button
+            @click="uppercase = true; generate()" :class="uppercase ? 'bg-kiri-green text-white' : 'text-muted'"
             class="px-3 py-1.5 text-[10px] font-bold rounded-lg transition-all">Uppercase</button>
     </div>
 </div>
@@ -27,10 +29,9 @@ API development, or distributed systems research.
 
 {% block tool_actions_right %}
 <button @click="download()"
-    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-[#0D7C3D] text-white hover:bg-[#0A5C2C]"
+    class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold transition-all active:scale-95 shadow-sm bg-kiri-green text-white hover:bg-kiri-green-dark"
     x-show="uuids.length">
-    <i class="fas fa-download"></i>
-    <span>Export List</span>
+    <i class="fas fa-download"></i> <span>Export List</span>
 </button>
 {% endblock %}
 
@@ -38,63 +39,45 @@ API development, or distributed systems research.
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8 h-[500px]">
     <!-- Configuration -->
     <div class="space-y-6">
-        <div class="p-6 bg-[#F8F9FA] dark:bg-[#1A1A1A] rounded-[2rem] border border-[#DEE2E6] dark:border-[#3D3D3D]">
-            <h3 class="text-xs font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest mb-6">Generation
-                Rules</h3>
+        <div class="p-6 bg-surface rounded-[2rem] border border-subtle">
+            <h3 class="text-xs font-bold text-body uppercase tracking-widest mb-6">Generation Rules</h3>
             <div class="space-y-4">
-                <div>
-                    <label class="text-[10px] font-bold text-[#A1A1AA] uppercase mb-2 block">Quantity (1-100)</label>
+                <div> <label class="text-[10px] font-bold text-muted uppercase mb-2 block">Quantity (1-100)</label>
                     <input type="number" x-model.number="count" min="1" max="100"
-                        class="w-full p-4 font-mono text-sm border border-[#DEE2E6] dark:border-[#3D3D3D] rounded-2xl bg-white dark:bg-[#121212] text-[#212529] dark:text-white outline-none focus:border-[#0D7C3D] transition-all">
+                        class="w-full p-4 font-mono text-sm border border-subtle rounded-2xl bg-surface text-heading outline-none focus:border-kiri-green transition-all">
                 </div>
-                <div class="flex items-center gap-3">
-                    <input type="checkbox" x-model="noHyphens" @change="generate()"
-                        class="w-4 h-4 text-[#0D7C3D] border-gray-300 rounded focus:ring-[#0D7C3D]">
-                    <span class="text-sm text-[#6C757D] dark:text-[#E4E4E7]">Strip Hyphens</span>
-                </div>
-                <button @click="generate()"
-                    class="w-full py-4 bg-[#0D7C3D] text-white font-bold rounded-2xl hover:bg-[#0A5C2C] transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2">
-                    <i class="fas fa-magic"></i>
-                    Generate
-                </button>
+                <div class="flex items-center gap-3"> <input type="checkbox" x-model="noHyphens" @change="generate()"
+                        class="w-4 h-4 text-kiri-green border-subtle rounded focus:ring-kiri-green"> <span
+                        class="text-sm text-muted">Strip
+                        Hyphens</span> </div> <button @click="generate()"
+                    class="w-full py-4 bg-kiri-green text-white font-bold rounded-2xl hover:bg-kiri-green-dark transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2">
+                    <i class="fas fa-magic"></i> Generate </button>
             </div>
-        </div>
-
-        <!-- Quick Insight -->
-        <div class="p-6 bg-[#0D7C3D]/5 border border-[#0D7C3D]/10 rounded-[2rem] text-center">
-            <p class="text-[10px] font-bold text-[#0D7C3D] uppercase tracking-widest mb-1">Secure Generation</p>
-            <p class="text-xs text-[#0D7C3D]/70 italic leading-relaxed">Generated using cryptographically secure random
+        </div> <!-- Quick Insight -->
+        <div class="p-6 bg-kiri-green/5 border border-kiri-green/10 rounded-[2rem] text-center">
+            <p class="text-[10px] font-bold text-kiri-green uppercase tracking-widest mb-1">Secure Generation</p>
+            <p class="text-xs text-kiri-green/70 italic leading-relaxed">Generated using cryptographically secure random
                 values.</p>
         </div>
-    </div>
-
-    <!-- Results Display -->
+    </div> <!-- Results Display -->
     <div class="lg:col-span-2 flex flex-col gap-3">
-        <div class="flex items-center justify-between px-2">
-            <span class="text-[10px] font-bold text-[#6C757D] dark:text-[#A1A1AA] uppercase tracking-widest">Generated
-                Output</span>
-            <button @click="copyToClipboard(uuids.join('\n'))" x-show="uuids.length"
-                class="text-[10px] font-bold text-[#0D7C3D] hover:underline uppercase flex items-center gap-1.5">
-                <i class="fas" :class="copied ? 'fa-check' : 'fa-copy'"></i>
-                <span x-text="copied ? 'Copied All' : 'Copy All'"></span>
-            </button>
-        </div>
-        <div
-            class="flex-1 rounded-[2rem] bg-white dark:bg-[#121212] border border-[#DEE2E6] dark:border-[#3D3D3D] overflow-hidden flex flex-col">
+        <div class="flex items-center justify-between px-2"> <span
+                class="text-[10px] font-bold text-body uppercase tracking-widest">Generated
+                Output</span> <button @click="copyToClipboard(uuids.join('\n'))" x-show="uuids.length"
+                class="text-[10px] font-bold text-kiri-green hover:underline uppercase flex items-center gap-1.5"> <i
+                    class="fas" :class="copied ? 'fa-check' : 'fa-copy'"></i> <span
+                    x-text="copied ? 'Copied All' : 'Copy All'"></span> </button> </div>
+        <div class="flex-1 rounded-[2rem] bg-surface border border-subtle overflow-hidden flex flex-col">
             <div class="flex-1 overflow-auto p-8 custom-scrollbar bg-dots-grid">
                 <template x-for="(uuid, i) in uuids" :key="i">
-                    <div class="flex items-center gap-4 py-2 group">
-                        <span class="text-[9px] font-bold text-[#ADB5BD] w-6" x-text="i+1"></span>
-                        <span class="font-mono text-sm text-[#212529] dark:text-[#4ADE80] flex-1 break-all"
-                            x-text="uuid"></span>
-                        <button @click="copyToClipboard(uuid)"
-                            class="opacity-0 group-hover:opacity-100 transition-opacity text-[#A1A1AA] hover:text-[#0D7C3D]"><i
-                                class="fas fa-copy text-xs"></i></button>
-                    </div>
+                    <div class="flex items-center gap-4 py-2 group"> <span class="text-[9px] font-bold text-muted w-6"
+                            x-text="i+1"></span> <span class="font-mono text-sm text-heading flex-1 break-all"
+                            x-text="uuid"></span> <button @click="copyToClipboard(uuid)"
+                            class="opacity-0 group-hover:opacity-100 transition-opacity text-muted hover:text-kiri-green"><i
+                                class="fas fa-copy text-xs"></i></button> </div>
                 </template>
-                <div x-show="!uuids.length"
-                    class="h-full flex flex-col items-center justify-center text-gray-300 dark:text-gray-700">
-                    <i class="fas fa-fingerprint text-5xl mb-4 opacity-20"></i>
+                <div x-show="!uuids.length" class="h-full flex flex-col items-center justify-center text-muted"> <i
+                        class="fas fa-fingerprint text-5xl mb-4 opacity-20"></i>
                     <p class="text-sm font-bold uppercase tracking-widest opacity-50">Awaiting Generation</p>
                 </div>
             </div>
@@ -110,27 +93,33 @@ count: 10,
 uppercase: false,
 noHyphens: false,
 uuids: [],
-
 loadSample() {
 this.generate();
 },
-
 generate() {
 const results = [];
 const limit = Math.max(1, Math.min(this.count, 100));
 for (let i = 0; i < limit; i++) { let uuid=crypto.randomUUID(); if (this.noHyphens) uuid=uuid.replace(/-/g, '' ); if
     (this.uppercase) uuid=uuid.toUpperCase(); results.push(uuid); } this.uuids=results;
     this.statusMessage=`${results.length} UUIDs generated`; }, download() { if (!this.uuids.length) return;
-    this.downloadFile(this.uuids.join('\n'), 'kiri_uuids.txt' , 'text/plain' ); } } {% endblock %} {% block
-    extra_js_tool %} <style>
+    this.downloadFile(this.uuids.join('\n'), 'kiri_uuids.txt' , 'text/plain' ); }, onReset() { this.uuids=[];
+    this.statusMessage='Ready' ; } } {% endblock %} {% block extra_js_tool %} <style>
     .bg-dots-grid {
     background-image: radial-gradient(#DEE2E6 1px, transparent 1px);
     background-size: 20px 20px;
     }
+
     .dark .bg-dots-grid {
     background-image: radial-gradient(#2D2D2D 1px, transparent 1px);
     }
-    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-    .custom-scrollbar::-webkit-scrollbar-thumb { @apply bg-[#DEE2E6] dark:bg-[#3D3D3D] rounded-full; }
+
+    .custom-scrollbar::-webkit-scrollbar {
+    width: 4px;
+    }
+
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: var(--color-subtle);
+    border-radius: 9999px;
+    }
     </style>
     {% endblock %}

@@ -3,7 +3,7 @@ User-agent: *
 Allow: /
 
 # Sitemap
-Sitemap: {{ SITE_URL }}/sitemap.xml
+Sitemap: {{ SITE_URL|default:"https://kiri.ng" }}/sitemap.xml
 
 # Disallow admin and private areas
 Disallow: /admin/

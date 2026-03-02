@@ -7,7 +7,6 @@ const urlsToCache = [
 
     // --- Core App Assets ---
     "{% static 'css/output.css' %}",
-    "{% static 'css/forms.css' %}",
     "{% static 'css/fonts.css' %}",
     "{% static 'js/main.js' %}",
     "{% static 'js/htmx.min.js' %}",
@@ -31,12 +30,8 @@ const urlsToCache = [
     // --- Vendor: Alpine.js ---
     "{% static 'vendor/alpine/alpine.min.js' %}",
 
-    // --- Vendor: xterm (SQL Workbench terminal output) ---
-    "{% static 'vendor/xterm/xterm.css' %}",
-    "{% static 'vendor/xterm/xterm.js' %}",
-    "{% static 'vendor/xterm/xterm-addon-fit.js' %}",
 
-    // --- Tools: Pyodide (Python Studio — cached lazily below, not in install) ---
+    // --- Tools: Pyodide (Python Studio - cached lazily below, not in install) ---
     // Pyodide 0.29.3 loaded on demand via tool pages, not pre-cached here
     // to avoid huge install payload (~10MB wasm). Listed for fetch-cache strategy.
 ];
@@ -56,7 +51,7 @@ self.addEventListener('install', event => {
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => {
-                // Graceful individual adds — a single 404 won't abort the whole SW
+                // Graceful individual adds - a single 404 won't abort the whole SW
                 return Promise.all(urlsToCache.map(url =>
                     cache.add(url).catch(e => console.warn(`SW: Could not cache ${url}`, e))
                 ));
@@ -101,11 +96,14 @@ self.addEventListener('fetch', event => {
                 .catch(() => caches.match(request).then(r => r || caches.match('/offline/')))
         );
     } else {
-        // Assets: cache-first; inject CORP headers for WASM/SharedArrayBuffer
+        // Assets: cache-first; inject CORP headers for WASM/SharedArrayBuffer only when needed
         event.respondWith(
             caches.match(request).then(cached => {
                 if (cached) {
-                    return injectCORPHeaders(cached);
+                    if (PYODIDE_CACHE_URLS.some(u => request.url.startsWith(u))) {
+                        return injectCORPHeaders(cached);
+                    }
+                    return cached;
                 }
                 return fetch(request).then(response => {
                     // Lazily cache Pyodide files on first use

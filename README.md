@@ -1,7 +1,7 @@
 # Kiri
 
 [![License: Proprietary](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
-[![Python: 3.12+](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://www.python.org/)
+[![Python: 3.14](https://img.shields.io/badge/Python-3.12+-blue.svg)](https://www.python.org/)
 [![Django: 6.0](https://img.shields.io/badge/Django-6.0-green.svg)](https://www.djangoproject.com/)
 
 **Software & AI — built lightweight, small, and efficient.**

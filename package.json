@@ -1,7 +1,7 @@
 {
   "name": "kiri",
   "version": "1.0.0",
-  "description": "Kiri Labs — Software & Utilities, built lightweight and efficient",
+  "description": "Open-source research tools, developer utilities, and project showcases. Built for edge intelligence and low-resource environments.",
   "scripts": {
     "build": "npm run build:css",
     "build:css": "npx @tailwindcss/cli -i ./static/css/global.css -o ./static/css/output.css --minify",

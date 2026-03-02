@@ -34,7 +34,7 @@ CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "hello@kiri.ng")
 
 # Core Application Definition
 INSTALLED_APPS = [
-    "kiri_project.apps.KiriProjectConfig",  # Must be first for SQLite signals
+    "kiri_project.apps.KiriProjectConfig",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -97,7 +97,6 @@ TEMPLATES = [
 WSGI_APPLICATION = "kiri_project.wsgi.application"
 
 # Database - SQLite optimized for 1GB RAM
-# PRAGMAs applied via connection signals in kiri_project/apps.py
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -109,7 +108,7 @@ DATABASES = {
     }
 }
 
-# Caching - Database Backend to save RAM
+# Caching - Database Backend
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.db.DatabaseCache",
@@ -133,22 +132,13 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
-# Static & Media Files with WhiteNoise Optimization
+# Static & Media Files
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = BASE_DIR / "media"
-
-STORAGES = {
-    "default": {
-        "BACKEND": "django.core.files.storage.FileSystemStorage",
-    },
-    "staticfiles": {
-        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
-    },
-}
 
 WHITENOISE_CUSTOM_HEADERS = [
     (r'.*', {
@@ -180,7 +170,7 @@ LOGGING = {
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "users.CustomUser"
 
-# Authentication & Allauth
+# Authentication
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
     "allauth.account.auth_backends.AuthenticationBackend",

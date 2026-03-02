@@ -39,8 +39,6 @@ Client-side coding environments for Python (Pyodide), SQL (sql.js), and HTML/CSS
 ---
 
 ## Corporate & Compliance
-**Kiri Research Labs** is officially registered as a technology business in Nigeria.
-
 *   **CAC Registration:** 9317920
 *   **SMEDAN ID:** SUID-2621-6457-9859-4343
 *   **Contact:** [hello@kiri.ng](mailto:hello@kiri.ng)

@@ -1,5 +1,7 @@
 @import "tailwindcss";
 
+@source "../../templates";
+@source "../js";
 @custom-variant dark (&:where(.dark, .dark *));
 
 /* 1. SMART THEME TOKENS */
@@ -11,7 +13,7 @@
     --color-heading: var(--kiri-heading);
     --color-body: var(--kiri-body);
     --color-text-muted: var(--kiri-muted);
-    
+
     --color-surface: var(--kiri-surface);
     --color-surface-subtle: var(--kiri-surface-subtle);
     --color-border-subtle: var(--kiri-border);
@@ -78,7 +80,8 @@
     }
 
     .mobile-nav {
-        @apply md:hidden fixed bottom-0 left-0 right-0 h-16 bg-surface border-t border-border-subtle z-50 shadow-[0_-4px_12px_rgba(0,0,0,0.05)];
+        @apply md:hidden fixed bottom-0 left-0 right-0 h-16 bg-surface border-t border-border-subtle z-50;
+        box-shadow: 0 -4px 12px rgba(0, 0, 0, 0.05);
     }
 
     .dropdown-menu {
@@ -92,7 +95,7 @@
     /* ==========================================================================
        Forms & Inputs 
        ========================================================================== */
-    .form-input, 
+    .form-input,
     .input-field,
     .search-input,
     .form-field input,
@@ -330,8 +333,15 @@ html.dark #theme-icon-dark {
 
 /* Animations */
 @keyframes bounce-slow {
-    0%, 100% { transform: translateY(0); }
-    50% { transform: translateY(-5px); }
+
+    0%,
+    100% {
+        transform: translateY(0);
+    }
+
+    50% {
+        transform: translateY(-5px);
+    }
 }
 
 .animate-bounce-slow {

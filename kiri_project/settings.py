@@ -10,17 +10,15 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# Security settings
+# Security
 DEBUG = os.environ.get("DEBUG", "False") == "True"
 SECRET_KEY = os.environ.get("SECRET_KEY", "django-insecure-dev-key-for-development-only")
 
 if not DEBUG and SECRET_KEY == "django-insecure-dev-key-for-development-only":
     raise ValueError("SECRET_KEY environment variable must be set in production")
 
-# ALLOWED_HOSTS
 ALLOWED_HOSTS_ENV = os.environ.get("ALLOWED_HOSTS", "")
 if ALLOWED_HOSTS_ENV:
     ALLOWED_HOSTS = [host.strip() for host in ALLOWED_HOSTS_ENV.split(",")]
@@ -32,10 +30,9 @@ CSRF_TRUSTED_ORIGINS = [
     "https://www.kiri.ng",
 ]
 
-# Contact Email
 CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "hello@kiri.ng")
 
-# Application definition
+# Core Application Definition
 INSTALLED_APPS = [
     "kiri_project.apps.KiriProjectConfig",  # Must be first for SQLite signals
     "django.contrib.admin",
@@ -46,15 +43,13 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.sites",
     "django.contrib.sitemaps",
-    # Third Party
     "allauth",
     "allauth.account",
     "allauth.socialaccount",
     "allauth.socialaccount.providers.github",
-    "users.providers.huggingface",  # Custom Hugging Face provider
+    "users.providers.huggingface",
     "django_htmx",
     "pwa",
-    # Local
     "core",
     "users",
     "projects",
@@ -70,7 +65,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "django.contrib.auth.middleware.LoginRequiredMiddleware",  # Native 6.0 Global Auth
+    "django.contrib.auth.middleware.LoginRequiredMiddleware", 
     "core.middleware.ExceptionLoggingMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
@@ -101,34 +96,31 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "kiri_project.wsgi.application"
 
-# Database - SQLite optimized for 1GB RAM production
-# NOTE: PRAGMAs are applied via connection signals in kiri_project/apps.py
-# (init_command is deprecated in Django 6.0 for SQLite)
+# Database - SQLite optimized for 1GB RAM
+# PRAGMAs applied via connection signals in kiri_project/apps.py
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
         "NAME": BASE_DIR / "db.sqlite3",
         "OPTIONS": {
             "timeout": 20,
-            "transaction_mode": "IMMEDIATE",  # Better concurrency
+            "transaction_mode": "IMMEDIATE",
         },
     }
 }
 
-# Caching - Database Backend (Optimized for 1GB RAM)
-# Using DB instead of RAM (LocMemCache) to save memory for Pyodide/App
+# Caching - Database Backend to save RAM
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.db.DatabaseCache",
         "LOCATION": "kiri_cache_table",
-        "TIMEOUT": 60 * 15,  # 15 minutes default
+        "TIMEOUT": 60 * 15,
         "OPTIONS": {
             "MAX_ENTRIES": 2000
         }
     }
 }
 
-# Password validation
 AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator"},
     {"NAME": "django.contrib.auth.password_validation.MinimumLengthValidator"},
@@ -136,28 +128,34 @@ AUTH_PASSWORD_VALIDATORS = [
     {"NAME": "django.contrib.auth.password_validation.NumericPasswordValidator"},
 ]
 
-# Internationalization
 LANGUAGE_CODE = "en-us"
 TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
-# Static files
-STATIC_URL = "static/"
+# Static & Media Files with WhiteNoise Optimization
+STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
 
-# WhiteNoise Headers for COEP/CORP compatibility
+MEDIA_URL = "/media/"
+MEDIA_ROOT = BASE_DIR / "media"
+
+STORAGES = {
+    "default": {
+        "BACKEND": "django.core.files.storage.FileSystemStorage",
+    },
+    "staticfiles": {
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
+
 WHITENOISE_CUSTOM_HEADERS = [
     (r'.*', {
         'Cross-Origin-Resource-Policy': 'cross-origin',
         'Access-Control-Allow-Origin': '*',
     }),
 ]
-
-# Media files
-MEDIA_URL = "/media/"
-MEDIA_ROOT = BASE_DIR / "media"
 
 LOGGING = {
     'version': 1,
@@ -182,31 +180,32 @@ LOGGING = {
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "users.CustomUser"
 
-# Authentication
+# Authentication & Allauth
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
     "allauth.account.auth_backends.AuthenticationBackend",
 ]
 
-# Allauth - Staff-Only (sole proprietorship, no public signup)
+# Staff-Only Signup Configuration
 ACCOUNT_LOGIN_METHODS = {"username"}
 ACCOUNT_EMAIL_VERIFICATION = "none"
+SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
+SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
+ACCOUNT_LOGOUT_ON_GET = True
+LOGIN_REDIRECT_URL = "/"
+LOGOUT_REDIRECT_URL = "/"
 
-# Rate limits
+SOCIALACCOUNT_LOGIN_ON_GET = False
+SOCIALACCOUNT_STORE_TOKENS = True
+SOCIALACCOUNT_AUTO_SIGNUP = False
+SOCIALACCOUNT_ADAPTER = 'users.adapter.KiriSocialAccountAdapter'
+ACCOUNT_ADAPTER = 'users.adapter.KiriAccountAdapter'
+
 ACCOUNT_RATE_LIMITS = {
     "login": "5/m",
     "login_failed": "10/m/ip",
 }
 
-# Account linking - prevent duplicate accounts by auto-linking same email
-SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
-SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
-
-ACCOUNT_LOGOUT_ON_GET = True
-LOGIN_REDIRECT_URL = "/"
-LOGOUT_REDIRECT_URL = "/"
-
-# OAuth Providers (GitHub, Hugging Face)
 SOCIALACCOUNT_PROVIDERS = {
     "github": {
         "APP": {
@@ -223,20 +222,15 @@ SOCIALACCOUNT_PROVIDERS = {
         "SCOPE": ["openid", "profile", "email", "read-repos", "write-repos", "inference-api"],
     },
 }
-SOCIALACCOUNT_LOGIN_ON_GET = False
-SOCIALACCOUNT_STORE_TOKENS = True
-SOCIALACCOUNT_AUTO_SIGNUP = False  # Block account creation via OAuth
-SOCIALACCOUNT_ADAPTER = 'users.adapter.KiriSocialAccountAdapter'
-ACCOUNT_ADAPTER = 'users.adapter.KiriAccountAdapter'  # Blocks public signup
 
-# Django 6.0 Native Tasks Configuration
+# Tasks Configuration
 TASKS = {
     "default": {
         "BACKEND": "django.tasks.backends.immediate.ImmediateBackend",
     },
 }
 
-# Email disabled - staff contacts admin directly for password issues
+# General & Security
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 SITE_URL = os.environ.get("SITE_URL", "https://kiri.ng")
 
@@ -254,14 +248,12 @@ if not DEBUG or IS_TESTING:
     CSRF_COOKIE_SECURE = True
     SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 
-    # Content Security Policy (Django 6.0 built-in)
-    # Using REPORT_ONLY for gradual rollout — switch to SECURE_CSP to enforce
     SECURE_CSP_REPORT_ONLY = {
         "default-src": ["'self'"],
         "script-src": [
             "'self'",
             "'unsafe-inline'",
-            "'unsafe-eval'",  # Required for Alpine.js (standard build)
+            "'unsafe-eval'", 
             "https://cdn.jsdelivr.net",
             "https://cdnjs.cloudflare.com",
             "https://www.googletagmanager.com",
@@ -297,14 +289,10 @@ if not DEBUG or IS_TESTING:
         "object-src": ["'none'"],
     }
 
-    # Performance
     CONN_MAX_AGE = 60
     DATA_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
     FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
-
-    # CSRF Cookie settings
     CSRF_COOKIE_SAMESITE = "Strict"
-
 
 # PWA Settings
 PWA_APP_NAME = "Kiri"

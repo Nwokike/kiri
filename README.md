@@ -33,7 +33,7 @@ Client-side coding environments for Python (Pyodide), SQL (sql.js), and HTML/CSS
 
 *   **Backend**: Django 6.0 + HTMX 2.0
 *   **Styling**: Tailwind CSS v4
-*   **Client-side Compute**: Pyodide (WASM Python), sql.js (WASM SQLite)
+*   **Client-side Compute (Playground)**: Pyodide (WASM Python), sql.js (WASM SQLite)
 *   **Tasks**: Django 6.0 native task framework
 
 ---

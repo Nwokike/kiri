@@ -98,7 +98,7 @@
     }
 
     .sidebar {
-        @apply fixed top-14 left-0 bottom-0 bg-surface border-r border-border-subtle z-40 transition-all duration-300 overflow-hidden hidden md:block;
+        @apply fixed top-14 left-0 bottom-0 bg-surface border-r border-border-subtle z-40 transition-all duration-300 overflow-hidden;
     }
 
     .mobile-nav {
@@ -460,7 +460,7 @@ a[href*="/huggingface/"]::before {
    11. SIDEBAR CARD & ERROR COMPONENTS
    ========================================================================== */
 @layer components {
-    .page-container { @apply mx-auto max-w-7xl px-4 md:px-6; }
+    .page-container { @apply mx-auto max-w-7xl px-4 py-8 md:px-6 md:py-10; }
     .content-grid { @apply gap-8 grid lg:grid-cols-3; }
     .content-main { @apply lg:col-span-2 space-y-12; }
     .content-sidebar { @apply space-y-8; }

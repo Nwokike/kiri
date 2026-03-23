@@ -1,5 +1,5 @@
 {% extends "base.html" %}
-{% load i18n %}
+{% load i18n socialaccount %}
 
 {% block title %}Integrations | Kiri Labs{% endblock %}
 
@@ -57,8 +57,14 @@
                             </div>
                             {% endif %}
                         </div>
-                        <span
-                            class="bg-success-subtle font-bold py-1 rounded px-2 text-[10px] text-kiri-green tracking-wider uppercase">Connected</span>
+                        <div class="flex items-center gap-3">
+                            <a href="{% provider_login_url account.provider process='connect' %}" title="Refresh connection to update expired tokens"
+                                class="btn-secondary !w-auto !py-1 !px-2.5 !text-[10px] text-muted hover:text-kiri-green hover:border-kiri-green transition-colors z-10 relative flex items-center gap-1.5 shadow-sm">
+                                <i class="fas fa-sync-alt h-3 w-3"></i> Refresh
+                            </a>
+                            <span
+                                class="bg-success-subtle font-bold py-1 rounded px-2 text-[10px] text-kiri-green tracking-wider uppercase hidden sm:inline-block">Connected</span>
+                        </div>
                     </div>
                 </label>
                 {% endwith %}

@@ -45,7 +45,6 @@ function initSidebar() {
     const isMobile = () => window.innerWidth < 768;
 
     function openMobileSidebar() {
-        sidebar?.classList.remove('hidden');
         sidebar?.classList.add('mobile-open');
         sidebarOverlay?.classList.remove('hidden');
         document.body.style.overflow = 'hidden';
@@ -55,9 +54,6 @@ function initSidebar() {
         sidebar?.classList.remove('mobile-open');
         sidebarOverlay?.classList.add('hidden');
         document.body.style.overflow = '';
-        setTimeout(() => {
-            if (isMobile()) sidebar?.classList.add('hidden');
-        }, 300);
     }
 
     // Helper to get CSS variables

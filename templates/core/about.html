@@ -14,54 +14,54 @@ Kiri Labs builds lightweight, smart, and efficient software and AI solutions. Di
 {% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-6 py-8">
+<div class="k-container max-w-7xl px-6">
     <section class="mb-12">
-        <div class="card p-8 md:p-12 relative overflow-hidden">
-            <div class="relative z-10 flex flex-col md:flex-row md:items-center gap-6 justify-center w-full">
+        <div class="card k-md-p-12 k-overflow-hidden k-p-8 k-relative">
+            <div class="gap-6 k-d-flex k-flex-col k-justify-center k-relative k-w-full k-z-10 md:flex-row md:items-center">
                 <img src="{% static 'images/logos/logo.png' %}" alt="Kiri Labs"
-                    class="h-20 w-auto object-contain shrink-0">
-                <div class="text-center md:text-left">
-                    <h1 class="text-2xl md:text-3xl font-extrabold text-heading mb-2 tracking-tight"> Built Small. Built
+                    class="k-shrink-0 k-spacer object-contain w-auto">
+                <div class="k-text-center md:text-left">
+                    <h1 class="font-extrabold k-mb-2 k-text-2xl md:text-3xl text-heading tracking-tight"> Built Small. Built
                         Smart. </h1>
-                    <p class="text-lg text-body max-w-xl leading-relaxed"> Software and AI that stays lightweight,
+                    <p class="k-max-w-xl k-text-lg leading-relaxed text-body"> Software and AI that stays lightweight,
                         small, and efficient. </p>
                 </div>
-            </div> <div class="decorative-blob blob-gold top-0 right-0 w-80 h-80 opacity-20"></div>
+            </div> <div class="blob-gold decorative-blob h-80 k-top-0 opacity-20 right-0 w-80"></div>
             <div class="decorative-blob blob-white bottom-0 left-1/2 w-64 h-64 opacity-10"></div>
         </div>
     </section> 
     
-    <div class="grid lg:grid-cols-3 gap-8 mb-12">
+    <div class="gap-8 k-d-grid lg:grid-cols-3 mb-12">
         <div class="lg:col-span-2">
-            <div class="card p-6 h-full">
-                <h2 class="text-xl font-semibold text-heading mb-4 flex items-center gap-2"> <i
+            <div class="card k-h-full p-6">
+                <h2 class="k-flex-row-center k-font-semibold k-mb-4 k-text-xl text-heading"> <i
                         class="fas fa-building text-kiri-green"></i> Who We
                     Are </h2>
-                <div class="space-y-4">
+                <div class="k-stack-md">
                     <p class="text-body leading-relaxed"> <strong>Kiri Labs</strong> builds software and artificial intelligence. We develop tools, platforms, and digital solutions with a strict focus on performance. </p>
-                    <p class="text-sm text-muted leading-relaxed"> We believe great software doesn't need to be heavy—everything we engineer is designed to do more with less. </p>
+                    <p class="k-text-sm-muted leading-relaxed"> We believe great software doesn't need to be heavy—everything we engineer is designed to do more with less. </p>
                 </div>
             </div>
         </div> 
         
         <div>
-            <div class="card p-6 h-full">
-                <h3 class="text-lg font-semibold text-heading mb-4 flex items-center gap-2"> <i
+            <div class="card k-h-full p-6">
+                <h3 class="k-flex-row-center k-font-semibold k-mb-4 k-text-lg text-heading"> <i
                         class="fas fa-bullseye text-kiri-gold"></i> What We
                     Value </h3>
                 <ul class="space-y-3">
-                    <li class="flex items-start gap-3 text-sm"> <i class="fas fa-check text-kiri-green mt-0.5"></i>
+                    <li class="k-flex-start-sm"> <i class="fas fa-check text-kiri-green mt-0.5"></i>
                         <span class="text-body">Lightweight over bloated</span>
                     </li>
-                    <li class="flex items-start gap-3 text-sm"> <i class="fas fa-check text-kiri-green mt-0.5"></i>
+                    <li class="k-flex-start-sm"> <i class="fas fa-check text-kiri-green mt-0.5"></i>
                         <span class="text-body">Small over
                             complex</span>
                     </li>
-                    <li class="flex items-start gap-3 text-sm"> <i class="fas fa-check text-kiri-green mt-0.5"></i>
+                    <li class="k-flex-start-sm"> <i class="fas fa-check text-kiri-green mt-0.5"></i>
                         <span class="text-body">Efficient
                             over excessive</span>
                     </li>
-                    <li class="flex items-start gap-3 text-sm"> <i class="fas fa-check text-kiri-green mt-0.5"></i>
+                    <li class="k-flex-start-sm"> <i class="fas fa-check text-kiri-green mt-0.5"></i>
                         <span class="text-body">Shipping
                             over theorizing</span>
                     </li>
@@ -71,62 +71,62 @@ Kiri Labs builds lightweight, smart, and efficient software and AI solutions. Di
     </div> 
     
     <section class="mb-12">
-        <div class="flex items-center justify-between mb-6">
-            <h2 class="text-xl font-semibold text-heading flex items-center gap-2"> <i
+        <div class="k-d-flex k-items-center k-justify-between k-mb-6">
+            <h2 class="k-flex-row-center k-font-semibold k-text-xl text-heading"> <i
                     class="fas fa-rocket text-kiri-green"></i> Our Platforms </h2>
         </div>
-        <div class="grid sm:grid-cols-2 gap-4">
-            <a href="https://imara.africa/" target="_blank" rel="noopener noreferrer" class="card card-hover p-5 group flex flex-col h-full">
-                <div class="mb-4">
+        <div class="k-grid-sm sm:grid-cols-2">
+            <a href="https://imara.africa/" target="_blank" rel="noopener noreferrer" class="card card-hover k-d-flex k-flex-col k-group k-h-full p-5">
+                <div class="k-mb-4">
                     <img src="{% static 'images/logos/imara.webp' %}" alt="Imara"
-                        class="h-12 w-12 object-contain filter group-hover:brightness-110 transition-all">
+                        class="filter group-hover:brightness-110 k-h-12 k-w-12 object-contain transition-all">
                 </div>
-                <h3 class="text-heading font-semibold mb-2 group-hover:text-kiri-green transition-colors">
+                <h3 class="group-hover:text-kiri-green k-font-semibold k-mb-2 k-transition-colors text-heading">
                     Imara
                 </h3>
-                <p class="text-xs text-muted mb-4 leading-relaxed flex-1">
+                <p class="k-flex-1 k-mb-4 k-text-xs-muted leading-relaxed">
                     Digital bodyguard protecting against online gender-based violence.
                 </p>
-                <span class="text-xs text-kiri-green font-semibold flex items-center gap-1">
+                <span class="k-d-flex k-font-semibold k-gap-1 k-items-center k-text-xs text-kiri-green">
                     Visit <i class="fas fa-external-link-alt"></i>
                 </span>
             </a>
 
             <a href="https://igboarchives.com.ng/" target="_blank" rel="noopener noreferrer"
-                class="card card-hover p-5 group flex flex-col h-full">
-                <div class="mb-4">
+                class="card card-hover k-d-flex k-flex-col k-group k-h-full p-5">
+                <div class="k-mb-4">
                     <img src="{% static 'images/logos/igboarchives.webp' %}" alt="Igbo Archives"
-                        class="h-12 w-12 object-contain filter group-hover:brightness-110 transition-all">
+                        class="filter group-hover:brightness-110 k-h-12 k-w-12 object-contain transition-all">
                 </div>
-                <h3 class="text-heading font-semibold mb-2 group-hover:text-kiri-green transition-colors">
+                <h3 class="group-hover:text-kiri-green k-font-semibold k-mb-2 k-transition-colors text-heading">
                     Igbo Archives
                 </h3>
-                <p class="text-xs text-muted mb-4 leading-relaxed flex-1">
+                <p class="k-flex-1 k-mb-4 k-text-xs-muted leading-relaxed">
                     Modern archive preserving Igbo cultural heritage digitally.
                 </p>
-                <span class="text-xs text-kiri-green font-semibold flex items-center gap-1">
+                <span class="k-d-flex k-font-semibold k-gap-1 k-items-center k-text-xs text-kiri-green">
                     Visit <i class="fas fa-external-link-alt"></i>
                 </span>
             </a>
         </div>
     </section> 
     
-    <section class="card p-6 md:p-8 text-center">
-        <h2 class="text-xl font-semibold text-heading mb-2">Registration & Compliance</h2>
-        <p class="text-sm text-body mb-4 max-w-2xl mx-auto"> Kiri Labs is officially registered as a technology
+    <section class="card k-text-center md:p-8 p-6">
+        <h2 class="k-font-semibold k-mb-2 k-text-xl text-heading">Registration & Compliance</h2>
+        <p class="k-max-w-2xl k-mb-4 k-mx-auto k-text-sm text-body"> Kiri Labs is officially registered as a technology
             business in Nigeria.<br>
             <strong>CAC Registration No:</strong> 9317920 | <strong>SMEDAN ID:</strong> SUID-2621-6457-9859-4343
         </p>
-        <div class="flex flex-wrap justify-center gap-4">
-            <a href="{% url 'core:terms' %}" class="text-kiri-green hover:underline text-sm font-medium">Terms of
+        <div class="flex-wrap k-d-flex k-gap-4 k-justify-center">
+            <a href="{% url 'core:terms' %}" class="k-link-sm text-kiri-green">Terms of
                 Service</a>
-            <a href="{% url 'core:privacy' %}" class="text-kiri-green hover:underline text-sm font-medium">Privacy
+            <a href="{% url 'core:privacy' %}" class="k-link-sm text-kiri-green">Privacy
                 Policy</a>
-            <a href="{% url 'core:refund_policy' %}" class="text-kiri-green hover:underline text-sm font-medium">Refund
+            <a href="{% url 'core:refund_policy' %}" class="k-link-sm text-kiri-green">Refund
                 Policy</a>
         </div>
     </section>
 </div> 
 
-<div class="h-20 md:hidden"></div>
+<div class="k-spacer md:hidden"></div>
 {% endblock %}

@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en" class="k-h-full">
 
 <head>
     <meta charset="UTF-8">
@@ -14,20 +14,20 @@
 </head>
 
 <body
-    class="h-full k-page-container flex flex-col items-center justify-center bg-surface text-body transition-colors duration-300">
-    <div class="text-center px-6">
-        <div class="mb-8">
+    class="duration-300 k-error-container k-page-container text-body">
+    <div class="k-text-center px-6">
+        <div class="k-mb-8">
             <img src="{% static 'images/logos/logo.webp' %}" alt="Kiri"
-                class="h-20 w-auto mx-auto opacity-50 dark:opacity-30">
+                class="dark:opacity-30 k-spacer-center opacity-50 w-auto">
         </div>
-        <div class="w-20 h-20 mx-auto mb-6 bg-warning-subtle rounded-full flex items-center justify-center">
-            <i class="fas fa-wifi text-3xl text-kiri-gold"></i>
+        <div class="bg-warning-subtle k-d-flex k-items-center k-justify-center k-mb-6 k-rounded-full k-spacer-center k-w-20">
+            <i class="fa-wifi fas k-text-3xl text-kiri-gold"></i>
         </div>
-        <h2 class="text-2xl font-semibold text-heading mb-2">You're Offline</h2>
-        <p class="text-muted mb-8 max-w-md mx-auto">
+        <h2 class="k-section-title-lg text-heading">You're Offline</h2>
+        <p class="k-mb-8 k-mx-auto k-text-muted-base max-w-md">
             It looks like you've lost your internet connection. Please check your connection and try again.
         </p>
-        <button onclick="window.location.reload()" class="btn-primary inline-flex items-center gap-2">
+        <button onclick="window.location.reload()" class="btn-primary k-gap-2 k-inline-flex k-items-center">
             <i class="fas fa-redo"></i> Try Again
         </button>
     </div>

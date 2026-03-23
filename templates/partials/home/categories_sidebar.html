@@ -1,15 +1,15 @@
 <!-- Categories -->
 {% if categories %}
 <div class="card p-6">
-    <h3 class="text-sm font-bold text-heading mb-4 flex items-center gap-2 uppercase tracking-wider">
-        <i class="fas fa-tags text-muted"></i> Categories
+    <h3 class="k-flex-row-center k-font-bold k-mb-4 k-text-sm text-heading tracking-wider uppercase">
+        <i class="fa-tags fas k-text-muted-base"></i> Categories
     </h3>
-    <div class="flex flex-wrap gap-2">
+    <div class="flex-wrap k-d-flex k-gap-2">
         {% for cat in categories %}
         <a href="{% url 'projects:list' %}?category={{ cat.category|urlencode }}"
-            class="px-3 py-1.5 text-xs font-bold bg-subtle text-body rounded-lg hover:bg-success-subtle hover:text-kiri-green transition-colors">
+            class="bg-subtle hover:bg-success-subtle hover:text-kiri-green k-font-bold k-rounded-lg k-text-xs k-transition-colors px-3 py-1.5 text-body">
             {{ cat.category|default:"Other" }}
-            <span class="ml-1 opacity-50">{{ cat.count }}</span>
+            <span class="k-ml-1 opacity-50">{{ cat.count }}</span>
         </a>
         {% endfor %}
     </div>

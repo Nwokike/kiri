@@ -10,64 +10,64 @@
 {% block og_description %}{{ project.description|truncatechars:160 }}{% endblock %}
 
 {% block content %}
-<div class="max-w-4xl mx-auto px-4 py-8">
+<div class="k-container max-w-4xl px-4">
     <!-- Breadcrumb -->
-    <nav class="text-xs text-muted mb-5">
-        <a href="{% url 'projects:list' %}" class="hover:text-kiri-green transition-colors">Projects</a>
+    <nav class="k-text-xs-muted mb-5">
+        <a href="{% url 'projects:list' %}" class="hover:text-kiri-green k-transition-colors">Projects</a>
         <span class="mx-2">/</span>
         <span class="text-body">{{ project.name }}</span>
     </nav>
 
     <!-- Header -->
-    <div class="card p-6 mb-6">
-        <div class="flex flex-wrap items-start justify-between gap-4">
-            <div class="flex-1 min-w-0">
+    <div class="card k-mb-6 p-6">
+        <div class="flex-wrap k-d-flex k-gap-4 k-items-start k-justify-between">
+            <div class="k-flex-auto">
                 <!-- Badges -->
-                <div class="flex flex-wrap gap-2 mb-3">
+                <div class="flex-wrap k-d-flex k-gap-2 k-mb-3">
                     <span
-                        class="section-label tracking-normal px-2 py-0.5 rounded-full bg-success-subtle text-kiri-green dark:bg-kiri-green/20 lowercase">
+                        class="bg-success-subtle dark:bg-kiri-green/20 k-badge lowercase px-2 section-label text-kiri-green tracking-normal">
                         {{ project.get_category_display }}
                     </span>
                     {% if project.is_hot %}
                     <span
-                        class="section-label tracking-normal px-2 py-0.5 rounded-full bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-400">
+                        class="bg-orange-100 dark:bg-orange-900/30 dark:text-orange-400 k-badge px-2 section-label text-orange-700 tracking-normal">
                         🔥 Hot
                     </span>
                     {% endif %}
                     {% if project.language %}
-                    <span class="section-label tracking-normal px-2 py-0.5 rounded-full bg-subtle text-muted lowercase">
+                    <span class="bg-subtle k-badge k-text-muted-base lowercase px-2 section-label tracking-normal">
                         {{ project.language }}
                     </span>
                     {% endif %}
                 </div>
 
-                <h1 class="text-xl font-bold text-heading">{{ project.name }}</h1>
+                <h1 class="k-font-bold k-text-xl text-heading">{{ project.name }}</h1>
 
                 {% if project.submitted_by %}
-                <p class="mt-1 text-xs text-muted">
-                    Submitted by <span class="font-medium text-body">{{ project.submitted_by.username }}</span> &middot;
+                <p class="k-mt-1 k-text-xs-muted">
+                    Submitted by <span class="k-font-medium text-body">{{ project.submitted_by.username }}</span> &middot;
                     {{ project.created_at|date:"N j, Y" }}
                 </p>
                 {% endif %}
             </div>
 
             <!-- Action Links -->
-            <div class="flex items-center gap-2 flex-shrink-0">
+            <div class="k-flex-row-center k-flex-shrink-0">
                 {% if project.github_repo_url %}
                 <a href="{{ project.github_repo_url }}" target="_blank" rel="noopener"
-                    class="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg bg-gray-900 text-white hover:bg-black transition-colors">
+                    class="bg-gray-900 gap-1.5 hover:bg-black k-d-flex k-font-medium k-items-center k-rounded-lg k-text-sm k-text-white k-transition-colors px-3 py-1.5">
                     <i class="fab fa-github"></i> GitHub
                 </a>
                 {% endif %}
                 {% if project.demo_url %}
                 <a href="{{ project.demo_url }}" target="_blank" rel="noopener"
-                    class="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg bg-kiri-green text-white hover:bg-kiri-green-dark transition-colors">
+                    class="bg-kiri-green gap-1.5 hover:bg-kiri-green-dark k-d-flex k-font-medium k-items-center k-rounded-lg k-text-sm k-text-white k-transition-colors px-3 py-1.5">
                     <i class="fas fa-external-link-alt"></i> Demo
                 </a>
                 {% endif %}
                 {% if project.huggingface_url %}
                 <a href="{{ project.huggingface_url }}" target="_blank" rel="noopener"
-                    class="flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg bg-subtle text-muted hover:bg-subtle transition-colors">
+                    class="bg-subtle gap-1.5 hover:bg-subtle k-d-flex k-font-medium k-items-center k-rounded-lg k-text-muted k-text-sm px-3 py-1.5">
                     🤗 HF
                 </a>
                 {% endif %}
@@ -75,26 +75,26 @@
         </div>
 
         <!-- Stats -->
-        <div class="mt-5 flex flex-wrap gap-5 text-sm text-muted border-t border-subtle pt-4">
-            <span><i class="fas fa-star mr-1.5 text-yellow-400"></i>{{ project.stars_count }} stars</span>
-            <span><i class="fas fa-code-branch mr-1.5"></i>{{ project.forks_count }} forks</span>
-            <span><i class="fas fa-eye mr-1.5"></i>{{ project.view_count }} views</span>
+        <div class="border-subtle border-t flex-wrap gap-5 k-d-flex k-text-sm-muted mt-5 pt-4">
+            <span><i class="fa-star fas k-mr-1-5 text-yellow-400"></i>{{ project.stars_count }} stars</span>
+            <span><i class="fa-code-branch fas k-mr-1-5"></i>{{ project.forks_count }} forks</span>
+            <span><i class="fa-eye fas k-mr-1-5"></i>{{ project.view_count }} views</span>
         </div>
     </div>
 
     <!-- Description -->
-    <div class="card p-6 mb-6">
-        <h2 class="section-label mb-3">About</h2>
-        <p class="text-sm text-body leading-relaxed whitespace-pre-line">{{ project.description }}</p>
+    <div class="card k-mb-6 p-6">
+        <h2 class="k-mb-3 section-label">About</h2>
+        <p class="k-text-sm leading-relaxed text-body whitespace-pre-line">{{ project.description }}</p>
     </div>
 
     <!-- Topics -->
     {% if project.topics %}
-    <div class="card p-6 mb-6">
-        <h2 class="section-label mb-3">Topics</h2>
-        <div class="flex flex-wrap gap-2">
+    <div class="card k-mb-6 p-6">
+        <h2 class="k-mb-3 section-label">Topics</h2>
+        <div class="flex-wrap k-d-flex k-gap-2">
             {% for topic in project.topics %}
-            <span class="text-xs px-2.5 py-1 rounded-full bg-surface border border-subtle text-body transition-colors">
+            <span class="border-subtle k-bg-surface k-border k-py-1 k-rounded-full k-text-xs k-transition-colors px-2.5 text-body">
                 #{{ topic }}
             </span>
             {% endfor %}
@@ -104,5 +104,5 @@
 </div>
 
 <!-- Mobile Spacer -->
-<div class="h-20 md:hidden"></div>
+<div class="k-spacer md:hidden"></div>
 {% endblock %}

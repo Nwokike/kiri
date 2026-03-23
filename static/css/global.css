@@ -4,25 +4,48 @@
 @source "../js";
 @custom-variant dark (&:where(.dark, .dark *));
 
-/* 1. SMART THEME TOKENS */
+/* ==========================================================================
+   1. SMART THEME TOKENS
+   ========================================================================== */
 @theme {
+    /* Core Brand Colors */
     --color-kiri-green: #0D7C3D;
     --color-kiri-green-dark: #0A5C2C;
     --color-kiri-gold: #C4992E;
 
+    /* Semantic Variables */
     --color-heading: var(--kiri-heading);
     --color-body: var(--kiri-body);
-    --color-text-muted: var(--kiri-muted);
+    --color-muted: var(--kiri-muted);
 
     --color-surface: var(--kiri-surface);
     --color-surface-subtle: var(--kiri-surface-subtle);
     --color-border-subtle: var(--kiri-border);
     --color-background: var(--kiri-bg);
 
+    /* UI Component Fallbacks */
+    --color-accent: var(--color-kiri-green);
+    --color-accent-hover: var(--color-kiri-green-dark);
+    --color-secondary: var(--color-muted);
+    --color-alt: var(--color-surface-subtle);
+    --color-surface-alt: #E5E7EB;
+    
+    /* Vintage & Heritage Colors */
+    --color-heritage-cream: #FDFBF7;
+    --color-vintage-gold: #C4992E;
+    --color-vintage-beaver: #9F8170;
+    --color-vintage-bronze: #8C7853;
+    --color-dark-brown: #5C4033;
+    --color-dark-umber: #362312;
+
+    /* Typography */
     --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
     --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 }
 
+/* ==========================================================================
+   2. BASE STYLES & CSS VARIABLES
+   ========================================================================== */
 @layer base {
     :root {
         --kiri-heading: #000000;
@@ -32,6 +55,9 @@
         --kiri-surface-subtle: #F8F9FA;
         --kiri-border: #DEE2E6;
         --kiri-bg: #F8F9FA;
+        
+        --sidebar-width-expanded: 220px;
+        --sidebar-width-collapsed: 56px;
     }
 
     :root.dark {
@@ -49,16 +75,12 @@
     }
 }
 
-:root {
-    --sidebar-width-expanded: 220px;
-    --sidebar-width-collapsed: 56px;
-}
-
+/* ==========================================================================
+   3. COMPONENTS
+   ========================================================================== */
 @layer components {
 
-    /* ==========================================================================
-       Layout & Cards
-       ========================================================================== */
+    /* Layout & Cards */
     .card {
         @apply bg-surface border border-border-subtle rounded-xl;
     }
@@ -92,9 +114,7 @@
         @apply bg-background flex items-center justify-center;
     }
 
-    /* ==========================================================================
-       Forms & Inputs 
-       ========================================================================== */
+    /* Forms & Inputs */
     .form-input,
     .input-field,
     .search-input,
@@ -110,9 +130,7 @@
         @apply h-10 pl-10 pr-4 text-sm;
     }
 
-    /* ==========================================================================
-       Buttons
-       ========================================================================== */
+    /* Buttons */
     .btn,
     .btn-primary,
     .btn-secondary {
@@ -145,20 +163,17 @@
         @apply w-8 h-8 bg-surface-subtle text-body hover:bg-kiri-green hover:text-white;
     }
 
-    /* ==========================================================================
-       Navigation
-       ========================================================================== */
+    /* Navigation */
     .nav-link {
         @apply flex items-center h-10 px-4 gap-3 text-body hover:bg-surface-subtle hover:text-kiri-green transition-colors;
     }
 
     .nav-link-active {
-        /* Fixed: Using pure utility classes here */
-        @apply bg-[#E8F5ED] dark:bg-kiri-green/10 text-kiri-green border-r-2 border-kiri-green;
+        @apply bg-[#E8F5ED] dark:bg-kiri-green text-kiri-green border-r-2 border-kiri-green;
     }
 
     .subnav-link {
-        @apply flex items-center h-9 px-4 gap-3 text-[12px] font-bold text-text-muted hover:text-kiri-green transition-colors;
+        @apply flex items-center h-9 px-4 gap-3 text-[12px] font-bold hover:text-kiri-green transition-colors;
     }
 
     .nav-label-text {
@@ -170,7 +185,7 @@
     }
 
     .mobile-nav-item {
-        @apply flex flex-col items-center justify-center gap-1 text-text-muted;
+        @apply flex flex-col items-center justify-center gap-1;
     }
 
     .mobile-nav-item-active {
@@ -181,9 +196,7 @@
         @apply text-[9px] font-bold uppercase tracking-tighter;
     }
 
-    /* ==========================================================================
-       Alerts
-       ========================================================================== */
+    /* Alerts */
     .alert,
     .alert-success,
     .alert-error,
@@ -192,63 +205,276 @@
         @apply p-3 text-sm font-bold rounded-lg border-l-4;
     }
 
-    /* Fixed: Using pure utility classes instead of custom classes */
     .alert-success {
-        @apply bg-[#E8F5ED] dark:bg-kiri-green/10 border-kiri-green text-kiri-green dark:text-green-400;
+        @apply bg-[#E8F5ED] dark:bg-kiri-green border-kiri-green text-kiri-green dark:text-green-400;
     }
 
     .alert-error {
-        @apply bg-red-50 dark:bg-red-900/10 border-red-500 text-red-700 dark:text-red-400;
+        @apply bg-red-50 dark:bg-red-900 border-red-500 text-red-700 dark:text-red-400;
     }
 
     .alert-warning {
-        @apply bg-[#FDF5E6] dark:bg-kiri-gold/10 border-kiri-gold text-[#8B6914] dark:text-yellow-400;
+        @apply bg-[#FDF5E6] dark:bg-kiri-gold border-kiri-gold text-[#8B6914] dark:text-yellow-400;
     }
 
     .alert-info {
-        @apply bg-blue-50 dark:bg-blue-900/10 border-blue-500 text-blue-700 dark:text-blue-400;
+        @apply bg-blue-50 dark:bg-blue-900 border-blue-500 text-blue-700 dark:text-blue-400;
     }
 
-    /* ==========================================================================
-       Utilities
-       ========================================================================== */
-    .divider {
-        @apply border-t border-border-subtle;
-    }
+    /* Standard Utilities */
+    .divider { @apply border-t border-border-subtle; }
+    .border-subtle { @apply border-border-subtle; }
+    .bg-subtle { @apply bg-surface-subtle; }
+    .bg-surface { @apply bg-surface; }
+    .bg-success-subtle { @apply bg-[#E8F5ED] dark:bg-kiri-green; }
+    .bg-danger-subtle { @apply bg-red-50 dark:bg-red-900; }
+    .bg-warning-subtle { @apply bg-[#FDF5E6] dark:bg-kiri-gold; }
+    .bg-info-subtle { @apply bg-blue-50 dark:bg-blue-900; }
 
-    .border-subtle {
-        @apply border-border-subtle;
-    }
-
-    .bg-subtle {
-        @apply bg-surface-subtle;
-    }
-
-    .bg-surface {
-        @apply bg-surface;
-    }
-
-    .bg-success-subtle {
-        @apply bg-[#E8F5ED] dark:bg-kiri-green/10;
-    }
-
-    .bg-danger-subtle {
-        @apply bg-red-50 dark:bg-red-900/10;
-    }
-
-    .bg-warning-subtle {
-        @apply bg-[#FDF5E6] dark:bg-kiri-gold/10;
-    }
-
-    .bg-info-subtle {
-        @apply bg-blue-50 dark:bg-blue-900/10;
-    }
+    /* Auto-generated Kiri Utility Components */
+    .k-error-container { @apply bg-surface flex flex-col h-full items-center justify-center transition-colors; }
+    .k-page-title { @apply font-semibold mb-4 text-2xl; }
+    .k-section-title { @apply font-semibold mb-3 text-xl; }
+    .k-section-title-lg { @apply font-semibold mb-2 text-2xl; }
+    .k-card-title { @apply font-bold mb-2 text-xl; }
+    .k-label { @apply block font-bold text-sm; }
+    .k-container-main { @apply max-w-7xl md:px-6 mx-auto px-4 py-8; }
+    .k-container-md { @apply max-w-2xl mx-auto py-8; }
+    .k-container { @apply mx-auto py-8; }
+    .k-flex-row-center { @apply flex gap-2 items-center; }
+    .k-flex-row-center-md { @apply flex gap-3 items-center; }
+    .k-flex-start-sm { @apply flex gap-3 items-start text-sm; }
+    .k-grid-main { @apply gap-8 grid lg:grid-cols-3; }
+    .k-grid-sm { @apply gap-4 grid; }
+    .k-stack-lg { @apply space-y-6; }
+    .k-stack-md { @apply space-y-4; }
+    
+    .k-text-muted { @apply text-muted transition-colors; }
+    .k-text-sm-muted { @apply text-muted text-sm; }
+    .k-text-xs-muted { @apply text-muted text-xs; }
+    .k-text-sm-center { @apply text-center text-sm; }
+    .k-text-muted-bold { @apply font-bold text-muted; }
+    
+    .k-link-sm { @apply font-medium hover:underline text-sm; }
+    .k-flex-auto { @apply flex-1 min-w-0; }
+    .k-spacer-center { @apply h-20 mx-auto; }
+    .k-spacer { @apply h-20; }
+    .k-mb-10-center { @apply mb-10 text-center; }
+    .k-badge { @apply py-0.5 rounded-full; }
+    
+    .k-d-flex { @apply flex; }
+    .k-d-grid { @apply grid; }
+    
+    .k--bottom-16 { @apply -bottom-16; }
+    .k--right-16 { @apply -right-16; }
+    .k-absolute { @apply absolute; }
+    
+    /* Escaped Slashes for Tailwind Opacity Modifiers */
+    .k-bg-accent\/10 { @apply bg-accent/10; }
+    .k-hover-bg-accent\/5 { @apply hover:bg-accent/5; }
+    .k-bg-heritage-cream\/50 { @apply bg-heritage-cream/50; }
+    .k-bg-secondary\/10 { @apply bg-secondary/10; }
+    .k-bg-surface-alt\/30 { @apply bg-surface-alt/30; }
+    .k-border-accent\/30 { @apply border-accent/30; }
+    .k-border-secondary\/20 { @apply border-secondary/20; }
+    .k-text-surface-alt\/20 { @apply text-surface-alt/20; }
+    
+    /* Escaped Brackets for Arbitrary Values */
+    .k-max-w-\[150px\] { @apply max-w-[150px]; }
+    .k-max-w-\[200px\] { @apply max-w-[200px]; }
+    .k-min-h-\[200px\] { @apply min-h-[200px]; }
+    
+    .k-bg-alt { @apply bg-alt; }
+    .k-bg-gray-100 { @apply bg-gray-100; }
+    .k-bg-gray-50 { @apply bg-gray-50; }
+    .k-bg-green-600 { @apply bg-green-600; }
+    .k-bg-red-600 { @apply bg-red-600; }
+    .k-block { @apply block; }
+    .k-border { @apply border; }
+    .k-border-2 { @apply border-2; }
+    .k-border-accent { @apply border-accent; }
+    .k-border-b { @apply border-b; }
+    .k-border-border { @apply border-border-subtle; }
+    .k-border-dashed { @apply border-dashed; }
+    .k-border-gray-300 { @apply border-gray-300; }
+    .k-border-l-4 { @apply border-l-4; }
+    .k-border-l-accent { @apply border-l-accent; }
+    .k-border-l-vintage-gold { @apply border-l-vintage-gold; }
+    .k-border-none { @apply border-none; }
+    .k-border-red-600 { @apply border-red-600; }
+    .k-col-span-full { @apply col-span-full; }
+    .k-drop-shadow-md { @apply drop-shadow-md; }
+    
+    .k-flex { @apply flex; }
+    .k-flex-1 { @apply flex-1; }
+    .k-flex-col { @apply flex-col; }
+    .k-flex-shrink-0 { @apply flex-shrink-0; }
+    .k-font-bold { @apply font-bold; }
+    .k-font-medium { @apply font-medium; }
+    .k-font-mono { @apply font-mono; }
+    .k-font-normal { @apply font-normal; }
+    .k-font-sans { @apply font-sans; }
+    .k-font-semibold { @apply font-semibold; }
+    .k-font-serif { @apply font-serif; }
+    
+    .k-gap-1 { @apply gap-1; }
+    .k-gap-2 { @apply gap-2; }
+    .k-gap-3 { @apply gap-3; }
+    .k-gap-4 { @apply gap-4; }
+    .k-grid { @apply grid; }
+    .k-grid-cols-1 { @apply grid-cols-1; }
+    .k-grid-cols-2 { @apply grid-cols-2; }
+    
+    .k-h-1 { @apply h-1; }
+    .k-h-3 { @apply h-3; }
+    .k-h-12 { @apply h-12; }
+    .k-h-20 { @apply h-20; }
+    .k-h-24 { @apply h-24; }
+    .k-h-auto { @apply h-auto; }
+    .k-h-full { @apply h-full; }
+    .k-hidden { @apply hidden; }
+    
+    .k-hover-bg-green-700 { @apply hover:bg-green-700; }
+    .k-hover-bg-red-50 { @apply hover:bg-red-50; }
+    .k-hover-bg-red-700 { @apply hover:bg-red-700; }
+    .k-hover-border-accent { @apply hover:border-accent; }
+    .k-hover-text-accent { @apply hover:text-accent; }
+    .k-hover-text-accent-hover { @apply hover:text-accent-hover; }
+    .k-hover-text-text { @apply hover:text-body; }
+    .k-hover-underline { @apply hover:underline; }
+    
+    .k-inline { @apply inline; }
+    .k-inline-block { @apply inline-block; }
+    .k-inline-flex { @apply inline-flex; }
+    .k-italic { @apply italic; }
+    .k-items-center { @apply items-center; }
+    .k-items-start { @apply items-start; }
+    .k-justify-between { @apply justify-between; }
+    .k-justify-center { @apply justify-center; }
+    .k-justify-end { @apply justify-end; }
+    .k-left-0 { @apply left-0; }
+    .k-line-clamp-2 { @apply line-clamp-2; }
+    
+    .k-max-w-2xl { @apply max-w-2xl; }
+    .k-max-w-5xl { @apply max-w-5xl; }
+    .k-max-w-lg { @apply max-w-lg; }
+    .k-max-w-none { @apply max-w-none; }
+    .k-max-w-xl { @apply max-w-xl; }
+    
+    .k-mb-1 { @apply mb-1; }
+    .k-mb-2 { @apply mb-2; }
+    .k-mb-3 { @apply mb-3; }
+    .k-mb-4 { @apply mb-4; }
+    .k-mb-6 { @apply mb-6; }
+    .k-mb-8 { @apply mb-8; }
+    .k-mb-10 { @apply mb-10; }
+    
+    .k-md-col-span-2 { @apply md:col-span-2; }
+    .k-md-p-12 { @apply md:p-12; }
+    .k-md-text-4xl { @apply md:text-4xl; }
+    .k-min-h-screen { @apply min-h-screen; }
+    .k-min-w-0 { @apply min-w-0; }
+    
+    .k-ml-1 { @apply ml-1; }
+    .k-ml-auto { @apply ml-auto; }
+    .k-mr-1 { @apply mr-1; }
+    .k-mr-1-5 { @apply mr-1.5; }
+    .k-mr-2 { @apply mr-2; }
+    
+    .k-mt-1 { @apply mt-1; }
+    .k-mt-2 { @apply mt-2; }
+    .k-mt-3 { @apply mt-3; }
+    .k-mt-4 { @apply mt-4; }
+    .k-mt-6 { @apply mt-6; }
+    .k-mt-8 { @apply mt-8; }
+    .k-mx-auto { @apply mx-auto; }
+    
+    .k-object-cover { @apply object-cover; }
+    .k-opacity-70 { @apply opacity-70; }
+    .k-origin-left { @apply origin-left; }
+    .k-overflow-hidden { @apply overflow-hidden; }
+    
+    .k-p-1 { @apply p-1; }
+    .k-p-2 { @apply p-2; }
+    .k-p-3 { @apply p-3; }
+    .k-p-4 { @apply p-4; }
+    .k-p-8 { @apply p-8; }
+    .k-pl-4 { @apply pl-4; }
+    
+    /* Replaced Plugin Classes with Native Utilities */
+    .k-prose { @apply text-body leading-relaxed space-y-4 max-w-none; }
+    .k-prose-sm { @apply text-sm text-body leading-relaxed space-y-3 max-w-none; }
+    
+    .k-pt-6 { @apply pt-6; }
+    
+    /* Escaped Dot for Padding Class */
+    .k-py-0\.5 { @apply py-0.5; }
+    
+    .k-py-1 { @apply py-1; }
+    .k-py-8 { @apply py-8; }
+    .k-py-16 { @apply py-16; }
+    
+    .k-relative { @apply relative; }
+    .k-rounded { @apply rounded; }
+    .k-rounded-full { @apply rounded-full; }
+    .k-rounded-lg { @apply rounded-lg; }
+    .k-rounded-r-lg { @apply rounded-r-lg; }
+    .k-scale-90 { @apply scale-90; }
+    .k-shrink-0 { @apply shrink-0; }
+    
+    .k-sm-flex-row { @apply sm:flex-row; }
+    .k-sm-inline { @apply sm:inline; }
+    .k-sm-items-start { @apply sm:items-start; }
+    .k-sm-max-w-none { @apply sm:max-w-none; }
+    .k-sm-mt-0 { @apply sm:mt-0; }
+    .k-sm-w-32 { @apply sm:w-32; }
+    
+    .k-space-y-4 { @apply space-y-4; }
+    .k-space-y-6 { @apply space-y-6; }
+    
+    .k-text-xs { @apply text-xs; }
+    .k-text-sm { @apply text-sm; }
+    .k-text-base { @apply text-base; }
+    .k-text-lg { @apply text-lg; }
+    .k-text-xl { @apply text-xl; }
+    .k-text-2xl { @apply text-2xl; }
+    .k-text-3xl { @apply text-3xl; }
+    .k-text-4xl { @apply text-4xl; }
+    .k-text-8xl { @apply text-8xl; }
+    .k-text-9xl { @apply text-9xl; }
+    
+    .k-text-accent { @apply text-accent; }
+    .k-text-center { @apply text-center; }
+    .k-text-dark-brown { @apply text-dark-brown; }
+    .k-text-dark-umber { @apply text-dark-umber; }
+    .k-text-display-lg { @apply text-4xl font-bold; }
+    .k-text-gray-400 { @apply text-gray-400; }
+    .k-text-green-600 { @apply text-green-600; }
+    .k-text-muted-base { @apply text-muted; }
+    .k-text-red-500 { @apply text-red-500; }
+    .k-text-red-600 { @apply text-red-600; }
+    .k-text-secondary { @apply text-secondary; }
+    .k-text-text { @apply text-body; }
+    .k-text-vintage-beaver { @apply text-vintage-beaver; }
+    .k-text-vintage-bronze { @apply text-vintage-bronze; }
+    .k-text-vintage-gold { @apply text-vintage-gold; }
+    .k-text-white { @apply text-white; }
+    
+    .k-top-0 { @apply top-0; }
+    .k-transition-colors { @apply transition-colors; }
+    .k-truncate { @apply truncate; }
+    .k-underline { @apply underline; }
+    
+    .k-w-3 { @apply w-3; }
+    .k-w-12 { @apply w-12; }
+    .k-w-20 { @apply w-20; }
+    .k-w-full { @apply w-full; }
+    .k-z-10 { @apply z-10; }
 }
 
 /* ==========================================================================
-   Global Interactions & PWA
+   4. GLOBAL INTERACTIONS & PWA
    ========================================================================== */
-
 #theme-icon-light,
 #theme-icon-dark {
     display: none;
@@ -333,12 +559,10 @@ html.dark #theme-icon-dark {
 
 /* Animations */
 @keyframes bounce-slow {
-
     0%,
     100% {
         transform: translateY(0);
     }
-
     50% {
         transform: translateY(-5px);
     }
@@ -349,9 +573,8 @@ html.dark #theme-icon-dark {
 }
 
 /* ==========================================================================
-   Socialaccount Provider List Override
+   5. SOCIAL ACCOUNT PROVIDER LIST OVERRIDE
    ========================================================================== */
-
 .socialaccount_providers {
     display: contents;
 }

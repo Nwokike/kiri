@@ -14,22 +14,22 @@ Explore AI, ML, and software projects built by Kiri Labs. Browse by category, so
 {% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 py-8">
+<div class="k-container max-w-7xl px-4">
     <!-- Page Header -->
-    <div class="mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+    <div class="k-d-flex k-flex-col k-gap-4 k-justify-between k-mb-8 k-sm-flex-row sm:items-center">
         <div>
-            <h1 class="text-2xl font-bold text-heading">Projects</h1>
-            <p class="mt-1 text-sm text-body">Showcasing AI, ML, and software projects from our community.</p>
+            <h1 class="k-font-bold k-text-2xl text-heading">Projects</h1>
+            <p class="k-mt-1 k-text-sm text-body">Showcasing AI, ML, and software projects from our community.</p>
         </div>
         {% if user.is_authenticated %}
-        <a href="{% url 'projects:create' %}" class="btn-primary shrink-0 self-start sm:self-auto">
-            <i class="fas fa-plus mr-1.5"></i> Submit Project
+        <a href="{% url 'projects:create' %}" class="btn-primary k-shrink-0 self-start sm:self-auto">
+            <i class="fa-plus fas k-mr-1-5"></i> Submit Project
         </a>
         {% endif %}
     </div>
 
     <!-- Filters -->
-    <form method="get" class="flex flex-wrap gap-2 mb-6" id="filter-form">
+    <form method="get" class="flex-wrap k-d-flex k-gap-2 k-mb-6" id="filter-form">
         <select name="category" onchange="this.form.submit()" class="form-input !w-auto !py-1.5 !h-auto">
             <option value="">All Categories</option>
             {% for value, label in categories %}
@@ -45,41 +45,41 @@ Explore AI, ML, and software projects built by Kiri Labs. Browse by category, so
 
     <!-- Project Grid -->
     {% if projects %}
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+    <div class="k-grid-cols-1 k-grid-sm lg:grid-cols-3 sm:grid-cols-2">
         {% for project in projects %}
-        <a href="{{ project.get_absolute_url }}" class="card card-hover p-5 group block">
+        <a href="{{ project.get_absolute_url }}" class="card card-hover k-block k-group p-5">
             <!-- Category Badge + Hot -->
-            <div class="flex items-center gap-2 mb-3">
+            <div class="k-flex-row-center k-mb-3">
                 <span
-                    class="section-label bg-success-subtle text-kiri-green px-2 py-0.5 rounded-full lowercase tracking-normal">
+                    class="bg-success-subtle k-badge lowercase px-2 section-label text-kiri-green tracking-normal">
                     {{ project.get_category_display }}
                 </span>
                 {% if project.is_hot %}
-                <span class="section-label bg-warning-subtle text-orange-600 px-2 py-0.5 rounded-full tracking-normal">
+                <span class="bg-warning-subtle k-badge px-2 section-label text-orange-600 tracking-normal">
                     🔥 Hot
                 </span>
                 {% endif %}
             </div>
 
             <!-- Title -->
-            <h2 class="font-semibold text-heading group-hover:text-kiri-green transition-colors line-clamp-1">
+            <h2 class="group-hover:text-kiri-green k-font-semibold k-transition-colors line-clamp-1 text-heading">
                 {{ project.name }}
             </h2>
 
             <!-- Description -->
-            <p class="mt-1.5 text-sm text-body line-clamp-2">{{ project.description }}</p>
+            <p class="k-line-clamp-2 k-text-sm mt-1.5 text-body">{{ project.description }}</p>
 
             <!-- Meta -->
-            <div class="mt-4 flex items-center justify-between text-xs text-muted">
-                <div class="flex items-center gap-3">
+            <div class="k-d-flex k-items-center k-justify-between k-mt-4 k-text-xs-muted">
+                <div class="k-flex-row-center-md">
                     {% if project.language %}
-                    <span><i class="fas fa-circle text-[8px] mr-1 text-kiri-green"></i>{{ project.language }}</span>
+                    <span><i class="fa-circle fas k-mr-1 text-[8px] text-kiri-green"></i>{{ project.language }}</span>
                     {% endif %}
                     {% if project.stars_count %}
-                    <span><i class="fas fa-star mr-1"></i>{{ project.stars_count }}</span>
+                    <span><i class="fa-star fas k-mr-1"></i>{{ project.stars_count }}</span>
                     {% endif %}
                     {% if project.forks_count %}
-                    <span><i class="fas fa-code-branch mr-1"></i>{{ project.forks_count }}</span>
+                    <span><i class="fa-code-branch fas k-mr-1"></i>{{ project.forks_count }}</span>
                     {% endif %}
                 </div>
                 <span>{{ project.created_at|date:"M Y" }}</span>
@@ -90,32 +90,32 @@ Explore AI, ML, and software projects built by Kiri Labs. Browse by category, so
 
     <!-- Pagination -->
     {% if is_paginated %}
-    <div class="mt-10 flex justify-center items-center gap-2">
+    <div class="k-flex-row-center k-justify-center mt-10">
         {% if page_obj.has_previous %}
         <a href="?page={{ page_obj.previous_page_number }}&category={{ current_category }}&sort={{ current_sort }}"
-            class="btn-secondary !w-auto !py-1.5 !px-3 !text-sm flex items-center">
-            <i class="fas fa-chevron-left mr-1"></i> Prev
+            class="!px-3 !py-1.5 !text-sm !w-auto btn-secondary k-d-flex k-items-center">
+            <i class="fa-chevron-left fas k-mr-1"></i> Prev
         </a>
         {% endif %}
-        <span class="text-sm text-muted">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        <span class="k-text-sm-muted">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
         {% if page_obj.has_next %}
         <a href="?page={{ page_obj.next_page_number }}&category={{ current_category }}&sort={{ current_sort }}"
-            class="btn-secondary !w-auto !py-1.5 !px-3 !text-sm flex items-center">
-            Next <i class="fas fa-chevron-right ml-1"></i>
+            class="!px-3 !py-1.5 !text-sm !w-auto btn-secondary k-d-flex k-items-center">
+            Next <i class="fa-chevron-right fas k-ml-1"></i>
         </a>
         {% endif %}
     </div>
     {% endif %}
     {% else %}
     <!-- Empty State -->
-    <div class="text-center py-24">
-        <i class="fas fa-folder-open text-4xl text-muted mb-4 block"></i>
-        <h2 class="text-lg font-semibold text-body">No projects yet</h2>
-        <p class="mt-1 text-sm text-muted">Check back soon - projects will appear here once approved.</p>
+    <div class="k-text-center py-24">
+        <i class="fa-folder-open fas k-block k-mb-4 k-text-4xl k-text-muted-base"></i>
+        <h2 class="k-font-semibold k-text-lg text-body">No projects yet</h2>
+        <p class="k-mt-1 k-text-sm-muted">Check back soon - projects will appear here once approved.</p>
     </div>
     {% endif %}
 </div>
 
 <!-- Mobile Spacer -->
-<div class="h-20 md:hidden"></div>
+<div class="k-spacer md:hidden"></div>
 {% endblock %}

@@ -17,7 +17,7 @@ and all running locally.
 {% block og_image %}{{ request.scheme }}://{{ request.get_host }}{% static 'images/logos/logo.png' %}{% endblock %}
 
 {% block content %}
-<div class="max-w-7xl mx-auto px-4 md:px-6 py-8">
+<div class="k-container max-w-7xl md:px-6 px-4">
     <!-- Hero Section -->
     {% include "partials/home/hero.html" %}
 
@@ -25,7 +25,7 @@ and all running locally.
     {% include "partials/home/pillars.html" %}
 
     <!-- Main Content Grid -->
-    <div class="grid lg:grid-cols-3 gap-8">
+    <div class="gap-8 k-d-grid lg:grid-cols-3">
         <!-- Left: Featured Content -->
         <div class="lg:col-span-2 space-y-12">
             <!-- Featured Projects -->
@@ -33,29 +33,29 @@ and all running locally.
         </div>
 
         <!-- Right: Sidebar -->
-        <div class="space-y-6">
+        <div class="k-stack-lg">
             <!-- Ecosystem Platforms -->
             {% if ecosystem_platforms %}
             <div class="card p-6">
-                <h3 class="text-sm font-bold text-heading uppercase tracking-wider mb-4 flex items-center gap-2">
+                <h3 class="k-flex-row-center k-font-bold k-mb-4 k-text-sm text-heading tracking-wider uppercase">
                     <i class="fas fa-globe text-kiri-green"></i> Our Platforms
                 </h3>
                 <div class="space-y-2">
                     {% for platform in ecosystem_platforms %}
                     <a href="{{ platform.url }}" target="_blank" rel="noopener"
-                        class="flex items-center gap-3 p-3 rounded-lg hover:bg-subtle transition-colors group">
+                        class="hover:bg-subtle k-flex-row-center-md k-group k-p-3 k-rounded-lg k-transition-colors">
                         <div
-                            class="w-9 h-9 bg-subtle rounded-lg flex items-center justify-center group-hover:bg-success-subtle transition-colors">
+                            class="bg-subtle group-hover:bg-success-subtle h-9 k-d-flex k-items-center k-justify-center k-rounded-lg k-transition-colors w-9">
                             <i
-                                class="{{ platform.icon_class }} text-sm text-body group-hover:text-kiri-green transition-colors"></i>
+                                class="group-hover:text-kiri-green k-text-sm k-transition-colors platform.icon_class text-body"></i>
                         </div>
-                        <div class="min-w-0">
-                            <div class="text-sm font-medium text-heading truncate">{{ platform.name }}</div>
+                        <div class="k-min-w-0">
+                            <div class="k-font-medium k-text-sm k-truncate text-heading">{{ platform.name }}</div>
                             {% if platform.short_description %}
-                            <div class="text-xs text-muted truncate">{{ platform.short_description }}</div>
+                            <div class="k-text-xs-muted k-truncate">{{ platform.short_description }}</div>
                             {% endif %}
                         </div>
-                        <i class="fas fa-external-link-alt text-[9px] text-muted ml-auto"></i>
+                        <i class="fa-external-link-alt fas k-ml-auto k-text-muted-base text-[9px]"></i>
                     </a>
                     {% endfor %}
                 </div>
@@ -71,21 +71,21 @@ and all running locally.
             <!-- Latest Projects -->
             {% if latest_projects %}
             <div class="card p-6">
-                <h3 class="text-sm font-bold text-heading mb-4 flex items-center gap-2 uppercase tracking-wider">
+                <h3 class="k-flex-row-center k-font-bold k-mb-4 k-text-sm text-heading tracking-wider uppercase">
                     <i class="fas fa-clock text-blue-500"></i> Recently Added
                 </h3>
                 <div class="space-y-3">
                     {% for project in latest_projects %}
-                    <a href="{% url 'projects:detail' project.slug %}" class="flex items-center gap-3 group">
-                        <div class="w-8 h-8 bg-subtle rounded-lg flex items-center justify-center shrink-0">
-                            <i class="fas fa-folder-open text-xs text-muted"></i>
+                    <a href="{% url 'projects:detail' project.slug %}" class="k-flex-row-center-md k-group">
+                        <div class="bg-subtle h-8 k-d-flex k-items-center k-justify-center k-rounded-lg k-shrink-0 w-8">
+                            <i class="fa-folder-open fas k-text-xs-muted"></i>
                         </div>
-                        <div class="min-w-0 flex-1">
+                        <div class="k-flex-auto">
                             <p
-                                class="text-sm font-medium text-heading truncate group-hover:text-kiri-green transition-colors">
+                                class="group-hover:text-kiri-green k-font-medium k-text-sm k-transition-colors k-truncate text-heading">
                                 {{ project.name }}
                             </p>
-                            <p class="text-[10px] text-muted uppercase tracking-wider">
+                            <p class="k-text-muted-base text-[10px] tracking-wider uppercase">
                                 {{ project.language|default:"Project" }} · {{ project.created_at|timesince }} ago
                             </p>
                         </div>
@@ -99,5 +99,5 @@ and all running locally.
 </div>
 
 <!-- Mobile Spacer -->
-<div class="h-20 md:hidden"></div>
+<div class="k-spacer md:hidden"></div>
 {% endblock %}

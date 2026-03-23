@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en" class="h-full">
+<html lang="en" class="k-h-full">
 
 <head>
     <meta charset="UTF-8">
@@ -14,18 +14,18 @@
 </head>
 
 <body
-    class="h-full k-page-container flex flex-col items-center justify-center bg-surface text-body transition-colors duration-300">
-    <div class="text-center px-6">
-        <div class="mb-8">
+    class="duration-300 k-error-container k-page-container text-body">
+    <div class="k-text-center px-6">
+        <div class="k-mb-8">
             <img src="{% static 'images/logos/logo.webp' %}" alt="Kiri"
-                class="h-20 w-auto mx-auto opacity-50 dark:opacity-30">
+                class="dark:opacity-30 k-spacer-center opacity-50 w-auto">
         </div>
-        <h1 class="text-8xl font-bold text-muted mb-4">500</h1>
-        <h2 class="text-2xl font-semibold text-heading mb-2">Something Went Wrong</h2>
-        <p class="text-muted mb-8 max-w-md mx-auto">
+        <h1 class="k-mb-4 k-text-8xl k-text-muted-bold">500</h1>
+        <h2 class="k-section-title-lg text-heading">Something Went Wrong</h2>
+        <p class="k-mb-8 k-mx-auto k-text-muted-base max-w-md">
             We're experiencing some technical difficulties. Please try again later.
         </p>
-        <a href="/" class="btn-primary inline-flex items-center gap-2">
+        <a href="/" class="btn-primary k-gap-2 k-inline-flex k-items-center">
             <i class="fas fa-home pr-1"></i> Go Home
         </a>
     </div>

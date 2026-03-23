@@ -2,20 +2,20 @@
 <!-- ===== HEADER ===== -->
 <header class="page-header">
     <!-- Left: Hamburger + Logo -->
-    <div class="k-d-flex k-h-full k-items-center">
+    <div class="header-section">
         <button id="sidebar-toggle" class="icon-btn-large" title="Toggle sidebar">
-            <i class="fa-bars fas k-text-lg"></i>
+            <i class="fa-bars fas text-lg"></i>
         </button>
-        <a href="/" class="hover:bg-subtle k-d-flex k-h-full k-items-center k-transition-colors">
+        <a href="/" class="header-brand">
             <img src="{% static 'images/logos/logo.webp' %}" alt="Kiri" class="h-9 w-auto">
         </a>
     </div>
 
     <!-- Center: Spacer -->
-    <div class="k-flex-1"></div>
+    <div class="flex-1"></div>
 
     <!-- Right: Actions -->
-    <div class="k-d-flex k-gap-1 k-h-full k-items-center pr-2">
+    <div class="header-actions">
         <!-- Theme Toggle -->
         <button id="theme-toggle" class="icon-btn" title="Toggle theme">
             <i class="fas fa-moon" id="theme-icon-light"></i>
@@ -24,38 +24,36 @@
 
         {% if user.is_authenticated %}
         <!-- Profile Dropdown -->
-        <div class="k-relative" id="profile-dropdown-container">
+        <div class="profile-dropdown-container" id="profile-dropdown-container">
             <button id="profile-dropdown-toggle" class="icon-btn" title="Profile menu">
                 {% if user.avatar_url %}
-                <img src="{{ user.avatar_url }}" alt="{{ user.username }}" class="h-8 k-rounded-full w-8">
+                <img src="{{ user.avatar_url }}" alt="{{ user.username }}" class="h-8 rounded-full w-8">
                 {% else %}
-                <div
-                    class="bg-gradient-to-br from-kiri-green h-8 k-d-flex k-font-semibold k-items-center k-justify-center k-rounded-full k-text-white k-text-xs to-kiri-green-dark w-8">
+                <div class="avatar-fallback">
                     {{ user.username|slice:":2"|upper }}
                 </div>
                 {% endif %}
             </button>
 
             <!-- Dropdown Menu -->
-            <div id="profile-dropdown" class="dropdown-menu k-hidden">
-                <div class="border-t-0 divider k-border-b k-p-3">
-                    <p class="k-font-medium text-heading">{{ user.username }}</p>
-                    <p class="k-text-xs-muted">Staff</p>
+            <div id="profile-dropdown" class="dropdown-menu hidden">
+                <div class="dropdown-header">
+                    <p class="dropdown-username">{{ user.username }}</p>
+                    <p class="dropdown-role">Staff</p>
                 </div>
                 <div class="py-2">
                     <a href="{% url 'core:about' %}" class="dropdown-item">
-                        <i class="fa-user fas k-text-center w-5"></i> About
+                        <i class="fa-user fas text-center w-5"></i> About
                     </a>
                     <a href="{% url 'projects:create' %}" class="dropdown-item">
-                        <i class="fa-plus fas k-text-center w-5"></i> New Project
+                        <i class="fa-plus fas text-center w-5"></i> New Project
                     </a>
                     <a href="{% url 'socialaccount_connections' %}" class="dropdown-item">
-                        <i class="fa-plug fas k-text-center w-5"></i> Integrations
+                        <i class="fa-plug fas text-center w-5"></i> Integrations
                     </a>
-                    <div class="my-1 mx-3 divider"></div>
-                    <a href="{% url 'account_logout' %}"
-                        class="dropdown-item hover:bg-subtle hover:text-red-600 k-text-red-500">
-                        <i class="fa-sign-out-alt fas k-text-center w-5"></i> Sign Out
+                    <div class="dropdown-divider"></div>
+                    <a href="{% url 'account_logout' %}" class="dropdown-item-danger">
+                        <i class="fa-sign-out-alt fas text-center w-5"></i> Sign Out
                     </a>
                 </div>
             </div>

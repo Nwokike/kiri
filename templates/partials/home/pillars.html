@@ -1,50 +1,50 @@
 <!-- Feature Grid -->
 <section class="mb-16">
-    <div class="gap-6 k-d-grid md:grid-cols-3">
+    <div class="gap-6 grid md:grid-cols-3">
         <!-- Projects -->
-        <div class="card hover:border-kiri-green k-group k-transition-colors md:p-8 p-6">
-            <div class="bg-success-subtle k-d-flex k-h-12 k-items-center k-justify-center k-mb-6 k-rounded-lg k-w-12 text-kiri-green">
-                <i class="fa-briefcase fas k-text-xl"></i>
+        <div class="card hover:border-kiri-green group transition-colors md:p-8 p-6">
+            <div class="bg-success-subtle flex h-12 items-center justify-center mb-6 rounded-lg w-12 text-kiri-green dark:text-white">
+                <i class="fa-briefcase fas text-xl"></i>
             </div>
-            <h3 class="group-hover:text-kiri-green k-font-bold k-mb-3 k-text-xl k-transition-colors text-heading">Projects</h3>
-            <p class="k-mb-6 k-text-sm-muted leading-relaxed">
+            <h3 class="group-hover:text-kiri-green font-bold mb-3 text-xl transition-colors text-heading">Projects</h3>
+            <p class="mb-6 text-sm text-muted leading-relaxed">
                 Our open-source projects with GitHub integration, live demos, and detailed metadata.
             </p>
             <a href="{% url 'projects:list' %}"
-                class="k-font-bold k-gap-2 k-hover-underline k-inline-flex k-items-center k-text-sm text-kiri-green">
+                class="font-bold gap-2 hover-underline inline-flex items-center text-sm text-kiri-green">
                 Browse Projects <i class="fas fa-arrow-right text-[10px]"></i>
             </a>
         </div>
 
         <!-- Tools -->
-        <div class="card hover:border-kiri-gold k-group k-transition-colors md:p-8 p-6">
-            <div class="bg-warning-subtle k-d-flex k-h-12 k-items-center k-justify-center k-mb-6 k-rounded-lg k-w-12 text-kiri-gold">
-                <i class="fa-tools fas k-text-xl"></i>
+        <div class="card hover:border-kiri-gold group transition-colors md:p-8 p-6">
+            <div class="bg-warning-subtle flex h-12 items-center justify-center mb-6 rounded-lg w-12 text-kiri-gold dark:text-white">
+                <i class="fa-tools fas text-xl"></i>
             </div>
-            <h3 class="group-hover:text-kiri-gold k-font-bold k-mb-3 k-text-xl k-transition-colors text-heading">Tools Hub</h3>
-            <p class="k-mb-6 k-text-sm-muted leading-relaxed">
+            <h3 class="group-hover:text-kiri-gold font-bold mb-3 text-xl transition-colors text-heading">Tools Hub</h3>
+            <p class="mb-6 text-sm text-muted leading-relaxed">
                 {{ total_tools }}+ browser-based developer utilities. JSON formatters, PDF editors, data profilers, and
                 more - all
                 running locally.
             </p>
             <a href="{% url 'tools:index' %}"
-                class="k-font-bold k-gap-2 k-hover-underline k-inline-flex k-items-center k-text-sm text-kiri-gold">
+                class="font-bold gap-2 hover-underline inline-flex items-center text-sm text-kiri-gold">
                 Access Tools Hub <i class="fas fa-arrow-right text-[10px]"></i>
             </a>
         </div>
 
         <!-- About -->
-        <div class="card hover:border-blue-600 k-group k-transition-colors md:p-8 p-6">
-            <div class="bg-info-subtle k-d-flex k-h-12 k-items-center k-justify-center k-mb-6 k-rounded-lg k-w-12 text-blue-600">
-                <i class="fa-info-circle fas k-text-xl"></i>
+        <div class="card hover:border-blue-600 group transition-colors md:p-8 p-6">
+            <div class="bg-info-subtle flex h-12 items-center justify-center mb-6 rounded-lg w-12 text-blue-600 dark:text-white">
+                <i class="fa-info-circle fas text-xl"></i>
             </div>
-            <h3 class="group-hover:text-blue-600 k-font-bold k-mb-3 k-text-xl k-transition-colors text-heading">About Us</h3>
-            <p class="k-mb-6 k-text-sm-muted leading-relaxed">
+            <h3 class="group-hover:text-blue-600 font-bold mb-3 text-xl transition-colors text-heading">About Us</h3>
+            <p class="mb-6 text-sm text-muted leading-relaxed">
                 High-performance software focused on being lightweight, small, and efficient. Learn more about what we
                 do and how we work.
             </p>
             <a href="{% url 'core:about' %}"
-                class="k-font-bold k-gap-2 k-hover-underline k-inline-flex k-items-center k-text-sm text-blue-600">
+                class="font-bold gap-2 hover-underline inline-flex items-center text-sm text-blue-600">
                 Learn More <i class="fas fa-arrow-right text-[10px]"></i>
             </a>
         </div>

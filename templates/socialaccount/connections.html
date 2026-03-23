@@ -4,20 +4,20 @@
 {% block title %}Integrations | Kiri Labs{% endblock %}
 
 {% block content %}
-<div class="k-container max-w-3xl md:py-16 px-4">
-    <div class="k-mb-10-center">
-        <h1 class="font-extrabold k-text-3xl text-heading">Third-Party Integrations</h1>
-        <p class="k-max-w-lg k-mt-2 k-mx-auto k-text-sm text-body">Manage your connected third-party accounts. Currently
+<div class="container mx-auto max-w-3xl md:py-16 px-4">
+    <div class="mb-10-center">
+        <h1 class="font-extrabold text-3xl text-heading">Third-Party Integrations</h1>
+        <p class="max-w-lg mt-2 mx-auto text-sm text-body">Manage your connected third-party accounts. Currently
             connected accounts can be used to import projects directly into Kiri.</p>
     </div>
 
     <div class="card p-6 md:p-8">
         {% if form.accounts %}
-        <p class="border-subtle k-border-b k-font-bold k-mb-6 k-text-sm pb-4 text-heading">
+        <p class="border-subtle border-b font-bold mb-6 text-sm pb-4 text-heading">
             {% trans 'You can sign in to your account using any of the following third-party accounts:' %}
         </p>
 
-        <form method="post" action="{% url 'socialaccount_connections' %}" class="k-stack-lg">
+        <form method="post" action="{% url 'socialaccount_connections' %}" class="space-y-6">
             {% csrf_token %}
 
             {% if form.non_field_errors %}
@@ -26,41 +26,39 @@
             </div>
             {% endif %}
 
-            <fieldset class="k-stack-md">
+            <fieldset class="space-y-4">
                 {% for base_account in form.accounts %}
                 {% with base_account.get_provider_account as account %}
                 <label for="id_account_{{ base_account.id }}"
-                    class="border-subtle cursor-pointer hover:border-kiri-green k-bg-surface k-border k-d-flex k-group k-items-center k-p-4 k-transition-colors rounded-xl">
+                    class="border-subtle cursor-pointer hover:border-kiri-green bg-surface border flex group items-center p-4 transition-colors rounded-xl">
                     <input id="id_account_{{ base_account.id }}" type="radio" name="account"
                         value="{{ base_account.id }}"
-                        class="border-subtle focus:ring-kiri-green h-4 k-bg-surface text-kiri-green w-4">
+                        class="border-subtle focus:ring-kiri-green h-4 bg-surface text-kiri-green w-4">
 
-                    <div class="k-d-flex k-flex-1 k-items-center k-justify-between ml-4">
-                        <div class="k-flex-row-center-md">
+                    <div class="flex flex-1 items-center justify-between ml-4">
+                        <div class="flex items-center-md">
                             {% if account.get_brand.id == 'github' %}
-                            <i class="fa-github fab k-text-2xl text-heading"></i>
+                            <i class="fa-github fab text-2xl text-heading"></i>
                             <div>
-                                <span class="k-label text-heading">GitHub</span>
-                                <span class="k-block k-text-xs-muted">{{ account }}</span>
+                                <span class="font-medium text-sm text-heading">GitHub</span>
+                                <span class="block text-xs text-muted">{{ account }}</span>
                             </div>
                             {% elif account.get_brand.id == 'huggingface' %}
-                            <i class="fa-robot fas k-text-2xl text-yellow-500"></i>
+                            <i class="fa-robot fas text-2xl text-yellow-500"></i>
                             <div>
-                                <span class="k-label text-heading">Hugging Face</span>
-                                <span class="k-block k-text-xs-muted">{{ account }}</span>
+                                <span class="font-medium text-sm text-heading">Hugging Face</span>
+                                <span class="block text-xs text-muted">{{ account }}</span>
                             </div>
                             {% else %}
-                            <span
-                                class="%} %}fab %}fas 'github' 'twitter' == account.get_brand.id elif else endif fa-github fa-globe fa-twitter if k-text-2xl pt-1 text-blue-400{% text-body{% text-muted{% {%"></span>
+                            <i class="fas fa-globe text-2xl text-muted"></i>
                             <div>
-                                <span class="capitalize k-label text-heading">{{ account.get_brand.name
-                                    }}</span>
-                                <span class="k-block k-text-xs-muted">{{ account }}</span>
+                                <span class="capitalize font-medium text-sm text-heading">{{ account.get_brand.name }}</span>
+                                <span class="block text-xs text-muted">{{ account }}</span>
                             </div>
                             {% endif %}
                         </div>
                         <span
-                            class="bg-success-subtle k-font-bold k-py-1 k-rounded px-2 text-[10px] text-kiri-green tracking-wider uppercase">Connected</span>
+                            class="bg-success-subtle font-bold py-1 rounded px-2 text-[10px] text-kiri-green tracking-wider uppercase">Connected</span>
                     </div>
                 </label>
                 {% endwith %}
@@ -69,24 +67,22 @@
 
             <div class="pt-4 border-t border-subtle">
                 <button type="submit"
-                    class="btn-secondary hover:bg-red-600 hover:border-red-600 hover:text-white k-text-red-600 k-transition-colors k-w-full sm:w-auto">
-                    <i class="fa-trash-alt fas k-mr-2"></i> {% trans 'Remove Selected Connection' %}
+                    class="btn-secondary hover:bg-red-600 hover:border-red-600 hover:text-white text-red-600 transition-colors w-full sm:w-auto">
+                    <i class="fa-trash-alt fas mr-2"></i> {% trans 'Remove Selected Connection' %}
                 </button>
             </div>
         </form>
         {% else %}
-        <div class="k-py-8 k-text-center">
-            <i class="fa-plug fas k-block k-mb-4 k-text-4xl k-text-muted-base"></i>
-            <p class="k-font-medium k-text-sm text-body">{% trans 'You currently have no social network accounts connected
-                to this account.' %}</p>
+        <div class="py-8 text-center">
+            <i class="fa-plug fas block mb-4 text-4xl text-muted"></i>
+            <p class="font-medium text-sm text-body">{% trans 'You currently have no social network accounts connected to this account.' %}</p>
         </div>
         {% endif %}
 
         <div class="mt-10 pt-8 border-t border-subtle">
-            <h2 class="k-font-bold k-mb-4 k-text-sm section-label text-heading tracking-widest uppercase">{% trans 'Add a 3rd
-                Party Account' %}</h2>
+            <h2 class="font-bold mb-4 text-sm section-label text-heading tracking-widest uppercase">{% trans 'Add a 3rd Party Account' %}</h2>
 
-            <div class="k-grid-sm sm:grid-cols-2">
+            <div class="grid gap-4 sm:grid-cols-2">
                 {% include "socialaccount/snippets/provider_list.html" with process="connect" %}
             </div>
         </div>

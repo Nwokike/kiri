@@ -1,7 +1,7 @@
 {% load static %}
 {% load pwa %}
 <!DOCTYPE html>
-<html lang="en" class="k-h-full">
+<html lang="en" class="h-full">
 
 <head>
     <meta charset="UTF-8">
@@ -51,28 +51,28 @@
     {% progressive_web_app_meta %}
 </head>
 
-<body class="bg-subtle k-h-full text-body">
+<body class="bg-subtle h-full text-body">
     <!-- ===== HEADER ===== -->
     {% include "partials/header.html" %}
 
     <!-- ===== MOBILE SIDEBAR OVERLAY ===== -->
-    <div id="sidebar-overlay" class="bg-black/50 fixed inset-0 k-hidden md:hidden z-30" aria-hidden="true"></div>
+    <div id="sidebar-overlay" class="sidebar-overlay md:hidden" aria-hidden="true"></div>
 
     <!-- ===== SIDEBAR ===== -->
     {% include "partials/sidebar.html" %}
 
     <!-- ===== MAIN CONTENT ===== -->
-    <main class="duration-200 k-min-h-screen md:pl-14 pt-14 transition-all" id="main-content">
+    <main class="main-wrapper" id="main-content">
         <div class="min-h-full">
             <!-- Messages -->
             {% if messages %}
-            <div class="fixed k-d-flex k-flex-col k-gap-3 pointer-events-none right-4 top-4 z-50">
+            <div class="messages-container">
                 {% for message in messages %}
-                <div class="animate-fade-in-right border-subtle k-bg-surface k-border k-flex-row-center-md pointer-events-auto px-4 py-3 rounded-xl shadow-lg"
+                <div class="message-toast"
                     role="alert" x-data="{ show: true }" x-show="show" x-init="setTimeout(() => show = false, 5000)">
-                    <div class="{% if 'error' in message.tags %}bg-red-500{% elif 'success' in message.tags %}bg-kiri-green{% else %}bg-blue-500{% endif %} h-2 k-rounded-full w-2"></div>
-                    <span class="k-font-bold k-text-xs text-heading">{{ message }}</span>
-                    <button @click="show = false" class="hover:text-body k-text-muted">
+                    <div class="{% if 'error' in message.tags %}bg-red-500{% elif 'success' in message.tags %}bg-kiri-green{% else %}bg-blue-500{% endif %} message-indicator"></div>
+                    <span class="message-text">{{ message }}</span>
+                    <button @click="show = false" class="message-close">
                         <i class="fas fa-times text-[10px]"></i>
                     </button>
                 </div>
@@ -88,10 +88,8 @@
     </main>
 
     <!-- ===== PWA INSTALL BUTTON ===== -->
-    <button id="pwa-install-btn"
-        class="border-subtle bottom-24 fixed hover:shadow-lg icon-box k-bg-surface k-border k-group k-hidden k-rounded-full md:bottom-8 right-6 shadow-md text-kiri-green transition-all z-40"
-        title="Install Kiri App">
-        <i class="fa-download fas group-hover:scale-110 k-text-xs transition-transform"></i>
+    <button id="pwa-install-btn" class="pwa-btn" title="Install Kiri App">
+        <i class="fa-download fas pwa-btn-icon"></i>
     </button>
 
     <!-- ===== MOBILE BOTTOM NAV ===== -->

@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en" class="k-h-full">
+<html lang="en" class="h-full">
 
 <head>
     <meta charset="UTF-8">
@@ -14,18 +14,18 @@
 </head>
 
 <body
-    class="duration-300 k-error-container k-page-container text-body">
-    <div class="k-text-center px-6">
-        <div class="k-mb-8">
+    class="error-page-wrapper">
+    <div class="error-page-content">
+        <div class="error-page-logo-container">
             <img src="{% static 'images/logos/logo.webp' %}" alt="Kiri"
-                class="dark:opacity-30 k-spacer-center opacity-50 w-auto">
+                class="error-page-logo">
         </div>
-        <h1 class="k-mb-4 k-text-8xl k-text-muted-bold">404</h1>
-        <h2 class="k-section-title-lg text-heading">Page Not Found</h2>
-        <p class="k-mb-8 k-mx-auto k-text-muted-base max-w-md">
+        <h1 class="error-page-code">404</h1>
+        <h2 class="error-page-title">Page Not Found</h2>
+        <p class="error-page-desc">
             The page you're looking for doesn't exist or has been moved.
         </p>
-        <a href="{% url 'core:home' %}" class="btn-primary k-gap-2 k-inline-flex k-items-center">
+        <a href="{% url 'core:home' %}" class="btn-primary error-page-btn">
             <i class="fas fa-home pr-1"></i> Go Home
         </a>
     </div>

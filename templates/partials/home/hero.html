@@ -1,39 +1,39 @@
 <!-- Hero Section -->
 <section class="mb-12">
-    <div class="card k-md-p-12 k-overflow-hidden k-relative p-6 shadow-sm">
-        <div class="k-relative k-z-10">
+    <div class="card md-p-12 overflow-hidden relative p-6 shadow-sm">
+        <div class="relative z-10">
             <div
-                class="bg-success-subtle k-font-bold k-gap-2 k-inline-flex k-items-center k-mb-6 k-py-1 k-rounded-full px-3 text-[10px] text-kiri-green tracking-wider uppercase">
-                <span class="animate-pulse bg-kiri-green h-1.5 k-rounded-full w-1.5"></span>
+                class="bg-success-subtle font-bold gap-2 inline-flex items-center mb-6 py-1 rounded-full px-3 text-[10px] text-kiri-green dark:text-white tracking-wider uppercase">
+                <span class="animate-pulse bg-kiri-green dark:bg-white h-1.5 rounded-full w-1.5"></span>
                 Software & Tools
             </div>
 
-            <h1 class="font-extrabold k-mb-6 k-md-text-4xl k-text-2xl leading-tight max-w-3xl text-heading tracking-tight">
+            <h1 class="font-extrabold mb-6 md-text-4xl text-2xl leading-tight max-w-3xl text-heading tracking-tight">
                 Software & Tools, Built Lightweight.
             </h1>
 
-            <p class="k-max-w-2xl k-mb-10 k-text-base k-text-muted-base leading-relaxed md:text-lg">
+            <p class="max-w-2xl mb-10 text-base text-muted leading-relaxed md:text-lg">
                 Our projects, tools, and everything we build - all in one place. Lightweight, efficient, and always
                 shipping.
             </p>
 
             <!-- Dynamic Stats Bar -->
-            <div class="flex-nowrap k-d-flex k-gap-4 k-mb-10 md:gap-10 no-scrollbar overflow-x-auto">
-                <div class="k-d-flex k-flex-col min-w-max">
-                    <span class="k-font-bold k-text-xl md:text-2xl text-heading">{{ stats.total_projects }}</span>
-                    <span class="k-text-muted-bold text-[10px] tracking-widest uppercase">Open-Source Projects</span>
+            <div class="flex-nowrap flex gap-4 mb-10 md:gap-10 no-scrollbar overflow-x-auto">
+                <div class="flex flex-col min-w-max">
+                    <span class="font-bold text-xl md:text-2xl text-heading">{{ stats.total_projects }}</span>
+                    <span class="font-bold text-muted text-[10px] tracking-widest uppercase">Open-Source Projects</span>
                 </div>
-                <div class="border-l border-subtle k-d-flex k-flex-col k-pl-4 md:pl-10 min-w-max">
-                    <span class="k-font-bold k-text-xl md:text-2xl text-heading">{{ stats.total_tools }}</span>
-                    <span class="k-text-muted-bold text-[10px] tracking-widest uppercase">Browser-Based Tools</span>
+                <div class="border-l border-subtle flex flex-col pl-4 md:pl-10 min-w-max">
+                    <span class="font-bold text-xl md:text-2xl text-heading">{{ stats.total_tools }}</span>
+                    <span class="font-bold text-muted text-[10px] tracking-widest uppercase">Browser-Based Tools</span>
                 </div>
-                <div class="border-l border-subtle k-d-flex k-flex-col k-pl-4 md:pl-10 min-w-max">
-                    <span class="k-font-bold k-text-xl md:text-2xl text-heading">{{ stats.total_stars }}k</span>
-                    <span class="k-text-muted-bold text-[10px] tracking-widest uppercase">Stars</span>
+                <div class="border-l border-subtle flex flex-col pl-4 md:pl-10 min-w-max">
+                    <span class="font-bold text-xl md:text-2xl text-heading">{{ stats.total_stars }}k</span>
+                    <span class="font-bold text-muted text-[10px] tracking-widest uppercase">Stars</span>
                 </div>
             </div>
 
-            <div class="flex-nowrap k-d-flex k-gap-3 md:gap-4 no-scrollbar overflow-x-auto py-2">
+            <div class="flex-nowrap flex gap-3 md:gap-4 no-scrollbar overflow-x-auto py-2">
                 <a href="{% url 'projects:list' %}" class="btn-primary min-w-max">
                     <i class="fas fa-rocket text-[10px] md:text-xs"></i> Explore Projects
                 </a>
@@ -44,7 +44,7 @@
         </div>
 
         <!-- Decorative elements -->
-        <div class="blob-gold decorative-blob h-80 k-top-0 right-0 w-80"></div>
+        <div class="blob-gold decorative-blob h-80 top-0 right-0 w-80"></div>
         <div class="decorative-blob blob-white bottom-0 left-1/2 w-64 h-64 opacity-20"></div>
     </div>
 </section>

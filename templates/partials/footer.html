@@ -1,50 +1,50 @@
 {% load static %}
 <!-- Footer -->
 <footer class="page-footer">
-    <div class="k-mx-auto max-w-7xl px-6 py-12">
-        <div class="gap-12 grid-cols-3 k-d-grid lg:gap-8 lg:grid-cols-4">
+    <div class="footer-container">
+        <div class="footer-grid">
             <!-- Brand & Socials -->
-            <div class="col-span-3 lg:col-span-1">
-                <a href="/" class="k-flex-row-center k-mb-4">
+            <div class="footer-brand-col">
+                <a href="/" class="footer-brand-link">
                     <img src="{% static 'images/logos/logo.webp' %}" alt="Kiri" class="h-10 w-auto">
                 </a>
-                <p class="k-mb-6 k-text-sm-muted">
+                <p class="footer-description">
                     Software & AI tools - built lightweight and efficient.
                 </p>
                 <!-- Social Links -->
-                <div class="k-d-flex k-gap-3">
+                <div class="footer-socials">
                     <a href="https://github.com/kiri-labs" target="_blank" rel="noopener noreferrer" class="icon-btn-sm"
                         title="GitHub">
-                        <i class="fa-github fab k-text-sm"></i>
+                        <i class="fa-github fab footer-social-icon"></i>
                     </a>
                     <a href="https://x.com/kiri_research" target="_blank" rel="noopener noreferrer" class="icon-btn-sm"
                         title="X (Twitter)">
-                        <i class="fa-x-twitter fab k-text-sm"></i>
+                        <i class="fa-x-twitter fab footer-social-icon"></i>
                     </a>
                     <a href="https://facebook.com/kiri.ng.social" target="_blank" rel="noopener noreferrer"
                         class="icon-btn-sm" title="Facebook">
-                        <i class="fa-facebook-f fab k-text-sm"></i>
+                        <i class="fa-facebook-f fab footer-social-icon"></i>
                     </a>
                     <a href="https://instagram.com/kiri.ng.social" target="_blank" rel="noopener noreferrer"
                         class="icon-btn-sm" title="Instagram">
-                        <i class="fa-instagram fab k-text-sm"></i>
+                        <i class="fa-instagram fab footer-social-icon"></i>
                     </a>
                 </div>
             </div>
 
             <!-- Platform -->
             <div>
-                <h4 class="k-font-semibold k-mb-4 text-heading">Platform</h4>
-                <ul class="k-text-sm space-y-3">
+                <h4 class="footer-heading">Platform</h4>
+                <ul class="footer-list">
                     <li><a href="{% url 'projects:list' %}"
-                            class="hover:text-kiri-green k-text-muted">Projects</a></li>
+                            class="footer-link">Projects</a></li>
                     <li><a href="{% url 'tools:index' %}"
-                            class="hover:text-kiri-green k-text-muted">Tools Hub</a></li>
+                            class="footer-link">Tools Hub</a></li>
                     {% if ecosystem_platforms %}
                     {% for platform in ecosystem_platforms %}
                     <li><a href="{{ platform.url }}" target="_blank" rel="noopener"
-                            class="hover:text-kiri-green k-text-muted">{{ platform.name }} <i
-                                class="fa-external-link-alt fas k-ml-1 opacity-50 text-[8px]"></i></a></li>
+                            class="footer-link">{{ platform.name }} <i
+                                class="fa-external-link-alt fas ml-1 opacity-50 text-[8px]"></i></a></li>
                     {% endfor %}
                     {% endif %}
                 </ul>
@@ -52,38 +52,39 @@
 
             <!-- Company -->
             <div>
-                <h4 class="k-font-semibold k-mb-4 text-heading">Company</h4>
-                <ul class="k-text-sm space-y-3">
+                <h4 class="footer-heading">Company</h4>
+                <ul class="footer-list">
                     <li><a href="{% url 'core:about' %}"
-                            class="hover:text-kiri-green k-text-muted">About Us</a></li>
+                            class="footer-link">About Us</a></li>
                     <li><a href="{% url 'core:contact' %}"
-                            class="hover:text-kiri-green k-text-muted">Contact</a></li>
+                            class="footer-link">Contact</a></li>
                     <li><a href="{% url 'account_login' %}"
-                            class="hover:text-kiri-green k-font-bold k-text-muted text-[10px] tracking-widest uppercase">Staff
-                            Login</a></li>
+                            class="footer-link">Staff Login</a></li>
                 </ul>
             </div>
 
             <!-- Legal -->
             <div>
-                <h4 class="k-font-semibold k-mb-4 text-heading">Legal</h4>
-                <ul class="k-text-sm space-y-3">
+                <h4 class="footer-heading">Legal</h4>
+                <ul class="footer-list">
                     <li><a href="{% url 'core:privacy' %}"
-                            class="hover:text-kiri-green k-text-muted">Privacy Policy</a></li>
+                            class="footer-link">Privacy Policy</a></li>
                     <li><a href="{% url 'core:terms' %}"
-                            class="hover:text-kiri-green k-text-muted">Terms of Service</a></li>
+                            class="footer-link">Terms of Service</a></li>
                     <li><a href="{% url 'core:refund_policy' %}"
-                            class="hover:text-kiri-green k-text-muted">Refund Policy</a></li>
+                            class="footer-link">Refund Policy</a></li>
                 </ul>
             </div>
         </div>
 
         <!-- Bottom -->
-        <div class="divider k-d-flex k-flex-col k-gap-4 k-items-center k-justify-between k-pt-6 k-text-xs-muted md:flex-row mt-10">
-            <div class="k-text-center md:text-left">
+        <div class="footer-bottom">
+            <div class="footer-copyright">
                 <p>&copy; 2024 - {{ CURRENT_YEAR }} <a href="https://kiri.ng/about" target="_blank" rel="noopener"
-                        class="hover:text-kiri-green k-transition-colors">Kiri Labs</a>. All rights reserved.</p>
-                <p class="k-mt-1 opacity-75">RC No. 9317920 | SUID-2621-6457-9859-4343</p>
+                        class="footer-link">Kiri Research Labs</a>. All rights reserved.</p>
+            </div>
+            <div class="footer-copyright">
+                <p class="opacity-75">RC No. 9317920 | SUID-2621-6457-9859-4343</p>
             </div>
         </div>
     </div>

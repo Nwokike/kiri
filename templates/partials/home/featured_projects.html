@@ -1,31 +1,31 @@
 <!-- Featured Projects -->
 {% if featured_projects %}
 <section>
-    <div class="k-d-flex k-items-center k-justify-between k-mb-6">
-        <h2 class="k-flex-row-center k-font-bold k-text-xl text-heading">
+    <div class="flex items-center justify-between mb-6">
+        <h2 class="flex items-center font-bold text-xl text-heading">
             <i class="fas fa-fire text-kiri-gold"></i> Featured Projects
         </h2>
-        <a href="{% url 'projects:list' %}" class="k-font-bold k-hover-underline k-text-sm text-kiri-green">
-            View All <i class="fa-arrow-right fas k-ml-1"></i>
+        <a href="{% url 'projects:list' %}" class="font-bold hover-underline text-sm text-kiri-green">
+            View All <i class="fa-arrow-right fas ml-1"></i>
         </a>
     </div>
 
-    <div class="gap-5 k-d-grid md:grid-cols-2">
+    <div class="gap-5 grid md:grid-cols-2">
         {% for project in featured_projects %}
-        <a href="{% url 'projects:detail' project.slug %}" class="card card-hover k-block k-group p-5">
-            <div class="k-d-flex k-items-start k-justify-between k-mb-3">
+        <a href="{% url 'projects:detail' project.slug %}" class="card card-hover block group p-5">
+            <div class="flex items-start justify-between mb-3">
                 <span
-                    class="bg-success-subtle k-font-bold k-py-1 k-rounded px-2.5 text-[9px] text-kiri-green tracking-wider uppercase">
+                    class="bg-success-subtle font-bold py-1 rounded px-2.5 text-[9px] text-kiri-green tracking-wider uppercase">
                     {{ project.language|default:"Project" }}
                 </span>
-                <div class="k-flex-row-center">
+                <div class="flex items-center">
                     {% if project.demo_url %}
-                    <span class="k-d-flex k-font-bold k-gap-1 k-items-center text-[9px] text-blue-500 uppercase">
+                    <span class="flex font-bold gap-1 items-center text-[9px] text-blue-500 uppercase">
                         <i class="fas fa-play-circle"></i> Live
                     </span>
                     {% endif %}
                     {% if project.is_hot %}
-                    <span class="k-d-flex k-font-bold k-gap-1 k-items-center text-[9px] text-kiri-gold uppercase">
+                    <span class="flex font-bold gap-1 items-center text-[9px] text-kiri-gold uppercase">
                         <i class="fas fa-fire"></i> Hot
                     </span>
                     {% endif %}
@@ -33,26 +33,26 @@
             </div>
 
             <h3
-                class="group-hover:text-kiri-green k-font-bold k-mb-2 k-text-base k-transition-colors leading-tight text-heading">
+                class="group-hover:text-kiri-green font-bold mb-2 text-base transition-colors leading-tight text-heading">
                 {{ project.name }}
             </h3>
 
-            <p class="k-line-clamp-2 k-mb-4 k-text-sm leading-relaxed text-body">
+            <p class="line-clamp-2 mb-4 text-sm leading-relaxed text-body">
                 {{ project.description|truncatewords:20 }}
             </p>
 
-            <div class="border-subtle border-t gap-5 k-d-flex k-items-center k-text-muted-bold pt-3 text-[11px]">
-                <span class="gap-1.5 k-d-flex k-items-center">
+            <div class="border-subtle border-t gap-5 flex items-center font-bold text-muted pt-3 text-[11px]">
+                <span class="gap-1.5 flex items-center">
                     <i class="fas fa-star text-kiri-gold"></i> {{ project.stars_count }}
                 </span>
-                <span class="gap-1.5 k-d-flex k-items-center">
+                <span class="gap-1.5 flex items-center">
                     <i class="fas fa-code-branch"></i> {{ project.forks_count }}
                 </span>
-                <span class="gap-1.5 k-d-flex k-items-center">
+                <span class="gap-1.5 flex items-center">
                     <i class="fas fa-eye"></i> {{ project.view_count }}
                 </span>
                 {% if project.category %}
-                <span class="bg-subtle k-ml-auto k-py-0.5 k-rounded px-2 text-[10px]">
+                <span class="bg-subtle ml-auto py-0.5 rounded px-2 text-[10px]">
                     {{ project.get_category_display }}
                 </span>
                 {% endif %}

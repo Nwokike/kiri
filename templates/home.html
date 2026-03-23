@@ -17,7 +17,7 @@ and all running locally.
 {% block og_image %}{{ request.scheme }}://{{ request.get_host }}{% static 'images/logos/logo.png' %}{% endblock %}
 
 {% block content %}
-<div class="k-container max-w-7xl md:px-6 px-4">
+<div class="page-container">
     <!-- Hero Section -->
     {% include "partials/home/hero.html" %}
 
@@ -25,37 +25,37 @@ and all running locally.
     {% include "partials/home/pillars.html" %}
 
     <!-- Main Content Grid -->
-    <div class="gap-8 k-d-grid lg:grid-cols-3">
+    <div class="content-grid">
         <!-- Left: Featured Content -->
-        <div class="lg:col-span-2 space-y-12">
+        <div class="content-main">
             <!-- Featured Projects -->
             {% include "partials/home/featured_projects.html" %}
         </div>
 
         <!-- Right: Sidebar -->
-        <div class="k-stack-lg">
+        <div class="content-sidebar">
             <!-- Ecosystem Platforms -->
             {% if ecosystem_platforms %}
-            <div class="card p-6">
-                <h3 class="k-flex-row-center k-font-bold k-mb-4 k-text-sm text-heading tracking-wider uppercase">
+            <div class="sidebar-card">
+                <h3 class="sidebar-card-title">
                     <i class="fas fa-globe text-kiri-green"></i> Our Platforms
                 </h3>
                 <div class="space-y-2">
                     {% for platform in ecosystem_platforms %}
                     <a href="{{ platform.url }}" target="_blank" rel="noopener"
-                        class="hover:bg-subtle k-flex-row-center-md k-group k-p-3 k-rounded-lg k-transition-colors">
+                        class="sidebar-card-item">
                         <div
-                            class="bg-subtle group-hover:bg-success-subtle h-9 k-d-flex k-items-center k-justify-center k-rounded-lg k-transition-colors w-9">
+                            class="sidebar-card-icon-box">
                             <i
-                                class="group-hover:text-kiri-green k-text-sm k-transition-colors platform.icon_class text-body"></i>
+                                class="sidebar-card-icon {{ platform.icon_class }}"></i>
                         </div>
-                        <div class="k-min-w-0">
-                            <div class="k-font-medium k-text-sm k-truncate text-heading">{{ platform.name }}</div>
+                        <div class="sidebar-card-content">
+                            <div class="sidebar-card-content-title">{{ platform.name }}</div>
                             {% if platform.short_description %}
-                            <div class="k-text-xs-muted k-truncate">{{ platform.short_description }}</div>
+                            <div class="sidebar-card-content-desc">{{ platform.short_description }}</div>
                             {% endif %}
                         </div>
-                        <i class="fa-external-link-alt fas k-ml-auto k-text-muted-base text-[9px]"></i>
+                        <i class="fas fa-external-link-alt sidebar-card-arrow"></i>
                     </a>
                     {% endfor %}
                 </div>
@@ -70,22 +70,22 @@ and all running locally.
 
             <!-- Latest Projects -->
             {% if latest_projects %}
-            <div class="card p-6">
-                <h3 class="k-flex-row-center k-font-bold k-mb-4 k-text-sm text-heading tracking-wider uppercase">
+            <div class="sidebar-card">
+                <h3 class="sidebar-card-title">
                     <i class="fas fa-clock text-blue-500"></i> Recently Added
                 </h3>
                 <div class="space-y-3">
                     {% for project in latest_projects %}
-                    <a href="{% url 'projects:detail' project.slug %}" class="k-flex-row-center-md k-group">
-                        <div class="bg-subtle h-8 k-d-flex k-items-center k-justify-center k-rounded-lg k-shrink-0 w-8">
-                            <i class="fa-folder-open fas k-text-xs-muted"></i>
+                    <a href="{% url 'projects:detail' project.slug %}" class="sidebar-card-item">
+                        <div class="sidebar-card-icon-box">
+                            <i class="fas fa-folder-open sidebar-card-icon"></i>
                         </div>
-                        <div class="k-flex-auto">
+                        <div class="sidebar-card-content">
                             <p
-                                class="group-hover:text-kiri-green k-font-medium k-text-sm k-transition-colors k-truncate text-heading">
+                                class="sidebar-card-content-title">
                                 {{ project.name }}
                             </p>
-                            <p class="k-text-muted-base text-[10px] tracking-wider uppercase">
+                            <p class="sidebar-card-content-desc uppercase">
                                 {{ project.language|default:"Project" }} · {{ project.created_at|timesince }} ago
                             </p>
                         </div>
@@ -99,5 +99,5 @@ and all running locally.
 </div>
 
 <!-- Mobile Spacer -->
-<div class="k-spacer md:hidden"></div>
+<div class="h-16 md:hidden"></div>
 {% endblock %}

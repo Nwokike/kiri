@@ -1,6 +1,6 @@
 {% load static %}
 <!DOCTYPE html>
-<html lang="en" class="k-h-full">
+<html lang="en" class="h-full">
 
 <head>
     <meta charset="UTF-8">
@@ -14,20 +14,20 @@
 </head>
 
 <body
-    class="duration-300 k-error-container k-page-container text-body">
-    <div class="k-text-center px-6">
-        <div class="k-mb-8">
+    class="duration-300 min-h-screen py-20 container mx-auto py-8 text-body">
+    <div class="text-center px-6">
+        <div class="mb-8">
             <img src="{% static 'images/logos/logo.webp' %}" alt="Kiri"
-                class="dark:opacity-30 k-spacer-center opacity-50 w-auto">
+                class="dark:opacity-30 spacer-center opacity-50 w-auto">
         </div>
-        <div class="bg-warning-subtle k-d-flex k-items-center k-justify-center k-mb-6 k-rounded-full k-spacer-center k-w-20">
-            <i class="fa-wifi fas k-text-3xl text-kiri-gold"></i>
+        <div class="bg-warning-subtle flex items-center justify-center mb-6 rounded-full spacer-center w-20">
+            <i class="fa-wifi fas text-3xl text-kiri-gold"></i>
         </div>
-        <h2 class="k-section-title-lg text-heading">You're Offline</h2>
-        <p class="k-mb-8 k-mx-auto k-text-muted-base max-w-md">
+        <h2 class="text-xl font-bold text-heading-lg text-heading">You're Offline</h2>
+        <p class="mb-8 mx-auto text-muted max-w-md">
             It looks like you've lost your internet connection. Please check your connection and try again.
         </p>
-        <button onclick="window.location.reload()" class="btn-primary k-gap-2 k-inline-flex k-items-center">
+        <button onclick="window.location.reload()" class="btn-primary gap-2 inline-flex items-center">
             <i class="fas fa-redo"></i> Try Again
         </button>
     </div>

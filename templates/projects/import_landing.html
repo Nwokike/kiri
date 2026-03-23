@@ -4,73 +4,73 @@
 {% block title %}Import Project - Kiri Labs{% endblock %}
 
 {% block content %}
-<div class="k-container max-w-4xl px-4" x-data="repoImporterInit()">
-    <div class="k-mb-8">
-        <h1 class="k-font-bold k-text-2xl text-heading">Import Project</h1>
-        <p class="k-mt-1 k-text-sm text-body">Select a repository from your connected accounts to auto-fill the submission
+<div class="container mx-auto max-w-4xl px-4" x-data="repoImporterInit()">
+    <div class="mb-8">
+        <h1 class="font-bold text-2xl text-heading">Import Project</h1>
+        <p class="mt-1 text-sm text-body">Select a repository from your connected accounts to auto-fill the submission
             form.</p>
     </div>
 
     <!-- Platform Tabs -->
-    <div class="border-subtle k-border-b k-d-flex k-mb-6">
+    <div class="border-subtle border-b flex mb-6">
         <button @click="setPlatform('github')"
-            :class="'border-kiri-green 'border-transparent 'github' : === ? hover:text-body' k-text-muted-base platform text-kiri-green'"
-            class="border-b-2 k-font-medium k-text-sm k-transition-colors px-6 py-3">
-            <i class="fa-github fab k-mr-2"></i> GitHub
+            :class="platform === 'github' ? 'border-kiri-green text-kiri-green dark:text-white' : 'border-transparent text-muted hover:text-body'"
+            class="border-b-2 font-medium text-sm transition-colors px-6 py-3">
+            <i class="fa-github fab mr-2"></i> GitHub
         </button>
         <button @click="setPlatform('huggingface')"
-            :class="'border-kiri-green 'border-transparent 'huggingface' : === ? hover:text-body' k-text-muted-base platform text-kiri-green'"
-            class="border-b-2 k-font-medium k-text-sm k-transition-colors px-6 py-3">
-            <i class="fa-robot fas k-mr-2"></i> Hugging Face
+            :class="platform === 'huggingface' ? 'border-kiri-green text-kiri-green dark:text-white' : 'border-transparent text-muted hover:text-body'"
+            class="border-b-2 font-medium text-sm transition-colors px-6 py-3">
+            <i class="fa-robot fas mr-2"></i> Hugging Face
         </button>
     </div>
 
     <!-- Connection Check / Search -->
     <template x-if="platformObj.connected">
-        <div class="k-stack-lg">
+        <div class="space-y-6">
             <!-- Search Bar -->
-            <div class="k-relative">
-                <i class="-translate-y-1/2 fa-search fas k-absolute k-text-muted-base left-4 top-1/2"></i>
+            <div class="relative">
+                <i class="-translate-y-1/2 fa-search fas absolute text-muted left-4 top-1/2"></i>
                 <input type="text" x-model="searchQuery" placeholder="Search your repositories..."
                     class="form-input pl-11 pr-4 py-3">
             </div>
 
             <!-- Repo List -->
-            <div class="k-grid-cols-1 k-grid-sm md:grid-cols-2">
+            <div class="grid-cols-1 grid gap-4 md:grid-cols-2">
                 <template x-if="loading">
-                    <div class="k-col-span-full k-text-center py-12">
-                        <i class="fa-spin fa-spinner fas k-text-2xl text-kiri-green"></i>
-                        <p class="k-mt-2 k-text-sm-muted">Loading your repositories...</p>
+                    <div class="col-span-full text-center py-12">
+                        <i class="fa-spin fa-spinner fas text-2xl text-kiri-green"></i>
+                        <p class="mt-2 text-sm text-muted">Loading your repositories...</p>
                     </div>
                 </template>
 
                 <template x-if="!loading && filteredRepos.length === 0">
                     <div
-                        class="bg-subtle border-subtle k-border k-border-dashed k-col-span-full k-text-center py-12 rounded-xl">
-                        <i class="fa-box-open fas k-mb-2 k-text-3xl k-text-muted-base"></i>
-                        <p class="k-text-sm-muted">No repositories found matching your search.</p>
+                        class="bg-subtle border-subtle border border-dashed col-span-full text-center py-12 rounded-xl">
+                        <i class="fa-box-open fas mb-2 text-3xl text-muted"></i>
+                        <p class="text-sm text-muted">No repositories found matching your search.</p>
                     </div>
                 </template>
 
                 <template x-for="repo in filteredRepos" :key="repo.full_name">
-                    <div @click="importRepo(repo)" class="card card-hover cursor-pointer k-block k-group p-5">
-                        <div class="k-d-flex k-items-start k-justify-between k-mb-2">
-                            <h3 class="group-hover:text-kiri-green k-font-semibold k-text-sm k-truncate text-heading"
+                    <div @click="importRepo(repo)" class="card card-hover cursor-pointer block group p-5">
+                        <div class="flex items-start justify-between mb-2">
+                            <h3 class="group-hover:text-kiri-green font-semibold text-sm truncate text-heading"
                                 x-text="repo.name"></h3>
                             <span x-show="repo.private"
-                                class="bg-subtle k-py-0.5 k-rounded k-text-muted-base px-1.5 section-label uppercase">Private</span>
+                                class="bg-subtle py-0.5 rounded text-muted px-1.5 section-label uppercase">Private</span>
                         </div>
-                        <p class="k-line-clamp-2 k-mb-4 k-text-xs text-body"
+                        <p class="line-clamp-2 mb-4 text-xs text-body"
                             x-text="repo.description || 'No description provided.'"></p>
-                        <div class="k-d-flex k-items-center k-justify-between k-text-muted-base text-[11px]">
-                            <div class="k-flex-row-center-md">
+                        <div class="flex items-center justify-between text-muted text-[11px]">
+                            <div class="flex items-center-md">
                                 <span x-show="repo.language"><i
-                                        class="fa-circle fas k-mr-1 text-[8px] text-kiri-green"></i><span
+                                        class="fa-circle fas mr-1 text-[8px] text-kiri-green"></i><span
                                         x-text="repo.language"></span></span>
-                                <span><i class="fa-star fas k-mr-1"></i><span x-text="repo.stars"></span></span>
+                                <span><i class="fa-star fas mr-1"></i><span x-text="repo.stars"></span></span>
                             </div>
                             <i
-                                class="fa-chevron-right fas group-hover:text-kiri-green group-hover:translate-x-1 k-text-muted-base transition-all"></i>
+                                class="fa-chevron-right fas group-hover:text-kiri-green group-hover:translate-x-1 text-muted transition-all"></i>
                         </div>
                     </div>
                 </template>
@@ -80,15 +80,15 @@
 
     <!-- Connect State -->
     <template x-if="!platformObj.connected">
-        <div class="card k-py-16 k-text-center">
-            <div class="bg-success-subtle k-d-flex k-items-center k-justify-center k-mb-6 k-rounded-full k-spacer-center k-w-20">
-                <i :class="platformObj.icon" class="k-text-3xl text-kiri-green"></i>
+        <div class="card py-16 text-center">
+            <div class="bg-success-subtle flex items-center justify-center mb-6 rounded-full mx-auto h-20 w-20">
+                <i :class="platformObj.icon" class="text-3xl text-kiri-green dark:text-white"></i>
             </div>
-            <h2 class="k-card-title text-heading" x-text="'Connect your ' + platformObj.name"></h2>
-            <p class="k-mb-8 k-mx-auto k-text-sm max-w-sm text-body">
+            <h2 class="card-title text-heading" x-text="'Connect your ' + platformObj.name"></h2>
+            <p class="mb-8 mx-auto text-sm max-w-sm text-body">
                 Connect your account to browse and import your research repositories directly into Kiri.
             </p>
-            <a :href="platformObj.connect_url" class="btn-primary k-inline-flex">
+            <a :href="platformObj.connect_url" class="btn-primary inline-flex">
                 Connect Now
             </a>
         </div>
@@ -96,9 +96,9 @@
 
     <!-- Manual Fallback -->
     <div class="mt-12 pt-8 border-t border-subtle">
-        <h3 class="k-mb-4 k-text-center section-label">Or import manually by URL</h3>
-        <div class="k-d-flex k-gap-2 k-max-w-xl k-mx-auto">
-            <div class="k-flex-1">
+        <h3 class="mb-4 text-center section-label">Or import manually by URL</h3>
+        <div class="flex gap-2 max-w-xl mx-auto">
+            <div class="flex-1">
                 <input type="url" id="manual-url" placeholder="https://github.com/user/repo" class="form-input">
             </div>
             <button id="manual-import-btn" class="btn-primary !w-auto">
@@ -109,7 +109,7 @@
 </div>
 
 <!-- Mobile Spacer -->
-<div class="k-spacer md:hidden"></div>
+<div class="spacer md:hidden"></div>
 {% endblock %}
 
 {% block extra_js %}

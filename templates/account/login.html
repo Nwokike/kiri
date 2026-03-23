@@ -6,27 +6,27 @@
 {% block title %}Staff Login | Kiri Labs{% endblock %}
 
 {% block content %}
-<div class="k-mx-auto k-py-16 max-w-md px-4">
+<div class="mx-auto py-16 max-w-md px-4">
     
-    <div class="k-d-flex k-flex-col k-items-center k-mb-10-center">
-        <a href="/" class="border-subtle h-16 hover:border-kiri-green k-bg-surface k-border k-d-flex k-items-center k-justify-center k-mb-6 k-transition-colors rounded-2xl shadow-sm w-16">
+    <div class="flex flex-col items-center mb-10-center">
+        <a href="/" class="border-subtle h-16 hover:border-kiri-green bg-surface border flex items-center justify-center mb-6 transition-colors rounded-2xl shadow-sm w-16">
             <img src="{% static 'images/logos/logo.webp' %}" alt="Kiri Labs" class="h-8 w-auto">
         </a>
-        <h1 class="font-extrabold k-text-3xl text-heading">Staff Login</h1>
-        <p class="k-flex-row-center k-font-bold k-mt-2 k-text-xs text-kiri-green tracking-widest uppercase">
+        <h1 class="font-extrabold text-3xl text-heading">Staff Login</h1>
+        <p class="flex items-center font-bold mt-2 text-xs text-kiri-green tracking-widest uppercase">
             <i class="fas fa-lock"></i> Authorized Access Only
         </p>
     </div>
 
-    <div class="border-t-4 border-t-kiri-green card k-mb-8 k-p-8 shadow-lg">
-        <form class="k-stack-lg" method="POST" action="{% url 'account_login' %}">
+    <div class="border-t-4 border-t-kiri-green card mb-8 p-8 shadow-lg">
+        <form class="space-y-6" method="POST" action="{% url 'account_login' %}">
             {% csrf_token %}
 
             {% if form.errors %}
-            <div class="bg-red-50 border-red-200 k-border k-mb-6 k-p-4 k-rounded-lg">
+            <div class="bg-red-50 border-red-200 border mb-6 p-4 rounded-lg">
                 {% for field, errors in form.errors.items %}
                     {% for error in errors %}
-                        <p class="k-flex-row-center k-font-medium k-text-red-600 k-text-sm">
+                        <p class="flex items-center font-medium text-red-600 text-sm">
                             <i class="fas fa-triangle-exclamation"></i> {{ error }}
                         </p>
                     {% endfor %}
@@ -36,23 +36,23 @@
 
             <div class="space-y-5">
                 <div class="space-y-2">
-                    <label for="id_login" class="k-label text-heading">Username</label>
+                    <label for="id_login" class="font-medium text-sm text-heading">Username</label>
                     <input type="text" name="login" placeholder="staff_username" required id="id_login"
-                        class="focus:border-kiri-green focus:ring-kiri-green form-input k-w-full">
+                        class="focus:border-kiri-green focus:ring-kiri-green form-input w-full">
                 </div>
 
                 <div class="space-y-2">
-                    <label for="id_password" class="k-label text-heading">Password</label>
+                    <label for="id_password" class="font-medium text-sm text-heading">Password</label>
                     <input type="password" name="password" placeholder="••••••••••••" required id="id_password"
-                        class="focus:border-kiri-green focus:ring-kiri-green form-input k-w-full">
+                        class="focus:border-kiri-green focus:ring-kiri-green form-input w-full">
                 </div>
             </div>
 
-            <div class="k-d-flex k-items-center k-justify-between k-mt-2">
-                <label class="cursor-pointer k-flex-row-center-md k-group">
+            <div class="flex items-center justify-between mt-2">
+                <label class="cursor-pointer flex items-center-md group">
                     <input type="checkbox" name="remember" id="id_remember"
-                        class="border-subtle focus:ring-kiri-green focus:ring-opacity-20 h-4 k-bg-surface k-rounded text-kiri-green transition-all w-4">
-                    <span class="group-hover:text-kiri-green k-font-medium k-text-sm k-transition-colors text-body">Remember me</span>
+                        class="border-subtle focus:ring-kiri-green focus:ring-opacity-20 h-4 bg-surface rounded text-kiri-green transition-all w-4">
+                    <span class="group-hover:text-kiri-green font-medium text-sm transition-colors text-body">Remember me</span>
                 </label>
             </div>
 
@@ -60,15 +60,15 @@
             <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
             {% endif %}
 
-            <button class="active:scale-95 btn-primary k-flex-row-center k-justify-center k-mt-4 k-w-full py-3 transition-transform" type="submit">
+            <button class="active:scale-95 btn-primary flex items-center justify-center mt-4 w-full py-3 transition-transform" type="submit">
                 Sign In <i class="fas fa-arrow-right text-[10px]"></i>
             </button>
         </form>
     </div>
 
-    <div class="k-text-center">
-        <p class="k-text-xs-muted">
-            Need access? <a href="mailto:hello@kiri.ng" class="k-hover-underline text-kiri-green">Contact the administrator</a>.
+    <div class="text-center">
+        <p class="text-xs text-muted">
+            Need access? <a href="mailto:hello@kiri.ng" class="hover-underline text-kiri-green">Contact the administrator</a>.
         </p>
     </div>
     

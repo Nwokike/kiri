@@ -1,69 +1,56 @@
 {% load static %}
-
 <header class="page-header">
-    <div class="header-section w-full justify-between px-4">
-        
-        <div class="flex items-center gap-2">
-            <button id="mobile-menu-btn" class="icon-btn md:hidden" aria-label="Toggle Menu">
-                <i class="fas fa-bars"></i>
+    <div class="header-section">
+        <button id="sidebar-toggle" class="icon-btn-large md:mr-2" aria-label="Toggle Navigation" title="Toggle sidebar">
+            <i class="fa-bars fas text-lg"></i>
+        </button>
+        <a href="/" class="header-brand">
+            <img src="{% static 'images/logos/logo.webp' %}" alt="Kiri" class="h-8 md:h-9 w-auto">
+        </a>
+    </div>
+
+    <div class="flex-1"></div>
+
+    <div class="header-actions">
+        <button id="theme-toggle" class="icon-btn" aria-label="Toggle Theme" title="Toggle theme">
+            <i class="fas fa-moon" id="theme-icon-light"></i>
+            <i class="fas fa-sun text-yellow-400" id="theme-icon-dark"></i>
+        </button>
+
+        {% if user.is_authenticated %}
+        <div class="profile-dropdown-container" id="profile-dropdown-container">
+            <button id="profile-dropdown-toggle" class="icon-btn ml-1" aria-haspopup="true" aria-expanded="false" title="Profile menu">
+                {% if user.avatar_url %}
+                <img src="{{ user.avatar_url }}" alt="{{ user.username }}" class="h-8 rounded-full w-8 border border-border-subtle object-cover">
+                {% else %}
+                <div class="avatar-fallback">
+                    {{ user.username|slice:":2"|upper }}
+                </div>
+                {% endif %}
             </button>
 
-            <a href="{% url 'core:home' %}" class="header-brand">
-                <img src="{% static 'images/logos/logo.png' %}" alt="Kiri Labs" class="h-8 w-auto object-contain">
-                <span class="ml-2 font-bold text-heading hidden sm:block tracking-tight">Kiri</span>
-            </a>
-        </div>
-
-        <div class="header-actions">
-            <button id="theme-toggle" class="icon-btn" aria-label="Toggle Theme">
-                <i class="fas fa-sun" id="theme-icon-light"></i>
-                <i class="fas fa-moon" id="theme-icon-dark"></i>
-            </button>
-
-            {% if user.is_authenticated %}
-            <div class="profile-dropdown-container ml-2" x-data="{ open: false }" @click.away="open = false">
-                <button @click="open = !open" class="flex items-center gap-2 focus:outline-none transition-transform hover:scale-105">
-                    <div class="avatar-fallback">
-                        {{ user.username|make_list|first|upper }}
-                    </div>
-                </button>
-                
-                <div x-show="open" 
-                     x-transition:enter="transition ease-out duration-100"
-                     x-transition:enter-start="transform opacity-0 scale-95"
-                     x-transition:enter-end="transform opacity-100 scale-100"
-                     x-transition:leave="transition ease-in duration-75"
-                     x-transition:leave-start="transform opacity-100 scale-100"
-                     x-transition:leave-end="transform opacity-0 scale-95"
-                     class="dropdown-menu mt-2 right-0 origin-top-right"
-                     style="display: none;"
-                     x-cloak>
-                     
-                    <div class="dropdown-header">
-                        <div class="dropdown-username">{{ user.username }}</div>
-                        <div class="dropdown-role truncate">{{ user.email }}</div>
-                    </div>
-                    
-                    <a href="#" class="dropdown-item">
-                        <i class="fas fa-user subnav-icon text-muted"></i> 
-                        <span>Profile</span>
+            <div id="profile-dropdown" class="dropdown-menu hidden shadow-xl origin-top-right right-2 top-full mt-2">
+                <div class="dropdown-header">
+                    <p class="dropdown-username truncate">{{ user.username }}</p>
+                    <p class="dropdown-role">Staff</p>
+                </div>
+                <div class="py-2">
+                    <a href="{% url 'core:about' %}" class="dropdown-item">
+                        <i class="fa-user fas text-center w-5"></i> About
                     </a>
-                    
+                    <a href="{% url 'projects:create' %}" class="dropdown-item">
+                        <i class="fa-plus fas text-center w-5"></i> New Project
+                    </a>
+                    <a href="{% url 'socialaccount_connections' %}" class="dropdown-item">
+                        <i class="fa-plug fas text-center w-5"></i> Integrations
+                    </a>
                     <div class="dropdown-divider"></div>
-                    
-                    <form method="post" action="{% url 'account_logout' %}" class="w-full m-0 p-0">
-                        {% csrf_token %}
-                        <button type="submit" class="dropdown-item dropdown-item-danger w-full text-left">
-                            <i class="fas fa-sign-out-alt subnav-icon"></i> 
-                            <span>Log Out</span>
-                        </button>
-                    </form>
+                    <a href="{% url 'account_logout' %}" class="dropdown-item-danger">
+                        <i class="fa-sign-out-alt fas text-center w-5"></i> Sign Out
+                    </a>
                 </div>
             </div>
-            {% else %}
-            <a href="{% url 'account_login' %}" class="btn-primary text-xs py-1.5 px-4 ml-2">Log In</a>
-            {% endif %}
         </div>
-        
+        {% endif %}
     </div>
 </header>

@@ -1,33 +1,27 @@
 {% load static %}
-<!-- ===== HEADER ===== -->
 <header class="page-header">
-    <!-- Left: Hamburger + Logo -->
     <div class="header-section">
-        <button id="sidebar-toggle" class="icon-btn-large" title="Toggle sidebar">
+        <button id="sidebar-toggle" class="icon-btn-large md:mr-2" aria-label="Toggle Navigation" title="Toggle sidebar">
             <i class="fa-bars fas text-lg"></i>
         </button>
         <a href="/" class="header-brand">
-            <img src="{% static 'images/logos/logo.webp' %}" alt="Kiri" class="h-9 w-auto">
+            <img src="{% static 'images/logos/logo.webp' %}" alt="Kiri" class="h-8 md:h-9 w-auto">
         </a>
     </div>
 
-    <!-- Center: Spacer -->
     <div class="flex-1"></div>
 
-    <!-- Right: Actions -->
     <div class="header-actions">
-        <!-- Theme Toggle -->
-        <button id="theme-toggle" class="icon-btn" title="Toggle theme">
+        <button id="theme-toggle" class="icon-btn" aria-label="Toggle Theme" title="Toggle theme">
             <i class="fas fa-moon" id="theme-icon-light"></i>
             <i class="fas fa-sun text-yellow-400" id="theme-icon-dark"></i>
         </button>
 
         {% if user.is_authenticated %}
-        <!-- Profile Dropdown -->
         <div class="profile-dropdown-container" id="profile-dropdown-container">
-            <button id="profile-dropdown-toggle" class="icon-btn" title="Profile menu">
+            <button id="profile-dropdown-toggle" class="icon-btn ml-1" aria-haspopup="true" aria-expanded="false" title="Profile menu">
                 {% if user.avatar_url %}
-                <img src="{{ user.avatar_url }}" alt="{{ user.username }}" class="h-8 rounded-full w-8">
+                <img src="{{ user.avatar_url }}" alt="{{ user.username }}" class="h-8 rounded-full w-8 border border-border-subtle object-cover">
                 {% else %}
                 <div class="avatar-fallback">
                     {{ user.username|slice:":2"|upper }}
@@ -35,10 +29,9 @@
                 {% endif %}
             </button>
 
-            <!-- Dropdown Menu -->
-            <div id="profile-dropdown" class="dropdown-menu hidden">
+            <div id="profile-dropdown" class="dropdown-menu hidden shadow-xl origin-top-right right-2 top-full mt-2">
                 <div class="dropdown-header">
-                    <p class="dropdown-username">{{ user.username }}</p>
+                    <p class="dropdown-username truncate">{{ user.username }}</p>
                     <p class="dropdown-role">Staff</p>
                 </div>
                 <div class="py-2">

@@ -18,23 +18,16 @@ and all running locally.
 
 {% block content %}
 <div class="page-container">
-    <!-- Hero Section -->
     {% include "partials/home/hero.html" %}
 
-    <!-- Feature Grid -->
     {% include "partials/home/pillars.html" %}
 
-    <!-- Main Content Grid -->
     <div class="content-grid">
-        <!-- Left: Featured Content -->
         <div class="content-main">
-            <!-- Featured Projects -->
             {% include "partials/home/featured_projects.html" %}
         </div>
 
-        <!-- Right: Sidebar -->
         <div class="content-sidebar">
-            <!-- Ecosystem Platforms -->
             {% if ecosystem_platforms %}
             <div class="sidebar-card">
                 <h3 class="sidebar-card-title">
@@ -62,13 +55,10 @@ and all running locally.
             </div>
             {% endif %}
 
-            <!-- Trending Projects -->
             {% include "partials/home/trending_sidebar.html" %}
 
-            <!-- Categories -->
             {% include "partials/home/categories_sidebar.html" %}
 
-            <!-- Latest Projects -->
             {% if latest_projects %}
             <div class="sidebar-card">
                 <h3 class="sidebar-card-title">
@@ -97,7 +87,4 @@ and all running locally.
         </div>
     </div>
 </div>
-
-<!-- Mobile Spacer -->
-<div class="h-16 md:hidden"></div>
 {% endblock %}

@@ -2,7 +2,6 @@ from django.shortcuts import render
 from django.contrib.auth.decorators import login_not_required
 from django.http import JsonResponse, HttpResponse
 from django.core.cache import cache
-from django.db.models import Case, When, Value, IntegerField
 
 
 @login_not_required
@@ -13,53 +12,43 @@ def home(request):
         from projects.models import Project
         from django.db.models import Count, Sum
 
-        # Featured projects - prioritize HOT, then sort by stars
+        all_projects = Project.objects.all()
+
+        # Featured projects (manually flagged), then by most recent
         featured_projects = list(
-            Project.objects.filter(is_approved=True)
-            .annotate(
-                is_hot_order=Case(
-                    When(is_hot=True, then=Value(0)),
-                    default=Value(1),
-                    output_field=IntegerField()
-                )
-            )
-            .order_by('is_hot_order', '-stars_count')
-            .select_related('submitted_by')[:6]
+            all_projects.filter(is_featured=True).order_by('-created_at')[:6]
         )
 
         # Dynamic stats
-        approved = Project.objects.filter(is_approved=True)
-        star_sum = approved.aggregate(total=Sum('stars_count'))['total'] or 0
+        stats = {
+            'total_projects': all_projects.count(),
+            'total_live': all_projects.exclude(live_url='').count(),
+        }
 
         # Dynamic tool count from registry
         try:
             from tools.registry import TOOLS
-            tool_count = len(TOOLS)
+            stats['total_tools'] = len(TOOLS)
         except ImportError:
-            tool_count = 30
+            stats['total_tools'] = 30
 
-        stats = {
-            'total_projects': approved.count(),
-            'total_stars': f"{star_sum:,}",
-            'total_tools': tool_count,
-        }
-
+        # Categories with counts
         categories = list(
-            approved.values('category')
+            all_projects.values('category')
             .annotate(count=Count('id'))
             .order_by('-count')[:8]
         )
-        trending_projects = list(approved.order_by('-view_count')[:5])
-        latest_projects = list(approved.order_by('-created_at')[:4])
+
+        # Latest projects
+        latest_projects = list(all_projects.order_by('-created_at')[:5])
 
         context = {
             "featured_projects": featured_projects,
             "stats": stats,
             "categories": categories,
-            "trending_projects": trending_projects,
             "latest_projects": latest_projects,
         }
-        cache.set('homepage_context', context, 300)  # 5 minutes
+        cache.set('homepage_context', context, 300)
 
     return render(request, "home.html", context)
 
@@ -89,15 +78,15 @@ def contact(request):
 
 
 @login_not_required
-def offline(request):
-    """Offline page for PWA."""
-    return render(request, "offline.html")
-
-
-@login_not_required
 def refund_policy(request):
     """Refund policy page."""
     return render(request, "core/refund.html")
+
+
+@login_not_required
+def offline(request):
+    """Offline page for PWA."""
+    return render(request, "offline.html")
 
 
 @login_not_required

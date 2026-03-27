@@ -15,13 +15,18 @@ def sync_project_metadata(project):
     if data:
         project.stars_count = data['stars_count']
         project.forks_count = data['forks_count']
-        project.language = data['language']
+        project.language = data['language'] or ''
 
         if not project.description:
-            project.description = data['description']
+            project.description = data['description'] or ''
 
-        if not project.topics and data['topics']:
-            project.topics = data['topics']
+        if not project.topics and data.get('topics'):
+            # Convert list to comma-separated string
+            topics = data['topics']
+            if isinstance(topics, list):
+                project.topics = ', '.join(topics)
+            else:
+                project.topics = str(topics)
 
         project.last_synced_at = timezone.now()
         project.save(update_fields=[

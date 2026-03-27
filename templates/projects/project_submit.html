@@ -1,0 +1,61 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}Add Project | Kiri Research Labs{% endblock %}
+
+{% block content %}
+<div class="page-container max-w-3xl">
+    <div class="mb-6">
+        <h1 class="font-bold text-2xl text-heading">Add Project</h1>
+        <p class="mt-1 text-sm text-muted">Include a new project in the Kiri Research Labs showcase.</p>
+    </div>
+
+    <div class="card p-6">
+        <form method="post" action="{% url 'projects:create_manual' %}">
+            {% csrf_token %}
+
+            {% if form.errors %}
+            <div class="alert-error mb-4 p-3 text-xs">
+                <p class="font-semibold mb-1">Please correct the errors below:</p>
+                {% for field in form %}
+                {% for error in field.errors %}
+                <p>&bull; {{ field.label }}: {{ error }}</p>
+                {% endfor %}
+                {% endfor %}
+                {% for error in form.non_field_errors %}
+                <p>&bull; {{ error }}</p>
+                {% endfor %}
+            </div>
+            {% endif %}
+
+            <div class="space-y-4">
+                {% for field in form %}
+                <div>
+                    <label for="{{ field.id_for_label }}" class="block font-semibold mb-1 text-xs text-heading">
+                        {{ field.label }}{% if field.field.required %} <span class="text-red-500">*</span>{% endif %}
+                    </label>
+                    {% if field.help_text %}
+                    <p class="mb-1 text-muted text-[11px]">{{ field.help_text }}</p>
+                    {% endif %}
+                    <div class="form-field">
+                        {{ field }}
+                    </div>
+                    {% if field.errors %}
+                    <p class="mt-1 text-red-500 text-xs">{{ field.errors|first }}</p>
+                    {% endif %}
+                </div>
+                {% endfor %}
+
+                <div class="flex gap-3 pt-2">
+                    <button type="submit" class="btn-primary flex-1 py-2.5">
+                        Add Project
+                    </button>
+                    <a href="{% url 'projects:list' %}" class="btn-secondary px-4 py-2.5">
+                        Cancel
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

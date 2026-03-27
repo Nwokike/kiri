@@ -1,51 +1,48 @@
-<!-- Feature Grid -->
+<!-- Value Propositions -->
 <section class="mb-16">
     <div class="gap-6 grid md:grid-cols-3">
-        <!-- Projects -->
+        <!-- Edge Intelligence -->
         <div class="card hover:border-kiri-green group transition-colors md:p-8 p-6">
             <div class="bg-success-subtle flex h-12 items-center justify-center mb-6 rounded-lg w-12 text-kiri-green dark:text-white">
-                <i class="fa-briefcase fas text-xl"></i>
+                <i class="fa-microchip fas text-xl"></i>
             </div>
-            <h3 class="group-hover:text-kiri-green font-bold mb-3 text-xl transition-colors text-heading">Projects</h3>
+            <h3 class="group-hover:text-kiri-green font-bold mb-3 text-xl transition-colors text-heading">Edge Intelligence</h3>
             <p class="mb-6 text-sm text-muted leading-relaxed">
-                Our open-source projects with GitHub integration, live demos, and detailed metadata.
+                TinyML and small language models designed for zero and low-compute environments.
             </p>
-            <a href="{% url 'projects:list' %}"
+            <a href="{% url 'projects:list' %}?category=ai_nlp"
                 class="font-bold gap-2 hover-underline inline-flex items-center text-sm text-kiri-green">
-                Browse Projects <i class="fas fa-arrow-right text-[10px]"></i>
+                View Projects <i class="fas fa-arrow-right text-[10px]"></i>
             </a>
         </div>
 
-        <!-- Tools -->
+        <!-- Lightweight Engineering -->
         <div class="card hover:border-kiri-gold group transition-colors md:p-8 p-6">
             <div class="bg-warning-subtle flex h-12 items-center justify-center mb-6 rounded-lg w-12 text-kiri-gold dark:text-white">
-                <i class="fa-tools fas text-xl"></i>
+                <i class="fa-feather fas text-xl"></i>
             </div>
-            <h3 class="group-hover:text-kiri-gold font-bold mb-3 text-xl transition-colors text-heading">Tools Hub</h3>
+            <h3 class="group-hover:text-kiri-gold font-bold mb-3 text-xl transition-colors text-heading">Built Lightweight</h3>
             <p class="mb-6 text-sm text-muted leading-relaxed">
-                {{ total_tools }}+ browser-based developer utilities. JSON formatters, PDF editors, data profilers, and
-                more - all
-                running locally.
+                Small codebases, minimal dependencies, optimized for 1GB RAM servers and low-resource devices.
             </p>
-            <a href="{% url 'tools:index' %}"
+            <a href="{% url 'projects:list' %}"
                 class="font-bold gap-2 hover-underline inline-flex items-center text-sm text-kiri-gold">
-                Access Tools Hub <i class="fas fa-arrow-right text-[10px]"></i>
+                Browse All <i class="fas fa-arrow-right text-[10px]"></i>
             </a>
         </div>
 
-        <!-- About -->
+        <!-- Open Source -->
         <div class="card hover:border-blue-600 group transition-colors md:p-8 p-6">
             <div class="bg-info-subtle flex h-12 items-center justify-center mb-6 rounded-lg w-12 text-blue-600 dark:text-white">
-                <i class="fa-info-circle fas text-xl"></i>
+                <i class="fa-code-branch fas text-xl"></i>
             </div>
-            <h3 class="group-hover:text-blue-600 font-bold mb-3 text-xl transition-colors text-heading">About Us</h3>
+            <h3 class="group-hover:text-blue-600 font-bold mb-3 text-xl transition-colors text-heading">Open Source</h3>
             <p class="mb-6 text-sm text-muted leading-relaxed">
-                High-performance software focused on being lightweight, small, and efficient. Learn more about what we
-                do and how we work.
+                All projects are public on GitHub. Fork, contribute, or deploy your own instance.
             </p>
-            <a href="{% url 'core:about' %}"
+            <a href="https://github.com/Nwokike" target="_blank" rel="noopener"
                 class="font-bold gap-2 hover-underline inline-flex items-center text-sm text-blue-600">
-                Learn More <i class="fas fa-arrow-right text-[10px]"></i>
+                GitHub <i class="fas fa-external-link-alt text-[10px]"></i>
             </a>
         </div>
     </div>

@@ -1,29 +1,29 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Projects - Kiri Labs{% endblock %}
+{% block title %}Projects | Kiri Research Labs{% endblock %}
 
 {% block meta_description %}
-Browse open-source work from the Kiri Labs community.
+Open source projects by Kiri Research Labs. Lightweight software for edge intelligence.
 {% endblock %}
 
-{% block og_title %}Projects - Kiri Labs{% endblock %}
+{% block og_title %}Projects | Kiri Research Labs{% endblock %}
 
 {% block og_description %}
-Explore AI, ML, and software projects built by Kiri Labs. Browse by category, sort by stars, and discover new tools.
+Open source projects by Kiri Research Labs. Lightweight software for edge intelligence.
 {% endblock %}
 
 {% block content %}
-<div class="container mx-auto max-w-7xl px-4">
+<div class="page-container">
     <!-- Page Header -->
     <div class="flex flex-col gap-4 justify-between mb-8 sm-flex-row sm:items-center">
         <div>
             <h1 class="font-bold text-2xl text-heading">Projects</h1>
-            <p class="mt-1 text-sm text-body">Showcasing AI, ML, and software projects from our community.</p>
+            <p class="mt-1 text-sm text-body">Open source software and research by Kiri Research Labs.</p>
         </div>
-        {% if user.is_authenticated %}
-        <a href="{% url 'projects:create' %}" class="btn-primary shrink-0 self-start sm:self-auto">
-            <i class="fa-plus fas mr-1-5"></i> Submit Project
+        {% if user.is_staff %}
+        <a href="{% url 'projects:create_manual' %}" class="btn-primary shrink-0 self-start sm:self-auto">
+            <i class="fa-plus fas"></i> Add Project
         </a>
         {% endif %}
     </div>
@@ -36,53 +36,65 @@ Explore AI, ML, and software projects built by Kiri Labs. Browse by category, so
             <option value="{{ value }}" {% if current_category == value %}selected{% endif %}>{{ label }}</option>
             {% endfor %}
         </select>
-        <select name="sort" onchange="this.form.submit()" class="form-input !w-auto !py-1.5 !h-auto">
-            <option value="-created_at" {% if current_sort == "-created_at" %}selected{% endif %}>Newest</option>
-            <option value="-stars_count" {% if current_sort == "-stars_count" %}selected{% endif %}>Most Stars</option>
-            <option value="name" {% if current_sort == "name" %}selected{% endif %}>A-Z</option>
+        <select name="status" onchange="this.form.submit()" class="form-input !w-auto !py-1.5 !h-auto">
+            <option value="">All Statuses</option>
+            {% for value, label in statuses %}
+            <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>{{ label }}</option>
+            {% endfor %}
         </select>
+        {% if search_query or current_category or current_status %}
+        <a href="{% url 'projects:list' %}" class="btn-secondary !py-1.5 !h-auto">Clear</a>
+        {% endif %}
     </form>
 
     <!-- Project Grid -->
     {% if projects %}
     <div class="grid-cols-1 grid gap-4 lg:grid-cols-3 sm:grid-cols-2">
         {% for project in projects %}
-        <a href="{{ project.get_absolute_url }}" class="card card-hover block group p-5">
-            <!-- Category Badge + Hot -->
-            <div class="flex items-center mb-3">
-                <span
-                    class="bg-success-subtle badge lowercase px-2 section-label text-kiri-green tracking-normal">
-                    {{ project.get_category_display }}
-                </span>
-                {% if project.is_hot %}
-                <span class="bg-warning-subtle badge px-2 section-label text-orange-600 tracking-normal">
-                    🔥 Hot
-                </span>
-                {% endif %}
+        <a href="{{ project.get_absolute_url }}" class="card card-hover block group overflow-hidden">
+            {% if project.preview_image_url %}
+            <div class="bg-subtle h-32 overflow-hidden">
+                <img src="{{ project.preview_image_url }}" alt="{{ project.name }}"
+                    class="h-full w-full object-cover" loading="lazy">
             </div>
-
-            <!-- Title -->
-            <h2 class="group-hover:text-kiri-green font-semibold transition-colors line-clamp-1 text-heading">
-                {{ project.name }}
-            </h2>
-
-            <!-- Description -->
-            <p class="line-clamp-2 text-sm mt-1.5 text-body">{{ project.description }}</p>
-
-            <!-- Meta -->
-            <div class="flex items-center justify-between mt-4 text-xs text-muted">
-                <div class="flex items-center-md">
-                    {% if project.language %}
-                    <span><i class="fa-circle fas mr-1 text-[8px] text-kiri-green"></i>{{ project.language }}</span>
+            {% endif %}
+            <div class="p-5">
+                <!-- Badges -->
+                <div class="flex items-center gap-2 mb-3">
+                    <span
+                        class="bg-success-subtle font-bold lowercase px-2 py-0.5 rounded section-label text-kiri-green tracking-normal">
+                        {{ project.get_category_display }}
+                    </span>
+                    {% if project.live_url %}
+                    <span class="flex font-bold gap-1 items-center text-[9px] text-kiri-green uppercase">
+                        <i class="fas fa-circle text-[6px]"></i> Live
+                    </span>
                     {% endif %}
-                    {% if project.stars_count %}
-                    <span><i class="fa-star fas mr-1"></i>{{ project.stars_count }}</span>
-                    {% endif %}
-                    {% if project.forks_count %}
-                    <span><i class="fa-code-branch fas mr-1"></i>{{ project.forks_count }}</span>
+                    {% if project.status == 'beta' %}
+                    <span class="flex font-bold gap-1 items-center text-[9px] text-kiri-gold uppercase">
+                        <i class="fas fa-flask"></i> Beta
+                    </span>
                     {% endif %}
                 </div>
-                <span>{{ project.created_at|date:"M Y" }}</span>
+
+                <!-- Title -->
+                <h2 class="group-hover:text-kiri-green font-semibold transition-colors line-clamp-1 text-heading">
+                    {{ project.name }}
+                </h2>
+
+                <!-- Description -->
+                <p class="line-clamp-2 text-sm mt-1.5 text-body">{{ project.description|truncatewords:15 }}</p>
+
+                <!-- Meta -->
+                <div class="flex items-center justify-between mt-4 text-xs text-muted">
+                    <div class="flex items-center gap-2">
+                        {% if project.language %}
+                        <span><i class="fa-circle fas mr-1 text-[8px] text-kiri-green"></i>{{ project.language }}</span>
+                        {% endif %}
+                        <span>{{ project.get_status_display }}</span>
+                    </div>
+                    <span>{{ project.created_at|date:"M Y" }}</span>
+                </div>
             </div>
         </a>
         {% endfor %}
@@ -90,18 +102,18 @@ Explore AI, ML, and software projects built by Kiri Labs. Browse by category, so
 
     <!-- Pagination -->
     {% if is_paginated %}
-    <div class="flex items-center justify-center mt-10">
+    <div class="flex items-center justify-center gap-3 mt-10">
         {% if page_obj.has_previous %}
-        <a href="?page={{ page_obj.previous_page_number }}&category={{ current_category }}&sort={{ current_sort }}"
-            class="!px-3 !py-1.5 !text-sm !w-auto btn-secondary flex items-center">
-            <i class="fa-chevron-left fas mr-1"></i> Prev
+        <a href="?page={{ page_obj.previous_page_number }}&category={{ current_category }}&status={{ current_status }}"
+            class="btn-secondary !px-3 !py-1.5 !text-sm">
+            <i class="fa-chevron-left fas"></i> Prev
         </a>
         {% endif %}
         <span class="text-sm text-muted">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
         {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}&category={{ current_category }}&sort={{ current_sort }}"
-            class="!px-3 !py-1.5 !text-sm !w-auto btn-secondary flex items-center">
-            Next <i class="fa-chevron-right fas ml-1"></i>
+        <a href="?page={{ page_obj.next_page_number }}&category={{ current_category }}&status={{ current_status }}"
+            class="btn-secondary !px-3 !py-1.5 !text-sm">
+            Next <i class="fa-chevron-right fas"></i>
         </a>
         {% endif %}
     </div>
@@ -111,11 +123,8 @@ Explore AI, ML, and software projects built by Kiri Labs. Browse by category, so
     <div class="text-center py-24">
         <i class="fa-folder-open fas block mb-4 text-4xl text-muted"></i>
         <h2 class="font-semibold text-lg text-body">No projects yet</h2>
-        <p class="mt-1 text-sm text-muted">Check back soon - projects will appear here once approved.</p>
+        <p class="mt-1 text-sm text-muted">Check back soon.</p>
     </div>
     {% endif %}
 </div>
-
-<!-- Mobile Spacer -->
-<div class="spacer md:hidden"></div>
 {% endblock %}

@@ -1,5 +1,4 @@
 {% load static %}
-{% load pwa %}
 <!DOCTYPE html>
 <html lang="en" class="h-full">
 
@@ -14,7 +13,7 @@
 
     <!-- Open Graph -->
     <meta property="og:type" content="website">
-    <meta property="og:site_name" content="Kiri Labs">
+    <meta property="og:site_name" content="Kiri Research Labs">
     <meta property="og:url" content="{{ request.build_absolute_uri }}">
     <meta property="og:title" content="{% block og_title %}Kiri{% endblock %}">
     <meta property="og:description"
@@ -23,7 +22,7 @@
         content="{% block og_image %}{{ request.scheme }}://{{ request.get_host }}{% static 'images/logos/logo.png' %}{% endblock %}">
 
     <meta property="twitter:card" content="summary_large_image">
-    <meta property="twitter:title" content="{% block twitter_title %}Kiri Labs - Tools & Projects{% endblock %}">
+    <meta property="twitter:title" content="{% block twitter_title %}Kiri Research Labs - Tools & Projects{% endblock %}">
 
     <meta name="csrf-token" content="{{ csrf_token }}">
 
@@ -48,7 +47,21 @@
     <script src="{% static 'js/analytics.js' %}"></script>
     {% endif %}
 
-    {% progressive_web_app_meta %}
+    <!-- JSON-LD Organization Schema -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Organization",
+        "name": "Kiri Research Labs",
+        "url": "https://kiri.ng",
+        "logo": "{{ request.scheme }}://{{ request.get_host }}{% static 'images/logos/logo.png' %}",
+        "description": "Lightweight software for edge intelligence. TinyML, small language models, and developer tools.",
+        "sameAs": [
+            "https://twitter.com/kiri_research",
+            "https://github.com/kiri-labs"
+        ]
+    }
+    </script>
 </head>
 
 <body class="bg-subtle h-full text-body">
@@ -96,8 +109,7 @@
     {% include "partials/mobile_nav.html" %}
 
     <!-- Scripts -->
-    <script src="{% static 'js/htmx.min.js' %}"></script>
-    <script src="{% static 'js/pwa_install.js' %}"></script>
+    <script src="{% static 'js/main.js' %}"></script>
     <script src="{% static 'js/main.js' %}"></script>
     {% block extra_js %}{% endblock %}
 </body>

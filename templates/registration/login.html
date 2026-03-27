@@ -1,16 +1,14 @@
 {% extends "base.html" %}
-{% load i18n %}
 {% load static %}
-{% load account socialaccount %}
 
-{% block title %}Staff Login | Kiri Labs{% endblock %}
+{% block title %}Staff Login | Kiri Research Labs{% endblock %}
 
 {% block content %}
 <div class="mx-auto py-16 max-w-md px-4">
     
     <div class="flex flex-col items-center mb-10-center">
         <a href="/" class="border-subtle h-16 hover:border-kiri-green bg-surface border flex items-center justify-center mb-6 transition-colors rounded-2xl shadow-sm w-16">
-            <img src="{% static 'images/logos/logo.webp' %}" alt="Kiri Labs" class="h-8 w-auto">
+            <img src="{% static 'images/logos/logo.webp' %}" alt="Kiri Research Labs" class="h-8 w-auto">
         </a>
         <h1 class="font-extrabold text-3xl text-heading">Staff Login</h1>
         <p class="flex items-center font-bold mt-2 text-xs text-kiri-green tracking-widest uppercase">
@@ -19,7 +17,7 @@
     </div>
 
     <div class="border-t-4 border-t-kiri-green card mb-8 p-8 shadow-lg">
-        <form class="space-y-6" method="POST" action="{% url 'account_login' %}">
+        <form class="space-y-6" method="POST" action="{% url 'login' %}">
             {% csrf_token %}
 
             {% if form.errors %}
@@ -36,8 +34,8 @@
 
             <div class="space-y-5">
                 <div class="space-y-2">
-                    <label for="id_login" class="font-medium text-sm text-heading">Username</label>
-                    <input type="text" name="login" placeholder="staff_username" required id="id_login"
+                    <label for="id_username" class="font-medium text-sm text-heading">Username</label>
+                    <input type="text" name="username" placeholder="staff_username" required id="id_username"
                         class="focus:border-kiri-green focus:ring-kiri-green form-input w-full">
                 </div>
 
@@ -48,16 +46,8 @@
                 </div>
             </div>
 
-            <div class="flex items-center justify-between mt-2">
-                <label class="cursor-pointer flex items-center-md group">
-                    <input type="checkbox" name="remember" id="id_remember"
-                        class="border-subtle focus:ring-kiri-green focus:ring-opacity-20 h-4 bg-surface rounded text-kiri-green transition-all w-4">
-                    <span class="group-hover:text-kiri-green font-medium text-sm transition-colors text-body">Remember me</span>
-                </label>
-            </div>
-
-            {% if redirect_field_value %}
-            <input type="hidden" name="{{ redirect_field_name }}" value="{{ redirect_field_value }}" />
+            {% if next %}
+            <input type="hidden" name="next" value="{{ next }}" />
             {% endif %}
 
             <button class="active:scale-95 btn-primary flex items-center justify-center mt-4 w-full py-3 transition-transform" type="submit">

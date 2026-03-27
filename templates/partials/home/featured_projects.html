@@ -3,7 +3,7 @@
 <section>
     <div class="flex items-center justify-between mb-6">
         <h2 class="flex items-center font-bold text-xl text-heading">
-            <i class="fas fa-fire text-kiri-gold"></i> Featured Projects
+            <i class="fas fa-star text-kiri-gold"></i> Featured
         </h2>
         <a href="{% url 'projects:list' %}" class="font-bold hover-underline text-sm text-kiri-green">
             View All <i class="fa-arrow-right fas ml-1"></i>
@@ -12,50 +12,52 @@
 
     <div class="gap-5 grid md:grid-cols-2">
         {% for project in featured_projects %}
-        <a href="{% url 'projects:detail' project.slug %}" class="card card-hover block group p-5">
-            <div class="flex items-start justify-between mb-3">
-                <span
-                    class="bg-success-subtle font-bold py-1 rounded px-2.5 text-[9px] text-kiri-green tracking-wider uppercase">
-                    {{ project.language|default:"Project" }}
-                </span>
-                <div class="flex items-center">
-                    {% if project.demo_url %}
-                    <span class="flex font-bold gap-1 items-center text-[9px] text-blue-500 uppercase">
-                        <i class="fas fa-play-circle"></i> Live
+        <a href="{% url 'projects:detail' project.slug %}" class="card card-hover block group overflow-hidden">
+            {% if project.preview_image_url %}
+            <div class="bg-subtle h-36 overflow-hidden">
+                <img src="{{ project.preview_image_url }}" alt="{{ project.name }}"
+                    class="h-full w-full object-cover" loading="lazy">
+            </div>
+            {% endif %}
+            <div class="p-5">
+                <div class="flex items-start justify-between mb-3">
+                    <span
+                        class="bg-success-subtle font-bold py-1 rounded px-2.5 text-[9px] text-kiri-green tracking-wider uppercase">
+                        {{ project.language|default:"Project" }}
                     </span>
-                    {% endif %}
-                    {% if project.is_hot %}
-                    <span class="flex font-bold gap-1 items-center text-[9px] text-kiri-gold uppercase">
-                        <i class="fas fa-fire"></i> Hot
+                    <div class="flex gap-2 items-center">
+                        {% if project.live_url %}
+                        <span class="flex font-bold gap-1 items-center text-[9px] text-kiri-green uppercase">
+                            <i class="fas fa-circle text-[6px]"></i> Live
+                        </span>
+                        {% endif %}
+                        {% if project.status == 'beta' %}
+                        <span class="flex font-bold gap-1 items-center text-[9px] text-kiri-gold uppercase">
+                            <i class="fas fa-flask"></i> Beta
+                        </span>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <h3
+                    class="group-hover:text-kiri-green font-bold mb-2 text-base transition-colors leading-tight text-heading">
+                    {{ project.name }}
+                </h3>
+
+                <p class="line-clamp-2 mb-4 text-sm leading-relaxed text-body">
+                    {{ project.description|truncatewords:20 }}
+                </p>
+
+                <div class="border-subtle border-t gap-3 flex items-center flex-wrap font-bold text-muted pt-3 text-[11px]">
+                    {% for tag in project.tech_stack_list %}
+                    <span class="bg-subtle py-0.5 rounded px-2 text-[10px]">{{ tag }}</span>
+                    {% endfor %}
+                    {% if project.category %}
+                    <span class="bg-subtle ml-auto py-0.5 rounded px-2 text-[10px]">
+                        {{ project.get_category_display }}
                     </span>
                     {% endif %}
                 </div>
-            </div>
-
-            <h3
-                class="group-hover:text-kiri-green font-bold mb-2 text-base transition-colors leading-tight text-heading">
-                {{ project.name }}
-            </h3>
-
-            <p class="line-clamp-2 mb-4 text-sm leading-relaxed text-body">
-                {{ project.description|truncatewords:20 }}
-            </p>
-
-            <div class="border-subtle border-t gap-5 flex items-center font-bold text-muted pt-3 text-[11px]">
-                <span class="gap-1.5 flex items-center">
-                    <i class="fas fa-star text-kiri-gold"></i> {{ project.stars_count }}
-                </span>
-                <span class="gap-1.5 flex items-center">
-                    <i class="fas fa-code-branch"></i> {{ project.forks_count }}
-                </span>
-                <span class="gap-1.5 flex items-center">
-                    <i class="fas fa-eye"></i> {{ project.view_count }}
-                </span>
-                {% if project.category %}
-                <span class="bg-subtle ml-auto py-0.5 rounded px-2 text-[10px]">
-                    {{ project.get_category_display }}
-                </span>
-                {% endif %}
             </div>
         </a>
         {% endfor %}

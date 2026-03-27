@@ -1,17 +1,16 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Kiri - Software & Utilities{% endblock %}
+{% block title %}Kiri Research Labs{% endblock %}
 
 {% block meta_description %}
-30+ browser-based developer tools, productivity features, and project showcases from Kiri Labs. Lightweight, efficient,
-and all running locally.
+Lightweight software for edge intelligence. TinyML, small language models, and developer tools by Kiri Research Labs.
 {% endblock %}
 
-{% block og_title %}Kiri Labs - Tools & Projects{% endblock %}
+{% block og_title %}Kiri Research Labs{% endblock %}
 
 {% block og_description %}
-30+ browser-based developer tools, productivity features, and project showcases. Built lightweight and efficient.
+Lightweight software for edge intelligence. Open source projects, AI tools, and developer utilities.
 {% endblock %}
 
 {% block og_image %}{{ request.scheme }}://{{ request.get_host }}{% static 'images/logos/logo.png' %}{% endblock %}
@@ -71,8 +70,7 @@ and all running locally.
                             <i class="fas fa-folder-open sidebar-card-icon"></i>
                         </div>
                         <div class="sidebar-card-content">
-                            <p
-                                class="sidebar-card-content-title">
+                            <p class="sidebar-card-content-title">
                                 {{ project.name }}
                             </p>
                             <p class="sidebar-card-content-desc uppercase">

@@ -38,14 +38,11 @@
                     <a href="{% url 'core:about' %}" class="dropdown-item">
                         <i class="fa-user fas text-center w-5"></i> About
                     </a>
-                    <a href="{% url 'projects:create' %}" class="dropdown-item">
+                    <a href="{% url 'projects:create_manual' %}" class="dropdown-item">
                         <i class="fa-plus fas text-center w-5"></i> New Project
                     </a>
-                    <a href="{% url 'socialaccount_connections' %}" class="dropdown-item">
-                        <i class="fa-plug fas text-center w-5"></i> Integrations
-                    </a>
                     <div class="dropdown-divider"></div>
-                    <a href="{% url 'account_logout' %}" class="dropdown-item-danger">
+                    <a href="{% url 'logout' %}" class="dropdown-item-danger">
                         <i class="fa-sign-out-alt fas text-center w-5"></i> Sign Out
                     </a>
                 </div>

@@ -1,7 +1,7 @@
 {% load static %}
 <!-- Mobile Bottom Nav -->
 <nav class="mobile-nav">
-    <div class="mobile-nav-grid">
+    <div class="mobile-nav-grid" style="grid-template-columns: repeat(3, 1fr);">
         <a href="{% url 'core:home' %}"
             class="mobile-nav-item {% if request.path == '/' %}mobile-nav-item-active{% endif %}">
             <i class="fa-home fas mobile-nav-icon"></i>
@@ -11,11 +11,6 @@
             class="mobile-nav-item {% if 'projects' in request.path %}mobile-nav-item-active{% endif %}">
             <i class="fa-briefcase fas mobile-nav-icon"></i>
             <span class="mobile-nav-label">Projects</span>
-        </a>
-        <a href="{% url 'tools:index' %}"
-            class="mobile-nav-item {% if 'tools' in request.path %}mobile-nav-item-active{% endif %}">
-            <i class="fa-toolbox fas mobile-nav-icon"></i>
-            <span class="mobile-nav-label">Tools</span>
         </a>
         <a href="{% url 'core:about' %}"
             class="mobile-nav-item {% if 'about' in request.path %}mobile-nav-item-active{% endif %}">

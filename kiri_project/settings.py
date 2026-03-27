@@ -1,5 +1,5 @@
 """
-Django settings for Kiri Labs (kiri.ng)
+Django settings for Kiri Research Labs (kiri.ng)
 Optimized for Google Cloud 1GB RAM VM deployment.
 """
 
@@ -32,7 +32,7 @@ CSRF_TRUSTED_ORIGINS = [
 
 CONTACT_EMAIL = os.environ.get("CONTACT_EMAIL", "hello@kiri.ng")
 
-# Core Application Definition
+# ── Application Definition ──
 INSTALLED_APPS = [
     "kiri_project.apps.KiriProjectConfig",
     "django.contrib.admin",
@@ -43,13 +43,6 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.sites",
     "django.contrib.sitemaps",
-    "allauth",
-    "allauth.account",
-    "allauth.socialaccount",
-    "allauth.socialaccount.providers.github",
-    "users.providers.huggingface",
-    "django_htmx",
-    "pwa",
     "core",
     "users",
     "projects",
@@ -65,13 +58,10 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
-    "django.contrib.auth.middleware.LoginRequiredMiddleware", 
-    "core.middleware.ExceptionLoggingMiddleware",
+    "django.contrib.auth.middleware.LoginRequiredMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "django.middleware.csp.ContentSecurityPolicyMiddleware",
-    "allauth.account.middleware.AccountMiddleware",
-    "django_htmx.middleware.HtmxMiddleware",
 ]
 
 ROOT_URLCONF = "kiri_project.urls"
@@ -96,7 +86,7 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "kiri_project.wsgi.application"
 
-# Database - SQLite optimized for 1GB RAM
+# ── Database — SQLite optimized for 1GB RAM ──
 DATABASES = {
     "default": {
         "ENGINE": "django.db.backends.sqlite3",
@@ -108,7 +98,7 @@ DATABASES = {
     }
 }
 
-# Caching - Database Backend
+# ── Caching — Database Backend ──
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.db.DatabaseCache",
@@ -132,7 +122,7 @@ TIME_ZONE = "UTC"
 USE_I18N = True
 USE_TZ = True
 
-# Static & Media Files
+# ── Static & Media Files ──
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [BASE_DIR / "static"]
 STATIC_ROOT = BASE_DIR / "staticfiles"
@@ -143,7 +133,6 @@ MEDIA_ROOT = BASE_DIR / "media"
 WHITENOISE_CUSTOM_HEADERS = [
     (r'.*', {
         'Cross-Origin-Resource-Policy': 'cross-origin',
-        'Access-Control-Allow-Origin': '*',
     }),
 ]
 
@@ -170,57 +159,23 @@ LOGGING = {
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
 AUTH_USER_MODEL = "users.CustomUser"
 
-# Authentication
+# ── Authentication (Django built-in) ──
 AUTHENTICATION_BACKENDS = [
     "django.contrib.auth.backends.ModelBackend",
-    "allauth.account.auth_backends.AuthenticationBackend",
 ]
 
-# Staff-Only Signup Configuration
-ACCOUNT_LOGIN_METHODS = {"username"}
-ACCOUNT_EMAIL_VERIFICATION = "none"
-SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
-SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
-ACCOUNT_LOGOUT_ON_GET = True
+LOGIN_URL = "/accounts/login/"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
-SOCIALACCOUNT_LOGIN_ON_GET = True
-SOCIALACCOUNT_STORE_TOKENS = True
-SOCIALACCOUNT_AUTO_SIGNUP = False
-SOCIALACCOUNT_ADAPTER = 'users.adapter.KiriSocialAccountAdapter'
-ACCOUNT_ADAPTER = 'users.adapter.KiriAccountAdapter'
-
-ACCOUNT_RATE_LIMITS = {
-    "login": "5/m",
-    "login_failed": "10/m/ip",
-}
-
-SOCIALACCOUNT_PROVIDERS = {
-    "github": {
-        "APP": {
-            "client_id": os.environ.get("GITHUB_CLIENT_ID", ""),
-            "secret": os.environ.get("GITHUB_SECRET", ""),
-        },
-        "SCOPE": ["read:user", "user:email", "public_repo", "repo"],
-    },
-    "huggingface": {
-        "APP": {
-            "client_id": os.environ.get("HUGGINGFACE_CLIENT_ID", ""),
-            "secret": os.environ.get("HUGGINGFACE_SECRET", ""),
-        },
-        "SCOPE": ["openid", "profile", "email", "read-repos", "write-repos", "inference-api"],
-    },
-}
-
-# Tasks Configuration
+# ── Tasks Configuration ──
 TASKS = {
     "default": {
         "BACKEND": "django.tasks.backends.immediate.ImmediateBackend",
     },
 }
 
-# General & Security
+# ── General & Security ──
 EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 SITE_URL = os.environ.get("SITE_URL", "https://kiri.ng")
 
@@ -243,7 +198,7 @@ if not DEBUG or IS_TESTING:
         "script-src": [
             "'self'",
             "'unsafe-inline'",
-            "'unsafe-eval'", 
+            "'unsafe-eval'",
             "https://cdn.jsdelivr.net",
             "https://cdnjs.cloudflare.com",
             "https://www.googletagmanager.com",
@@ -264,11 +219,10 @@ if not DEBUG or IS_TESTING:
             "https://fonts.gstatic.com",
             "https://cdnjs.cloudflare.com",
         ],
-        "img-src": ["'self'", "data:", "https:", "https://unpkg.com", "blob:"],
+        "img-src": ["'self'", "data:", "https:", "blob:"],
         "connect-src": [
             "'self'",
             "https://cdn.jsdelivr.net",
-            "https://huggingface.co",
             "https://www.google-analytics.com",
             "https://region1.google-analytics.com",
             "https://stats.g.doubleclick.net",
@@ -284,10 +238,10 @@ if not DEBUG or IS_TESTING:
     FILE_UPLOAD_MAX_MEMORY_SIZE = 5 * 1024 * 1024
     CSRF_COOKIE_SAMESITE = "Strict"
 
-# PWA Settings
-PWA_APP_NAME = "Kiri"
+# ── PWA Settings ──
+PWA_APP_NAME = "Kiri Research Labs"
 PWA_APP_SHORT_NAME = "Kiri"
-PWA_APP_DESCRIPTION = "Software & AI tools, developer utilities, and project showcases by Kiri Labs. Built lightweight and efficient."
+PWA_APP_DESCRIPTION = "Lightweight software for edge intelligence. Projects, tools, and research by Kiri Research Labs."
 PWA_APP_THEME_COLOR = '#2E9A4F'
 PWA_APP_BACKGROUND_COLOR = '#0F2F1B'
 PWA_APP_DISPLAY = 'standalone'

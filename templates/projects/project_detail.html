@@ -1,16 +1,20 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}{{ project.name }} - Kiri Labs{% endblock %}
+{% block title %}{{ project.seo_title|default:project.name }} | Kiri Research Labs{% endblock %}
 
-{% block meta_description %}{{ project.description|truncatechars:160 }}{% endblock %}
+{% block meta_description %}{{ project.seo_description|default:project.description|truncatechars:160 }}{% endblock %}
 
-{% block og_title %}{{ project.name }}{% endblock %}
+{% block og_title %}{{ project.seo_title|default:project.name }}{% endblock %}
 
-{% block og_description %}{{ project.description|truncatechars:160 }}{% endblock %}
+{% block og_description %}{{ project.seo_description|default:project.description|truncatechars:160 }}{% endblock %}
+
+{% if project.preview_image_url %}
+{% block og_image %}{{ project.preview_image_url }}{% endblock %}
+{% endif %}
 
 {% block content %}
-<div class="container mx-auto max-w-4xl px-4">
+<div class="page-container">
     <!-- Breadcrumb -->
     <nav class="text-xs text-muted mb-5">
         <a href="{% url 'projects:list' %}" class="hover:text-kiri-green transition-colors">Projects</a>
@@ -18,67 +22,57 @@
         <span class="text-body">{{ project.name }}</span>
     </nav>
 
-    <!-- Header -->
-    <div class="card mb-6 p-6">
-        <div class="flex-wrap flex gap-4 items-start justify-between">
-            <div class="flex-auto">
-                <!-- Badges -->
-                <div class="flex-wrap flex gap-2 mb-3">
-                    <span
-                        class="bg-success-subtle dark:bg-kiri-green/20 badge lowercase px-2 section-label text-kiri-green tracking-normal">
-                        {{ project.get_category_display }}
-                    </span>
-                    {% if project.is_hot %}
-                    <span
-                        class="bg-orange-100 dark:bg-orange-900/30 dark:text-orange-400 badge px-2 section-label text-orange-700 tracking-normal">
-                        🔥 Hot
-                    </span>
-                    {% endif %}
-                    {% if project.language %}
-                    <span class="bg-subtle badge text-muted lowercase px-2 section-label tracking-normal">
-                        {{ project.language }}
-                    </span>
-                    {% endif %}
+    <!-- Header Card -->
+    <div class="card mb-6 overflow-hidden">
+        {% if project.preview_image_url %}
+        <div class="bg-subtle h-48 md:h-64 overflow-hidden">
+            <img src="{{ project.preview_image_url }}" alt="{{ project.name }}"
+                class="h-full w-full object-cover" loading="lazy">
+        </div>
+        {% endif %}
+        <div class="p-6">
+            <div class="flex-wrap flex gap-4 items-start justify-between">
+                <div class="flex-auto">
+                    <!-- Badges -->
+                    <div class="flex-wrap flex gap-2 mb-3">
+                        <span
+                            class="bg-success-subtle font-bold lowercase px-2 py-0.5 rounded section-label text-kiri-green tracking-normal">
+                            {{ project.get_category_display }}
+                        </span>
+                        {% if project.language %}
+                        <span class="bg-subtle font-bold lowercase px-2 py-0.5 rounded section-label text-muted tracking-normal">
+                            {{ project.language }}
+                        </span>
+                        {% endif %}
+                        <span class="bg-subtle font-bold lowercase px-2 py-0.5 rounded section-label text-muted tracking-normal">
+                            {{ project.get_status_display }}
+                        </span>
+                    </div>
+
+                    <h1 class="font-bold text-xl text-heading">{{ project.name }}</h1>
+                    <p class="mt-1 text-xs text-muted">Added {{ project.created_at|date:"N j, Y" }}</p>
                 </div>
 
-                <h1 class="font-bold text-xl text-heading">{{ project.name }}</h1>
-
-                {% if project.submitted_by %}
-                <p class="mt-1 text-xs text-muted">
-                    Submitted by <span class="font-medium text-body">{{ project.submitted_by.username }}</span> &middot;
-                    {{ project.created_at|date:"N j, Y" }}
-                </p>
-                {% endif %}
+                <!-- Action Buttons -->
+                <div class="flex flex-wrap items-center gap-2">
+                    {% if project.primary_url %}
+                    <a href="{{ project.primary_url }}" target="_blank" rel="noopener"
+                        class="btn-primary !py-1.5 !text-sm">
+                        {% if project.live_url %}
+                        <i class="fas fa-external-link-alt"></i> Visit
+                        {% else %}
+                        <i class="fas fa-flask"></i> Preview
+                        {% endif %}
+                    </a>
+                    {% endif %}
+                    {% if project.github_repo_url %}
+                    <a href="{{ project.github_repo_url }}" target="_blank" rel="noopener"
+                        class="btn-secondary !py-1.5 !text-sm">
+                        <i class="fab fa-github"></i> Source
+                    </a>
+                    {% endif %}
+                </div>
             </div>
-
-            <!-- Action Links -->
-            <div class="flex items-center flex-shrink-0">
-                {% if project.github_repo_url %}
-                <a href="{{ project.github_repo_url }}" target="_blank" rel="noopener"
-                    class="bg-gray-900 gap-1.5 hover:bg-black flex font-medium items-center rounded-lg text-sm text-white transition-colors px-3 py-1.5">
-                    <i class="fab fa-github"></i> GitHub
-                </a>
-                {% endif %}
-                {% if project.demo_url %}
-                <a href="{{ project.demo_url }}" target="_blank" rel="noopener"
-                    class="bg-kiri-green gap-1.5 hover:bg-kiri-green-dark flex font-medium items-center rounded-lg text-sm text-white transition-colors px-3 py-1.5">
-                    <i class="fas fa-external-link-alt"></i> Demo
-                </a>
-                {% endif %}
-                {% if project.huggingface_url %}
-                <a href="{{ project.huggingface_url }}" target="_blank" rel="noopener"
-                    class="bg-subtle gap-1.5 hover:bg-subtle flex font-medium items-center rounded-lg text-muted text-sm px-3 py-1.5">
-                    🤗 HF
-                </a>
-                {% endif %}
-            </div>
-        </div>
-
-        <!-- Stats -->
-        <div class="border-subtle border-t flex-wrap gap-5 flex text-sm text-muted mt-5 pt-4">
-            <span><i class="fa-star fas mr-1-5 text-yellow-400"></i>{{ project.stars_count }} stars</span>
-            <span><i class="fa-code-branch fas mr-1-5"></i>{{ project.forks_count }} forks</span>
-            <span><i class="fa-eye fas mr-1-5"></i>{{ project.view_count }} views</span>
         </div>
     </div>
 
@@ -88,21 +82,55 @@
         <p class="text-sm leading-relaxed text-body whitespace-pre-line">{{ project.description }}</p>
     </div>
 
+    <!-- Tech Stack -->
+    {% if project.tech_stack %}
+    <div class="card mb-6 p-6">
+        <h2 class="mb-3 section-label">Tech Stack</h2>
+        <div class="flex-wrap flex gap-2">
+            {% for tech in project.tech_stack_list %}
+            <span class="border-subtle bg-surface border py-1 rounded-full text-xs px-2.5 text-body">
+                {{ tech }}
+            </span>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
     <!-- Topics -->
     {% if project.topics %}
     <div class="card mb-6 p-6">
         <h2 class="mb-3 section-label">Topics</h2>
         <div class="flex-wrap flex gap-2">
-            {% for topic in project.topics %}
-            <span class="border-subtle bg-surface border py-1 rounded-full text-xs transition-colors px-2.5 text-body">
+            {% for topic in project.topics_list %}
+            <span class="border-subtle bg-surface border py-1 rounded-full text-xs px-2.5 text-body">
                 #{{ topic }}
             </span>
             {% endfor %}
         </div>
     </div>
     {% endif %}
-</div>
 
-<!-- Mobile Spacer -->
-<div class="spacer md:hidden"></div>
+    <!-- JSON-LD SoftwareApplication Schema -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "{{ project.name|escapejs }}",
+        "description": "{{ project.description|escapejs }}",
+        {% if project.preview_image_url %}
+        "image": "{{ project.preview_image_url|escapejs }}",
+        {% endif %}
+        "applicationCategory": "{{ project.get_category_display|escapejs }}",
+        "operatingSystem": "Web",
+        {% if project.primary_url %}
+        "url": "{{ project.primary_url|escapejs }}",
+        {% endif %}
+        "author": {
+            "@type": "Organization",
+            "name": "Kiri Research Labs",
+            "url": "https://kiri.ng"
+        }
+    }
+    </script>
+</div>
 {% endblock %}

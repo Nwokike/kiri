@@ -1,20 +1,20 @@
-<!-- Trending Projects -->
-{% if trending_projects %}
+<!-- Latest Projects -->
+{% if latest_projects %}
 <div class="card p-6">
     <h3 class="flex items-center font-bold text-sm mb-5 text-heading tracking-wider uppercase">
-        <i class="fas fa-chart-line text-kiri-gold"></i> Trending
+        <i class="fas fa-clock text-blue-500"></i> Latest
     </h3>
     <div class="space-y-4">
-        {% for project in trending_projects %}
-        <a href="{% url 'projects:detail' project.slug %}" class="flex items-center-md group">
+        {% for project in latest_projects %}
+        <a href="{% url 'projects:detail' project.slug %}" class="flex items-center group">
             <span
                 class="bg-subtle font-black h-7 flex items-center justify-center rounded-lg shrink-0 text-xs text-muted w-7">{{ forloop.counter }}</span>
-            <div class="flex-auto">
+            <div class="flex-auto ml-3">
                 <p class="group-hover:text-kiri-green font-bold text-sm transition-colors truncate text-heading">
                     {{ project.name }}
                 </p>
                 <p class="font-bold text-muted text-[10px] tracking-wider uppercase">
-                    {{ project.view_count }} views · {{ project.stars_count }} ★
+                    {{ project.language|default:"Project" }} · {{ project.get_status_display }}
                 </p>
             </div>
         </a>
@@ -22,7 +22,7 @@
     </div>
     <a href="{% url 'projects:list' %}"
         class="border-subtle border-t block font-bold hover-underline mt-4 text-center text-xs pt-4 text-kiri-green">
-        View All Projects →
+        View All Projects
     </a>
 </div>
 {% endif %}

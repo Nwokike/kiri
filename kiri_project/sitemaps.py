@@ -14,7 +14,6 @@ class StaticViewSitemap(Sitemap):
     changefreq = 'monthly'
 
     def items(self):
-        # Core pages
         pages = [
             'core:home', 'core:about', 'core:contact',
             'core:privacy', 'core:terms', 'core:refund_policy',
@@ -37,14 +36,13 @@ class StaticViewSitemap(Sitemap):
         return reverse(item)
 
 
-
 class ProjectSitemap(Sitemap):
     """Sitemap for project pages."""
     changefreq = 'weekly'
     priority = 0.8
 
     def items(self):
-        return Project.objects.filter(is_approved=True)
+        return Project.objects.all()
 
     def lastmod(self, obj):
         return obj.updated_at

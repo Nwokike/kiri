@@ -5,40 +5,39 @@
             <div
                 class="bg-success-subtle font-bold gap-2 inline-flex items-center mb-6 py-1 rounded-full px-3 text-[10px] text-kiri-green dark:text-white tracking-wider uppercase">
                 <span class="animate-pulse bg-kiri-green dark:bg-white h-1.5 rounded-full w-1.5"></span>
-                Software & Tools
+                Kiri Research Labs
             </div>
 
             <h1 class="font-extrabold mb-6 md-text-4xl text-2xl leading-tight max-w-3xl text-heading tracking-tight">
-                Software & Tools, Built Lightweight.
+                Lightweight software for edge intelligence.
             </h1>
 
             <p class="max-w-2xl mb-10 text-base text-muted leading-relaxed md:text-lg">
-                Our projects, tools, and everything we build - all in one place. Lightweight, efficient, and always
-                shipping.
+                We build small, efficient AI tools and platforms. TinyML, SLMs, and developer utilities. All open source.
             </p>
 
-            <!-- Dynamic Stats Bar -->
+            <!-- Stats Bar -->
             <div class="flex-nowrap flex gap-4 mb-10 md:gap-10 no-scrollbar overflow-x-auto">
                 <div class="flex flex-col min-w-max">
                     <span class="font-bold text-xl md:text-2xl text-heading">{{ stats.total_projects }}</span>
-                    <span class="font-bold text-muted text-[10px] tracking-widest uppercase">Open-Source Projects</span>
+                    <span class="font-bold text-muted text-[10px] tracking-widest uppercase">Projects</span>
+                </div>
+                <div class="border-l border-subtle flex flex-col pl-4 md:pl-10 min-w-max">
+                    <span class="font-bold text-xl md:text-2xl text-heading">{{ stats.total_live }}</span>
+                    <span class="font-bold text-muted text-[10px] tracking-widest uppercase">Live Platforms</span>
                 </div>
                 <div class="border-l border-subtle flex flex-col pl-4 md:pl-10 min-w-max">
                     <span class="font-bold text-xl md:text-2xl text-heading">{{ stats.total_tools }}</span>
-                    <span class="font-bold text-muted text-[10px] tracking-widest uppercase">Browser-Based Tools</span>
-                </div>
-                <div class="border-l border-subtle flex flex-col pl-4 md:pl-10 min-w-max">
-                    <span class="font-bold text-xl md:text-2xl text-heading">{{ stats.total_stars }}k</span>
-                    <span class="font-bold text-muted text-[10px] tracking-widest uppercase">Stars</span>
+                    <span class="font-bold text-muted text-[10px] tracking-widest uppercase">Dev Tools</span>
                 </div>
             </div>
 
             <div class="flex-nowrap flex gap-3 md:gap-4 no-scrollbar overflow-x-auto py-2">
                 <a href="{% url 'projects:list' %}" class="btn-primary min-w-max">
-                    <i class="fas fa-rocket text-[10px] md:text-xs"></i> Explore Projects
+                    <i class="fas fa-briefcase text-[10px] md:text-xs"></i> Our Work
                 </a>
-                <a href="{% url 'tools:index' %}" class="btn-secondary min-w-max">
-                    <i class="fas fa-wrench text-[10px] md:text-xs"></i> Browse Tools
+                <a href="{% url 'core:about' %}" class="btn-secondary min-w-max">
+                    <i class="fas fa-info-circle text-[10px] md:text-xs"></i> About Us
                 </a>
             </div>
         </div>

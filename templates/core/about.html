@@ -1,16 +1,16 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}About | Kiri Labs{% endblock %}
+{% block title %}About | Kiri Research Labs{% endblock %}
 
 {% block meta_description %}
-Kiri Labs builds lightweight, smart, and efficient software and AI solutions. Discover our platforms.
+Kiri Research Labs builds lightweight software for edge intelligence. TinyML, SLMs, and developer tools.
 {% endblock %}
 
-{% block og_title %}About Kiri Labs{% endblock %}
+{% block og_title %}About | Kiri Research Labs{% endblock %}
 
 {% block og_description %}
-Kiri Labs builds lightweight, smart, and efficient software and AI solutions. Discover our platforms.
+Kiri Research Labs builds lightweight software for edge intelligence. TinyML, SLMs, and developer tools.
 {% endblock %}
 
 {% block content %}
@@ -18,63 +18,67 @@ Kiri Labs builds lightweight, smart, and efficient software and AI solutions. Di
     <section class="mb-12">
         <div class="card overflow-hidden p-6 md:p-8 relative">
             <div class="gap-6 flex flex-col justify-center relative w-full z-10 md:flex-row md:items-center">
-                <img src="{% static 'images/logos/logo.png' %}" alt="Kiri Labs"
+                <img src="{% static 'images/logos/logo.png' %}" alt="Kiri Research Labs"
                     class="shrink-0 h-16 md:h-20 object-contain w-auto mx-auto md:mx-0">
                 <div class="text-center md:text-left">
-                    <h1 class="font-extrabold mb-1 text-xl md:text-2xl text-heading tracking-tight"> Built Small. Built
-                        Smart. </h1>
-                    <p class="max-w-md mx-auto md:mx-0 text-sm md:text-base leading-relaxed text-body"> Software and AI that stays lightweight,
-                        small, and efficient. </p>
+                    <h1 class="font-extrabold mb-1 text-xl md:text-2xl text-heading tracking-tight">Kiri Research Labs</h1>
+                    <p class="max-w-md mx-auto md:mx-0 text-sm md:text-base leading-relaxed text-body">Lightweight software for edge intelligence.</p>
                 </div>
             </div>
             <div class="blob-gold decorative-blob h-40 top-0 opacity-20 right-0 w-40"></div>
             <div class="decorative-blob blob-white bottom-0 left-1/2 w-40 h-40 opacity-10"></div>
         </div>
-    </section> 
-    
+    </section>
+
     <div class="gap-8 grid lg:grid-cols-3 mb-12">
         <div class="lg:col-span-2">
             <div class="card h-full p-6">
-                <h2 class="flex items-center font-semibold mb-4 text-xl text-heading"> <i
-                        class="fas fa-building text-kiri-green"></i> Who We
-                    Are </h2>
+                <h2 class="flex items-center font-semibold mb-4 text-xl text-heading">
+                    <i class="fas fa-building text-kiri-green"></i> Who We Are
+                </h2>
                 <div class="space-y-4">
-                    <p class="text-body leading-relaxed"> <strong>Kiri Labs</strong> builds software and artificial intelligence. We develop tools, platforms, and digital solutions with a strict focus on performance. </p>
-                    <p class="text-sm text-muted leading-relaxed"> We believe great software doesn't need to be heavy—everything we engineer is designed to do more with less. </p>
+                    <p class="text-body leading-relaxed">
+                        <strong>Kiri Research Labs</strong> builds software and AI for edge intelligence. We focus on TinyML, small language models, and tools that run well on low-resource hardware.
+                    </p>
+                    <p class="text-sm text-muted leading-relaxed">
+                        Every project we ship is designed to do more with less. Small codebases, minimal dependencies, optimized for 1GB RAM servers and edge devices.
+                    </p>
                 </div>
             </div>
-        </div> 
-        
+        </div>
+
         <div>
             <div class="card h-full p-6">
-                <h3 class="flex items-center font-semibold mb-4 text-lg text-heading"> <i
-                        class="fas fa-bullseye text-kiri-gold"></i> What We
-                    Value </h3>
+                <h3 class="flex items-center font-semibold mb-4 text-lg text-heading">
+                    <i class="fas fa-bullseye text-kiri-gold"></i> What We Value
+                </h3>
                 <ul class="space-y-3">
-                    <li class="flex-start-sm"> <i class="fas fa-check text-kiri-green mt-0.5"></i>
+                    <li class="flex-start-sm">
+                        <i class="fas fa-check text-kiri-green mt-0.5"></i>
                         <span class="text-body">Lightweight over bloated</span>
                     </li>
-                    <li class="flex-start-sm"> <i class="fas fa-check text-kiri-green mt-0.5"></i>
-                        <span class="text-body">Small over
-                            complex</span>
+                    <li class="flex-start-sm">
+                        <i class="fas fa-check text-kiri-green mt-0.5"></i>
+                        <span class="text-body">Small over complex</span>
                     </li>
-                    <li class="flex-start-sm"> <i class="fas fa-check text-kiri-green mt-0.5"></i>
-                        <span class="text-body">Efficient
-                            over excessive</span>
+                    <li class="flex-start-sm">
+                        <i class="fas fa-check text-kiri-green mt-0.5"></i>
+                        <span class="text-body">Efficient over excessive</span>
                     </li>
-                    <li class="flex-start-sm"> <i class="fas fa-check text-kiri-green mt-0.5"></i>
-                        <span class="text-body">Shipping
-                            over theorizing</span>
+                    <li class="flex-start-sm">
+                        <i class="fas fa-check text-kiri-green mt-0.5"></i>
+                        <span class="text-body">Shipping over theorizing</span>
                     </li>
                 </ul>
             </div>
         </div>
-    </div> 
-    
+    </div>
+
     <section class="mb-12">
         <div class="flex items-center justify-between mb-6">
-            <h2 class="flex items-center font-semibold text-xl text-heading"> <i
-                    class="fas fa-rocket text-kiri-green"></i> Our Platforms </h2>
+            <h2 class="flex items-center font-semibold text-xl text-heading">
+                <i class="fas fa-rocket text-kiri-green"></i> Our Platforms
+            </h2>
         </div>
         <div class="grid gap-4 sm:grid-cols-2">
             <a href="https://imara.africa/" target="_blank" rel="noopener noreferrer" class="card card-hover flex flex-col group h-full p-5">
@@ -110,22 +114,19 @@ Kiri Labs builds lightweight, smart, and efficient software and AI solutions. Di
                 </span>
             </a>
         </div>
-    </section> 
-    
+    </section>
+
     <section class="card text-center md:p-8 p-6">
         <h2 class="font-semibold mb-2 text-xl text-heading">Registration & Compliance</h2>
-        <p class="max-w-2xl mb-4 mx-auto text-sm text-body"> Kiri Labs is officially registered as a technology
-            business in Nigeria.<br>
+        <p class="max-w-2xl mb-4 mx-auto text-sm text-body">
+            Kiri Research Labs is officially registered as a technology business in Nigeria.<br>
             <strong>CAC Registration No:</strong> 9317920 | <strong>SMEDAN ID:</strong> SUID-2621-6457-9859-4343
         </p>
         <div class="flex-wrap flex gap-4 justify-center">
-            <a href="{% url 'core:terms' %}" class="link-sm text-kiri-green">Terms of
-                Service</a>
-            <a href="{% url 'core:privacy' %}" class="link-sm text-kiri-green">Privacy
-                Policy</a>
-            <a href="{% url 'core:refund_policy' %}" class="link-sm text-kiri-green">Refund
-                Policy</a>
+            <a href="{% url 'core:terms' %}" class="link-sm text-kiri-green">Terms of Service</a>
+            <a href="{% url 'core:privacy' %}" class="link-sm text-kiri-green">Privacy Policy</a>
+            <a href="{% url 'core:refund_policy' %}" class="link-sm text-kiri-green">Refund Policy</a>
         </div>
     </section>
-</div> 
+</div>
 {% endblock %}

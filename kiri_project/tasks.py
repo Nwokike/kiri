@@ -10,41 +10,6 @@ logger = logging.getLogger(__name__)
 
 
 @task()
-def cleanup_old_errors():
-    """Delete resolved ErrorLog entries older than 30 days."""
-    from core.models import ErrorLog
-
-    cutoff = timezone.now() - timedelta(days=30)
-    deleted, _ = ErrorLog.objects.filter(
-        created_at__lt=cutoff, is_resolved=True
-    ).delete()
-    logger.info(f"Cleaned up {deleted} old error logs")
-
-
-@task()
-def update_project_hot_status():
-    """
-    Updates the 'is_hot' status of projects based on view counts.
-    Simple logic: Top 5 projects by views + stars are marked HOT.
-    """
-    from projects.models import Project
-    from django.db.models import F
-
-    logger.info("Starting HOT projects update...")
-
-    Project.objects.update(is_hot=False)
-
-    projects = Project.objects.annotate(
-        score=F('view_count') + (F('stars_count') * 10)
-    ).order_by('-score')
-
-    top_project_ids = list(projects[:5].values_list('id', flat=True))
-    updated_count = Project.objects.filter(id__in=top_project_ids).update(is_hot=True)
-
-    logger.info(f"Updated {updated_count} projects to HOT at {timezone.now()}")
-
-
-@task()
 def sync_github_stats():
     """
     Syncs stars, forks, and description from GitHub for all projects.

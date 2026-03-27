@@ -1,11 +1,11 @@
 [project]
 name = "kiri"
 version = "1.0.0"
-description = "Open-source research tools, developer utilities, and project showcases. Built for edge intelligence and low-resource environments."
+description = "Lightweight software for edge intelligence. Projects, tools, and research by Kiri Research Labs."
 readme = "README.md"
 license = {text = "Proprietary"}
 requires-python = ">=3.14"
-keywords = ["research", "ai", "machine-learning", "publications", "django"]
+keywords = ["research", "ai", "machine-learning", "edge-intelligence", "tinyml", "django"]
 classifiers = [
     "Development Status :: 4 - Beta",
     "Framework :: Django :: 6.0",
@@ -15,18 +15,13 @@ classifiers = [
 ]
 dependencies = [
     "django>=6.0.2",
-    "django-allauth>=65.14.1",
-    "django-htmx>=1.27.0",
-    "django-pwa>=2.0.1",
     "gunicorn>=23.0.0",
-    "pillow>=12.1.0",
     "python-dotenv>=1.2.1",
     "requests>=2.32.5",
     "whitenoise>=6.11.0",
     "asgiref>=3.8.1",
     "nh3>=0.3.0",
     "markdown>=3.5.0",
-    "cryptography>=44.0.0",
 ]
 
 [build-system]

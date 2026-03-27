@@ -118,13 +118,4 @@ function initProfileDropdown() {
     });
 }
 
-// ============================================================================
-// HTMX Configuration
-// ============================================================================
 
-document.body.addEventListener('htmx:configRequest', (event) => {
-    const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
-    if (csrfTokenMeta) {
-        event.detail.headers['X-CSRFToken'] = csrfTokenMeta.content;
-    }
-});

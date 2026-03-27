@@ -19,13 +19,10 @@ urlpatterns = [
     )), name="login"),
     path("accounts/logout/", auth_views.LogoutView.as_view(), name="logout"),
 
-    # PWA & Service Worker
-    path("serviceworker.js", core_views.serviceworker, name="serviceworker"),
-    path("manifest.json", core_views.pwa_manifest, name="pwa_manifest"),
+    # Icon
     path("favicon.ico", RedirectView.as_view(url=settings.STATIC_URL + "favicon.ico", permanent=True)),
 
     # Suppress noisy dev tool requests
-    path("studio/stackframe.js", core_views.silent_asset, {'filename': 'stackframe.js'}),
     path(".well-known/appspecific/com.chrome.devtools.json", core_views.silent_asset, {'filename': 'devtools.json'}),
 
     # SEO

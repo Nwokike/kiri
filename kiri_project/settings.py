@@ -79,6 +79,7 @@ TEMPLATES = [
                 "django.contrib.messages.context_processors.messages",
                 "kiri_project.context_processors.kiri_settings",
                 "kiri_project.context_processors.ecosystem_platforms",
+                "kiri_project.context_processors.active_projects",
             ],
         },
     },

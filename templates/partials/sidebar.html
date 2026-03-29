@@ -12,10 +12,23 @@
             </a>
 
             <a href="{% url 'projects:list' %}"
-                class="nav-link {% if 'projects' in request.path %}nav-link-active{% endif %}">
+                class="nav-link {% if request.path == '/projects/' %}nav-link-active{% endif %}">
                 <i class="fa-briefcase fas sidebar-icon"></i>
-                <span class="nav-label nav-label-text">Projects</span>
+                <span class="nav-label nav-label-text flex-1">Projects</span>
             </a>
+            
+            {% if active_projects %}
+            <div class="sidebar-subnav-container nav-label transition-opacity duration-200">
+                {% for project in active_projects %}
+                <a href="{% url 'projects:detail' project.slug %}" 
+                   class="subnav-link {% if project.slug in request.path %}text-kiri-green{% endif %}">
+                    <i class="fas fa-folder subnav-icon text-muted opacity-70"></i>
+                    <span class="nav-label-text truncate">{{ project.name }}</span>
+                </a>
+                {% endfor %}
+            </div>
+            {% endif %}
+
 
             <div class="sidebar-section-header-top-bordered">
                 <span class="nav-label section-label transition-opacity duration-200">Platform</span>

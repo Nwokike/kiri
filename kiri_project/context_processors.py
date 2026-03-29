@@ -33,3 +33,23 @@ def ecosystem_platforms(request):
         )
         cache.set(cache_key, platforms, 300)
     return {'ecosystem_platforms': platforms}
+
+
+def active_projects(request):
+    """
+    Inject active projects into all templates for sidebar navigation.
+    Cached for 5 minutes.
+    """
+    from django.core.cache import cache
+    
+    cache_key = 'active_projects_sidebar'
+    projects = cache.get(cache_key)
+    if projects is None:
+        from projects.models import Project
+        projects = list(
+            Project.objects.filter(status=Project.Status.ACTIVE)
+            .values('name', 'slug')
+            .order_by('-created_at')[:5]  # Limit to 5 or so to avoid huge sidebar, they can still go to the Project page for more
+        )
+        cache.set(cache_key, projects, 300)
+    return {'active_projects': projects}

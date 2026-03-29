@@ -41,7 +41,10 @@ class Project(models.Model):
     )
 
     # ── Links ──
-    github_repo_url = models.URLField(help_text="GitHub repository URL")
+    github_repo_url = models.URLField(
+        blank=True, default='',
+        help_text="GitHub repository URL",
+    )
     huggingface_url = models.URLField(
         blank=True, default='',
         help_text="Hugging Face Space/Model/Dataset URL",
@@ -106,13 +109,35 @@ class Project(models.Model):
 
     @property
     def preview_image_url(self):
-        """Return image URL: custom override → GitHub OG image → None."""
+        """Return image URL: custom override → GitHub OG image → Hugging Face OG image → None."""
         if self.custom_image_url:
             return self.custom_image_url
-        parsed = GitHubService.parse_repo_url(self.github_repo_url)
-        if parsed:
-            owner, repo = parsed
-            return f"https://opengraph.githubassets.com/1/{owner}/{repo}"
+            
+        if self.github_repo_url:
+            parsed = GitHubService.parse_repo_url(self.github_repo_url)
+            if parsed:
+                owner, repo = parsed
+                return f"https://opengraph.githubassets.com/1/{owner}/{repo}"
+                
+        if self.huggingface_url:
+            url = self.huggingface_url.split('#')[0].split('?')[0].rstrip('/')
+            if 'huggingface.co/' in url:
+                path = url.split('huggingface.co/')[-1]
+                parts = [p for p in path.split('/') if p]
+                if len(parts) >= 2:
+                    if parts[0] in ('spaces', 'datasets', 'models'):
+                        hf_type = parts[0]
+                        owner = parts[1]
+                        repo = parts[2] if len(parts) > 2 else ""
+                        if repo:
+                            return f"https://cdn-thumbnails.huggingface.co/social-thumbnails/{hf_type}/{owner}/{repo}.png"
+                        else:
+                            return f"https://cdn-thumbnails.huggingface.co/social-thumbnails/{hf_type}/{owner}.png"
+                    else:
+                        owner = parts[0]
+                        repo = parts[1]
+                        return f"https://cdn-thumbnails.huggingface.co/social-thumbnails/models/{owner}/{repo}.png"
+                        
         return None
 
     @property

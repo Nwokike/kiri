@@ -1,7 +1,7 @@
 from django.db import models
 from django.utils.text import slugify
+from django.core.cache import cache
 from .services import GitHubService
-
 
 class Project(models.Model):
     """Project showcase for Kiri Research Labs."""
@@ -176,6 +176,11 @@ class Project(models.Model):
                 counter += 1
             self.slug = slug
         super().save(*args, **kwargs)
+        cache.delete('homepage_context')
+
+    def delete(self, *args, **kwargs):
+        super().delete(*args, **kwargs)
+        cache.delete('homepage_context')
 
     def __str__(self):
         return self.name

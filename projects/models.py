@@ -11,9 +11,11 @@ class Project(models.Model):
         AI_VISION = 'ai_vision', 'AI / Computer Vision'
         DATA_SCIENCE = 'data_science', 'Data Science'
         WEB_TOOLS = 'web_tools', 'Web Tools'
+        WEB_APPS = 'web_apps', 'Web Applications'
         AI_AUDIO = 'ai_audio', 'AI / Audio & Speech'
         ML_OPS = 'ml_ops', 'MLOps / Infra'
         ROBOTICS = 'robotics', 'Robotics'
+        AGENT = 'agent', 'AI Agents'
         RESEARCH = 'research', 'Research'
         OTHER = 'other', 'Other'
 
@@ -40,6 +42,10 @@ class Project(models.Model):
 
     # ── Links ──
     github_repo_url = models.URLField(help_text="GitHub repository URL")
+    huggingface_url = models.URLField(
+        blank=True, default='',
+        help_text="Hugging Face Space/Model/Dataset URL",
+    )
     live_url = models.URLField(
         blank=True, default='',
         help_text="Production URL (e.g. https://imara.kiri.ng)",

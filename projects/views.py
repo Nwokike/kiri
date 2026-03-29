@@ -1,4 +1,4 @@
-from django.views.generic import ListView, DetailView, CreateView
+from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_not_required
 from django.contrib.auth.mixins import UserPassesTestMixin
@@ -72,5 +72,18 @@ class ProjectSubmitView(StaffRequiredMixin, CreateView):
         messages.success(
             self.request,
             f"'{self.object.name}' added successfully!",
+        )
+        return response
+
+class ProjectUpdateView(StaffRequiredMixin, UpdateView):
+    model = Project
+    form_class = ProjectSubmissionForm
+    template_name = 'projects/project_submit.html'
+
+    def form_valid(self, form):
+        response = super().form_valid(form)
+        messages.success(
+            self.request,
+            f"'{self.object.name}' updated successfully!",
         )
         return response

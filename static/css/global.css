@@ -391,7 +391,7 @@ html.dark #theme-icon-dark {
    ========================================================================== */
 @layer components {
     .footer-container { @apply mx-auto max-w-7xl px-6 py-12 w-full; }
-    .footer-grid { @apply gap-12 grid grid-cols-3 lg:gap-8 lg:grid-cols-4; }
+    .footer-grid { @apply gap-2 grid grid-cols-3 lg:gap-8 lg:grid-cols-4; }
     .footer-brand-col { @apply col-span-3 lg:col-span-1; }
     .footer-brand-link { @apply flex items-center mb-4; }
     .footer-description { @apply mb-6 text-sm text-muted; }

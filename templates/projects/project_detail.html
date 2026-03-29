@@ -65,10 +65,21 @@
                         {% endif %}
                     </a>
                     {% endif %}
+                    {% if project.huggingface_url %}
+                    <a href="{{ project.huggingface_url }}" target="_blank" rel="noopener"
+                        class="btn-secondary !py-1.5 !text-sm">
+                        🤗 Hugging Face
+                    </a>
+                    {% endif %}
                     {% if project.github_repo_url %}
                     <a href="{{ project.github_repo_url }}" target="_blank" rel="noopener"
                         class="btn-secondary !py-1.5 !text-sm">
                         <i class="fab fa-github"></i> Source
+                    </a>
+                    {% endif %}
+                    {% if user.is_staff %}
+                    <a href="{% url 'projects:edit' project.slug %}" class="btn-secondary !py-1.5 !text-sm">
+                        <i class="fas fa-edit"></i> Edit
                     </a>
                     {% endif %}
                 </div>

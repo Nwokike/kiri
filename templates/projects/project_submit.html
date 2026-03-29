@@ -1,17 +1,17 @@
 {% extends "base.html" %}
 {% load static %}
 
-{% block title %}Add Project | Kiri Research Labs{% endblock %}
+{% block title %}{% if object %}Edit Project{% else %}Add Project{% endif %} | Kiri Research Labs{% endblock %}
 
 {% block content %}
 <div class="page-container max-w-3xl">
     <div class="mb-6">
-        <h1 class="font-bold text-2xl text-heading">Add Project</h1>
-        <p class="mt-1 text-sm text-muted">Include a new project in the Kiri Research Labs showcase.</p>
+        <h1 class="font-bold text-2xl text-heading">{% if object %}Edit "{{ object.name }}"{% else %}Add Project{% endif %}</h1>
+        <p class="mt-1 text-sm text-muted">{% if object %}Update the details for this project.{% else %}Include a new project in the Kiri Research Labs showcase.{% endif %}</p>
     </div>
 
     <div class="card p-6">
-        <form method="post" action="{% url 'projects:create_manual' %}">
+        <form method="post">
             {% csrf_token %}
 
             {% if form.errors %}
@@ -48,9 +48,9 @@
 
                 <div class="flex gap-3 pt-2">
                     <button type="submit" class="btn-primary flex-1 py-2.5">
-                        Add Project
+                        {% if object %}Save Changes{% else %}Add Project{% endif %}
                     </button>
-                    <a href="{% url 'projects:list' %}" class="btn-secondary px-4 py-2.5">
+                    <a href="{% if object %}{% url 'projects:detail' object.slug %}{% else %}{% url 'projects:list' %}{% endif %}" class="btn-secondary px-4 py-2.5">
                         Cancel
                     </a>
                 </div>

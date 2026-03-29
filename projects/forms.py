@@ -11,6 +11,7 @@ class ProjectSubmissionForm(forms.ModelForm):
             'category',
             'status',
             'github_repo_url',
+            'huggingface_url',
             'live_url',
             'staging_url',
             'custom_image_url',
@@ -40,8 +41,9 @@ class ProjectSubmissionForm(forms.ModelForm):
         }
         help_texts = {
             'github_repo_url': 'Full GitHub repository URL (e.g. https://github.com/user/repo)',
+            'huggingface_url': 'Hugging Face Space, Model, or Dataset URL.',
             'topics': 'Comma-separated tags. Auto-synced from GitHub if left empty.',
-            'live_url': 'Production URL for live platforms (e.g. https://imara.kiri.ng)',
+            'live_url': 'Production URL for live platforms (e.g. https://*.kiri.ng)',
             'staging_url': 'Staging/beta URL for non-live projects.',
             'custom_image_url': 'Override the auto-generated GitHub preview image.',
             'tech_stack': 'Curated technology badges shown on the project card.',

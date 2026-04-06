@@ -11,24 +11,34 @@
                 <span class="nav-label nav-label-text">Home</span>
             </a>
 
-            <a href="{% url 'projects:list' %}"
-                class="nav-link {% if request.path == '/projects/' %}nav-link-active{% endif %}">
-                <i class="fa-briefcase fas sidebar-icon"></i>
-                <span class="nav-label nav-label-text flex-1">Projects</span>
-            </a>
-            
-            {% if active_projects %}
-            <div class="sidebar-subnav-container nav-label transition-opacity duration-200">
-                {% for project in active_projects %}
-                <a href="{% url 'projects:detail' project.slug %}" 
-                   class="subnav-link {% if project.slug in request.path %}text-kiri-green{% endif %}">
-                    <i class="fas fa-folder subnav-icon text-muted opacity-70"></i>
-                    <span class="nav-label-text truncate">{{ project.name }}</span>
-                </a>
-                {% endfor %}
-            </div>
-            {% endif %}
+            <div class="projects-section" x-data="{ open: {% if 'projects' in request.path %}true{% else %}false{% endif %} }" @sidebar-collapsed.window="open = false">
+                <button @click="open = !open" class="tools-hub-btn nav-link {% if request.path == '/projects/' %}nav-link-active{% endif %}">
+                    <i class="fa-briefcase fas sidebar-icon"></i>
+                    <span class="tools-hub-text nav-label nav-label-text text-left flex-1">Projects</span>
+                    <i class="fas fa-chevron-down tools-hub-chevron nav-label text-[10px] transition-transform"
+                        :class="open ? 'rotate-180' : ''"></i>
+                </button>
 
+                <div x-show="open" x-transition class="sidebar-subnav-container">
+                    <a href="{% url 'projects:list' %}" class="subnav-link {% if request.path == '/projects/' %}text-kiri-green{% endif %}">
+                        <i class="fa-layer-group fas subnav-icon"></i>
+                        <span class="nav-label">All Projects</span>
+                    </a>
+
+                    {% if active_projects %}
+                    <div class="sidebar-subsection-header-mt4">
+                        <span class="nav-label section-label transition-opacity duration-200">Active</span>
+                    </div>
+                    {% for project in active_projects %}
+                    <a href="{% url 'projects:detail' project.slug %}" 
+                       class="subnav-link {% if project.slug in request.path %}text-kiri-green{% endif %}">
+                        <i class="fa-diagram-project fas subnav-icon"></i>
+                        <span class="nav-label-text truncate">{{ project.name }}</span>
+                    </a>
+                    {% endfor %}
+                    {% endif %}
+                </div>
+            </div>
 
             <div class="sidebar-section-header-top-bordered">
                 <span class="nav-label section-label transition-opacity duration-200">Platform</span>
@@ -40,7 +50,6 @@
                 <span class="nav-label nav-label-text">About</span>
             </a>
 
-            <!-- Ecosystem Platforms -->
             {% if ecosystem_platforms %}
             <div class="sidebar-section-header-top-bordered">
                 <span class="nav-label section-label transition-opacity duration-200">Our Platforms</span>
@@ -52,6 +61,172 @@
             </a>
             {% endfor %}
             {% endif %}
+
+            <div class="sidebar-divider"></div>
+
+            <div class="tools-section" x-data="{ open: false }" @sidebar-collapsed.window="open = false">
+                <button @click="open = !open" class="tools-hub-btn nav-link">
+                    <i class="fa-toolbox fas sidebar-icon"></i>
+                    <span class="tools-hub-text nav-label nav-label-text text-left flex-1">Tools Hub</span>
+                    <i class="fas fa-chevron-down tools-hub-chevron nav-label text-[10px] transition-transform"
+                        :class="open ? 'rotate-180' : ''"></i>
+                </button>
+
+                <div x-show="open" x-transition class="sidebar-subnav-container">
+                    <div class="sidebar-subsection-header">
+                        <span class="nav-label section-label transition-opacity duration-200">Data & Research</span>
+                    </div>
+
+                    <a href="{% url 'tools:tool_detail' 'data-profiler' %}" class="subnav-link">
+                        <i class="fa-chart-pie fas subnav-icon"></i>
+                        <span class="nav-label">Data Profiler</span>
+                    </a>
+                    <a href="{% url 'tools:tool_detail' 'audio-transcriber' %}" class="subnav-link">
+                        <i class="fa-microphone-lines fas subnav-icon"></i>
+                        <span class="nav-label">Audio Transcriber</span>
+                    </a>
+                    <a href="{% url 'tools:tool_detail' 'csv-json' %}" class="subnav-link">
+                        <i class="fa-file-csv fas subnav-icon"></i>
+                        <span class="nav-label">CSV / JSON</span>
+                    </a>
+                    <a href="{% url 'tools:tool_detail' 'json-schema' %}" class="subnav-link">
+                        <i class="fa-project-diagram fas subnav-icon"></i>
+                        <span class="nav-label">JSON Schema</span>
+                    </a>
+                    <a href="{% url 'tools:tool_detail' 'latex-editor' %}" class="subnav-link">
+                        <i class="fa-square-root-alt fas subnav-icon"></i>
+                        <span class="nav-label">LaTeX Editor</span>
+                    </a>
+                    <a href="{% url 'tools:tool_detail' 'timestamp' %}" class="subnav-link">
+                        <i class="fa-clock fas subnav-icon"></i>
+                        <span class="nav-label">Timestamp</span>
+                    </a>
+
+                    <div class="sidebar-subsection-header-mt4">
+                        <span class="nav-label section-label transition-opacity duration-200">Security & Systems</span>
+                    </div>
+                    <a href="{% url 'tools:tool_detail' 'api-tester' %}" class="subnav-link">
+                        <i class="fa-plug fas subnav-icon"></i>
+                        <span class="nav-label">API Tester</span>
+                    </a>
+                    <a href="{% url 'tools:tool_detail' 'hash-gen' %}" class="subnav-link">
+                        <i class="fa-fingerprint fas subnav-icon"></i>
+                        <span class="nav-label">Hash Gen</span>
+                    </a>
+                    <a href="{% url 'tools:tool_detail' 'uuid-gen' %}" class="subnav-link">
+                        <i class="fa-id-badge fas subnav-icon"></i>
+                        <span class="nav-label">UUID Gen</span>
+                    </a>
+                    <a href="{% url 'tools:tool_detail' 'cron-gen' %}" class="subnav-link">
+                        <i class="fa-calendar-alt fas subnav-icon"></i>
+                        <span class="nav-label">Cron Gen</span>
+                    </a>
+
+                    <div class="sidebar-subsection-header-mt4">
+                        <span class="nav-label section-label transition-opacity duration-200">Programming</span>
+                    </div>
+                    <a href="{% url 'tools:tool_detail' 'sql-workbench' %}" class="subnav-link">
+                        <i class="fa-server fas subnav-icon"></i>
+                        <span class="nav-label">SQL Workbench</span>
+                    </a>
+                    <a href="{% url 'tools:tool_detail' 'json-formatter' %}" class="subnav-link">
+                        <i class="fa-code fas subnav-icon"></i>
+                        <span class="nav-label">JSON Formatter</span>
+                    </a>
+                    <a href="{% url 'tools:tool_detail' 'sql-refinery' %}" class="subnav-link">
+                        <i class="fa-database fas subnav-icon"></i>
+                        <span class="nav-label">SQL Refinery</span>
+                    </a>
+                    <a href="{% url 'tools:tool_detail' 'yaml-json' %}" class="subnav-link">
+                        <i class="fa-file-code fas subnav-icon"></i>
+                        <span class="nav-label">YAML / JSON</span>
+                    </a>
+                    <a href="{% url 'tools:tool_detail' 'diff' %}" class="subnav-link">
+                        <i class="fa-columns fas subnav-icon"></i>
+                        <span class="nav-label">Diff Viewer</span>
+                    </a>
+                    <a href="{% url 'tools:tool_detail' 'regex-tester' %}" class="subnav-link">
+                        <i class="fa-asterisk fas subnav-icon"></i>
+                        <span class="nav-label">Regex Tester</span>
+                    </a>
+                    <a href="{% url 'tools:tool_detail' 'jwt-parser' %}" class="subnav-link">
+                        <i class="fa-id-card fas subnav-icon"></i>
+                        <span class="nav-label">JWT Parser</span>
+                    </a>
+                    <a href="{% url 'tools:tool_detail' 'base64' %}" class="subnav-link">
+                        <i class="fa-exchange-alt fas subnav-icon"></i>
+                        <span class="nav-label">Base64 Converter</span>
+                    </a>
+                    <a href="{% url 'tools:tool_detail' 'url-encoder' %}" class="subnav-link">
+                        <i class="fa-link fas subnav-icon"></i>
+                        <span class="nav-label">URL Encoder</span>
+                    </a>
+                    <a href="{% url 'tools:tool_detail' 'markdown-preview' %}" class="subnav-link">
+                        <i class="fa-file-alt fas subnav-icon"></i>
+                        <span class="nav-label">Markdown</span>
+                    </a>
+                    <a href="{% url 'tools:tool_detail' 'image-to-base64' %}" class="subnav-link">
+                        <i class="fa-image fas subnav-icon"></i>
+                        <span class="nav-label">Image to Base64</span>
+                    </a>
+                    <a href="{% url 'tools:tool_detail' 'html-entities' %}" class="subnav-link">
+                        <i class="fa-code fas subnav-icon"></i>
+                        <span class="nav-label">HTML Entities</span>
+                    </a>
+
+                    <div class="sidebar-subsection-header-mt4">
+                        <span class="nav-label section-label transition-opacity duration-200">Docs & Images</span>
+                    </div>
+                    <a href="{% url 'tools:tool_detail' 'pdf-editor' %}" class="subnav-link">
+                        <i class="fa-edit fas subnav-icon"></i>
+                        <span class="nav-label">PDF Editor</span>
+                    </a>
+                    <a href="{% url 'tools:tool_detail' 'markdown-to-pdf' %}" class="subnav-link">
+                        <i class="fa-markdown fab subnav-icon"></i>
+                        <span class="nav-label">Markdown to PDF</span>
+                    </a>
+                    <a href="{% url 'tools:tool_detail' 'image-to-pdf' %}" class="subnav-link">
+                        <i class="fa-images fas subnav-icon"></i>
+                        <span class="nav-label">Image to PDF</span>
+                    </a>
+                    <a href="{% url 'tools:tool_detail' 'pdf-to-image' %}" class="subnav-link">
+                        <i class="fa-file-image fas subnav-icon"></i>
+                        <span class="nav-label">PDF to Image</span>
+                    </a>
+                    <a href="{% url 'tools:tool_detail' 'pdf-splitter' %}" class="subnav-link">
+                        <i class="fa-cut fas subnav-icon"></i>
+                        <span class="nav-label">PDF Splitter</span>
+                    </a>
+                    <a href="{% url 'tools:tool_detail' 'pdf-merger' %}" class="subnav-link">
+                        <i class="fa-layer-group fas subnav-icon"></i>
+                        <span class="nav-label">PDF Merger</span>
+                    </a>
+                    <a href="{% url 'tools:tool_detail' 'pdf-text-extractor' %}" class="subnav-link">
+                        <i class="fa-file-alt fas subnav-icon"></i>
+                        <span class="nav-label">PDF Extractor</span>
+                    </a>
+                    <a href="{% url 'tools:tool_detail' 'qr-generator' %}" class="subnav-link">
+                        <i class="fa-qrcode fas subnav-icon"></i>
+                        <span class="nav-label">QR Generator</span>
+                    </a>
+                    <a href="{% url 'tools:tool_detail' 'exif-viewer' %}" class="subnav-link">
+                        <i class="fa-camera fas subnav-icon"></i>
+                        <span class="nav-label">Exif Viewer</span>
+                    </a>
+                    <a href="{% url 'tools:tool_detail' 'background-remover' %}" class="subnav-link">
+                        <i class="fa-wand-magic-sparkles fas subnav-icon"></i>
+                        <span class="nav-label">Bg Remover</span>
+                    </a>
+                    <a href="{% url 'tools:tool_detail' 'latex-to-pdf' %}" class="subnav-link">
+                        <i class="fa-file-pdf fas subnav-icon"></i>
+                        <span class="nav-label">LaTeX to PDF</span>
+                    </a>
+                    <a href="{% url 'tools:tool_detail' 'ocr' %}" class="subnav-link">
+                        <i class="fa-font fas subnav-icon"></i>
+                        <span class="nav-label">Local OCR</span>
+                    </a>
+                </div>
+            </div>
         </div>
     </nav>
 </aside>

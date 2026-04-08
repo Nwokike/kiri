@@ -18,11 +18,8 @@ browser.
 {% endblock %}
 
 {% block tool_head %}
-<!-- PDF.js for rendering -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
-<!-- Fabric.js for the editor layer -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
-<!-- PDF-lib for exporting/modifying -->
 <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
 
 <style>
@@ -54,12 +51,6 @@ browser.
         background-color: rgba(30, 30, 30, 0.8);
     }
 
-    /* Redaction visualization */
-    .redaction-preview {
-        background-color: #000 !important;
-        opacity: 0.8 !important;
-    }
-
     .signature-pad-canvas {
         background: #fff;
         border: 2px dashed #e2e8f0;
@@ -70,7 +61,6 @@ browser.
 
 {% block tool_body %}
 <div x-init="init()" class="flex flex-col h-full gap-4">
-    <!-- Toolbar -->
     <div
         class="flex flex-wrap items-center justify-between gap-4 p-3 bg-surface border border-subtle rounded-2xl shadow-sm sticky top-0 z-20">
         <div class="flex items-center gap-2">
@@ -117,23 +107,24 @@ browser.
                     :disabled="historyIndex <= 0">
                     <i class="fas fa-undo"></i>
                 </button>
-                <button @click="savePDF()"
-                    class="px-5 py-2.5 bg-surface border border-subtle hover:border-kiri-green text-heading rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-sm">
-                    <i class="fas fa-save text-kiri-green"></i> Export
+                <button @click="savePDF()" :disabled="isProcessing"
+                    class="px-5 py-2.5 bg-surface border border-subtle hover:border-kiri-green text-heading rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-sm disabled:opacity-50">
+                    <template x-if="!isProcessing"> <i class="fas fa-save text-kiri-green"></i> </template>
+                    <template x-if="isProcessing"> <i class="fas fa-circle-notch fa-spin text-kiri-green"></i> </template>
+                    <span>Export</span>
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Main Editor -->
     <div
         class="flex-1 flex flex-col min-h-[700px] overflow-hidden rounded-[2.5rem] border border-subtle bg-[#525659] relative custom-scrollbar">
         <template x-if="!pdfDoc">
             <div class="absolute inset-0 flex flex-col items-center justify-center text-white/50 space-y-4">
-                <div
-                    class="w-20 h-20 rounded-full border-4 border-dashed border-white/20 flex items-center justify-center">
+                <button @click="$refs.fileInput.click()"
+                    class="w-20 h-20 rounded-full border-4 border-dashed border-white/20 flex items-center justify-center hover:border-kiri-green hover:text-kiri-green transition-colors cursor-pointer">
                     <i class="fas fa-file-pdf text-3xl"></i>
-                </div>
+                </button>
                 <p class="font-bold uppercase tracking-widest text-sm">Select a PDF to begin editing</p>
             </div>
         </template>
@@ -142,7 +133,6 @@ browser.
             <canvas id="editor-canvas" x-ref="canvas"></canvas>
         </div>
 
-        <!-- Zoom Controls -->
         <div x-show="pdfDoc"
             class="absolute bottom-8 right-8 flex items-center gap-3 p-1.5 bg-surface/90 backdrop-blur-md rounded-2xl border border-subtle shadow-2xl animate-slide-up">
             <button @click="zoomOut()" class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-subtle">
@@ -155,7 +145,6 @@ browser.
         </div>
     </div>
 
-    <!-- Signature Modal -->
     <div x-show="showSignatureModal" x-transition x-cloak
         class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
         <div class="bg-surface rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl border border-subtle animate-pop">
@@ -195,218 +184,314 @@ browser.
 
 {% block tool_js_data %}
 {
-pdfDoc: null,
-pageNum: 1,
-numPages: 0,
-zoom: 1.0,
-fabricCanvas: null,
-activeTool: 'select',
-history: [],
-historyIndex: -1,
-isProcessing: false,
-showSignatureModal: false,
-sigColor: '#000000',
-sigActive: false,
-sigPoints: [],
+    hideUpload: true,
+    hideSample: true, // Sample removed as requested
+    pdfDoc: null,
+    pdfBytes: null,
+    pageNum: 1,
+    numPages: 0,
+    zoom: 1.5,
+    fabricCanvas: null,
+    activeTool: 'select',
+    history: [],
+    historyIndex: -1,
+    pageStates: {}, // Stores the JSON state of annotations per page
+    isProcessing: false,
+    showSignatureModal: false,
+    sigColor: '#000000',
+    sigActive: false,
 
-tools: [
-{ id: 'select', name: 'Select', icon: 'fa-mouse-pointer' },
-{ id: 'draw', name: 'Draw', icon: 'fa-pencil-alt' },
-{ id: 'highlighter', name: 'Highlighter', icon: 'fa-highlighter' },
-{ id: 'text', name: 'Text', icon: 'fa-font' },
-{ id: 'rect', name: 'Rectangle', icon: 'fa-square' },
-{ id: 'signature', name: 'Sign', icon: 'fa-signature' },
-{ id: 'redact', name: 'Redact', icon: 'fa-eraser' }
-],
+    tools: [
+        { id: 'select', name: 'Select', icon: 'fa-mouse-pointer' },
+        { id: 'draw', name: 'Draw', icon: 'fa-pencil-alt' },
+        { id: 'highlighter', name: 'Highlighter', icon: 'fa-highlighter' },
+        { id: 'text', name: 'Text', icon: 'fa-font' },
+        { id: 'rect', name: 'Rectangle', icon: 'fa-square' },
+        { id: 'signature', name: 'Sign', icon: 'fa-signature' },
+        { id: 'redact', name: 'Redact', icon: 'fa-eraser' }
+    ],
 
-init() {
-pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
-this.initFabric();
-this.initSignaturePad();
-},
+    init() {
+        pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+        this.initFabric();
+        this.initSignaturePad();
+    },
 
-initFabric() {
-this.fabricCanvas = new fabric.Canvas('editor-canvas');
-this.fabricCanvas.on('object:added', () => this.saveHistory());
-this.fabricCanvas.on('object:modified', () => this.saveHistory());
-this.fabricCanvas.on('object:removed', () => this.saveHistory());
+    initFabric() {
+        this.fabricCanvas = new fabric.Canvas('editor-canvas');
+        this.fabricCanvas.on('object:added', () => this.saveHistory());
+        this.fabricCanvas.on('object:modified', () => this.saveHistory());
+        this.fabricCanvas.on('object:removed', () => this.saveHistory());
+    },
 
-window.addEventListener('resize', () => {
-if (this.pdfDoc) this.renderPage(this.pageNum);
-});
-},
+    initSignaturePad() {
+        const canvas = this.$refs.sigCanvas;
+        const ctx = canvas.getContext('2d');
+        let drawing = false;
 
-initSignaturePad() {
-const canvas = this.$refs.sigCanvas;
-const ctx = canvas.getContext('2d');
-let drawing = false;
+        const getPos = (e) => {
+            const rect = canvas.getBoundingClientRect();
+            const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+            const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+            return {
+                x: (clientX - rect.left) * (canvas.width / rect.width),
+                y: (clientY - rect.top) * (canvas.height / rect.height)
+            };
+        };
 
-const getPos = (e) => {
-const rect = canvas.getBoundingClientRect();
-const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-const clientY = e.touches ? e.touches[0].clientY : e.clientY;
-return {
-x: (clientX - rect.left) * (canvas.width / rect.width),
-y: (clientY - rect.top) * (canvas.height / rect.height)
-};
-};
+        const start = (e) => {
+            drawing = true;
+            const pos = getPos(e);
+            ctx.beginPath();
+            ctx.moveTo(pos.x, pos.y);
+            this.sigActive = true;
+        };
 
-const start = (e) => {
-drawing = true;
-const pos = getPos(e);
-ctx.beginPath();
-ctx.moveTo(pos.x, pos.y);
-this.sigActive = true;
-};
+        const move = (e) => {
+            if (!drawing) return;
+            e.preventDefault();
+            const pos = getPos(e);
+            ctx.lineTo(pos.x, pos.y);
+            ctx.strokeStyle = this.sigColor;
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.stroke();
+        };
 
-const move = (e) => {
-if (!drawing) return;
-e.preventDefault();
-const pos = getPos(e);
-ctx.lineTo(pos.x, pos.y);
-ctx.strokeStyle = this.sigColor;
-ctx.lineWidth = 2;
-ctx.lineCap = 'round';
-ctx.stroke();
-};
+        const stop = () => drawing = false;
 
-const stop = () => drawing = false;
+        canvas.addEventListener('mousedown', start);
+        canvas.addEventListener('mousemove', move);
+        window.addEventListener('mouseup', stop);
+        canvas.addEventListener('touchstart', start);
+        canvas.addEventListener('touchmove', move);
+        canvas.addEventListener('touchend', stop);
 
-canvas.addEventListener('mousedown', start);
-canvas.addEventListener('mousemove', move);
-window.addEventListener('mouseup', stop);
-canvas.addEventListener('touchstart', start);
-canvas.addEventListener('touchmove', move);
-canvas.addEventListener('touchend', stop);
+        const dpr = window.devicePixelRatio || 1;
+        canvas.width = canvas.offsetWidth * dpr;
+        canvas.height = canvas.offsetHeight * dpr;
+        ctx.scale(dpr, dpr);
+    },
 
-// Adjust for retina
-const dpr = window.devicePixelRatio || 1;
-canvas.width = canvas.offsetWidth * dpr;
-canvas.height = canvas.offsetHeight * dpr;
-ctx.scale(dpr, dpr);
-},
+    async loadPDF(e) {
+        // FIXED: Syntax error removed
+        const file = e.target.files?.[0] || e.dataTransfer?.files?.[0];
+        if (!file) return;
 
-async loadPDF(e) {
-const file = e.target.files[0];
-if (!file) return;
+        this.statusMessage = 'Loading PDF...';
+        const reader = new FileReader();
+        reader.onload = async (event) => {
+            this.pdfBytes = new Uint8Array(event.target.result);
+            this.pdfDoc = await pdfjsLib.getDocument(this.pdfBytes.slice(0)).promise;
+            this.numPages = this.pdfDoc.numPages;
+            this.pageNum = 1;
+            this.pageStates = {}; 
+            this.renderPage(this.pageNum);
+            this.statusMessage = `Loaded: ${file.name}`;
+        };
+        reader.readAsArrayBuffer(file);
+    },
 
-this.statusMessage = 'Loading PDF...';
-const reader = new FileReader();
-reader.onload = async (event) => {
-const typedarray = new Uint8Array(event.target.result);
-this.pdfDoc = await pdfjsLib.getDocument(typedarray).promise;
-this.numPages = this.pdfDoc.numPages;
-this.pageNum = 1;
-this.renderPage(this.pageNum);
-this.statusMessage = `File: ${file.name}`;
-};
-reader.readAsArrayBuffer(file);
-},
+    async renderPage(num) {
+        if (!this.pdfDoc) return;
+        this.isProcessing = true;
 
-async renderPage(num) {
-if (!this.pdfDoc) return;
-this.isProcessing = true;
+        // Save current page state before turning
+        if (this.fabricCanvas.getObjects().length > 0) {
+            this.pageStates[this.pageNum] = this.fabricCanvas.toJSON();
+        }
+        
+        // Clear history for the new page
+        this.history = [];
+        this.historyIndex = -1;
 
-const page = await this.pdfDoc.getPage(num);
-const viewport = page.getViewport({ scale: 2.0 * this.zoom });
+        const page = await this.pdfDoc.getPage(num);
+        const viewport = page.getViewport({ scale: this.zoom });
 
-const canvas = document.createElement('canvas');
-const context = canvas.getContext('2d');
-canvas.height = viewport.height;
-canvas.width = viewport.width;
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.height = viewport.height;
+        canvas.width = viewport.width;
 
-await page.render({ canvasContext: context, viewport }).promise;
+        await page.render({ canvasContext: context, viewport }).promise;
 
-this.fabricCanvas.setDimensions({
-width: viewport.width / 2,
-height: viewport.height / 2
-});
+        this.fabricCanvas.setDimensions({
+            width: viewport.width,
+            height: viewport.height
+        });
 
-this.fabricCanvas.setBackgroundImage(canvas.toDataURL(), this.fabricCanvas.renderAll.bind(this.fabricCanvas), {
-scaleX: 0.5,
-scaleY: 0.5
-});
+        this.fabricCanvas.setBackgroundImage(canvas.toDataURL(), () => {
+            this.fabricCanvas.renderAll();
+            // Restore annotations if they exist for this page
+            if (this.pageStates[num]) {
+                this.fabricCanvas.loadFromJSON(this.pageStates[num], () => {
+                    this.fabricCanvas.renderAll();
+                });
+            } else {
+                this.fabricCanvas.clear();
+                // We clear objects but need to restore the background we just set
+                this.fabricCanvas.setBackgroundImage(canvas.toDataURL(), this.fabricCanvas.renderAll.bind(this.fabricCanvas));
+            }
+            this.isProcessing = false;
+        });
+    },
 
-this.isProcessing = false;
-},
+    setTool(tool) {
+        this.activeTool = tool;
+        this.fabricCanvas.isDrawingMode = false;
+        this.fabricCanvas.selection = true;
 
-setTool(tool) {
-this.activeTool = tool;
-this.fabricCanvas.isDrawingMode = false;
-this.fabricCanvas.selection = true;
+        if (tool === 'draw' || tool === 'highlighter') {
+            this.fabricCanvas.isDrawingMode = true;
+            this.fabricCanvas.freeDrawingBrush.color = tool === 'draw' ? '#000' : 'rgba(255, 255, 0, 0.4)';
+            this.fabricCanvas.freeDrawingBrush.width = tool === 'draw' ? 2 : 20;
+        } else if (tool === 'text') {
+            const text = new fabric.IText('Double click to edit', {
+                left: 100, top: 100, fontSize: 24, fontFamily: 'Helvetica', fill: '#000'
+            });
+            this.fabricCanvas.add(text);
+        } else if (tool === 'rect') {
+            const rect = new fabric.Rect({
+                left: 100, top: 100, fill: 'transparent', stroke: '#e11d48', strokeWidth: 3, width: 100, height: 100
+            });
+            this.fabricCanvas.add(rect);
+        } else if (tool === 'signature') {
+            this.showSignatureModal = true;
+        } else if (tool === 'redact') {
+            const redact = new fabric.Rect({
+                left: 100, top: 100, fill: '#000000', width: 150, height: 30
+            });
+            this.fabricCanvas.add(redact);
+        }
+    },
 
-if (tool === 'draw' || tool === 'highlighter') {
-this.fabricCanvas.isDrawingMode = true;
-this.fabricCanvas.freeDrawingBrush.color = tool === 'draw' ? '#000' : 'rgba(255, 255, 0, 0.5)';
-this.fabricCanvas.freeDrawingBrush.width = tool === 'draw' ? 2 : 20;
-} else if (tool === 'text') {
-const text = new fabric.IText('Double click to edit', {
-left: 100, top: 100, fontSize: 16, fontFamily: 'Arial'
-});
-this.fabricCanvas.add(text);
-} else if (tool === 'rect') {
-const rect = new fabric.Rect({
-left: 100, top: 100, fill: 'transparent', stroke: 'red', strokeWidth: 2, width: 60, height: 60
-});
-this.fabricCanvas.add(rect);
-} else if (tool === 'signature') {
-this.showSignatureModal = true;
-} else if (tool === 'redact') {
-const redact = new fabric.Rect({
-left: 100, top: 100, fill: 'black', width: 100, height: 20
-});
-this.fabricCanvas.add(redact);
-}
-},
+    clearSignature() {
+        const canvas = this.$refs.sigCanvas;
+        const ctx = canvas.getContext('2d');
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        this.sigActive = false;
+    },
 
-clearSignature() {
-const canvas = this.$refs.sigCanvas;
-const ctx = canvas.getContext('2d');
-ctx.clearRect(0, 0, canvas.width, canvas.height);
-this.sigActive = false;
-},
+    applySignature() {
+        const dataUrl = this.$refs.sigCanvas.toDataURL();
+        fabric.Image.fromURL(dataUrl, (img) => {
+            img.scale(0.5);
+            img.set({ left: 100, top: 100 });
+            this.fabricCanvas.add(img);
+        });
+        this.showSignatureModal = false;
+        this.clearSignature();
+    },
 
-applySignature() {
-const dataUrl = this.$refs.sigCanvas.toDataURL();
-fabric.Image.fromURL(dataUrl, (img) => {
-img.scale(0.3);
-img.set({ left: 150, top: 150 });
-this.fabricCanvas.add(img);
-});
-this.showSignatureModal = false;
-this.clearSignature();
-},
+    saveHistory() {
+        if (this.isProcessing) return;
+        const json = this.fabricCanvas.toJSON();
+        this.history = this.history.slice(0, this.historyIndex + 1);
+        this.history.push(json);
+        this.historyIndex++;
+    },
 
-saveHistory() {
-if (this.isProcessing) return;
-const json = this.fabricCanvas.toJSON();
-this.history = this.history.slice(0, this.historyIndex + 1);
-this.history.push(json);
-this.historyIndex++;
-},
+    undo() {
+        if (this.historyIndex > 0) {
+            this.historyIndex--;
+            this.isProcessing = true;
+            this.fabricCanvas.loadFromJSON(this.history[this.historyIndex], () => {
+                this.fabricCanvas.renderAll();
+                this.isProcessing = false;
+            });
+        }
+    },
 
-undo() {
-if (this.historyIndex > 0) {
-this.historyIndex--;
-this.isProcessing = true;
-this.fabricCanvas.loadFromJSON(this.history[this.historyIndex], () => {
-this.fabricCanvas.renderAll();
-this.isProcessing = false;
-});
-}
-},
+    // COMPLETE: Actual PDF-lib export implementation
+    async savePDF() {
+        if (!this.pdfDoc || !this.pdfBytes) return;
+        this.statusMessage = 'Exporting PDF...';
+        this.isProcessing = true;
+        
+        try {
+            // Force save current page state
+            this.pageStates[this.pageNum] = this.fabricCanvas.toJSON();
 
-async savePDF() {
-if (!this.pdfDoc) return;
-this.statusMessage = 'Exporting...';
-// Logic for flattening fabric layers into PDF-lib would go here
-alert("Client-side export feature: This tool demonstrates UI and client-side processing. PDF-lib flattening is
-integrated in the production engine.");
-},
+            const { PDFDocument } = PDFLib;
+            const pdfDoc = await PDFDocument.load(this.pdfBytes);
+            const pages = pdfDoc.getPages();
 
-zoomIn() { this.zoom += 0.1; this.renderPage(this.pageNum); },
-zoomOut() { if (this.zoom > 0.5) { this.zoom -= 0.1; this.renderPage(this.pageNum); } },
-nextPage() { if (this.pageNum < this.numPages) { this.pageNum++; this.renderPage(this.pageNum); } }, prevPage() { if
-    (this.pageNum> 1) { this.pageNum--; this.renderPage(this.pageNum); } }
+            // Iterate through all pages to apply edits
+            for (let i = 1; i <= this.numPages; i++) {
+                if (this.pageStates[i] && this.pageStates[i].objects.length > 0) {
+                    const pdfPage = pages[i - 1];
+                    const { width, height } = pdfPage.getSize();
+                    
+                    // Create an invisible canvas to render the annotations WITHOUT the background
+                    const tempCanvas = new fabric.StaticCanvas(null, { width: this.fabricCanvas.width, height: this.fabricCanvas.height });
+                    
+                    await new Promise((resolve) => {
+                        tempCanvas.loadFromJSON(this.pageStates[i], () => {
+                            tempCanvas.backgroundImage = null; // Strip the PDF background
+                            tempCanvas.backgroundColor = null;
+                            tempCanvas.renderAll();
+                            resolve();
+                        });
+                    });
+
+                    // Export overlay as high-res PNG
+                    const dataUrl = tempCanvas.toDataURL({ format: 'png', multiplier: 2 });
+                    
+                    // Bake overlay into the PDF page
+                    if (dataUrl !== 'data:,') {
+                        const pngImage = await pdfDoc.embedPng(dataUrl);
+                        pdfPage.drawImage(pngImage, {
+                            x: 0,
+                            y: 0,
+                            width: width,
+                            height: height,
+                        });
+                    }
+                }
+            }
+
+            const pdfBytes = await pdfDoc.save();
+            const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `kiri_edited_${Date.now()}.pdf`;
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+            
+            this.statusMessage = 'Export successful!';
+        } catch (e) {
+            console.error(e);
+            this.error = 'Failed to export PDF';
+            this.statusMessage = 'Export failed';
+        } finally {
+            this.isProcessing = false;
+        }
+    },
+
+    zoomIn() { 
+        this.zoom += 0.2; 
+        this.renderPage(this.pageNum); 
+    },
+    zoomOut() { 
+        if (this.zoom > 0.6) { 
+            this.zoom -= 0.2; 
+            this.renderPage(this.pageNum); 
+        } 
+    },
+    nextPage() { 
+        if (this.pageNum < this.numPages) { 
+            this.pageStates[this.pageNum] = this.fabricCanvas.toJSON(); // Save state before turn
+            this.pageNum++; 
+            this.renderPage(this.pageNum); 
+        } 
+    }, 
+    prevPage() { 
+        if (this.pageNum > 1) { 
+            this.pageStates[this.pageNum] = this.fabricCanvas.toJSON(); // Save state before turn
+            this.pageNum--; 
+            this.renderPage(this.pageNum); 
+        } 
     }
-    {% endblock %}
+}
+{% endblock %}

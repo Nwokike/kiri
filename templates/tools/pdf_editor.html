@@ -4,8 +4,7 @@
 {% block title %}Neural PDF Workbench | Kiri Labs{% endblock %}
 
 {% block meta_description %}
-A professional-grade client-side PDF editor. Annotate, sign, redact, and modify PDF documents securely without uploading
-them to any server.
+A professional-grade client-side PDF editor. Annotate, sign, redact, and modify PDF documents securely without uploading them to any server.
 {% endblock %}
 
 {% block tool_name %}PDF Editor{% endblock %}
@@ -13,8 +12,7 @@ them to any server.
 {% block tool_title %}Neural PDF Studio{% endblock %}
 
 {% block tool_description %}
-Secure, client-side PDF manipulation. Draw, highlight, add text, and sign documents without your data ever leaving your
-browser.
+Secure, client-side PDF manipulation. Draw, highlight, add text, and sign documents without your data ever leaving your browser.
 {% endblock %}
 
 {% block tool_head %}
@@ -22,93 +20,112 @@ browser.
 <script src="https://cdnjs.cloudflare.com/ajax/libs/fabric.js/5.3.1/fabric.min.js"></script>
 <script src="https://unpkg.com/pdf-lib/dist/pdf-lib.min.js"></script>
 
+<script>
+    /* * IMPORTANT FIX:
+     * We store the heavy PDF and Fabric objects OUTSIDE of Alpine.js.
+     * Alpine wraps its data in Proxies, which breaks modern JS classes with 
+     * private fields (causing the #d error in pdf.js).
+     */
+    window.pdfApp = {
+        doc: null,
+        bytes: null,
+        canvas: null,
+        states: {}
+    };
+</script>
+
 <style>
+    /* Responsive app-like container */
+    .pdf-app-container {
+        height: calc(100vh - 180px); /* Adjust based on your header height */
+        min-height: 500px;
+    }
+
     .pdf-container {
         position: relative;
-        background-color: #525659;
-        min-height: 800px;
-        box-shadow: inset 0 0 40px rgba(0, 0, 0, 0.2);
+        background-color: #3b3d3f;
+        box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.3);
+        /* Critical for mobile: prevents page refresh/scroll while drawing */
+        touch-action: none; 
     }
 
     .canvas-container {
-        margin: 20px auto;
-        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.3);
+        margin: 0 auto;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.4);
     }
 
     .tool-btn-active {
-        background-color: rgba(13, 124, 61, 0.1) !important;
+        background-color: rgba(13, 124, 61, 0.15) !important;
         border-color: #0D7C3D !important;
         color: #0D7C3D !important;
         transform: scale(1.05);
     }
 
-    .page-indicator {
-        backdrop-filter: blur(8px);
-        background-color: rgba(255, 255, 255, 0.8);
-    }
-
-    .dark .page-indicator {
-        background-color: rgba(30, 30, 30, 0.8);
-    }
-
     .signature-pad-canvas {
         background: #fff;
-        border: 2px dashed #e2e8f0;
+        border: 2px dashed #cbd5e1;
         cursor: crosshair;
+        touch-action: none;
+    }
+
+    /* Hide scrollbar for toolbar but allow scrolling */
+    .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+    .hide-scrollbar {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
     }
 </style>
 {% endblock %}
 
 {% block tool_body %}
-<div x-init="init()" class="flex flex-col h-full gap-4">
-    <div
-        class="flex flex-wrap items-center justify-between gap-4 p-3 bg-surface border border-subtle rounded-2xl shadow-sm sticky top-0 z-20">
-        <div class="flex items-center gap-2">
+<div x-init="init()" class="flex flex-col w-full gap-4 pdf-app-container">
+    
+    <div class="flex flex-col md:flex-row items-start md:items-center justify-between gap-3 p-3 bg-surface border border-subtle rounded-2xl shadow-sm z-20 w-full overflow-hidden">
+        
+        <div class="flex items-center gap-3 w-full md:w-auto overflow-x-auto hide-scrollbar pb-1 md:pb-0">
             <button @click="$refs.fileInput.click()"
-                class="px-4 py-2 bg-kiri-green hover:bg-kiri-green-dark text-white rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-lg shadow-green-900/20">
-                <i class="fas fa-folder-open"></i> Open PDF
+                class="shrink-0 px-4 py-2.5 bg-kiri-green hover:bg-kiri-green-dark text-white rounded-xl text-sm font-bold transition-all flex items-center gap-2 shadow-lg shadow-green-900/20">
+                <i class="fas fa-folder-open"></i> <span class="hidden sm:inline">Open PDF</span>
             </button>
             <input type="file" x-ref="fileInput" @change="loadPDF($event)" accept=".pdf" class="hidden">
 
-            <div x-show="pdfDoc" class="h-6 w-px bg-subtle mx-2"></div>
+            <div x-show="hasDocument" class="h-8 w-px bg-subtle shrink-0"></div>
 
-            <div x-show="pdfDoc" class="flex items-center gap-1">
+            <div x-show="hasDocument" class="flex items-center gap-1 shrink-0">
                 <template x-for="tool in tools" :key="tool.id">
                     <button @click="setTool(tool.id)"
-                        class="p-2.5 rounded-xl border border-transparent hover:bg-subtle transition-all"
-                        :class="activeTool === tool.id ? 'tool-btn-active border-subtle' : ''" :title="tool.name">
+                        class="p-3 md:p-2.5 rounded-xl border border-transparent hover:bg-subtle transition-all flex items-center justify-center min-w-[40px]"
+                        :class="activeTool === tool.id ? 'tool-btn-active border-subtle' : 'text-muted hover:text-heading'" :title="tool.name">
                         <i class="fas" :class="tool.icon"></i>
                     </button>
                 </template>
             </div>
         </div>
 
-        <div x-show="pdfDoc" class="flex items-center gap-2">
-            <div class="flex items-center gap-2 px-3 py-1.5 bg-subtle rounded-xl border border-subtle">
-                <button @click="prevPage()" :disabled="pageNum <= 1"
-                    class="disabled:opacity-30 p-1 hover:text-kiri-green">
+        <div x-show="hasDocument" class="flex items-center justify-between w-full md:w-auto gap-3 pt-2 md:pt-0 border-t md:border-t-0 border-subtle">
+            <div class="flex items-center gap-2 px-2 py-1.5 bg-subtle rounded-xl border border-subtle">
+                <button @click="prevPage()" :disabled="pageNum <= 1" class="disabled:opacity-30 p-2 hover:text-kiri-green transition-colors">
                     <i class="fas fa-chevron-left text-xs"></i>
                 </button>
-                <div class="flex items-center gap-1.5 px-2">
-                    <span class="text-xs font-bold font-mono" x-text="pageNum"></span>
-                    <span class="text-[10px] text-muted font-bold uppercase">/</span>
-                    <span class="text-xs font-bold font-mono text-muted" x-text="numPages"></span>
+                <div class="flex items-center gap-1 text-sm">
+                    <span class="font-bold font-mono" x-text="pageNum"></span>
+                    <span class="text-muted font-bold">/</span>
+                    <span class="font-bold font-mono text-muted" x-text="numPages"></span>
                 </div>
-                <button @click="nextPage()" :disabled="pageNum >= numPages"
-                    class="disabled:opacity-30 p-1 hover:text-kiri-green">
+                <button @click="nextPage()" :disabled="pageNum >= numPages" class="disabled:opacity-30 p-2 hover:text-kiri-green transition-colors">
                     <i class="fas fa-chevron-right text-xs"></i>
                 </button>
             </div>
 
-            <div class="h-6 w-px bg-subtle mx-1"></div>
-
-            <div class="flex items-center gap-1">
-                <button @click="undo()" class="p-2.5 rounded-xl hover:bg-subtle disabled:opacity-30 transition-all"
-                    :disabled="historyIndex <= 0">
+            <div class="flex items-center gap-2">
+                <button @click="undo()" class="p-2.5 rounded-xl hover:bg-subtle disabled:opacity-30 text-muted hover:text-heading transition-all"
+                    :disabled="historyIndex <= 0" title="Undo">
                     <i class="fas fa-undo"></i>
                 </button>
                 <button @click="savePDF()" :disabled="isProcessing"
-                    class="px-5 py-2.5 bg-surface border border-subtle hover:border-kiri-green text-heading rounded-xl text-xs font-bold transition-all flex items-center gap-2 shadow-sm disabled:opacity-50">
+                    class="px-5 py-2.5 bg-surface border border-subtle hover:border-kiri-green text-heading rounded-xl text-sm font-bold transition-all flex items-center gap-2 shadow-sm disabled:opacity-50">
                     <template x-if="!isProcessing"> <i class="fas fa-save text-kiri-green"></i> </template>
                     <template x-if="isProcessing"> <i class="fas fa-circle-notch fa-spin text-kiri-green"></i> </template>
                     <span>Export</span>
@@ -117,64 +134,60 @@ browser.
         </div>
     </div>
 
-    <div
-        class="flex-1 flex flex-col min-h-[700px] overflow-hidden rounded-[2.5rem] border border-subtle bg-[#525659] relative custom-scrollbar">
-        <template x-if="!pdfDoc">
-            <div class="absolute inset-0 flex flex-col items-center justify-center text-white/50 space-y-4">
-                <button @click="$refs.fileInput.click()"
-                    class="w-20 h-20 rounded-full border-4 border-dashed border-white/20 flex items-center justify-center hover:border-kiri-green hover:text-kiri-green transition-colors cursor-pointer">
-                    <i class="fas fa-file-pdf text-3xl"></i>
-                </button>
-                <p class="font-bold uppercase tracking-widest text-sm">Select a PDF to begin editing</p>
+    <div class="flex-1 flex flex-col overflow-hidden rounded-[2rem] border border-subtle bg-[#3b3d3f] relative">
+        <template x-if="!hasDocument">
+            <div class="absolute inset-0 flex flex-col items-center justify-center text-white/40 space-y-4 cursor-pointer hover:bg-white/5 transition-colors" @click="$refs.fileInput.click()">
+                <div class="w-24 h-24 rounded-full border-4 border-dashed border-white/20 flex items-center justify-center text-kiri-green">
+                    <i class="fas fa-cloud-upload-alt text-4xl"></i>
+                </div>
+                <p class="font-bold uppercase tracking-widest text-sm">Tap or Click to upload PDF</p>
             </div>
         </template>
 
-        <div id="pdf-container" x-ref="pdfContainer" class="flex-1 overflow-auto p-4 flex justify-center pdf-container">
+        <div id="pdf-container" x-ref="pdfContainer" class="flex-1 overflow-auto p-2 md:p-6 flex justify-center items-start pdf-container">
             <canvas id="editor-canvas" x-ref="canvas"></canvas>
         </div>
 
-        <div x-show="pdfDoc"
-            class="absolute bottom-8 right-8 flex items-center gap-3 p-1.5 bg-surface/90 backdrop-blur-md rounded-2xl border border-subtle shadow-2xl animate-slide-up">
-            <button @click="zoomOut()" class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-subtle">
-                <i class="fas fa-minus text-xs"></i>
+        <div x-show="hasDocument" x-cloak
+            class="absolute bottom-6 right-6 flex items-center gap-1 p-1 bg-surface/90 backdrop-blur-md rounded-2xl border border-subtle shadow-lg">
+            <button @click="zoomOut()" class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-subtle text-muted hover:text-heading transition-colors">
+                <i class="fas fa-minus text-sm"></i>
             </button>
-            <span class="text-xs font-mono font-bold w-12 text-center" x-text="Math.round(zoom * 100) + '%'"></span>
-            <button @click="zoomIn()" class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-subtle">
-                <i class="fas fa-plus text-xs"></i>
+            <span class="text-xs font-mono font-bold w-12 text-center text-heading" x-text="Math.round(zoom * 100) + '%'"></span>
+            <button @click="zoomIn()" class="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-subtle text-muted hover:text-heading transition-colors">
+                <i class="fas fa-plus text-sm"></i>
             </button>
         </div>
     </div>
 
-    <div x-show="showSignatureModal" x-transition x-cloak
+    <div x-show="showSignatureModal" x-transition.opacity x-cloak
         class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
-        <div class="bg-surface rounded-3xl w-full max-w-lg overflow-hidden shadow-2xl border border-subtle animate-pop">
-            <div class="p-6 border-b border-subtle flex justify-between items-center bg-subtle/50">
-                <h3 class="text-xl font-black text-heading">Draw Signature</h3>
-                <button @click="showSignatureModal = false" class="text-muted hover:text-red-500 transition-colors">
-                    <i class="fas fa-times text-xl"></i>
+        <div class="bg-surface rounded-3xl w-full max-w-md overflow-hidden shadow-2xl border border-subtle transform transition-all" @click.away="showSignatureModal = false">
+            <div class="p-5 border-b border-subtle flex justify-between items-center bg-subtle/30">
+                <h3 class="text-lg font-black text-heading">Draw Signature</h3>
+                <button @click="showSignatureModal = false" class="text-muted hover:text-red-500 transition-colors p-2">
+                    <i class="fas fa-times text-lg"></i>
                 </button>
             </div>
-            <div class="p-8 space-y-6">
-                <div class="signature-pad-container">
-                    <canvas x-ref="sigCanvas" class="signature-pad-canvas w-full h-48 rounded-2xl"></canvas>
+            <div class="p-6 space-y-6">
+                <div class="signature-pad-container relative rounded-2xl overflow-hidden">
+                    <canvas x-ref="sigCanvas" class="signature-pad-canvas w-full h-48"></canvas>
                 </div>
-                <div class="flex items-center justify-center gap-4">
-                    <div class="flex items-center gap-2">
-                        <template x-for="color in ['#000000', '#000080', '#0000FF']">
-                            <button @click="sigColor = color" class="w-8 h-8 rounded-full border-2 transition-transform"
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <template x-for="color in ['#000000', '#1d4ed8', '#047857']">
+                            <button @click="sigColor = color" class="w-8 h-8 rounded-full border-2 transition-transform shadow-sm"
                                 :style="`background: ${color}`"
-                                :class="sigColor === color ? 'scale-125 border-kiri-green' : 'border-transparent'"></button>
+                                :class="sigColor === color ? 'scale-110 border-gray-400' : 'border-transparent'"></button>
                         </template>
                     </div>
-                    <div class="h-6 w-px bg-subtle"></div>
-                    <button @click="clearSignature()"
-                        class="text-xs font-bold text-muted hover:text-red-500 uppercase tracking-widest">
+                    <button @click="clearSignature()" class="text-xs font-bold text-muted hover:text-red-500 uppercase tracking-wide px-3 py-2">
                         Clear Pad
                     </button>
                 </div>
                 <button @click="applySignature()"
-                    class="w-full py-4 bg-heading text-surface rounded-2xl font-black uppercase tracking-widest hover:scale-[1.02] transition-all shadow-xl">
-                    Add to Document
+                    class="w-full py-3.5 bg-kiri-green text-white rounded-xl font-bold tracking-wide hover:bg-kiri-green-dark transition-colors shadow-md">
+                    Insert Signature
                 </button>
             </div>
         </div>
@@ -185,27 +198,27 @@ browser.
 {% block tool_js_data %}
 {
     hideUpload: true,
-    hideSample: true, // Sample removed as requested
-    pdfDoc: null,
-    pdfBytes: null,
+    hideSample: true,
+
+    // UI State Only. Heavy objects live in window.pdfApp
+    hasDocument: false, 
     pageNum: 1,
     numPages: 0,
-    zoom: 1.5,
-    fabricCanvas: null,
+    zoom: 1.0,
+    initialFitDone: false,
     activeTool: 'select',
     history: [],
     historyIndex: -1,
-    pageStates: {}, // Stores the JSON state of annotations per page
     isProcessing: false,
     showSignatureModal: false,
     sigColor: '#000000',
     sigActive: false,
 
     tools: [
-        { id: 'select', name: 'Select', icon: 'fa-mouse-pointer' },
-        { id: 'draw', name: 'Draw', icon: 'fa-pencil-alt' },
-        { id: 'highlighter', name: 'Highlighter', icon: 'fa-highlighter' },
-        { id: 'text', name: 'Text', icon: 'fa-font' },
+        { id: 'select', name: 'Select/Move', icon: 'fa-mouse-pointer' },
+        { id: 'draw', name: 'Pen Tool', icon: 'fa-pen-nib' },
+        { id: 'highlighter', name: 'Highlight', icon: 'fa-highlighter' },
+        { id: 'text', name: 'Add Text', icon: 'fa-font' },
         { id: 'rect', name: 'Rectangle', icon: 'fa-square' },
         { id: 'signature', name: 'Sign', icon: 'fa-signature' },
         { id: 'redact', name: 'Redact', icon: 'fa-eraser' }
@@ -215,17 +228,33 @@ browser.
         pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
         this.initFabric();
         this.initSignaturePad();
+        
+        window.addEventListener('resize', this.debounce(() => {
+            if (window.pdfApp.doc) this.renderPage(this.pageNum);
+        }, 300));
+    },
+
+    debounce(func, wait) {
+        let timeout;
+        return function(...args) {
+            const later = () => { clearTimeout(timeout); func.apply(this, args); };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        }.bind(this);
     },
 
     initFabric() {
-        this.fabricCanvas = new fabric.Canvas('editor-canvas');
-        this.fabricCanvas.on('object:added', () => this.saveHistory());
-        this.fabricCanvas.on('object:modified', () => this.saveHistory());
-        this.fabricCanvas.on('object:removed', () => this.saveHistory());
+        window.pdfApp.canvas = new fabric.Canvas('editor-canvas');
+        window.pdfApp.canvas.renderOnAddRemove = false;
+        
+        window.pdfApp.canvas.on('object:added', () => { window.pdfApp.canvas.renderAll(); this.saveHistory(); });
+        window.pdfApp.canvas.on('object:modified', () => { window.pdfApp.canvas.renderAll(); this.saveHistory(); });
+        window.pdfApp.canvas.on('object:removed', () => { window.pdfApp.canvas.renderAll(); this.saveHistory(); });
     },
 
     initSignaturePad() {
         const canvas = this.$refs.sigCanvas;
+        if (!canvas) return;
         const ctx = canvas.getContext('2d');
         let drawing = false;
 
@@ -249,119 +278,151 @@ browser.
 
         const move = (e) => {
             if (!drawing) return;
-            e.preventDefault();
+            e.preventDefault(); 
             const pos = getPos(e);
             ctx.lineTo(pos.x, pos.y);
             ctx.strokeStyle = this.sigColor;
-            ctx.lineWidth = 2;
+            ctx.lineWidth = 3;
             ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
             ctx.stroke();
         };
 
         const stop = () => drawing = false;
 
         canvas.addEventListener('mousedown', start);
-        canvas.addEventListener('mousemove', move);
+        canvas.addEventListener('mousemove', move, { passive: false });
         window.addEventListener('mouseup', stop);
-        canvas.addEventListener('touchstart', start);
-        canvas.addEventListener('touchmove', move);
+        canvas.addEventListener('touchstart', start, { passive: false });
+        canvas.addEventListener('touchmove', move, { passive: false });
         canvas.addEventListener('touchend', stop);
 
-        const dpr = window.devicePixelRatio || 1;
-        canvas.width = canvas.offsetWidth * dpr;
-        canvas.height = canvas.offsetHeight * dpr;
-        ctx.scale(dpr, dpr);
+        setTimeout(() => {
+            const dpr = window.devicePixelRatio || 1;
+            canvas.width = canvas.offsetWidth * dpr;
+            canvas.height = canvas.offsetHeight * dpr;
+            ctx.scale(dpr, dpr);
+        }, 100);
     },
 
     async loadPDF(e) {
-        // FIXED: Syntax error removed
         const file = e.target.files?.[0] || e.dataTransfer?.files?.[0];
         if (!file) return;
 
-        this.statusMessage = 'Loading PDF...';
+        this.isProcessing = true;
         const reader = new FileReader();
+        
         reader.onload = async (event) => {
-            this.pdfBytes = new Uint8Array(event.target.result);
-            this.pdfDoc = await pdfjsLib.getDocument(this.pdfBytes.slice(0)).promise;
-            this.numPages = this.pdfDoc.numPages;
-            this.pageNum = 1;
-            this.pageStates = {}; 
-            this.renderPage(this.pageNum);
-            this.statusMessage = `Loaded: ${file.name}`;
+            try {
+                // Ensure plain JS object, bypassing Alpine reactivity
+                const rawBuffer = event.target.result;
+                window.pdfApp.bytes = new Uint8Array(rawBuffer);
+                
+                const loadingTask = pdfjsLib.getDocument({ data: window.pdfApp.bytes });
+                window.pdfApp.doc = await loadingTask.promise;
+                
+                this.numPages = window.pdfApp.doc.numPages;
+                this.pageNum = 1;
+                window.pdfApp.states = {}; 
+                this.initialFitDone = false;
+                
+                // Trigger the UI updates
+                this.hasDocument = true;
+                await this.renderPage(this.pageNum);
+            } catch (error) {
+                console.error("PDF Load Error:", error);
+                alert("Failed to read PDF.");
+            } finally {
+                this.isProcessing = false;
+            }
         };
         reader.readAsArrayBuffer(file);
     },
 
     async renderPage(num) {
-        if (!this.pdfDoc) return;
+        if (!window.pdfApp.doc) return;
         this.isProcessing = true;
+        
+        const canvasObj = window.pdfApp.canvas;
 
-        // Save current page state before turning
-        if (this.fabricCanvas.getObjects().length > 0) {
-            this.pageStates[this.pageNum] = this.fabricCanvas.toJSON();
+        if (canvasObj.getObjects().length > 0) {
+            window.pdfApp.states[this.pageNum] = canvasObj.toJSON();
         }
         
-        // Clear history for the new page
         this.history = [];
         this.historyIndex = -1;
 
-        const page = await this.pdfDoc.getPage(num);
+        const page = await window.pdfApp.doc.getPage(num);
+        
+        const containerWidth = this.$refs.pdfContainer.clientWidth - 32; 
+        const unscaledViewport = page.getViewport({ scale: 1 });
+        
+        if (!this.initialFitDone) {
+            const fitScale = containerWidth / unscaledViewport.width;
+            this.zoom = fitScale < 1.2 ? fitScale : 1.2;
+            this.initialFitDone = true;
+        }
+
         const viewport = page.getViewport({ scale: this.zoom });
 
-        const canvas = document.createElement('canvas');
-        const context = canvas.getContext('2d');
-        canvas.height = viewport.height;
-        canvas.width = viewport.width;
+        const canvasEl = document.createElement('canvas');
+        const context = canvasEl.getContext('2d');
+        canvasEl.height = viewport.height;
+        canvasEl.width = viewport.width;
 
         await page.render({ canvasContext: context, viewport }).promise;
 
-        this.fabricCanvas.setDimensions({
+        canvasObj.setDimensions({
             width: viewport.width,
             height: viewport.height
         });
 
-        this.fabricCanvas.setBackgroundImage(canvas.toDataURL(), () => {
-            this.fabricCanvas.renderAll();
-            // Restore annotations if they exist for this page
-            if (this.pageStates[num]) {
-                this.fabricCanvas.loadFromJSON(this.pageStates[num], () => {
-                    this.fabricCanvas.renderAll();
+        canvasObj.setBackgroundImage(canvasEl.toDataURL(), () => {
+            canvasObj.renderAll();
+            if (window.pdfApp.states[num]) {
+                canvasObj.loadFromJSON(window.pdfApp.states[num], () => {
+                    canvasObj.renderAll();
+                    this.isProcessing = false;
                 });
             } else {
-                this.fabricCanvas.clear();
-                // We clear objects but need to restore the background we just set
-                this.fabricCanvas.setBackgroundImage(canvas.toDataURL(), this.fabricCanvas.renderAll.bind(this.fabricCanvas));
+                canvasObj.clear();
+                canvasObj.setBackgroundImage(canvasEl.toDataURL(), () => {
+                    canvasObj.renderAll();
+                    this.isProcessing = false;
+                });
             }
-            this.isProcessing = false;
         });
     },
 
     setTool(tool) {
         this.activeTool = tool;
-        this.fabricCanvas.isDrawingMode = false;
-        this.fabricCanvas.selection = true;
+        const canvas = window.pdfApp.canvas;
+        canvas.isDrawingMode = false;
+        canvas.selection = true;
 
         if (tool === 'draw' || tool === 'highlighter') {
-            this.fabricCanvas.isDrawingMode = true;
-            this.fabricCanvas.freeDrawingBrush.color = tool === 'draw' ? '#000' : 'rgba(255, 255, 0, 0.4)';
-            this.fabricCanvas.freeDrawingBrush.width = tool === 'draw' ? 2 : 20;
+            canvas.isDrawingMode = true;
+            canvas.freeDrawingBrush.color = tool === 'draw' ? '#000000' : 'rgba(253, 224, 71, 0.5)';
+            canvas.freeDrawingBrush.width = tool === 'draw' ? Math.max(2, this.zoom * 2) : Math.max(15, this.zoom * 15);
         } else if (tool === 'text') {
-            const text = new fabric.IText('Double click to edit', {
-                left: 100, top: 100, fontSize: 24, fontFamily: 'Helvetica', fill: '#000'
+            const text = new fabric.IText('Click to edit', {
+                left: 50, top: 50, fontSize: Math.max(16, 24 * this.zoom), fontFamily: 'Inter, sans-serif', fill: '#000'
             });
-            this.fabricCanvas.add(text);
+            canvas.add(text);
+            canvas.setActiveObject(text);
         } else if (tool === 'rect') {
             const rect = new fabric.Rect({
-                left: 100, top: 100, fill: 'transparent', stroke: '#e11d48', strokeWidth: 3, width: 100, height: 100
+                left: 50, top: 50, fill: 'transparent', stroke: '#e11d48', strokeWidth: Math.max(2, 3 * this.zoom), width: 100 * this.zoom, height: 100 * this.zoom
             });
-            this.fabricCanvas.add(rect);
+            canvas.add(rect);
         } else if (tool === 'signature') {
             this.showSignatureModal = true;
+            setTimeout(() => this.initSignaturePad(), 100);
         } else if (tool === 'redact') {
             const redact = new fabric.Rect({
-                left: 100, top: 100, fill: '#000000', width: 150, height: 30
+                left: 50, top: 50, fill: '#000000', width: 150 * this.zoom, height: 30 * this.zoom
             });
-            this.fabricCanvas.add(redact);
+            canvas.add(redact);
         }
     },
 
@@ -373,19 +434,25 @@ browser.
     },
 
     applySignature() {
+        if (!this.sigActive) {
+            this.showSignatureModal = false;
+            return;
+        }
         const dataUrl = this.$refs.sigCanvas.toDataURL();
         fabric.Image.fromURL(dataUrl, (img) => {
-            img.scale(0.5);
-            img.set({ left: 100, top: 100 });
-            this.fabricCanvas.add(img);
+            img.scale(0.3 * this.zoom);
+            img.set({ left: 50, top: 50 });
+            window.pdfApp.canvas.add(img);
+            window.pdfApp.canvas.setActiveObject(img);
         });
         this.showSignatureModal = false;
         this.clearSignature();
+        this.activeTool = 'select'; 
     },
 
     saveHistory() {
         if (this.isProcessing) return;
-        const json = this.fabricCanvas.toJSON();
+        const json = window.pdfApp.canvas.toJSON();
         this.history = this.history.slice(0, this.historyIndex + 1);
         this.history.push(json);
         this.historyIndex++;
@@ -395,49 +462,46 @@ browser.
         if (this.historyIndex > 0) {
             this.historyIndex--;
             this.isProcessing = true;
-            this.fabricCanvas.loadFromJSON(this.history[this.historyIndex], () => {
-                this.fabricCanvas.renderAll();
+            window.pdfApp.canvas.loadFromJSON(this.history[this.historyIndex], () => {
+                window.pdfApp.canvas.renderAll();
                 this.isProcessing = false;
             });
+        } else if (this.historyIndex === 0) {
+            this.historyIndex--;
+            window.pdfApp.canvas.clear();
+            this.renderPage(this.pageNum); 
         }
     },
 
-    // COMPLETE: Actual PDF-lib export implementation
     async savePDF() {
-        if (!this.pdfDoc || !this.pdfBytes) return;
-        this.statusMessage = 'Exporting PDF...';
+        if (!window.pdfApp.doc || !window.pdfApp.bytes) return;
         this.isProcessing = true;
         
         try {
-            // Force save current page state
-            this.pageStates[this.pageNum] = this.fabricCanvas.toJSON();
+            window.pdfApp.states[this.pageNum] = window.pdfApp.canvas.toJSON();
 
             const { PDFDocument } = PDFLib;
-            const pdfDoc = await PDFDocument.load(this.pdfBytes);
+            const pdfDoc = await PDFDocument.load(window.pdfApp.bytes);
             const pages = pdfDoc.getPages();
 
-            // Iterate through all pages to apply edits
             for (let i = 1; i <= this.numPages; i++) {
-                if (this.pageStates[i] && this.pageStates[i].objects.length > 0) {
+                if (window.pdfApp.states[i] && window.pdfApp.states[i].objects.length > 0) {
                     const pdfPage = pages[i - 1];
                     const { width, height } = pdfPage.getSize();
                     
-                    // Create an invisible canvas to render the annotations WITHOUT the background
-                    const tempCanvas = new fabric.StaticCanvas(null, { width: this.fabricCanvas.width, height: this.fabricCanvas.height });
+                    const tempCanvas = new fabric.StaticCanvas(null, { width: window.pdfApp.canvas.width, height: window.pdfApp.canvas.height });
                     
                     await new Promise((resolve) => {
-                        tempCanvas.loadFromJSON(this.pageStates[i], () => {
-                            tempCanvas.backgroundImage = null; // Strip the PDF background
+                        tempCanvas.loadFromJSON(window.pdfApp.states[i], () => {
+                            tempCanvas.backgroundImage = null; 
                             tempCanvas.backgroundColor = null;
                             tempCanvas.renderAll();
                             resolve();
                         });
                     });
 
-                    // Export overlay as high-res PNG
                     const dataUrl = tempCanvas.toDataURL({ format: 'png', multiplier: 2 });
                     
-                    // Bake overlay into the PDF page
                     if (dataUrl !== 'data:,') {
                         const pngImage = await pdfDoc.embedPng(dataUrl);
                         pdfPage.drawImage(pngImage, {
@@ -454,41 +518,37 @@ browser.
             const blob = new Blob([pdfBytes], { type: 'application/pdf' });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(blob);
-            link.download = `kiri_edited_${Date.now()}.pdf`;
+            link.download = `kiri_studio_document_${Date.now()}.pdf`;
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
             
-            this.statusMessage = 'Export successful!';
         } catch (e) {
             console.error(e);
-            this.error = 'Failed to export PDF';
-            this.statusMessage = 'Export failed';
+            alert("Failed to export PDF. Ensure the document is not encrypted.");
         } finally {
             this.isProcessing = false;
         }
     },
 
     zoomIn() { 
-        this.zoom += 0.2; 
+        this.zoom = Math.min(this.zoom + 0.2, 3.0); 
         this.renderPage(this.pageNum); 
     },
     zoomOut() { 
-        if (this.zoom > 0.6) { 
-            this.zoom -= 0.2; 
-            this.renderPage(this.pageNum); 
-        } 
+        this.zoom = Math.max(this.zoom - 0.2, 0.4); 
+        this.renderPage(this.pageNum); 
     },
     nextPage() { 
         if (this.pageNum < this.numPages) { 
-            this.pageStates[this.pageNum] = this.fabricCanvas.toJSON(); // Save state before turn
+            window.pdfApp.states[this.pageNum] = window.pdfApp.canvas.toJSON();
             this.pageNum++; 
             this.renderPage(this.pageNum); 
         } 
     }, 
     prevPage() { 
         if (this.pageNum > 1) { 
-            this.pageStates[this.pageNum] = this.fabricCanvas.toJSON(); // Save state before turn
+            window.pdfApp.states[this.pageNum] = window.pdfApp.canvas.toJSON();
             this.pageNum--; 
             this.renderPage(this.pageNum); 
         } 

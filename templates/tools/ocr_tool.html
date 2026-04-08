@@ -221,208 +221,226 @@ Features automated layout analysis, image pre-processing (binarization), and cli
 
 {% block tool_js_data %}
 {
-imageSrc: null,
-result: '',
-confidence: 0,
-language: 'eng',
-processing: false,
-progressText: '0%',
-copied: false,
-statusMessage: '',
-error: '', // Editor State
-cropper: null,
-isCropping: false,
-isEnhanced: false,
-rotation: 0,
-init() {
-this.hideUpload = true;
-this.hideSample = false;
-this.persist('ocr_last_lang', 'language', 'eng');
-},
-async loadSample() {
-try {
-const response = await fetch("{% static 'images/logos/logo.png' %}");
-const blob = await response.blob();
-const file = new File([blob], 'kiri_brand_logo.png', {
-type: 'image/png'
-});
-this.processFile(file);
-this.statusMessage = 'Brand logo loaded. Ready to scan.';
-} catch (err) {
-console.error(err);
-this.statusMessage = 'Failed to load sample logo';
-}
-},
-loadImage(event) {
-const file = event.target.files ? .[0] || event.dataTransfer ? .files ? .[0];
-if (!file) return;
-this.processFile(file);
-},
-handleDrop(e) {
-e.target.classList.remove('border-kiri-green', 'scale-[1.01]');
-this.loadImage(e);
-},
-handlePaste(e) {
-const items = (e.clipboardData || e.originalEvent.clipboardData).items;
-for (let index in items) {
-const item = items[index];
-if (item.kind === 'file' && item.type.startsWith('image/')) {
-const blob = item.getAsFile();
-this.processFile(blob);
-break; // Only take the first image
-}
-}
-},
-processFile(file) {
-if (this.imageSrc) URL.revokeObjectURL(this.imageSrc);
-this.imageSrc = URL.createObjectURL(file); // Reset State
-this.result = '';
-this.confidence = 0;
-this.rotation = 0;
-this.isEnhanced = false; // Destroy old cropper
-if (this.cropper) {
-this.cropper.destroy();
-this.cropper = null;
-this.isCropping = false;
-}
-},
-/* --- Editor Tools --- */
-toggleCrop() {
-const imageElement = this.$refs.image;
-if (this.isCropping) {
-this.cropper.destroy();
-this.cropper = null;
-this.isCropping = false;
-// When destroying cropper, ensure visual rotation matches internal state
-imageElement.style.transform = `rotate(${this.rotation}deg)`;
-} else {
-this.isCropping = true;
-// Reset CSS transform as Cropper handles it internally
-imageElement.style.transform = 'none';
-this.cropper = new Cropper(imageElement, {
-viewMode: 1,
-dragMode: 'move',
-autoCropArea: 0.8,
-background: false,
-rotatable: true,
-checkOrientation: false,
-ready: () => {
-this.cropper.rotateTo(this.rotation);
-}
-});
-}
-},
-rotate(deg) {
-this.rotation = (this.rotation + deg) % 360;
-if (this.isCropping && this.cropper) {
-this.cropper.rotate(deg);
-} else {
-this.$refs.image.style.transform = `rotate(${this.rotation}deg)`;
-}
-},
-toggleEnhance() {
-this.isEnhanced = !this.isEnhanced;
-},
-/* --- Processing Logic --- */
-async getProcessedCanvas() {
-const img = new Image();
-img.src = this.imageSrc;
-await new Promise(r => img.onload = r);
-if (this.isCropping && this.cropper) {
-const canvas = this.cropper.getCroppedCanvas();
-if (this.isEnhanced) return this.applyBinarization(canvas);
-return canvas;
-}
-const canvas = document.createElement('canvas');
-const ctx = canvas.getContext('2d'); // Handle Geometry
-if (Math.abs(this.rotation) === 90 || Math.abs(this.rotation) === 270) {
-canvas.width = img.height;
-canvas.height = img.width;
-} else {
-canvas.width = img.width;
-canvas.height = img.height;
-}
-ctx.translate(canvas.width / 2, canvas.height / 2);
-ctx.rotate(this.rotation * Math.PI / 180);
-ctx.drawImage(img, -img.width / 2, -img.height / 2);
-if (this.isEnhanced) return this.applyBinarization(canvas);
-return canvas;
-},
-applyBinarization(canvas) {
-const ctx = canvas.getContext('2d');
-const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-const d = imgData.data; // Grayscale + Adaptive Threshold
-for (let i = 0; i < d.length; i +=4) { const r=d[i]; const g=d[i + 1]; const b=d[i + 2]; const v=(0.2126 * r + 0.7152 *
-    g + 0.0722 * b>= 128) ? 255 : 0;
-    d[i] = d[i + 1] = d[i + 2] = v;
-    }
-    ctx.putImageData(imgData, 0, 0);
-    return canvas;
+    imageSrc: null,
+    result: '',
+    confidence: 0,
+    language: 'eng',
+    processing: false,
+    progressText: '0%',
+    copied: false,
+    statusMessage: '',
+    error: '', 
+    cropper: null,
+    isCropping: false,
+    isEnhanced: false,
+    rotation: 0,
+    hideUpload: true,
+    hideSample: true, // Force hide sample
+
+    init() {
+        this.hideUpload = true;
+        this.hideSample = true;
+        this.persist('ocr_last_lang', 'language', 'eng');
     },
+
+    loadImage(event) {
+        // FIXED: Repaired optional chaining syntax
+        const file = event.target.files?.[0] || event.dataTransfer?.files?.[0];
+        if (!file) return;
+        this.processFile(file);
+    },
+
+    handleDrop(e) {
+        e.target.classList.remove('border-kiri-green', 'scale-[1.01]');
+        this.loadImage(e);
+    },
+
+    handlePaste(e) {
+        const items = (e.clipboardData || e.originalEvent.clipboardData).items;
+        for (let index in items) {
+            const item = items[index];
+            if (item.kind === 'file' && item.type.startsWith('image/')) {
+                const blob = item.getAsFile();
+                this.processFile(blob);
+                break; // Only take the first image
+            }
+        }
+    },
+
+    processFile(file) {
+        if (this.imageSrc) URL.revokeObjectURL(this.imageSrc);
+        this.imageSrc = URL.createObjectURL(file); 
+        this.result = '';
+        this.confidence = 0;
+        this.rotation = 0;
+        this.isEnhanced = false; 
+        
+        if (this.cropper) {
+            this.cropper.destroy();
+            this.cropper = null;
+            this.isCropping = false;
+        }
+    },
+
+    /* --- Editor Tools --- */
+    toggleCrop() {
+        const imageElement = this.$refs.image;
+        if (this.isCropping) {
+            this.cropper.destroy();
+            this.cropper = null;
+            this.isCropping = false;
+            // When destroying cropper, ensure visual rotation matches internal state
+            imageElement.style.transform = `rotate(${this.rotation}deg)`;
+        } else {
+            this.isCropping = true;
+            // Reset CSS transform as Cropper handles it internally
+            imageElement.style.transform = 'none';
+            this.cropper = new Cropper(imageElement, {
+                viewMode: 1,
+                dragMode: 'move',
+                autoCropArea: 0.8,
+                background: false,
+                rotatable: true,
+                checkOrientation: false,
+                ready: () => {
+                    this.cropper.rotateTo(this.rotation);
+                }
+            });
+        }
+    },
+
+    rotate(deg) {
+        this.rotation = (this.rotation + deg) % 360;
+        if (this.isCropping && this.cropper) {
+            this.cropper.rotate(deg);
+        } else {
+            this.$refs.image.style.transform = `rotate(${this.rotation}deg)`;
+        }
+    },
+
+    toggleEnhance() {
+        this.isEnhanced = !this.isEnhanced;
+    },
+
+    /* --- Processing Logic --- */
+    async getProcessedCanvas() {
+        const img = new Image();
+        img.src = this.imageSrc;
+        await new Promise(r => img.onload = r);
+        
+        if (this.isCropping && this.cropper) {
+            const canvas = this.cropper.getCroppedCanvas();
+            if (this.isEnhanced) return this.applyBinarization(canvas);
+            return canvas;
+        }
+        
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d'); 
+        
+        // Handle Geometry
+        if (Math.abs(this.rotation) === 90 || Math.abs(this.rotation) === 270) {
+            canvas.width = img.height;
+            canvas.height = img.width;
+        } else {
+            canvas.width = img.width;
+            canvas.height = img.height;
+        }
+        
+        ctx.translate(canvas.width / 2, canvas.height / 2);
+        ctx.rotate(this.rotation * Math.PI / 180);
+        ctx.drawImage(img, -img.width / 2, -img.height / 2);
+        if (this.isEnhanced) return this.applyBinarization(canvas);
+        return canvas;
+    },
+
+    applyBinarization(canvas) {
+        const ctx = canvas.getContext('2d');
+        const imgData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const d = imgData.data; 
+        
+        // Grayscale + Adaptive Threshold
+        // FIXED: De-mangled formatter loop logic
+        for (let i = 0; i < d.length; i += 4) { 
+            const r = d[i]; 
+            const g = d[i + 1]; 
+            const b = d[i + 2]; 
+            const v = (0.2126 * r + 0.7152 * g + 0.0722 * b >= 128) ? 255 : 0;
+            d[i] = d[i + 1] = d[i + 2] = v;
+        }
+        
+        ctx.putImageData(imgData, 0, 0);
+        return canvas;
+    },
+
     async runOCR() {
-    if (!this.imageSrc) return;
-    this.processing = true;
-    this.result = '';
-    this.progressText = 'Preprocessing...';
-    try {
-    const canvas = await this.getProcessedCanvas(); // Fix: Tesseract recognizes canvas directly
-    this.progressText = 'Loading Engine...';
-    const worker = await Tesseract.createWorker(this.language);
-    this.progressText = 'Scanning...';
-    const {
-    data
-    } = await worker.recognize(canvas);
-    await worker.terminate();
-    this.result = data.text.trim();
-    this.confidence = Math.round(data.confidence);
-    } catch (err) {
-    console.error(err);
-    this.result = "Error during scan: " + err.message;
-    } finally {
-    this.processing = false;
-    }
+        if (!this.imageSrc) return;
+        this.processing = true;
+        this.result = '';
+        this.progressText = 'Preprocessing...';
+        
+        try {
+            const canvas = await this.getProcessedCanvas(); 
+            this.progressText = 'Loading Engine...';
+            const worker = await Tesseract.createWorker(this.language);
+            this.progressText = 'Scanning...';
+            
+            const { data } = await worker.recognize(canvas);
+            await worker.terminate();
+            
+            this.result = data.text.trim();
+            this.confidence = Math.round(data.confidence);
+        } catch (err) {
+            console.error(err);
+            this.result = "Error during scan: " + err.message;
+        } finally {
+            this.processing = false;
+        }
     },
+
     async copyText() {
-    await navigator.clipboard.writeText(this.result);
-    this.copied = true;
-    setTimeout(() => this.copied = false, 2000);
+        await navigator.clipboard.writeText(this.result);
+        this.copied = true;
+        setTimeout(() => this.copied = false, 2000);
     },
+
     speakText() {
-    if (!this.result) return;
-    window.speechSynthesis.cancel();
-    const utterance = new SpeechSynthesisUtterance(this.result);
-    const langMap = {
-    'eng': 'en-US',
-    'spa': 'es-ES',
-    'fra': 'fr-FR',
-    'deu': 'de-DE',
-    'jpn': 'ja-JP',
-    'chi_sim': 'zh-CN'
-    };
-    utterance.lang = langMap[this.language] || 'en-US';
-    window.speechSynthesis.speak(utterance);
+        if (!this.result) return;
+        window.speechSynthesis.cancel();
+        const utterance = new SpeechSynthesisUtterance(this.result);
+        const langMap = {
+            'eng': 'en-US',
+            'spa': 'es-ES',
+            'fra': 'fr-FR',
+            'deu': 'de-DE',
+            'jpn': 'ja-JP',
+            'chi_sim': 'zh-CN'
+        };
+        utterance.lang = langMap[this.language] || 'en-US';
+        window.speechSynthesis.speak(utterance);
     },
+
     downloadText() {
-    const blob = new Blob([this.result], {
-    type: 'text/plain'
-    });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.download = `ocr_scan_${Date.now()}.txt`;
-    link.click();
-    URL.revokeObjectURL(url);
+        const blob = new Blob([this.result], {
+            type: 'text/plain'
+        });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `ocr_scan_${Date.now()}.txt`;
+        link.click();
+        URL.revokeObjectURL(url);
     },
+
     reset() {
-    if (this.imageSrc) URL.revokeObjectURL(this.imageSrc);
-    this.imageSrc = null;
-    if (this.cropper) {
-    this.cropper.destroy();
-    this.cropper = null;
+        if (this.imageSrc) URL.revokeObjectURL(this.imageSrc);
+        this.imageSrc = null;
+        if (this.cropper) {
+            this.cropper.destroy();
+            this.cropper = null;
+        }
+        this.result = '';
+        this.isCropping = false;
+        if (this.$refs.fileInput) this.$refs.fileInput.value = '';
     }
-    this.result = '';
-    this.isCropping = false;
-    this.$refs.fileInput.value = '';
-    }
-    }
-    {% endblock %}
+}
+{% endblock %}

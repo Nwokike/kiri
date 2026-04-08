@@ -1,132 +1,122 @@
 {% extends "tools/base_tool.html" %}
 {% load static %}
 
+{% block title %}LaTeX to PDF Converter | Kiri Labs{% endblock %}
+
+{% block meta_description %}
+Write, compile, and export lightweight LaTeX documents directly in your browser. No server installation required.
+{% endblock %}
+
+{% block tool_name %}LaTeX to PDF{% endblock %}
+{% block tool_icon %}fa-subscript{% endblock %}
+{% block tool_title %}LaTeX to PDF Converter{% endblock %}
+
+{% block tool_description %}
+Write, compile, and export LaTeX documents instantly in your browser.
+<b>Note:</b> This is a lightweight client-side compiler. It supports standard formatting, basic math, and tables. Heavy external packages (e.g., amsmath) are not supported.
+{% endblock %}
+
+{% block tool_accept %}.tex,.txt{% endblock %}
+
 {% block tool_head %}
-<!-- LaTeX.js and html2pdf.js -->
-<script src="https://cdn.jsdelivr.net/npm/latex.js/dist/latex.mjs" type="module"></script>
-<script src="https://cdn.jsdelivr.net/npm/html2pdf.js-stable-fix@1.0.0/dist/html2pdf.bundle.min.js"></script>
+<script type="module">
+    import { HtmlGenerator, parse } from 'https://cdn.jsdelivr.net/npm/latex.js@0.12.4/dist/latex.mjs';
+    window.latexjs = { HtmlGenerator, parse };
+</script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
 <style>
-    #latex-preview-container {
-        font-family: 'Computer Modern', serif;
-        line-height: 1.5;
-        padding: 40px;
+    /* Professional A4 Paper Styling */
+    .a4-paper {
         background: white;
-        color: black;
-        min-height: 297mm;
-        /* A4 aspect ratio */
         width: 210mm;
+        min-height: 297mm;
         margin: 0 auto;
-        box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+        padding: 20mm;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        color: black;
     }
 
-    .latex-editor-grid {
-        display: grid;
-        grid-template-columns: 1fr 1fr;
-        gap: 24px;
-        height: 600px;
-    }
-
-    @media (max-width: 1024px) {
-        .latex-editor-grid {
-            grid-template-columns: 1fr;
-            height: auto;
+    @media (max-width: 767px) {
+        .a4-paper {
+            width: 100%;
+            min-height: auto;
+            padding: 10mm;
         }
+    }
+
+    /* Custom Scrollbar */
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background-color: var(--color-subtle);
+        border-radius: 9999px;
     }
 </style>
 {% endblock %}
 
-{% block tool_js_data %}
-{
-input: '\\documentclass{article}\n\\begin{document}\nHello from \\textbf{Kiri Tools}!\n\nThis is a LaTeX document
-compiled entirely in your browser.\n\n\\begin{equation}\ne^{i\\pi} + 1 = 0\n\\end{equation}\n\\end{document}',
-hideUpload: false,
-init() {
-this.$watch('input', () => this.renderLatex());
-// Initial render after small delay for library load
-setTimeout(() => this.renderLatex(), 500);
-},
-renderLatex() {
-if (!this.input) return;
-const container = document.getElementById('latex-preview');
-if (!container) return;
-try {
-// We use a dynamic import or global access for latex.js since it's a module
-import('https://cdn.jsdelivr.net/npm/latex.js/dist/latex.mjs').then(latex => {
-const generator = new latex.HtmlGenerator({
-hyphenate: false
-});
-const doc = latex.parse(this.input, {
-generator: generator
-});
-container.innerHTML = '';
-container.appendChild(doc.domFragment());
-this.statusMessage = 'Rendered successfully';
-this.error = '';
-}).catch(err => {
-console.error(err);
-});
-} catch (e) {
-this.error = 'LaTeX Syntax Error: ' + e.message;
-}
-},
-async generatePDF() {
-const element = document.getElementById('latex-preview-container');
-this.statusMessage = 'Generating PDF...';
-const opt = {
-margin: 0,
-filename: 'document.pdf',
-image: {
-type: 'jpeg',
-quality: 0.98
-},
-html2canvas: {
-scale: 2,
-useCORS: true
-},
-jsPDF: {
-unit: 'mm',
-format: 'a4',
-orientation: 'portrait'
-}
-};
-try {
-await html2pdf().set(opt).from(element).save();
-this.statusMessage = 'PDF downloaded!';
-} catch (err) {
-this.error = 'PDF Generation failed';
-}
-},
-loadSample() {
-this.input = '\\documentclass{article}\n\\begin{document}\n\\title{Research Report}\n\\author{Anonymous
-Researcher}\n\\maketitle\n\n\\section{Introduction}\nThis tool allows you to write LaTeX and generate PDFs
-instantly.\n\n\\section{Mathematics}\nThe quadratic formula is:\n\\begin{equation}\nx = \\frac{-b \\pm \\sqrt{b^2 -
-4ac}}{2a}\n\\end{equation}\n\n\\end{document}';
-this.renderLatex();
-},
-onReset() {
-this.input = '';
-const container = document.getElementById('latex-preview');
-if (container) container.innerHTML = '';
-this.statusMessage = 'Ready';
-}
-}
+{% block tool_actions_left %}
+<div class="flex items-center gap-3">
+    <label class="flex items-center gap-2 cursor-pointer">
+        <input type="checkbox" x-model="autoCompile" class="w-4 h-4 text-kiri-green border-subtle rounded focus:ring-kiri-green">
+        <span class="text-[10px] font-bold text-muted uppercase tracking-widest">Auto-Compile</span>
+    </label>
+    <button @click="compileLatex()" :disabled="compiling"
+        class="px-4 py-2 bg-surface text-muted border border-subtle rounded-xl text-xs font-bold hover:bg-subtle transition-all active:scale-95 flex items-center gap-2 disabled:opacity-50">
+        <template x-if="!compiling"> <i class="fas fa-play text-kiri-green"></i> </template>
+        <template x-if="compiling"> <i class="fas fa-circle-notch fa-spin text-kiri-green"></i> </template>
+        <span>Compile Now</span> 
+    </button>
+</div>
+{% endblock %}
+
+{% block tool_actions_right %}
+<button @click="downloadPDF()" :disabled="!input.trim() || loadingPdf" 
+    class="inline-flex items-center gap-2 px-6 py-2.5 bg-kiri-green hover:bg-kiri-green-dark text-white rounded-xl text-xs font-bold shadow-lg transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed">
+    <template x-if="!loadingPdf"> <i class="fas fa-file-pdf"></i> </template>
+    <template x-if="loadingPdf"> <i class="fas fa-circle-notch fa-spin"></i> </template>
+    <span x-text="loadingPdf ? 'Generating...' : 'Download PDF'"></span> 
+</button>
 {% endblock %}
 
 {% block tool_body %}
 <div class="space-y-6">
-    <div class="latex-editor-grid">
-        <!-- Editor -->
-        <div class="flex flex-col h-full"> <label
-                class="text-[10px] font-bold text-muted uppercase tracking-widest mb-2 px-2">LaTeX
-                Source</label> <textarea x-model="input"
-                class="flex-1 w-full bg-surface border border-subtle rounded-2xl p-6 font-mono text-sm resize-none focus:ring-2 focus: outline-none"
-                placeholder="Enter LaTeX code here..."></textarea> </div> <!-- Preview -->
-        <div class="flex flex-col h-full"> <label
-                class="text-[10px] font-bold text-muted uppercase tracking-widest mb-2 px-2">Live Preview
-                (A4)</label>
-            <div class="flex-1 overflow-auto bg-subtle rounded-2xl border border-subtle p-4">
-                <div id="latex-preview-container">
-                    <div id="latex-preview"></div>
+    <div class="flex flex-col lg:grid lg:grid-cols-2 gap-6 h-[800px] lg:h-[650px]">
+        
+        <div class="flex flex-col gap-2 h-full min-h-0">
+            <div class="flex items-center justify-between px-2 shrink-0"> 
+                <span class="text-[10px] font-bold text-muted uppercase tracking-widest flex items-center gap-2">
+                    <i class="fas fa-code text-blue-500"></i> LaTeX Source
+                </span> 
+            </div> 
+            <textarea x-model="input" @input.debounce.1500ms="if(autoCompile) compileLatex()"
+                class="flex-1 w-full p-6 font-mono text-[13px] border border-subtle rounded-[1.5rem] bg-surface text-heading resize-none shadow-inner outline-none focus:border-kiri-green transition-colors min-h-0 overflow-y-auto custom-scrollbar whitespace-pre text-nowrap"
+                placeholder="\documentclass{article}&#10;\begin{document}&#10;Start typing LaTeX here...&#10;\end{document}"></textarea>
+        </div>
+        
+        <div class="flex flex-col gap-2 h-full min-h-0">
+            <div class="flex items-center justify-between px-2 shrink-0"> 
+                <span class="text-[10px] font-bold text-muted uppercase tracking-widest flex items-center gap-2">
+                    <i class="fas fa-eye text-kiri-green"></i> Live Preview (A4)
+                </span> 
+            </div>
+            <div class="flex-1 bg-subtle border border-subtle rounded-[1.5rem] overflow-hidden shadow-sm relative min-h-0">
+                <div class="absolute inset-0 overflow-y-auto custom-scrollbar p-4 lg:p-8">
+                    
+                    <div x-show="error" class="mb-4 p-4 text-[11px] font-mono text-red-500 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-xl break-words whitespace-pre-wrap">
+                        <i class="fas fa-exclamation-triangle mr-1"></i> <span x-text="error"></span>
+                    </div>
+
+                    <div id="pdf-wrapper">
+                        <div id="latex-output" class="a4-paper">
+                            <div x-show="!input.trim()" class="flex flex-col items-center justify-center h-full text-muted opacity-50">
+                                <i class="fas fa-file-signature text-6xl mb-4"></i>
+                                <p class="text-sm font-bold uppercase tracking-widest">Awaiting Code</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -134,9 +124,152 @@ this.statusMessage = 'Ready';
 </div>
 {% endblock %}
 
-{% block tool_footer_right %}
-<button @click="generatePDF()"
-    class="inline-flex items-center gap-2 px-6 py-2.5 bg-kiri-green text-white rounded-xl text-xs font-extrabold hover:bg-kiri-green-dark transition-colors shadow-lg">
-    <i class="fas fa-file-pdf"></i> Download PDF
-</button>
+{% block tool_js_data %}
+{
+    hideUpload: false,
+    hideSample: false,
+    input: '',
+    error: '',
+    compiling: false,
+    loadingPdf: false,
+    autoCompile: true,
+    
+    init() {
+        this.persist('latex_input', 'input');
+        if (this.input) {
+            setTimeout(() => this.compileLatex(), 1000);
+        }
+    },
+
+    handleFile(e) {
+        const file = e.target.files?.[0] || e.dataTransfer?.files?.[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            this.input = event.target.result;
+            this.compileLatex();
+            this.statusMessage = 'LaTeX file loaded successfully';
+        };
+        reader.readAsText(file);
+    },
+
+    loadSample() {
+        this.input = `\\documentclass{article}
+
+\\title{Lightweight LaTeX Previewer}
+\\author{Kiri Labs}
+\\date{\\today}
+
+\\begin{document}
+\\maketitle
+
+\\section{Overview}
+This tool is designed for fast, lightweight, client-side LaTeX drafting. Because it runs instantly in your browser without communicating with a server, it has some limitations compared to a full desktop TeX installation.
+
+\\section{What Works (Supported)}
+\\begin{itemize}
+  \\item \\textbf{Standard Formatting}: Sections, bold, italics, quotes.
+  \\item \\textbf{Basic Math}: Inline equations like $E = mc^2$ or block equations.
+  \\item \\textbf{Tables}: Standard tabular environments.
+  \\item \\textbf{Lists}: Itemize and enumerate.
+\\end{itemize}
+
+\\begin{equation}
+\\int_0^1 x^2 \\, dx = \\frac{1}{3}
+\\end{equation}
+
+\\section{What Does NOT Work (Unsupported)}
+To keep this tool fast and lightweight, we do not download the heavy gigabytes of macros required for advanced packages.
+\\begin{itemize}
+  \\item \\texttt{\\backslash usepackage\\{amsmath\\}} (Advanced math environments like align)
+  \\item \\texttt{\\backslash usepackage\\{tikz\\}} (Complex diagrams)
+  \\item \\texttt{\\backslash usepackage\\{graphicx\\}} (External image embedding)
+\\end{itemize}
+
+\\vspace{1em}
+\\noindent If you try to use an unsupported package or environment, you will see a friendly syntax error above the preview window.
+
+\\end{document}`;
+        this.compileLatex();
+        this.statusMessage = "Sample Loaded";
+    },
+
+    compileLatex() {
+        if (!this.input.trim()) {
+            document.getElementById('latex-output').innerHTML = '';
+            this.error = '';
+            return;
+        }
+
+        if (typeof window.latexjs === 'undefined') {
+            this.error = "The LaTeX engine is still loading. Please wait a second and try again.";
+            return;
+        }
+
+        this.compiling = true;
+        this.error = '';
+        this.statusMessage = 'Compiling...';
+
+        try {
+            const generator = new window.latexjs.HtmlGenerator({ hyphenate: false });
+            const doc = window.latexjs.parse(this.input, { generator: generator });
+
+            const container = document.getElementById('latex-output');
+            container.innerHTML = '';
+            container.appendChild(doc.stylesAndScripts("https://cdn.jsdelivr.net/npm/latex.js@0.12.4/dist/"));
+            container.appendChild(doc.domFragment());
+            
+            this.statusMessage = 'Compiled successfully';
+        } catch (e) {
+            console.error("LaTeX Compilation Error:", e);
+            const line = e.location?.start?.line || "?";
+            const msg = e.message || "Unknown syntax error";
+            
+            // Provide a highly descriptive error so the user knows exactly why it failed
+            this.error = `Line ${line}: ${msg}\n\n⚠️ NOTE: This is a lightweight browser-based compiler. Advanced external packages (e.g., amsmath, graphicx) and complex macro environments (e.g., align) are not supported.`;
+            this.statusMessage = 'Compilation Error';
+        } finally {
+            this.compiling = false;
+        }
+    },
+
+    async downloadPDF() {
+        if (!this.input.trim() || this.error) return;
+        
+        this.loadingPdf = true;
+        this.statusMessage = "Generating PDF...";
+        
+        const element = document.getElementById('latex-output');
+        
+        const opt = {
+            margin: [0, 0],
+            filename: 'kiri_document.pdf',
+            image: { type: 'jpeg', quality: 0.98 },
+            html2canvas: { scale: 2, useCORS: true, logging: false },
+            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
+        };
+        
+        try {
+            await html2pdf().set(opt).from(element).save();
+            this.statusMessage = "PDF Downloaded";
+        } catch (err) {
+            console.error(err);
+            this.error = "PDF Generation failed: " + err.message;
+        } finally {
+            this.loadingPdf = false;
+        }
+    },
+
+    onReset() {
+        this.input = '';
+        const container = document.getElementById('latex-output');
+        if (container) container.innerHTML = '';
+        this.error = '';
+        this.compiling = false;
+        this.loadingPdf = false;
+        this.statusMessage = 'Ready';
+        if (this.$refs.fileInput) this.$refs.fileInput.value = '';
+    }
+}
 {% endblock %}

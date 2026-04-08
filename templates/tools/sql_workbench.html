@@ -29,8 +29,18 @@ formatting.
 <script src="https://cdn.jsdelivr.net/npm/alasql@4.4.0/dist/alasql.min.js"></script>
 
 <style>
+    /* CRITICAL FIX: 
+       CodeMirror must be absolutely positioned within a relative container 
+       so it calculates its own scrollbars instead of stretching the flexbox 
+    */
     .CodeMirror {
-        height: 100%;
+        position: absolute !important;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        height: 100% !important;
+        width: 100% !important;
         font-family: 'JetBrains Mono', 'Fira Code', monospace;
         font-size: 13px;
         background-color: transparent !important;
@@ -44,25 +54,21 @@ formatting.
     /* Workbench Grid Layout */
     .workbench-grid {
         display: grid;
-        grid-template-columns: 240px 1fr;
-        grid-template-rows: 60% 40%;
-        height: 80vh;
+        grid-template-columns: 240px minmax(0, 1fr);
+        /* Using minmax prevents children from breaking the grid constraints */
+        grid-template-rows: minmax(0, 6fr) minmax(0, 4fr); 
+        height: calc(100vh - 200px);
+        min-height: 500px;
         gap: 1rem;
         grid-template-areas:
             "sidebar editor"
             "sidebar results";
     }
 
-    @media (max-width: 768px) {
-        .workbench-grid {
-            grid-template-columns: 1fr;
-            grid-template-rows: auto 400px auto;
-            grid-template-areas:
-                "editor"
-                "results"
-                "sidebar";
-            height: auto;
-        }
+    /* Force all grid areas to respect constraints and not overflow */
+    .area-sidebar, .area-editor, .area-results {
+        min-height: 0;
+        min-width: 0;
     }
 
     .area-sidebar {
@@ -86,24 +92,33 @@ formatting.
         background-color: #3D3D3D;
         border-radius: 9999px;
     }
+
+    @media (max-width: 768px) {
+        .workbench-grid {
+            grid-template-columns: 1fr;
+            grid-template-rows: 400px 400px auto;
+            grid-template-areas:
+                "editor"
+                "results"
+                "sidebar";
+            height: auto;
+        }
+    }
 </style>
 {% endblock %}
 
 {% block tool_body %}
 <div x-init="init()" class="flex flex-col gap-4">
-    <div
-        class="flex flex-wrap items-center justify-between gap-4 p-3 bg-surface border border-subtle rounded-xl shadow-sm">
+    <div class="flex flex-wrap items-center justify-between gap-4 p-3 bg-surface border border-subtle rounded-xl shadow-sm">
         <div class="flex items-center gap-3">
-            <div
-                class="flex items-center gap-2 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg border border-blue-100 dark:border-blue-900/30">
+            <div class="flex items-center gap-2 px-3 py-1.5 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-lg border border-blue-100 dark:border-blue-900/30">
                 <i class="fas fa-database text-xs"></i>
                 <span class="text-xs font-bold" x-text="currentDB">kiri_db</span>
             </div>
             <div class="h-6 w-px bg-gray-300"></div>
             <div class="flex items-center gap-2">
                 <span class="text-[10px] uppercase font-bold text-muted">Mode:</span>
-                <select x-model="dialect" @change="changeDialect()"
-                    class="bg-transparent text-xs font-bold outline-none cursor-pointer">
+                <select x-model="dialect" @change="changeDialect()" class="bg-transparent text-xs font-bold outline-none cursor-pointer">
                     <option value="mysql">MySQL</option>
                     <option value="postgres">PostgreSQL</option>
                     <option value="sqlite">SQLite</option>
@@ -113,27 +128,23 @@ formatting.
         </div>
 
         <div class="flex items-center gap-2">
-            <button @click="resetDB()"
-                class="px-3 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg text-xs font-bold transition-colors"
-                title="Wipe Database">
-                <i class="fas fa-trash-alt"></i>
+            <button @click="resetDB()" class="px-3 py-2 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-lg text-xs font-bold transition-colors" title="Wipe Database">
+                <i class="fas fa-trash-alt"></i> Wipe Data
             </button>
-            <button @click="runQuery()"
-                class="px-6 py-2 bg-kiri-green hover:bg-kiri-green-dark text-white rounded-lg text-xs font-bold shadow-lg shadow-green-900/20 active:scale-95 flex items-center gap-2 transition-all">
+            <button @click="runQuery()" class="px-6 py-2 bg-kiri-green hover:bg-kiri-green-dark text-white rounded-lg text-xs font-bold shadow-lg shadow-green-900/20 active:scale-95 flex items-center gap-2 transition-all">
                 <i class="fas fa-play"></i>
-                <span class="hidden sm:inline">Execute</span>
+                <span class="hidden sm:inline">Execute (Ctrl+Enter)</span>
             </button>
         </div>
     </div>
 
     <div class="workbench-grid">
         <div class="area-sidebar bg-surface border border-subtle rounded-xl flex flex-col overflow-hidden">
-            <div class="p-3 bg-subtle border-b border-subtle flex justify-between items-center">
+            <div class="p-3 bg-subtle border-b border-subtle flex justify-between items-center shrink-0">
                 <span class="text-xs font-bold uppercase text-muted">Tables</span>
-                <button @click="refreshSchema()" class="text-muted hover:text-kiri-green"><i
-                        class="fas fa-sync-alt text-xs"></i></button>
+                <button @click="refreshSchema()" class="text-muted hover:text-kiri-green"><i class="fas fa-sync-alt text-xs"></i></button>
             </div>
-            <div class="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar">
+            <div class="flex-1 overflow-y-auto p-2 space-y-1 custom-scrollbar min-h-0">
                 <template x-if="tables.length === 0">
                     <div class="text-center py-8 opacity-50">
                         <i class="fas fa-layer-group text-2xl mb-2"></i>
@@ -142,8 +153,7 @@ formatting.
                 </template>
                 <template x-for="table in tables" :key="table.tableid">
                     <div class="group">
-                        <button @click="quickSelect(table.tableid)"
-                            class="w-full text-left px-3 py-2 rounded-lg hover:bg-subtle flex items-center gap-2 transition-colors">
+                        <button @click="quickSelect(table.tableid)" class="w-full text-left px-3 py-2 rounded-lg hover:bg-subtle flex items-center gap-2 transition-colors">
                             <i class="fas fa-table text-muted text-xs"></i>
                             <span class="text-xs font-mono text-body truncate" x-text="table.tableid"></span>
                         </button>
@@ -151,56 +161,46 @@ formatting.
                 </template>
             </div>
 
-            <div class="p-3 border-t border-subtle">
+            <div class="p-3 border-t border-subtle shrink-0">
                 <p class="text-[10px] font-bold text-muted mb-2 uppercase">Snippets</p>
                 <div class="flex gap-2 flex-wrap">
-                    <button @click="insertSnippet('create')"
-                        class="px-2 py-1 bg-subtle hover:bg-subtle rounded text-[10px] font-mono">CREATE</button>
-                    <button @click="insertSnippet('select')"
-                        class="px-2 py-1 bg-subtle hover:bg-subtle rounded text-[10px] font-mono">SELECT</button>
-                    <button @click="insertSnippet('insert')"
-                        class="px-2 py-1 bg-subtle hover:bg-subtle rounded text-[10px] font-mono">INSERT</button>
+                    <button @click="insertSnippet('create')" class="px-2 py-1 bg-subtle hover:bg-subtle rounded text-[10px] font-mono">CREATE</button>
+                    <button @click="insertSnippet('select')" class="px-2 py-1 bg-subtle hover:bg-subtle rounded text-[10px] font-mono">SELECT</button>
+                    <button @click="insertSnippet('insert')" class="px-2 py-1 bg-subtle hover:bg-subtle rounded text-[10px] font-mono">INSERT</button>
                 </div>
             </div>
         </div>
 
-        <div
-            class="area-editor flex flex-col bg-subtle rounded-xl overflow-hidden shadow-inner border border-subtle relative">
-            <div class="flex items-center justify-between px-4 py-2 bg-subtle border-b border-subtle">
+        <div class="area-editor flex flex-col bg-subtle rounded-xl overflow-hidden shadow-inner border border-subtle">
+            <div class="flex items-center justify-between px-4 py-2 bg-subtle border-b border-subtle shrink-0">
                 <span class="text-xs text-muted font-mono">Query Editor 1.sql</span>
-                <span class="text-[10px] text-muted">Ctrl+Enter to Run</span>
             </div>
-            <div class="flex-1 relative">
-                <div x-ref="editor" class="h-full"></div>
+            <div class="flex-1 relative min-h-0 w-full">
+                <textarea x-ref="editor" class="hidden"></textarea>
             </div>
         </div>
 
         <div class="area-results bg-surface border border-subtle rounded-xl flex flex-col overflow-hidden shadow-sm">
-            <div class="flex items-center justify-between px-4 py-2 bg-subtle border-b border-subtle">
+            <div class="flex items-center justify-between px-4 py-2 bg-subtle border-b border-subtle shrink-0">
                 <div class="flex items-center gap-2">
                     <span class="text-xs font-bold uppercase text-muted">Output</span>
-                    <span x-show="lastExecutionTime"
-                        class="text-[10px] px-2 py-0.5 rounded-full bg-green-100 text-green-700"
-                        x-text="lastExecutionTime + 'ms'"></span>
+                    <span x-show="lastExecutionTime" class="text-[10px] px-2 py-0.5 rounded-full bg-green-100 text-green-700" x-text="lastExecutionTime + 'ms'"></span>
                 </div>
                 <div class="flex gap-2" x-show="results && results.length > 0">
-                    <button @click="exportData('csv')"
-                        class="text-muted hover:text-kiri-green text-xs font-bold flex items-center gap-1">
+                    <button @click="exportData('csv')" class="text-muted hover:text-kiri-green text-xs font-bold flex items-center gap-1">
                         <i class="fas fa-file-csv"></i> CSV
                     </button>
-                    <button @click="exportData('json')"
-                        class="text-muted hover:text-kiri-green text-xs font-bold flex items-center gap-1">
+                    <button @click="exportData('json')" class="text-muted hover:text-kiri-green text-xs font-bold flex items-center gap-1">
                         <i class="fas fa-code"></i> JSON
                     </button>
                 </div>
             </div>
-            <div class="flex-1 overflow-auto relative bg-surface custom-scrollbar">
+            <div class="flex-1 overflow-auto relative bg-surface custom-scrollbar min-h-0">
                 <div x-show="error" class="p-4 text-red-500 font-mono text-sm bg-red-50/50 dark:bg-red-900/10">
                     <i class="fas fa-exclamation-triangle mr-2"></i>
                     <span x-text="error"></span>
                 </div>
-                <div x-show="!error && (!results || results.length === 0) && successMsg"
-                    class="p-4 text-green-600 font-mono text-sm">
+                <div x-show="!error && (!results || results.length === 0) && successMsg" class="p-4 text-green-600 font-mono text-sm">
                     <i class="fas fa-check mr-2"></i>
                     <span x-text="successMsg"></span>
                 </div>
@@ -209,8 +209,7 @@ formatting.
                         <thead>
                             <tr class="bg-subtle">
                                 <template x-for="key in Object.keys(results[0])">
-                                    <th class="p-3 text-xs font-bold text-muted border-b border-subtle whitespace-nowrap sticky top-0 bg-subtle"
-                                        x-text="key"></th>
+                                    <th class="p-3 text-xs font-bold text-muted border-b border-subtle whitespace-nowrap sticky top-0 bg-subtle" x-text="key"></th>
                                 </template>
                             </tr>
                         </thead>
@@ -218,8 +217,7 @@ formatting.
                             <template x-for="(row, idx) in results" :key="idx">
                                 <tr class="hover:bg-subtle dark:hover:bg-surface group">
                                     <template x-for="val in Object.values(row)">
-                                        <td class="p-3 text-xs border-b border-subtle font-mono text-body whitespace-nowrap max-w-[200px] overflow-hidden text-ellipsis"
-                                            x-text="val === null ? 'NULL' : val"></td>
+                                        <td class="p-3 text-xs border-b border-subtle font-mono text-body whitespace-nowrap max-w-[200px] overflow-hidden text-ellipsis" x-text="val === null ? 'NULL' : val"></td>
                                     </template>
                                 </tr>
                             </template>
@@ -234,189 +232,205 @@ formatting.
 
 {% block tool_js_data %}
 {
-editor: null,
-dialect: 'mysql', // Default to mysql as requested
-currentDB: 'kiri_workbench',
-tables: [],
-results: null,
-error: null,
-successMsg: null,
-lastExecutionTime: null,
-hideUpload: true,
-hideSample: true,
-hideReset: true,
-lastSql: '',
+    dialect: 'mysql',
+    currentDB: 'kiri_workbench',
+    tables: [],
+    results: null,
+    error: null,
+    successMsg: null,
+    lastExecutionTime: null,
+    hideUpload: true,
+    hideSample: true,
+    hideReset: true,
+    lastSql: '',
 
-init() {
-this.persist('sql_workbench_sql', 'lastSql');
-this.initEditor();
-this.initDB();
-},
+    init() {
+        this.persist('sql_workbench_sql', 'lastSql');
+        this.initDB();
+        this.$nextTick(() => {
+            this.initEditor();
+        });
+    },
 
-initEditor() {
-this.editor = CodeMirror(this.$refs.editor, {
-mode: 'text/x-mysql',
-theme: 'nord',
-lineNumbers: true,
-indentWithTabs: true,
-smartIndent: true,
-matchBrackets: true,
-autofocus: true,
-scrollbarStyle: "native",
-extraKeys: {
-"Ctrl-Space": "autocomplete",
-"Ctrl-Enter": () => this.runQuery(),
-"Cmd-Enter": () => this.runQuery()
-},
-hintOptions: { tables: {} }
-});
+    initEditor() {
+        const cm = CodeMirror.fromTextArea(this.$refs.editor, {
+            mode: 'text/x-mysql',
+            theme: 'nord',
+            lineNumbers: true,
+            indentWithTabs: true,
+            smartIndent: true,
+            matchBrackets: true,
+            autofocus: true,
+            extraKeys: {
+                "Ctrl-Space": "autocomplete",
+                "Ctrl-Enter": () => this.runQuery(),
+                "Cmd-Enter": () => this.runQuery()
+            },
+            hintOptions: { tables: {} }
+        });
 
-// Load saved SQL or Demo
-if (this.lastSql) {
-this.editor.setValue(this.lastSql);
-} else {
-this.editor.setValue(`-- MySQL Compatible Syntax
-CREATE TABLE IF NOT EXISTS users (
-id INT AUTO_INCREMENT PRIMARY KEY,
-username VARCHAR(255) NOT NULL,
-email VARCHAR(255),
-created_at DATETIME DEFAULT NOW()
-);
+        this.$refs.editor.cm = cm;
 
-INSERT INTO users (username, email) VALUES
-('Alice', 'alice@kiri.com'),
-('Bob', 'bob@test.com');
+        if (this.lastSql) {
+            cm.setValue(this.lastSql);
+        } else {
+            cm.setValue(`-- MySQL Compatible Syntax\nCREATE TABLE IF NOT EXISTS users (\n  id INT AUTO_INCREMENT PRIMARY KEY,\n  username VARCHAR(255) NOT NULL,\n  email VARCHAR(255),\n  created_at DATETIME DEFAULT NOW()\n);\n\nINSERT INTO users (username, email) VALUES\n('Alice', 'alice@kiri.com'),\n('Bob', 'bob@test.com');\n\nSELECT * FROM users;`);
+        }
 
-SELECT * FROM users;`);
-}
+        cm.on('change', () => {
+            this.lastSql = cm.getValue();
+        });
 
-// Auto-save on change
-this.editor.on('change', () => {
-this.lastSql = this.editor.getValue();
-});
+        // Fire refresh to ensure bounds are perfectly calculated 
+        // after CSS layout settles
+        setTimeout(() => cm.refresh(), 100);
+        setTimeout(() => cm.refresh(), 500);
+    },
 
-setTimeout(() => this.editor.refresh(), 100);
-},
+    initDB() {
+        try {
+            if (!alasql.databases[this.currentDB]) {
+                alasql(`CREATE DATABASE ${this.currentDB}`);
+            }
+            alasql(`USE ${this.currentDB}`);
+            this.refreshSchema();
+            this.statusMessage = 'SQL Workbench Ready';
+        } catch (e) {
+            console.error("DB Init Error", e);
+            this.error = "Failed to initialize memory database.";
+        }
+    },
 
-initDB() {
-try {
-// Use IndexedDB persistence for AlaSQL
-alasql('CREATE INDEXEDDB DATABASE IF NOT EXISTS ' + this.currentDB);
-alasql('ATTACH INDEXEDDB DATABASE ' + this.currentDB);
-alasql('USE ' + this.currentDB);
-this.refreshSchema();
-this.statusMessage = 'SQL Workbench Ready (Persistent)';
-} catch (e) {
-console.error("DB Init Error", e);
-// Fallback to memory
-alasql(`CREATE DATABASE IF NOT EXISTS ${this.currentDB}`);
-alasql(`USE ${this.currentDB}`);
-}
-},
+    changeDialect() {
+        alasql.options.mysqlLib = (this.dialect === 'mysql');
+        alasql.options.postgresLib = (this.dialect === 'postgres');
+        alasql.options.tsqlLib = (this.dialect === 'tsql');
 
-changeDialect() {
-alasql.options.mysqlLib = (this.dialect === 'mysql');
-alasql.options.postgresLib = (this.dialect === 'postgres');
-alasql.options.tsqlLib = (this.dialect === 'tsql');
+        const modeMap = {
+            'mysql': 'text/x-mysql',
+            'postgres': 'text/x-pgsql',
+            'tsql': 'text/x-mssql',
+            'sqlite': 'text/x-sql'
+        };
+        
+        if (this.$refs.editor.cm) {
+            this.$refs.editor.cm.setOption('mode', modeMap[this.dialect]);
+        }
+        this.statusMessage = `Switched to ${this.dialect.toUpperCase()} mode`;
+    },
 
-const modeMap = {
-'mysql': 'text/x-mysql',
-'postgres': 'text/x-pgsql',
-'tsql': 'text/x-mssql',
-'sqlite': 'text/x-sql'
-};
-this.editor.setOption('mode', modeMap[this.dialect]);
-this.statusMessage = `Switched to ${this.dialect.toUpperCase()} mode`;
-},
+    runQuery() {
+        if (!this.$refs.editor.cm) return;
+        const sql = this.$refs.editor.cm.getValue();
+        if (!sql.trim()) return;
 
-runQuery() {
-const sql = this.editor.getValue();
-if (!sql.trim()) return;
+        this.error = null;
+        this.results = null;
+        this.successMsg = null;
+        this.lastExecutionTime = null;
 
-this.error = null;
-this.results = null;
-this.successMsg = null;
-this.lastExecutionTime = null;
+        const start = performance.now();
+        try {
+            const res = alasql(sql);
+            const end = performance.now();
+            this.lastExecutionTime = (end - start).toFixed(2);
 
-const start = performance.now();
-try {
-const res = alasql(sql);
-const end = performance.now();
-this.lastExecutionTime = (end - start).toFixed(2);
+            if (Array.isArray(res) && res.length > 0) {
+                let lastData = [...res].reverse().find(r => Array.isArray(r));
+                if (lastData) {
+                    this.results = lastData;
+                } else {
+                    this.successMsg = "Query executed successfully.";
+                }
+            } else if (Array.isArray(res)) {
+                this.results = res;
+            } else {
+                this.successMsg = "Command executed successfully.";
+            }
 
-if (Array.isArray(res) && res.length > 0) {
-// If multiple queries, AlaSQL returns array of arrays.
-// We pick the last selection result.
-let lastData = [...res].reverse().find(r => Array.isArray(r));
-if (lastData) {
-this.results = lastData;
-} else {
-this.successMsg = "Query executed successfully.";
-}
-} else if (Array.isArray(res)) {
-this.results = res;
-} else {
-this.successMsg = "Command executed.";
-}
+            this.refreshSchema();
+            this.statusMessage = 'Query executed';
+        } catch (err) {
+            this.error = err.message;
+            this.statusMessage = 'Query failed';
+        }
+    },
 
-this.refreshSchema();
-this.statusMessage = 'Query executed';
-} catch (err) {
-this.error = err.message;
-this.statusMessage = 'Query failed';
-}
-},
+    refreshSchema() {
+        const tables = alasql(`SHOW TABLES`);
+        this.tables = tables || [];
+        
+        if (this.$refs.editor.cm) {
+            const hintTables = {};
+            this.tables.forEach(t => {
+                hintTables[t.tableid] = [];
+            });
+            this.$refs.editor.cm.setOption('hintOptions', { tables: hintTables });
+        }
+    },
 
-refreshSchema() {
-const tables = alasql(`SHOW TABLES`);
-this.tables = tables || [];
-const hintTables = {};
-this.tables.forEach(t => {
-hintTables[t.tableid] = [];
-});
-this.editor.setOption('hintOptions', { tables: hintTables });
-},
+    quickSelect(table) {
+        if (this.$refs.editor.cm) {
+            this.$refs.editor.cm.setValue(`SELECT * FROM ${table} LIMIT 50;`);
+            this.runQuery();
+        }
+    },
 
-quickSelect(table) {
-this.editor.setValue(`SELECT * FROM ${table} LIMIT 50;`);
-this.runQuery();
-},
+    resetDB() {
+        if (confirm("Wipe the entire database environment? This will drop all tables.")) {
+            try {
+                if (alasql.databases[this.currentDB]) {
+                    alasql(`DROP DATABASE ${this.currentDB}`);
+                }
+                alasql(`CREATE DATABASE ${this.currentDB}`);
+                alasql(`USE ${this.currentDB}`);
+                this.results = null;
+                this.error = null;
+                this.successMsg = 'Database wiped cleanly.';
+                
+                if (this.$refs.editor.cm) {
+                    this.$refs.editor.cm.setValue('');
+                }
+                
+                this.refreshSchema();
+                this.statusMessage = 'Database wiped';
+            } catch (e) {
+                this.error = "Failed to wipe database.";
+            }
+        }
+    },
 
-resetDB() {
-if (confirm("Wipe entire persistent database? This cannot be undone.")) {
-try {
-alasql(`DROP INDEXEDDB DATABASE ${this.currentDB}`);
-this.initDB();
-this.results = null;
-this.editor.setValue('');
-this.statusMessage = 'Storage wiped';
-} catch (e) {
-// Fallback for memory
-alasql(`DROP DATABASE ${this.currentDB}`);
-this.initDB();
-}
-}
-},
+    insertSnippet(type) {
+        if (!this.$refs.editor.cm) return;
+        let snippet = '';
+        if (type === 'create') snippet = "CREATE TABLE new_table (\n  id INT,\n  name VARCHAR(100)\n);\n";
+        if (type === 'select') snippet = "SELECT * FROM table_name WHERE id > 0;\n";
+        if (type === 'insert') snippet = "INSERT INTO table_name VALUES (1, 'Value');\n";
+        
+        this.$refs.editor.cm.replaceSelection(snippet);
+        this.$refs.editor.cm.focus();
+    },
 
-insertSnippet(type) {
-let snippet = '';
-if (type === 'create') snippet = "CREATE TABLE new_table (\n\tid INT,\n\tname VARCHAR(100)\n);";
-if (type === 'select') snippet = "SELECT * FROM table_name WHERE id > 0;";
-if (type === 'insert') snippet = "INSERT INTO table_name VALUES (1, 'Value');";
-this.editor.replaceSelection(snippet);
-this.editor.focus();
-},
-
-exportData(format) {
-if (!this.results) return;
-const opts = { headers: true };
-const fileName = `export_${new Date().getTime()}`;
-
-if (format === 'csv') {
-alasql(`SELECT * INTO CSV("${fileName}.csv", ?) FROM ?`, [opts, this.results]);
-} else {
-alasql(`SELECT * INTO JSON("${fileName}.json") FROM ?`, [this.results]);
-}
-}
+    exportData(format) {
+        if (!this.results || !this.results.length) return;
+        
+        const timestamp = new Date().getTime();
+        
+        if (format === 'csv') {
+            const headers = Object.keys(this.results[0]).join(',');
+            const rows = this.results.map(row => {
+                return Object.values(row).map(v => {
+                    if (v === null || v === undefined) return '""';
+                    const str = String(v).replace(/"/g, '""');
+                    return `"${str}"`;
+                }).join(',');
+            });
+            const csv = [headers, ...rows].join('\n');
+            this.downloadFile(csv, `sql_export_${timestamp}.csv`, 'text/csv');
+        } else {
+            const jsonStr = JSON.stringify(this.results, null, 2);
+            this.downloadFile(jsonStr, `sql_export_${timestamp}.json`, 'application/json');
+        }
+    }
 }
 {% endblock %}

@@ -43,7 +43,6 @@ Efficiently manage tabular data and structured arrays locally in your browser.
 {% block tool_body %}
 <div class="space-y-6">
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 h-[500px]">
-        <!-- Input Area -->
         <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between"> <span
                     class="text-[10px] font-bold text-body uppercase tracking-widest flex items-center gap-2"> <i
@@ -54,8 +53,7 @@ Efficiently manage tabular data and structured arrays locally in your browser.
             <textarea x-model="input" @input="convert()"
                 class="flex-1 w-full p-6 font-mono text-sm border border-subtle rounded-[1.5rem] bg-surface text-heading resize-none shadow-inner"
                 :placeholder="mode === 'c2j' ? 'Paste CSV content...' : 'Paste JSON array...'"></textarea>
-        </div> <!-- Output Area -->
-        <div class="flex flex-col gap-3">
+        </div> <div class="flex flex-col gap-3">
             <div class="flex items-center justify-between"> <span
                     class="text-[10px] font-bold text-body uppercase tracking-widest flex items-center gap-2"> <i
                         class="fas"
@@ -69,7 +67,6 @@ Efficiently manage tabular data and structured arrays locally in your browser.
                 <textarea readonly x-model="output"
                     class="w-full h-full p-6 font-mono text-sm bg-transparent text-muted resize-none outline-none"
                     :placeholder="mode === 'c2j' ? 'JSON results...' : 'CSV results...'"></textarea>
-                <!-- Format Toggles -->
                 <div class="absolute top-4 right-4 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     <template x-if="mode === 'c2j'">
                         <div class="flex gap-1"> <button @click="pretty = true; convert()"
@@ -96,13 +93,34 @@ Efficiently manage tabular data and structured arrays locally in your browser.
 
 {% block tool_js_data %}
 {
-hideUpload: true,
-init() {
-// Initialization
-},
+hideUpload: false,
+input: '',
+output: '',
 mode: 'c2j',
 pretty: true,
 headers: true,
+init() {
+// Initialization
+},
+handleFile(e) {
+const file = e.target.files[0];
+if (!file) return;
+
+// Auto-switch modes based on file extension
+if (file.name.endsWith('.json') || file.type === 'application/json') {
+    this.mode = 'j2c';
+} else if (file.name.endsWith('.csv') || file.type === 'text/csv') {
+    this.mode = 'c2j';
+}
+
+const reader = new FileReader();
+reader.onload = (event) => {
+    this.input = event.target.result;
+    this.convert();
+    this.statusMessage = 'File loaded successfully';
+};
+reader.readAsText(file);
+},
 loadSample() {
 if (this.mode === 'c2j') {
 this.input = `id,name,category,relevance,status
@@ -182,7 +200,7 @@ this.input = '';
 this.output = '';
 this.error = '';
 this.statusMessage = 'Ready';
-this.loadSample();
+if (this.$refs.fileInput) this.$refs.fileInput.value = '';
 }
 }
 {% endblock %}

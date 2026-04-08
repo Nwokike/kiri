@@ -145,7 +145,7 @@ export to cURL.
                             class="w-full min-h-[200px] p-4 form-input font-mono text-xs outline-none focus:border-kiri-green resize-y"
                             placeholder='{"key":"value" }'></textarea>
                         <p x-show="body && !isJsonValid" class="text-[10px] text-red-500 font-bold">
-                            <i class="fas fa-exclamation-triangle"></i> Invalid JSON
+                            <i class="fas fa-exclamation-triangle"></i> Invalid JSON format
                         </p>
                     </div>
                 </div>
@@ -203,7 +203,7 @@ export to cURL.
         <div class="hidden lg:block space-y-4">
             <div class="flex items-center justify-between">
                 <h3 class="text-xs font-black text-muted uppercase tracking-widest">History</h3>
-                <button @click="history = []" class="text-[10px] text-red-500 hover:underline">Clear</button>
+                <button @click="clearHistory()" class="text-[10px] text-red-500 hover:underline">Clear</button>
             </div>
             <div class="space-y-3 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
                 <template x-for="(item, idx) in history" :key="idx">
@@ -213,6 +213,7 @@ export to cURL.
                             <span class="text-[9px] font-black px-1.5 py-0.5 rounded bg-subtle" :class="{ 
                                     'text-blue-500': item.method === 'GET', 
                                     'text-green-500': item.method === 'POST', 
+                                    'text-orange-500': item.method === 'PUT' || item.method === 'PATCH',
                                     'text-red-500': item.method === 'DELETE' 
                                 }" x-text="item.method"></span>
                             <span class="text-[10px] text-muted"
@@ -237,199 +238,227 @@ export to cURL.
 
 {% block tool_js_data %}
 {
-hideUpload: true,
-method: 'GET',
-url: '',
-tab: 'params',
-resTab: 'body',
-// Data Models
-params: [{ key: '', value: '' }],
-headers: [{ key: 'Content-Type', value: 'application/json' }],
-authType: 'none',
-authToken: '',
-authUser: '',
-authPass: '',
-body: '',
-// State
-loading: false,
-responseStatus: 0,
-statusText: '',
-responseTime: 0,
-statusClass: '',
-output: '',
-responseHeaders: {},
-history: [],
+    hideUpload: true,
+    method: 'GET',
+    url: '',
+    tab: 'params',
+    resTab: 'body',
+    
+    // Data Models
+    params: [{ key: '', value: '' }],
+    headers: [{ key: 'Content-Type', value: 'application/json' }],
+    authType: 'none',
+    authToken: '',
+    authUser: '',
+    authPass: '',
+    body: '',
+    
+    // State
+    loading: false,
+    responseStatus: 0,
+    statusText: '',
+    responseTime: 0,
+    statusClass: '',
+    output: '',
+    responseHeaders: {},
+    history: [],
 
-init() {
-this.persist('api_tester_history', 'history', []);
-this.persist('api_tester_url', 'url', '');
-this.persist('api_tester_method', 'method', 'GET');
-this.persist('api_tester_params', 'params', [{ key: '', value: '' }]);
-this.persist('api_tester_headers', 'headers', [{ key: 'Content-Type', value: 'application/json' }]);
-this.persist('api_tester_authType', 'authType', 'none');
-this.persist('api_tester_body', 'body', '');
-this.hideSample = true;
-},
+    init() {
+        this.hideSample = true;
+        try {
+            const hist = localStorage.getItem('api_tester_history');
+            if (hist) this.history = JSON.parse(hist);
+        } catch(e) {}
+    },
 
-// Computed checks
-get isJsonValid() {
-try {
-if(this.body) JSON.parse(this.body);
-return true;
-} catch {
-return false;
-}
-},
+    get isJsonValid() {
+        try {
+            if(this.body) JSON.parse(this.body);
+            return true;
+        } catch {
+            return false;
+        }
+    },
 
-getCount(type) {
-if(type === 'params') return this.params.filter(p => p.key).length;
-if(type === 'headers') return this.headers.filter(h => h.key).length;
-if(type === 'auth') return this.authType !== 'none' ? 1 : 0;
-return 0;
-},
+    getCount(type) {
+        if(type === 'params') return this.params.filter(p => p.key).length;
+        if(type === 'headers') return this.headers.filter(h => h.key).length;
+        if(type === 'auth') return this.authType !== 'none' ? 1 : 0;
+        return 0;
+    },
 
-addItem() {
-if (this.tab === 'params') this.params.push({ key: '', value: '' });
-else if (this.tab === 'headers') this.headers.push({ key: '', value: '' });
-},
+    addItem() {
+        if (this.tab === 'params') this.params.push({ key: '', value: '' });
+        else if (this.tab === 'headers') this.headers.push({ key: '', value: '' });
+    },
 
-removeItem(idx) {
-if (this.tab === 'params') this.params.splice(idx, 1);
-else if (this.tab === 'headers') this.headers.splice(idx, 1);
-},
+    removeItem(idx) {
+        if (this.tab === 'params') this.params.splice(idx, 1);
+        else if (this.tab === 'headers') this.headers.splice(idx, 1);
+    },
 
-prettifyJson() {
-try {
-const obj = JSON.parse(this.body);
-this.body = JSON.stringify(obj, null, 4);
-} catch (e) { /* ignore */ }
-},
+    prettifyJson() {
+        try {
+            const obj = JSON.parse(this.body);
+            this.body = JSON.stringify(obj, null, 4);
+        } catch (e) {
+            alert("Invalid JSON format");
+        }
+    },
 
-// CURL Generator
-copyCurl() {
-let cmd = `curl -X ${this.method} "${this.buildUrl()}"`;
-// Headers
-const allHeaders = this.buildHeaders();
-for (const [key, val] of Object.entries(allHeaders)) {
-cmd += ` \\\n -H "${key}: ${val}"`;
-}
-// Body
-if (['POST', 'PUT', 'PATCH'].includes(this.method) && this.body) {
-// Escape single quotes for shell safety
-const safeBody = this.body.replace(/'/g, "'\\''");
-cmd += ` \\\n -d '${safeBody}'`;
-}
-this.copyToClipboard(cmd);
-alert('cURL command copied to clipboard!');
-},
+    copyCurl() {
+        let cmd = `curl -X ${this.method} "${this.buildUrl()}"`;
+        const allHeaders = this.buildHeaders();
+        for (const [key, val] of Object.entries(allHeaders)) {
+            cmd += ` \\\n -H "${key}: ${val}"`;
+        }
+        if (['POST', 'PUT', 'PATCH'].includes(this.method) && this.body) {
+            const safeBody = this.body.replace(/'/g, "'\\''");
+            cmd += ` \\\n -d '${safeBody}'`;
+        }
+        this.copyToClipboard(cmd);
+        alert('cURL command copied to clipboard!');
+    },
 
-buildUrl() {
-if (!this.url) return '';
-try {
-const urlObj = new URL(this.url);
-this.params.forEach(p => {
-if (p.key) urlObj.searchParams.append(p.key, p.value);
-});
-return urlObj.toString();
-} catch {
-return this.url;
-}
-},
+    buildUrl() {
+        if (!this.url) return '';
+        try {
+            const urlObj = new URL(this.url);
+            this.params.forEach(p => {
+                if (p.key) urlObj.searchParams.append(p.key, p.value);
+            });
+            return urlObj.toString();
+        } catch {
+            return this.url;
+        }
+    },
 
-buildHeaders() {
-const headersObj = {};
-this.headers.forEach(h => {
-if (h.key) headersObj[h.key] = h.value;
-});
+    buildHeaders() {
+        const headersObj = {};
+        this.headers.forEach(h => {
+            if (h.key) headersObj[h.key] = h.value;
+        });
 
-if (this.authType === 'bearer' && this.authToken) {
-headersObj['Authorization'] = `Bearer ${this.authToken}`;
-} else if (this.authType === 'basic' && (this.authUser || this.authPass)) {
-headersObj['Authorization'] = `Basic ${btoa(this.authUser + ':' + this.authPass)}`;
-}
-return headersObj;
-},
+        if (this.authType === 'bearer' && this.authToken) {
+            headersObj['Authorization'] = `Bearer ${this.authToken}`;
+        } else if (this.authType === 'basic' && (this.authUser || this.authPass)) {
+            headersObj['Authorization'] = `Basic ${btoa(this.authUser + ':' + this.authPass)}`;
+        }
+        return headersObj;
+    },
 
-addToHistory(status) {
-this.history.unshift({
-method: this.method,
-url: this.url,
-status: status,
-timestamp: Date.now(),
-params: JSON.parse(JSON.stringify(this.params)), // clone
-headers: JSON.parse(JSON.stringify(this.headers)),
-body: this.body
-});
-if (this.history.length > 20) this.history.pop();
-},
+    saveHistory() {
+        try {
+            localStorage.setItem('api_tester_history', JSON.stringify(this.history));
+        } catch(e) {}
+    },
 
-loadFromHistory(item) {
-this.method = item.method;
-this.url = item.url;
-this.params = item.params || [{key:'', value:''}];
-this.headers = item.headers || [{key:'', value:''}];
-this.body = item.body || '';
-// Scroll to top
-window.scrollTo({ top: 0, behavior: 'smooth' });
-},
+    addToHistory(status) {
+        this.history.unshift({
+            method: this.method,
+            url: this.url,
+            status: status,
+            timestamp: Date.now(),
+            params: JSON.parse(JSON.stringify(this.params)), 
+            headers: JSON.parse(JSON.stringify(this.headers)),
+            body: this.body
+        });
+        if (this.history.length > 20) this.history.pop();
+        this.saveHistory();
+    },
 
-async send() {
-if (!this.url) return;
-this.loading = true;
-this.responseStatus = 0;
-this.responseHeaders = {};
+    clearHistory() {
+        this.history = [];
+        this.saveHistory();
+    },
 
-const startTime = performance.now();
-const fullUrl = this.buildUrl();
-const headersObj = this.buildHeaders();
+    loadFromHistory(item) {
+        this.method = item.method;
+        this.url = item.url;
+        this.params = item.params || [{key:'', value:''}];
+        this.headers = item.headers || [{key:'', value:''}];
+        this.body = item.body || '';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    },
 
-const options = {
-method: this.method,
-headers: headersObj,
-mode: 'cors'
-};
+    async send() {
+        if (!this.url) return;
 
-if (['POST', 'PUT', 'PATCH'].includes(this.method) && this.body) {
-options.body = this.body;
-}
+        // Auto-fix URL prefix if missed
+        if (!this.url.startsWith('http://') && !this.url.startsWith('https://')) {
+            this.url = 'https://' + this.url;
+        }
 
-try {
-const res = await fetch(fullUrl, options);
-this.responseTime = Math.round(performance.now() - startTime);
-this.responseStatus = res.status;
-this.statusText = res.statusText;
+        this.loading = true;
+        this.responseStatus = 0;
+        this.responseHeaders = {};
 
-// Collect headers
-res.headers.forEach((val, key) => this.responseHeaders[key] = val);
+        const startTime = performance.now();
+        const fullUrl = this.buildUrl();
+        const headersObj = this.buildHeaders();
 
-// Styling status
-if (res.status < 300) { this.statusClass='bg-green-500/10 text-green-500 border-green-500/20' ; } else if (res.status <
-    400) { this.statusClass='bg-blue-500/10 text-blue-500 border-blue-500/20' ; } else if (res.status < 500) {
-    this.statusClass='bg-orange-500/10 text-orange-500 border-orange-500/20' ; } else {
-    this.statusClass='bg-red-500/10 text-red-500 border-red-500/20' ; } const
-    contentType=res.headers.get('content-type'); if (contentType && contentType.includes('application/json')) { const
-    json=await res.json(); this.output=JSON.stringify(json, null, 4); } else { this.output=await res.text(); } // Update
-    DOM for Prism this.$refs.codeBlock.textContent=this.output; this.$nextTick(()=>
-    Prism.highlightElement(this.$refs.codeBlock));
+        const options = {
+            method: this.method,
+            headers: headersObj,
+            mode: 'cors'
+        };
 
-    this.addToHistory(res.status);
-    } catch (e) {
-    this.responseStatus = 'ERR';
-    this.statusText = 'Network Error';
-    this.statusClass = 'bg-red-500 text-white border-transparent';
-    this.output = `// FAILED TO FETCH\n// ${e.message}\n\n// COMMON CAUSES:\n// 1. CORS is not enabled on the target
-    server.\n// 2. The URL is unreachable or blocked.\n// 3. Mixing HTTP/HTTPS (Mixed Content).`;
-    this.$refs.codeBlock.textContent = this.output;
-    this.$nextTick(() => Prism.highlightElement(this.$refs.codeBlock));
-    } finally {
-    this.loading = false;
+        if (['POST', 'PUT', 'PATCH'].includes(this.method) && this.body) {
+            options.body = this.body;
+        }
+
+        try {
+            const res = await fetch(fullUrl, options);
+            this.responseTime = Math.round(performance.now() - startTime);
+            this.responseStatus = res.status;
+            this.statusText = res.statusText;
+
+            res.headers.forEach((val, key) => this.responseHeaders[key] = val);
+
+            if (res.status < 300) {
+                this.statusClass = 'bg-green-500/10 text-green-500 border-green-500/20';
+            } else if (res.status < 400) {
+                this.statusClass = 'bg-blue-500/10 text-blue-500 border-blue-500/20';
+            } else if (res.status < 500) {
+                this.statusClass = 'bg-orange-500/10 text-orange-500 border-orange-500/20';
+            } else {
+                this.statusClass = 'bg-red-500/10 text-red-500 border-red-500/20';
+            }
+
+            const contentType = res.headers.get('content-type');
+            if (contentType && contentType.includes('application/json')) {
+                const json = await res.json();
+                this.output = JSON.stringify(json, null, 4);
+            } else {
+                this.output = await res.text();
+            }
+
+            if (this.$refs.codeBlock) {
+                this.$refs.codeBlock.textContent = this.output;
+                this.$nextTick(() => Prism.highlightElement(this.$refs.codeBlock));
+            }
+
+            this.addToHistory(res.status);
+
+        } catch (e) {
+            this.responseStatus = 'ERR';
+            this.statusText = 'Network Error';
+            this.statusClass = 'bg-red-500 text-white border-transparent';
+            this.output = `// FAILED TO FETCH\n// ${e.message}\n\n// COMMON CAUSES:\n// 1. CORS is not enabled on the target server.\n// 2. The URL is unreachable or blocked.\n// 3. Mixing HTTP/HTTPS (Mixed Content).`;
+            
+            if (this.$refs.codeBlock) {
+                this.$refs.codeBlock.textContent = this.output;
+                this.$nextTick(() => Prism.highlightElement(this.$refs.codeBlock));
+            }
+        } finally {
+            this.loading = false;
+        }
     }
-    }
-    }
-    {% endblock %}
+}
+{% endblock %}
 
-    {% block extra_js_tool %}
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
-    {% endblock %}
+{% block extra_js_tool %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-json.min.js"></script>
+{% endblock %}

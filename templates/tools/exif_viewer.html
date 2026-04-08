@@ -52,9 +52,10 @@ Strip sensitive data instantly before sharing. Supports JPEG images.
             data.<br> <span class="text-xs opacity-75 font-bold uppercase tracking-wide">100% Client-Side
                 Processing</span> </p>
         <button
-            class="px-8 py-3 bg-surface text-heading font-bold rounded-2xl hover:scale-105 transition-all shadow-lg">
+            class="px-8 py-3 bg-surface text-heading font-bold rounded-2xl pointer-events-none transition-all shadow-lg">
             Select Photo </button>
     </div>
+    
     <div x-show="file" x-cloak class="flex flex-col gap-6 animate-slide-up">
         <div class="card p-6 shadow-sm flex flex-col lg:flex-row items-center justify-between gap-6">
             <div class="flex items-center gap-6 w-full lg:w-auto">
@@ -87,6 +88,7 @@ Strip sensitive data instantly before sharing. Supports JPEG images.
                     <i class="fas fa-download"></i> Download Clean Image </button>
             </div>
         </div>
+        
         <div x-show="cleanedUrl"
             class="p-4 bg-green-100 dark:bg-green-900/20 border border-green-200 dark:border-green-900/30 rounded-2xl flex items-center gap-3 text-green-700 dark:text-green-400 animate-fade-in">
             <i class="fas fa-check-circle text-xl"></i>
@@ -96,6 +98,7 @@ Strip sensitive data instantly before sharing. Supports JPEG images.
                     for download.</p>
             </div>
         </div>
+        
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
             <div class="space-y-6">
                 <div class="card p-6 shadow-sm h-full flex flex-col">
@@ -139,6 +142,7 @@ Strip sensitive data instantly before sharing. Supports JPEG images.
                     </template>
                 </div>
             </div>
+            
             <div class="lg:col-span-2 card p-6 shadow-sm flex flex-col">
                 <div class="flex items-center justify-between mb-6">
                     <h4 class="font-black text-xs uppercase text-muted tracking-widest">
@@ -172,127 +176,171 @@ Strip sensitive data instantly before sharing. Supports JPEG images.
             </div>
         </div>
     </div>
+    
     <input type="file" x-ref="fileInput" class="hidden" accept="image/jpeg, image/jpg" @change="loadFile($event)">
 </div>
 {% endblock %}
 
 {% block tool_js_data %}
 {
-hideUpload: true,
-hideSample: false,
-file: null,
-previewUrl: null,
-cleanedUrl: null,
-meta: {},
-searchQuery: '',
-init() {
-this.hideUpload = true;
-this.hideSample = false;
-},
-async loadSample() {
-try {
-const response = await fetch("{% static 'images/logos/logo.png' %}");
-const blob = await response.blob();
-const file = new File([blob], 'kiri_brand_logo.png', {
-type: 'image/png'
-}); // Re-use logic from loadFile but for the direct file object
-this.resetTool();
-this.file = file;
-this.previewUrl = URL.createObjectURL(file);
-this.statusMessage = 'Analyzing brand logo...';
-const output = await exifr.parse(file, {
-tiff: true,
-exif: true,
-gps: true,
-iptc: true,
-xmp: true,
-mergeOutput: true
-});
-this.meta = output || {};
-this.statusMessage = 'Analysis complete';
-} catch (e) {
-console.error(e);
-this.statusMessage = 'Sample analysis failed';
-}
-},
-get filteredMeta() {
-const blocked = ['Thumbnail', 'MakerNote', 'UserComment', 'ICCProfile', 'ApplicationNotes'];
-const filtered = {};
-if (!this.meta) return filtered;
-Object.entries(this.meta).forEach(([k, v]) => {
-// Filter out binary data, huge objects, or blocked keys
-if (!blocked.includes(k) && typeof v !== 'object' && !(v instanceof Uint8Array)) {
-filtered[k] = v;
-} else if (v instanceof Date) {
-filtered[k] = v;
-}
-});
-return filtered;
-},
-/* --- File Handling --- */
-async loadFile(event) {
-const file = event.target.files ? .[0] || event.dataTransfer ? .files ? .[0];
-if (!file) return;
-if (!file.type.includes('jpeg') && !file.type.includes('jpg')) {
-alert('Currently only JPEG/JPG images are supported for Exif manipulation.');
-return;
-}
-this.resetTool(); // FIXED: Was incorrectly calling this.onReset()
-this.file = file;
-this.previewUrl = URL.createObjectURL(file);
-this.statusMessage = 'Analyzing metadata...';
-try {
-// Parse generic EXIF, GPS, IPTC, XMP
-const output = await exifr.parse(file, {
-tiff: true,
-exif: true,
-gps: true,
-iptc: true,
-xmp: true,
-icc: false,
-mergeOutput: true // Flatten the object
-});
-this.meta = output || {};
-this.statusMessage = 'Analysis complete';
-} catch (e) {
-console.error(e);
-this.statusMessage = 'No readable metadata found';
-this.meta = {};
-}
-},
-handleDrop(e) {
-e.target.classList.remove('border-kiri-green', 'scale-[1.01]');
-this.loadFile(e);
-},
-/* --- Actions --- */
-async removeMetadata() {
-if (!this.file) return;
-this.statusMessage = "Removing metadata...";
-const reader = new FileReader();
-reader.onload = (e) => {
-try {
-const originalDataUrl = e.target.result;
-// piexif.remove strips Exif from the DataURL string
-const cleanDataUrl = piexif.remove(originalDataUrl); // Convert Base64 back to Blob for download
-const byteString = atob(cleanDataUrl.split(',')[1]);
-const mimeString = cleanDataUrl.split(',')[0].split(':')[1].split(';')[0];
-const ab = new ArrayBuffer(byteString.length);
-const ia = new Uint8Array(ab);
-for (let i = 0; i < byteString.length; i++) { ia[i]=byteString.charCodeAt(i); } const blob=new Blob([ab], { type:
-    mimeString }); this.cleanedUrl=URL.createObjectURL(blob); this.statusMessage="Metadata removed successfully!" ; }
-    catch (err) { alert("Failed to remove metadata. Ensure the file is a standard JPEG."); console.error(err); } };
-    reader.readAsDataURL(this.file); }, downloadCleaned() { if (!this.cleanedUrl) return; const
-    a=document.createElement('a'); a.href=this.cleanedUrl; a.download='clean_' + this.file.name; a.click(); },
-    downloadJson() { if (Object.keys(this.meta).length===0) return; const dataStr="data:text/json;charset=utf-8," +
-    encodeURIComponent(JSON.stringify(this.meta, null, 2)); const a=document.createElement('a'); a.href=dataStr;
-    a.download=this.file.name + '_metadata.json' ; a.click(); }, openMap() { if (this.meta.latitude &&
-    this.meta.longitude) { // FIXED: Google Maps URL Template const
-    url=`https://www.google.com/maps?q=${this.meta.latitude},${this.meta.longitude}`; window.open(url, '_blank' ); } },
-    /* --- Formatters --- */ formatSize(bytes) { if (!bytes) return '0 B' ; const k=1024; const sizes=['B', 'KB' , 'MB'
-    , 'GB' ]; const i=Math.floor(Math.log(bytes) / Math.log(k)); return parseFloat((bytes / Math.pow(k, i)).toFixed(1))
-    + ' ' + sizes[i]; }, formatKey(key) { // camelCase to Spaced Title Case return key.replace(/([A-Z])/g, ' $1'
-    ).trim(); }, formatValue(value) { if (value instanceof Date) return value.toLocaleString(); if (typeof
-    value==='number' ) return value.toString(); return String(value); }, resetTool() { if (this.previewUrl)
-    URL.revokeObjectURL(this.previewUrl); if (this.cleanedUrl) URL.revokeObjectURL(this.cleanedUrl); this.file=null;
-    this.meta={}; this.previewUrl=null; this.cleanedUrl=null; this.searchQuery='' ; this.error='' ;
-    this.statusMessage='' ; if (this.$refs.fileInput) this.$refs.fileInput.value='' ; } } {% endblock %}
+    hideUpload: true,
+    hideSample: true, // Hidden because sample functionality was removed
+    file: null,
+    previewUrl: null,
+    cleanedUrl: null,
+    meta: {},
+    searchQuery: '',
+    
+    init() {
+        this.hideUpload = true;
+        this.hideSample = true;
+    },
+    
+    get filteredMeta() {
+        const blocked = ['Thumbnail', 'MakerNote', 'UserComment', 'ICCProfile', 'ApplicationNotes'];
+        const filtered = {};
+        if (!this.meta) return filtered;
+        Object.entries(this.meta).forEach(([k, v]) => {
+            // Filter out binary data, huge objects, or blocked keys
+            if (!blocked.includes(k) && typeof v !== 'object' && !(v instanceof Uint8Array)) {
+                filtered[k] = v;
+            } else if (v instanceof Date) {
+                filtered[k] = v;
+            }
+        });
+        return filtered;
+    },
+    
+    /* --- File Handling --- */
+    async loadFile(event) {
+        // FIXED: Optional chaining syntax repaired
+        const file = event.target.files?.[0] || event.dataTransfer?.files?.[0];
+        
+        if (!file) return;
+        if (!file.type.includes('jpeg') && !file.type.includes('jpg')) {
+            alert('Currently only JPEG/JPG images are supported for Exif manipulation.');
+            return;
+        }
+        
+        this.resetTool();
+        this.file = file;
+        this.previewUrl = URL.createObjectURL(file);
+        this.statusMessage = 'Analyzing metadata...';
+        
+        try {
+            // Parse generic EXIF, GPS, IPTC, XMP
+            const output = await exifr.parse(file, {
+                tiff: true,
+                exif: true,
+                gps: true,
+                iptc: true,
+                xmp: true,
+                icc: false,
+                mergeOutput: true // Flatten the object
+            });
+            this.meta = output || {};
+            this.statusMessage = 'Analysis complete';
+        } catch (e) {
+            console.error(e);
+            this.statusMessage = 'No readable metadata found';
+            this.meta = {};
+        }
+    },
+    
+    handleDrop(e) {
+        e.target.classList.remove('border-kiri-green', 'scale-[1.01]');
+        this.loadFile(e);
+    },
+    
+    /* --- Actions --- */
+    async removeMetadata() {
+        if (!this.file) return;
+        this.statusMessage = "Removing metadata...";
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            try {
+                const originalDataUrl = e.target.result;
+                // piexif.remove strips Exif from the DataURL string
+                const cleanDataUrl = piexif.remove(originalDataUrl); 
+                
+                // Convert Base64 back to Blob for download
+                // FIXED: Repaired badly mangled format logic
+                const byteString = atob(cleanDataUrl.split(',')[1]);
+                const mimeString = cleanDataUrl.split(',')[0].split(':')[1].split(';')[0];
+                const ab = new ArrayBuffer(byteString.length);
+                const ia = new Uint8Array(ab);
+                
+                for (let i = 0; i < byteString.length; i++) { 
+                    ia[i] = byteString.charCodeAt(i); 
+                } 
+                
+                const blob = new Blob([ab], { type: mimeString }); 
+                this.cleanedUrl = URL.createObjectURL(blob); 
+                this.statusMessage = "Metadata removed successfully!"; 
+            } catch (err) { 
+                alert("Failed to remove metadata. Ensure the file is a standard JPEG."); 
+                console.error(err); 
+            } 
+        };
+        reader.readAsDataURL(this.file); 
+    }, 
+    
+    downloadCleaned() { 
+        if (!this.cleanedUrl) return; 
+        const a = document.createElement('a'); 
+        a.href = this.cleanedUrl; 
+        a.download = 'clean_' + this.file.name; 
+        a.click(); 
+    },
+    
+    downloadJson() { 
+        if (Object.keys(this.meta).length === 0) return; 
+        const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(this.meta, null, 2)); 
+        const a = document.createElement('a'); 
+        a.href = dataStr;
+        a.download = this.file.name + '_metadata.json'; 
+        a.click(); 
+    }, 
+    
+    openMap() { 
+        if (this.meta.latitude && this.meta.longitude) { 
+            // FIXED: Standard Google Maps redirect URL formatting
+            const url = `https://www.google.com/maps?q=${this.meta.latitude},${this.meta.longitude}`; 
+            window.open(url, '_blank'); 
+        } 
+    },
+    
+    /* --- Formatters --- */ 
+    formatSize(bytes) { 
+        if (!bytes) return '0 B'; 
+        const k = 1024; 
+        const sizes = ['B', 'KB', 'MB', 'GB']; 
+        const i = Math.floor(Math.log(bytes) / Math.log(k)); 
+        return parseFloat((bytes / Math.pow(k, i)).toFixed(1)) + ' ' + sizes[i]; 
+    }, 
+    
+    formatKey(key) { 
+        // camelCase to Spaced Title Case 
+        return key.replace(/([A-Z])/g, ' $1').trim(); 
+    }, 
+    
+    formatValue(value) { 
+        if (value instanceof Date) return value.toLocaleString(); 
+        if (typeof value === 'number') return value.toString(); 
+        return String(value); 
+    }, 
+    
+    resetTool() { 
+        if (this.previewUrl) URL.revokeObjectURL(this.previewUrl); 
+        if (this.cleanedUrl) URL.revokeObjectURL(this.cleanedUrl); 
+        this.file = null;
+        this.meta = {}; 
+        this.previewUrl = null; 
+        this.cleanedUrl = null; 
+        this.searchQuery = ''; 
+        this.error = '';
+        this.statusMessage = ''; 
+        if (this.$refs.fileInput) this.$refs.fileInput.value = ''; 
+    } 
+} 
+{% endblock %}

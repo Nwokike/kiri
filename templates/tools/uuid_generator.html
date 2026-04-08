@@ -36,8 +36,7 @@ API development, or distributed systems research.
 {% endblock %}
 
 {% block tool_body %}
-<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 h-[500px]">
-    <!-- Configuration -->
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-8 lg:h-[500px]">
     <div class="space-y-6">
         <div class="p-6 bg-surface rounded-[2rem] border border-subtle">
             <h3 class="text-xs font-bold text-body uppercase tracking-widest mb-6">Generation Rules</h3>
@@ -53,22 +52,20 @@ API development, or distributed systems research.
                     class="w-full py-4 bg-kiri-green text-white font-bold rounded-2xl hover:bg-kiri-green-dark transition-all shadow-lg active:scale-95 flex items-center justify-center gap-2">
                     <i class="fas fa-magic"></i> Generate </button>
             </div>
-        </div> <!-- Quick Insight -->
-        <div class="p-6 bg-kiri-green/5 border border-kiri-green/10 rounded-[2rem] text-center">
+        </div> <div class="p-6 bg-kiri-green/5 border border-kiri-green/10 rounded-[2rem] text-center">
             <p class="text-[10px] font-bold text-kiri-green uppercase tracking-widest mb-1">Secure Generation</p>
             <p class="text-xs text-kiri-green/70 italic leading-relaxed">Generated using cryptographically secure random
                 values.</p>
         </div>
-    </div> <!-- Results Display -->
-    <div class="lg:col-span-2 flex flex-col gap-3">
-        <div class="flex items-center justify-between px-2"> <span
+    </div> <div class="lg:col-span-2 flex flex-col gap-3 h-[500px] lg:h-full min-h-0">
+        <div class="flex items-center justify-between px-2 shrink-0"> <span
                 class="text-[10px] font-bold text-body uppercase tracking-widest">Generated
                 Output</span> <button @click="copyToClipboard(uuids.join('\n'))" x-show="uuids.length"
                 class="text-[10px] font-bold text-kiri-green hover:underline uppercase flex items-center gap-1.5"> <i
                     class="fas" :class="copied ? 'fa-check' : 'fa-copy'"></i> <span
                     x-text="copied ? 'Copied All' : 'Copy All'"></span> </button> </div>
-        <div class="flex-1 rounded-[2rem] bg-surface border border-subtle overflow-hidden flex flex-col">
-            <div class="flex-1 overflow-auto p-8 custom-scrollbar bg-dots-grid">
+        <div class="flex-1 rounded-[2rem] bg-surface border border-subtle overflow-hidden flex flex-col min-h-0">
+            <div class="flex-1 overflow-y-auto p-8 custom-scrollbar bg-dots-grid">
                 <template x-for="(uuid, i) in uuids" :key="i">
                     <div class="flex items-center gap-4 py-2 group"> <span class="text-[9px] font-bold text-muted w-6"
                             x-text="i+1"></span> <span class="font-mono text-sm text-heading flex-1 break-all"
@@ -88,38 +85,61 @@ API development, or distributed systems research.
 
 {% block tool_js_data %}
 {
-hideUpload: true,
-count: 10,
-uppercase: false,
-noHyphens: false,
-uuids: [],
-loadSample() {
-this.generate();
-},
-generate() {
-const results = [];
-const limit = Math.max(1, Math.min(this.count, 100));
-for (let i = 0; i < limit; i++) { let uuid=crypto.randomUUID(); if (this.noHyphens) uuid=uuid.replace(/-/g, '' ); if
-    (this.uppercase) uuid=uuid.toUpperCase(); results.push(uuid); } this.uuids=results;
-    this.statusMessage=`${results.length} UUIDs generated`; }, download() { if (!this.uuids.length) return;
-    this.downloadFile(this.uuids.join('\n'), 'kiri_uuids.txt' , 'text/plain' ); }, onReset() { this.uuids=[];
-    this.statusMessage='Ready' ; } } {% endblock %} {% block extra_js_tool %} <style>
+    hideUpload: true,
+    count: 10,
+    uppercase: false,
+    noHyphens: false,
+    uuids: [],
+    
+    loadSample() {
+        this.generate();
+    },
+    
+    generate() {
+        const results = [];
+        const limit = Math.max(1, Math.min(this.count, 100));
+        
+        for (let i = 0; i < limit; i++) { 
+            let uuid = crypto.randomUUID(); 
+            if (this.noHyphens) uuid = uuid.replace(/-/g, ''); 
+            if (this.uppercase) uuid = uuid.toUpperCase(); 
+            results.push(uuid); 
+        } 
+        
+        this.uuids = results;
+        this.statusMessage = `${results.length} UUIDs generated`; 
+    }, 
+    
+    download() { 
+        if (!this.uuids.length) return;
+        this.downloadFile(this.uuids.join('\n'), 'kiri_uuids.txt' , 'text/plain'); 
+    }, 
+    
+    onReset() { 
+        this.uuids = [];
+        this.statusMessage = 'Ready'; 
+    } 
+} 
+{% endblock %} 
+
+{% block extra_js_tool %} 
+<style>
     .bg-dots-grid {
-    background-image: radial-gradient(#DEE2E6 1px, transparent 1px);
-    background-size: 20px 20px;
+        background-image: radial-gradient(#DEE2E6 1px, transparent 1px);
+        background-size: 20px 20px;
     }
 
     .dark .bg-dots-grid {
-    background-image: radial-gradient(#2D2D2D 1px, transparent 1px);
+        background-image: radial-gradient(#2D2D2D 1px, transparent 1px);
     }
 
     .custom-scrollbar::-webkit-scrollbar {
-    width: 4px;
+        width: 4px;
     }
 
     .custom-scrollbar::-webkit-scrollbar-thumb {
-    background-color: var(--color-subtle);
-    border-radius: 9999px;
+        background-color: var(--color-subtle);
+        border-radius: 9999px;
     }
-    </style>
-    {% endblock %}
+</style>
+{% endblock %}

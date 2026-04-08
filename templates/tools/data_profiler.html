@@ -19,7 +19,6 @@ Analyze distributions and data quality instantly on your local hardware.
 
 {% block tool_body %}
 <div class="space-y-8">
-    <!-- View Switcher -->
     <template x-if="!data">
         <div class="h-96 border-2 border-dashed border-subtle rounded-[3rem] flex flex-col items-center justify-center gap-6 bg-subtle backdrop-blur-md hover:bg-surface dark:hover:bg-surface hover:border-kiri-green transition-all cursor-pointer group"
             @click="$refs.fileInput.click()">
@@ -36,10 +35,8 @@ Analyze distributions and data quality instantly on your local hardware.
                 class="text-[10px] font-black text-kiri-green uppercase hover:underline">Or Load Calibration
                 Sample</button>
         </div>
-    </template> <!-- Dashboard -->
-    <template x-if="data">
+    </template> <template x-if="data">
         <div class="space-y-8 animate-fade-in">
-            <!-- Header Info -->
             <div class="flex items-center justify-between p-6 card shadow-sm">
                 <div class="flex items-center gap-2">
                     <button @click="onReset()"
@@ -61,7 +58,6 @@ Analyze distributions and data quality instantly on your local hardware.
                 </div>
             </div>
             <div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
-                <!-- Column Navigation -->
                 <div
                     class="lg:col-span-1 flex flex-row lg:flex-col gap-2 max-h-[600px] overflow-x-auto lg:overflow-y-auto pb-4 lg:pb-0 pr-2 custom-scrollbar">
                     <span
@@ -75,7 +71,6 @@ Analyze distributions and data quality instantly on your local hardware.
                                 :class="columnStats[col]?.missing > 0 ? 'bg-orange-400' : 'bg-kiri-green'"></div>
                         </button> </template>
                 </div>
-                <!-- Analysis Panel -->
                 <div class="lg:col-span-3 space-y-6 overflow-hidden">
                     <div class="p-10 bg-surface rounded-[3rem] border border-subtle shadow-sm">
                         <div class="flex justify-between items-center mb-10">
@@ -86,8 +81,7 @@ Analyze distributions and data quality instantly on your local hardware.
                             <div class="px-3 py-1 bg-kiri-green/10 rounded-lg"> <span
                                     class="text-[9px] font-black text-kiri-green uppercase"
                                     x-text="columnStats[selectedCol]?.type || 'GENERIC'"></span> </div>
-                        </div> <!-- Mini Stats Grid -->
-                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+                        </div> <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
                             <div class="p-6 bg-subtle/50 rounded-2xl border border-subtle">
                                 <p class="text-[9px] font-black text-muted uppercase tracking-tighter mb-2"> Uniqueness
                                 </p>
@@ -113,8 +107,7 @@ Analyze distributions and data quality instantly on your local hardware.
                                 <p class="text-xl font-black text-heading"
                                     x-text="columnStats[selectedCol]?.max || '-'"></p>
                             </div>
-                        </div> <!-- Distribution Chart -->
-                        <div class="space-y-6">
+                        </div> <div class="space-y-6">
                             <h4 class="text-[10px] font-black text-body uppercase tracking-[0.2em] ml-2"> Frequency
                                 Distribution</h4>
                             <div class="space-y-4">
@@ -247,7 +240,10 @@ this.statusMessage = 'Profile generated';
 onReset() {
 this.file = null;
 this.data = null;
-this.stats = null;
+this.stats = {
+rowCount: 0,
+colCount: 0
+};
 this.statusMessage = 'Ready';
 this.error = '';
 if (this.$refs.fileInput) this.$refs.fileInput.value = '';

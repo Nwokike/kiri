@@ -52,11 +52,12 @@ Features visual page selection, range inputs (e.g., "1-10"), and bulk ZIP export
                 class="text-xs opacity-75 font-bold uppercase tracking-wide">Processed locally. No file limits.</span>
         </p>
         <button
-            class="px-8 py-3 bg-surface text-heading font-bold rounded-2xl hover:scale-105 transition-all shadow-lg">
+            class="px-8 py-3 bg-surface text-heading font-bold rounded-2xl pointer-events-none transition-all shadow-lg">
             Select PDF </button>
     </div>
+    
     <div x-show="pdfDoc" x-cloak class="flex flex-col h-full gap-6 animate-slide-up">
-        <div class="sticky top-4 z-30 card p-4 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4">
+        <div class="sticky top-4 z-30 card p-4 shadow-xl flex flex-col md:flex-row items-center justify-between gap-4 bg-surface rounded-2xl border border-subtle">
             <div class="flex items-center gap-2 overflow-x-auto w-full md:w-auto no-scrollbar pb-2 md:pb-0">
                 <button @click="resetTool()"
                     class="w-10 h-10 flex items-center justify-center rounded-xl bg-subtle hover:text-red-500 transition-colors shrink-0">
@@ -71,15 +72,14 @@ Features visual page selection, range inputs (e.g., "1-10"), and bulk ZIP export
                     None </button>
                 <div class="relative group">
                     <input type="text" x-model="rangeInput" @keydown.enter="applyRange()" placeholder="e.g. 1-5, 8"
-                        class="w-32 px-3 py-2 form-input text-xs font-mono outline-none focus:border-kiri-green transition-all">
+                        class="w-32 px-3 py-2 form-input text-xs font-mono outline-none focus:border-kiri-green transition-all bg-subtle rounded-lg">
                     <button @click="applyRange()"
                         class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-kiri-green hover:underline">
                         APPLY </button>
                 </div>
             </div>
             <div class="flex items-center gap-3 w-full md:w-auto">
-                <div
-                    class="flex items-center gap-2 px-3 py-2 bg-surface rounded-xl border border-subtle flex-1 md:flex-none">
+                <div class="flex items-center gap-2 px-3 py-2 bg-subtle rounded-xl border border-subtle flex-1 md:flex-none">
                     <span class="text-[10px] font-bold text-muted uppercase">Action</span>
                     <select x-model="mode"
                         class="bg-transparent text-xs font-bold text-heading outline-none cursor-pointer">
@@ -89,13 +89,17 @@ Features visual page selection, range inputs (e.g., "1-10"), and bulk ZIP export
                 </div>
                 <button @click="processSplit()" :disabled="loading || selectedPages.length === 0"
                     class="px-6 py-3 bg-kiri-green hover:bg-kiri-green-dark text-white rounded-xl text-xs font-bold shadow-lg transition-all active:scale-95 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed min-w-[140px] justify-center">
-                    <template x-if="!loading"> <span class="flex items-center gap-2"> <i class="fas"
-                                :class="mode === 'merge' ? 'fa-file-export' : 'fa-box-open'"></i> <span
-                                x-text="mode === 'merge' ? 'Extract' : 'Split'"></span> <span
-                                class="bg-surface/20 px-1.5 py-0.5 rounded text-[10px]"
-                                x-text="selectedPages.length"></span> </span> </template>
-                    <template x-if="loading"> <span><i class="fas fa-circle-notch fa-spin mr-2"></i> Working...</span>
-                    </template> </button>
+                    <template x-if="!loading"> 
+                        <span class="flex items-center gap-2"> 
+                            <i class="fas" :class="mode === 'merge' ? 'fa-file-export' : 'fa-box-open'"></i> 
+                            <span x-text="mode === 'merge' ? 'Extract' : 'Split'"></span> 
+                            <span class="bg-surface/20 px-1.5 py-0.5 rounded text-[10px]" x-text="selectedPages.length"></span> 
+                        </span> 
+                    </template>
+                    <template x-if="loading"> 
+                        <span><i class="fas fa-circle-notch fa-spin mr-2"></i> Working...</span>
+                    </template> 
+                </button>
             </div>
         </div>
         <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4 pb-12">
@@ -127,148 +131,209 @@ Features visual page selection, range inputs (e.g., "1-10"), and bulk ZIP export
 
 {% block tool_js_data %}
 {
-hideUpload: true,
-hideSample: true, // State
-pdfDoc: null,
-pdfBytes: null,
-fileName: '',
-pages: [],
-selectedPages: [],
-loading: false,
-mode: 'merge',
-rangeInput: '',
-init() {
-// Inherits from base
-},
-/* --- Loading Logic --- */
-async loadPdf(event) {
-const file = event.target.files ? .[0] || event.dataTransfer ? .files ? .[0];
-if (!file || file.type !== 'application/pdf') {
-alert("Please select a valid PDF file.");
-return;
-}
-this.loading = true;
-this.statusMessage = "Reading PDF...";
-this.fileName = file.name;
-try {
-this.pdfBytes = await file.arrayBuffer(); // Load document using PDF.js
-const loadingTask = pdfjsLib.getDocument(this.pdfBytes.slice(0));
-this._pdfDoc = await loadingTask.promise; // Initialize page state
-this.pages = Array.from({
-length: this._pdfDoc.numPages
-}, (_, i) => ({
-num: i + 1,
-rendered: false
-}));
-this.pdfDoc = true;
-this.selectedPages = []; // Start rendering thumbnails
-this.$nextTick(() => this.renderThumbnails());
-this.statusMessage = `${this._pdfDoc.numPages} pages loaded`;
-} catch (err) {
-console.error(err);
-this.error = "Failed to load PDF. It might be password protected.";
-} finally {
-this.loading = false;
-}
-},
-handleDrop(e) {
-e.target.classList.remove('border-kiri-green', 'scale-[1.01]');
-this.loadPdf(e);
-},
-/* --- Rendering Logic --- */
-async renderThumbnails() {
-// Process pages sequentially to avoid freezing UI
-for (const page of this.pages) {
-if (page.rendered) continue;
-try {
-// Alpine proxies objects, we need the raw PDF object
-const pdfPage = await Alpine.raw(this._pdfDoc).getPage(page.num); // Calculate scale to fit thumbnail (width ~200px)
-const desiredWidth = 200;
-const viewport = pdfPage.getViewport({
-scale: 1
-});
-const scale = desiredWidth / viewport.width;
-const scaledViewport = pdfPage.getViewport({
-scale
-});
-const canvas = document.createElement('canvas');
-const context = canvas.getContext('2d');
-canvas.height = scaledViewport.height;
-canvas.width = scaledViewport.width;
-canvas.style.width = '100%';
-canvas.style.height = '100%';
-canvas.style.objectFit = 'contain';
-await pdfPage.render({
-canvasContext: context,
-viewport: scaledViewport
-}).promise;
-const container = document.getElementById(`page-thumb-${page.num}`);
-if (container) {
-container.innerHTML = '';
-container.appendChild(canvas);
-page.rendered = true;
-}
-} catch (e) {
-console.warn(`Error rendering page ${page.num}`, e);
-}
-}
-},
-/* --- Selection Logic --- */
-toggleSelection(pageNum) {
-if (this.selectedPages.includes(pageNum)) {
-this.selectedPages = this.selectedPages.filter(p => p !== pageNum);
-} else {
-this.selectedPages = [...this.selectedPages, pageNum].sort((a, b) => a - b);
-}
-},
-selectAll() {
-this.selectedPages = this.pages.map(p => p.num);
-},
-applyRange() {
-if (!this.rangeInput) return;
-const newSelection = new Set(this.selectedPages);
-const parts = this.rangeInput.split(',');
-parts.forEach(part => {
-const range = part.trim().split('-');
-if (range.length === 2) {
-const start = parseInt(range[0]);
-const end = parseInt(range[1]);
-if (!isNaN(start) && !isNaN(end)) {
-for (let i = Math.min(start, end); i <= Math.max(start, end); i++) { if (i> 0 && i <= this.pages.length)
-        newSelection.add(i); } } } else { const num=parseInt(part); if (!isNaN(num) && num> 0 && num <=
-            this.pages.length) { newSelection.add(num); } } }); this.selectedPages=Array.from(newSelection).sort((a,
-            b)=> a - b);
-            this.rangeInput = ''; // Clear input feedback
-            },
-            /* --- Processing Logic --- */
-            async processSplit() {
-            if (this.selectedPages.length === 0) return;
-            this.loading = true;
-            this.statusMessage = "Processing document...";
+    hideUpload: true,
+    hideSample: true,
+    pdfDoc: null,
+    _pdfDoc: null,
+    pdfBytes: null,
+    fileName: '',
+    pages: [],
+    selectedPages: [],
+    loading: false,
+    mode: 'merge',
+    rangeInput: '',
+    
+    init() {
+        // Init logic
+    },
+    
+    /* --- Loading Logic --- */
+    async loadPdf(event) {
+        // FIXED: Replaced bad optional chaining syntax ? .[0]
+        const file = event.target.files?.[0] || event.dataTransfer?.files?.[0];
+        
+        if (!file || file.type !== 'application/pdf') {
+            alert("Please select a valid PDF file.");
+            return;
+        }
+        
+        this.loading = true;
+        this.statusMessage = "Reading PDF...";
+        this.fileName = file.name;
+        
+        try {
+            this.pdfBytes = await file.arrayBuffer(); 
+            const loadingTask = pdfjsLib.getDocument(this.pdfBytes.slice(0));
+            this._pdfDoc = await loadingTask.promise; 
+            
+            this.pages = Array.from({ length: this._pdfDoc.numPages }, (_, i) => ({
+                num: i + 1,
+                rendered: false
+            }));
+            
+            this.pdfDoc = true;
+            this.selectedPages = []; 
+            this.$nextTick(() => this.renderThumbnails());
+            this.statusMessage = `${this._pdfDoc.numPages} pages loaded`;
+        } catch (err) {
+            console.error(err);
+            this.error = "Failed to load PDF. It might be password protected.";
+        } finally {
+            this.loading = false;
+        }
+    },
+    
+    handleDrop(e) {
+        e.target.classList.remove('border-kiri-green', 'scale-[1.01]');
+        this.loadPdf(e);
+    },
+    
+    /* --- Rendering Logic --- */
+    async renderThumbnails() {
+        for (const page of this.pages) {
+            if (page.rendered) continue;
             try {
-            const {
-            PDFDocument
-            } = PDFLib;
+                const pdfPage = await Alpine.raw(this._pdfDoc).getPage(page.num); 
+                const desiredWidth = 200;
+                const viewport = pdfPage.getViewport({ scale: 1 });
+                const scale = desiredWidth / viewport.width;
+                const scaledViewport = pdfPage.getViewport({ scale });
+                const canvas = document.createElement('canvas');
+                const context = canvas.getContext('2d');
+                canvas.height = scaledViewport.height;
+                canvas.width = scaledViewport.width;
+                canvas.style.width = '100%';
+                canvas.style.height = '100%';
+                canvas.style.objectFit = 'contain';
+                
+                await pdfPage.render({
+                    canvasContext: context,
+                    viewport: scaledViewport
+                }).promise;
+                
+                const container = document.getElementById(`page-thumb-${page.num}`);
+                if (container) {
+                    container.innerHTML = '';
+                    container.appendChild(canvas);
+                    page.rendered = true;
+                }
+            } catch (e) {
+                console.warn(`Error rendering page ${page.num}`, e);
+            }
+        }
+    },
+    
+    /* --- Selection Logic --- */
+    toggleSelection(pageNum) {
+        if (this.selectedPages.includes(pageNum)) {
+            this.selectedPages = this.selectedPages.filter(p => p !== pageNum);
+        } else {
+            this.selectedPages = [...this.selectedPages, pageNum].sort((a, b) => a - b);
+        }
+    },
+    
+    selectAll() {
+        this.selectedPages = this.pages.map(p => p.num);
+    },
+    
+    applyRange() {
+        if (!this.rangeInput) return;
+        const newSelection = new Set(this.selectedPages);
+        const parts = this.rangeInput.split(',');
+        
+        // FIXED: De-mangled formatter syntax to properly parse loops and conditions
+        parts.forEach(part => {
+            const range = part.trim().split('-');
+            if (range.length === 2) {
+                const start = parseInt(range[0]);
+                const end = parseInt(range[1]);
+                if (!isNaN(start) && !isNaN(end)) {
+                    const min = Math.min(start, end);
+                    const max = Math.max(start, end);
+                    for (let i = min; i <= max; i++) { 
+                        if (i > 0 && i <= this.pages.length) {
+                            newSelection.add(i);
+                        }
+                    } 
+                } 
+            } else { 
+                const num = parseInt(part); 
+                if (!isNaN(num) && num > 0 && num <= this.pages.length) { 
+                    newSelection.add(num); 
+                } 
+            } 
+        }); 
+        
+        this.selectedPages = Array.from(newSelection).sort((a, b) => a - b);
+        this.rangeInput = ''; 
+    },
+    
+    /* --- Processing Logic --- */
+    async processSplit() {
+        if (this.selectedPages.length === 0) return;
+        this.loading = true;
+        this.statusMessage = "Processing document...";
+        
+        try {
+            const { PDFDocument } = PDFLib;
             const srcDoc = await PDFDocument.load(this.pdfBytes);
-            const indices = this.selectedPages.map(p => p - 1); // PDF-lib uses 0-based index
-            if (this.mode === 'merge') { // Create one PDF with selected pages
-            const newDoc = await PDFDocument.create();
-            const copiedPages = await newDoc.copyPages(srcDoc, indices);
-            copiedPages.forEach(page => newDoc.addPage(page));
-            const pdfBytes = await newDoc.save();
-            const blob = new Blob([pdfBytes], {
-            type: 'application/pdf'
-            });
-            this.downloadFile(blob, `extracted_${this.fileName}`, 'application/pdf');
-            this.statusMessage = "Extraction Complete";
-            } else { // Split into separate files (ZIP)
-            const zip = new JSZip();
-            for (let i = 0; i < indices.length; i++) { const idx=indices[i]; const pageNum=this.selectedPages[i]; const
-                singleDoc=await PDFDocument.create(); const [copiedPage]=await singleDoc.copyPages(srcDoc, [idx]);
-                singleDoc.addPage(copiedPage); const bytes=await singleDoc.save();
-                zip.file(`page_${pageNum}_${this.fileName}`, bytes); } const content=await zip.generateAsync({
-                type: "blob" }); this.downloadFile(content, `split_pages_${Date.now()}.zip`, "application/zip" );
-                this.statusMessage="ZIP Archive Created" ; } } catch (err) { console.error(err);
-                this.error="Processing failed:" + err.message; } finally { this.loading=false; } }, resetTool() {
-                this.pdfDoc=null; this.pdfBytes=null; this.pages=[]; this.selectedPages=[]; if (this.$refs.fileInput)
-                this.$refs.fileInput.value='' ; } } {% endblock %}
+            const indices = this.selectedPages.map(p => p - 1); 
+            
+            if (this.mode === 'merge') { 
+                // Create one PDF with selected pages
+                const newDoc = await PDFDocument.create();
+                const copiedPages = await newDoc.copyPages(srcDoc, indices);
+                copiedPages.forEach(page => newDoc.addPage(page));
+                const pdfBytes = await newDoc.save();
+                const blob = new Blob([pdfBytes], { type: 'application/pdf' });
+                
+                this.downloadLocalBlob(blob, `extracted_${this.fileName}`);
+                this.statusMessage = "Extraction Complete";
+            } else { 
+                // Split into separate files (ZIP)
+                const zip = new JSZip();
+                // FIXED: Repaired mangled ZIP loop
+                for (let i = 0; i < indices.length; i++) { 
+                    const idx = indices[i]; 
+                    const pageNum = this.selectedPages[i]; 
+                    const singleDoc = await PDFDocument.create(); 
+                    const [copiedPage] = await singleDoc.copyPages(srcDoc, [idx]);
+                    singleDoc.addPage(copiedPage); 
+                    const bytes = await singleDoc.save();
+                    zip.file(`page_${pageNum}_${this.fileName}`, bytes); 
+                } 
+                
+                const content = await zip.generateAsync({ type: "blob" }); 
+                this.downloadLocalBlob(content, `split_pages_${Date.now()}.zip`);
+                this.statusMessage = "ZIP Archive Created"; 
+            } 
+        } catch (err) { 
+            console.error(err);
+            this.error = "Processing failed: " + err.message; 
+        } finally { 
+            this.loading = false; 
+        } 
+    }, 
+    
+    // Custom internal blob downloader to prevent generic base_tool.js errors
+    downloadLocalBlob(blob, filename) {
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        URL.revokeObjectURL(url);
+    },
+
+    resetTool() {
+        this.pdfDoc = null; 
+        this._pdfDoc = null;
+        this.pdfBytes = null; 
+        this.pages = []; 
+        this.selectedPages = []; 
+        if (this.$refs.fileInput) this.$refs.fileInput.value = ''; 
+    } 
+} 
+{% endblock %}

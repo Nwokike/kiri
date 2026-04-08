@@ -69,7 +69,8 @@ Supports complex nesting and multi-document YAML locally in your browser.
             </div>
             <div class="flex-1 rounded-[1.5rem] bg-surface border border-subtle relative overflow-hidden group">
                 <div class="w-full h-full p-6 overflow-auto custom-scrollbar">
-                    <pre><code :class="'language-' + (mode === 'y2j' ? 'json' : 'yaml')" x-text="output"></code></pre>
+                    <div x-show="error" class="p-4 mb-4 text-xs font-mono text-red-500 bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-xl break-words" x-text="error"></div>
+                    <pre x-show="!error"><code :class="'language-' + (mode === 'y2j' ? 'json' : 'yaml')" x-text="output"></code></pre>
                 </div>
             </div>
         </div>
@@ -79,78 +80,99 @@ Supports complex nesting and multi-document YAML locally in your browser.
 
 {% block tool_js_data %}
 {
-hideUpload: true,
-init() {
-// Initialization
-},
-mode: 'y2j',
-loadSample() {
-if (this.mode === 'y2j') {
-this.input = `version: "3.9"
-services:
-web:
-image: nginx:latest
-ports:
-- "80:80"
-db:
-image: postgres:15
-environment:
-POSTGRES_DB: sample_db
-resources:
-limits:
-memory: 512M`;
-} else {
-this.input = JSON.stringify({
-app: "Sample Application",
-version: "1.0.0",
-modules: ["API", "Frontend", "Database"],
-config: {
-cache: "memory",
-timeout: 3000
-}
-}, null, 4);
-}
-this.convert();
-},
-convert() {
-if (!this.input || !this.input.trim()) {
-this.output = '';
-this.error = '';
-return;
-}
-try {
-if (this.mode === 'y2j') {
-const parsed = jsyaml.load(this.input);
-this.output = JSON.stringify(parsed, null, 4);
-this.statusMessage = 'YAML converted to JSON';
-} else {
-const parsed = JSON.parse(this.input);
-this.output = jsyaml.dump(parsed);
-this.statusMessage = 'JSON converted to YAML';
-}
-this.error = ''; // Wait for DOM update then highlight
-this.$nextTick(() => {
-if (window.Prism) {
-Prism.highlightAll();
-}
-});
-} catch (e) {
-this.error = (this.mode === 'y2j' ? "YAML" : "JSON") + " Parsing error: " + e.message;
-this.output = '';
-this.statusMessage = 'Conversion failed';
-}
-},
-download() {
-if (!this.output || this.error) return;
-const ext = this.mode === 'y2j' ? 'json' : 'yaml';
-const mime = this.mode === 'y2j' ? 'application/json' : 'application/x-yaml';
-this.downloadFile(this.output, `kiri_config.${ext}`, mime);
-},
-onReset() {
-this.input = '';
-this.output = '';
-this.statusMessage = 'Ready';
-}
+    hideUpload: false,
+    mode: 'y2j',
+    input: '',
+    output: '',
+    error: '',
+    
+    init() {
+        // Initialization
+    },
+
+    handleFile(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        // Auto-switch modes based on file extension
+        if (file.name.endsWith('.json') || file.type === 'application/json') {
+            this.mode = 'j2y';
+        } else if (file.name.endsWith('.yaml') || file.name.endsWith('.yml')) {
+            this.mode = 'y2j';
+        }
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            this.input = event.target.result;
+            this.convert();
+            this.statusMessage = 'File loaded successfully';
+        };
+        reader.readAsText(file);
+    },
+    
+    loadSample() {
+        if (this.mode === 'y2j') {
+            // Hardcoded explicitly with spaces and newlines to prevent formatters from breaking YAML indentation
+            this.input = "version: \"3.9\"\nservices:\n  web:\n    image: nginx:latest\n    ports:\n      - \"80:80\"\n  db:\n    image: postgres:15\n    environment:\n      POSTGRES_DB: sample_db\n    resources:\n      limits:\n        memory: 512M";
+        } else {
+            this.input = JSON.stringify({
+                app: "Sample Application",
+                version: "1.0.0",
+                modules: ["API", "Frontend", "Database"],
+                config: {
+                    cache: "memory",
+                    timeout: 3000
+                }
+            }, null, 4);
+        }
+        this.convert();
+    },
+    
+    convert() {
+        if (!this.input || !this.input.trim()) {
+            this.output = '';
+            this.error = '';
+            return;
+        }
+        try {
+            if (this.mode === 'y2j') {
+                const parsed = jsyaml.load(this.input);
+                this.output = JSON.stringify(parsed, null, 4);
+                this.statusMessage = 'YAML converted to JSON';
+            } else {
+                const parsed = JSON.parse(this.input);
+                this.output = jsyaml.dump(parsed);
+                this.statusMessage = 'JSON converted to YAML';
+            }
+            this.error = ''; 
+            
+            // Wait for DOM update then highlight
+            this.$nextTick(() => {
+                if (window.Prism) {
+                    Prism.highlightAll();
+                }
+            });
+        } catch (e) {
+            this.error = (this.mode === 'y2j' ? "YAML" : "JSON") + " Parsing error: \n" + e.message;
+            this.output = '';
+            this.statusMessage = 'Conversion failed';
+        }
+    },
+    
+    download() {
+        if (!this.output || this.error) return;
+        const ext = this.mode === 'y2j' ? 'json' : 'yaml';
+        const mime = this.mode === 'y2j' ? 'application/json' : 'application/x-yaml';
+        this.downloadFile(this.output, `kiri_config.${ext}`, mime);
+    },
+    
+    onReset() {
+        this.input = '';
+        this.output = '';
+        this.error = '';
+        this.statusMessage = 'Ready';
+        if (this.$refs.fileInput) this.$refs.fileInput.value = '';
+    }
 }
 {% endblock %}
 

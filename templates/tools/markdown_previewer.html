@@ -13,7 +13,39 @@ Draft and visualize documentation with GitHub Flavored Markdown (GFM) support an
 
 {% block tool_description %}
 Draft and visualize your documentation with our Markdown engine.
-Supports GitHub Flavored Markdown (GFM) and syntax highlighting.
+Uses the authentic GitHub rendering style.
+{% endblock %}
+
+{% block tool_accept %}.md,.markdown,.txt{% endblock %}
+
+{% block tool_head %}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.0/github-markdown-light.min.css">
+<style>
+    .markdown-body {
+        box-sizing: border-box;
+        min-width: 200px;
+        max-width: 980px;
+        margin: 0 auto;
+        padding: 30px;
+        background-color: transparent !important;
+    }
+    
+    @media (max-width: 767px) {
+        .markdown-body {
+            padding: 15px;
+        }
+    }
+
+    /* Custom Scrollbar */
+    .custom-scrollbar::-webkit-scrollbar {
+        width: 6px;
+        height: 6px;
+    }
+    .custom-scrollbar::-webkit-scrollbar-thumb {
+        background-color: var(--color-subtle);
+        border-radius: 9999px;
+    }
+</style>
 {% endblock %}
 
 {% block tool_actions_right %}
@@ -26,32 +58,35 @@ Supports GitHub Flavored Markdown (GFM) and syntax highlighting.
 
 {% block tool_body %}
 <div class="space-y-6">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 h-[600px]">
-        <!-- Editor -->
-        <div class="flex flex-col gap-3">
-            <div class="flex items-center justify-between">
+    <div class="flex flex-col lg:grid lg:grid-cols-2 gap-8 h-[800px] lg:h-[600px]">
+        
+        <div class="flex flex-col gap-3 h-full min-h-0">
+            <div class="flex items-center justify-between shrink-0">
                 <span class="text-[10px] font-bold text-body uppercase tracking-widest flex items-center gap-2">
-                    <i class="fab fa-markdown text-blue-500"></i> Markdown Source </span>
-                <span class="text-[10px] text-muted" x-text="input.length ? input.length + ' chars' : ''"></span>
+                    <i class="fab fa-markdown text-blue-500"></i> Markdown Source 
+                </span>
+                <span class="text-[10px] text-muted font-mono bg-subtle px-2 py-0.5 rounded" x-text="input.length ? input.length + ' chars' : '0 chars'"></span>
             </div>
             <textarea x-model="input" @input="convert()"
-                class="flex-1 w-full p-6 font-mono text-sm border border-subtle rounded-[2rem] bg-surface text-heading resize-none shadow-inner outline-none focus:border-kiri-green transition-all"
-                placeholder="Type your markdown here..."></textarea>
-        </div> <!-- Preview -->
-        <div class="flex flex-col gap-3">
-            <div class="flex items-center justify-between">
+                class="flex-1 w-full p-6 font-mono text-[13px] border border-subtle rounded-[2rem] bg-surface text-heading resize-none shadow-inner outline-none focus:border-kiri-green transition-all min-h-0 overflow-y-auto custom-scrollbar"
+                placeholder="Type or paste your markdown here..."></textarea>
+        </div> 
+
+        <div class="flex flex-col gap-3 h-full min-h-0">
+            <div class="flex items-center justify-between shrink-0">
                 <span class="text-[10px] font-bold text-body uppercase tracking-widest flex items-center gap-2">
-                    <i class="fas fa-eye text-kiri-green"></i> Live Preview </span>
+                    <i class="fas fa-eye text-kiri-green"></i> Live Preview 
+                </span>
                 <button @click="copyToClipboard(rendered)" x-show="rendered"
                     class="text-[10px] font-bold text-kiri-green hover:underline uppercase flex items-center gap-1.5">
-                    <i class="fas" :class="copied ? 'fa-check' : 'fa-copy'"></i> <span
-                        x-text="copied ? 'Copied HTML' : 'Copy HTML'"></span>
+                    <i class="fas" :class="copied ? 'fa-check' : 'fa-copy'"></i> 
+                    <span x-text="copied ? 'Copied HTML' : 'Copy HTML'"></span>
                 </button>
             </div>
-            <div class="flex-1 rounded-[2rem] bg-surface border border-subtle relative overflow-hidden shadow-sm">
-                <div id="markdown-output"
-                    class="prose dark:prose-invert max-w-none w-full h-full overflow-auto p-10 custom-scrollbar"
-                    x-html="rendered"> </div>
+            <div class="flex-1 rounded-[2rem] bg-surface border border-subtle relative overflow-hidden shadow-sm min-h-0">
+                <div class="absolute inset-0 overflow-y-auto custom-scrollbar bg-surface">
+                    <div id="markdown-output" class="markdown-body" x-html="rendered"></div>
+                </div>
             </div>
         </div>
     </div>
@@ -60,109 +95,122 @@ Supports GitHub Flavored Markdown (GFM) and syntax highlighting.
 
 {% block tool_js_data %}
 {
-rendered: '',
-init() {
-this.hideUpload = true;
-this.hideSample = false;
-this.convert();
-},
-loadSample() {
-this.input = `# Project Documentation
+    hideUpload: false,
+    input: '',
+    rendered: '',
+    
+    init() {
+        this.hideSample = false;
+        marked.setOptions({
+            gfm: true,
+            breaks: true,
+            headerIds: true
+        });
+        this.convert();
+    },
+
+    handleFile(e) {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        reader.onload = (event) => {
+            this.input = event.target.result;
+            this.convert();
+            this.statusMessage = 'Markdown file loaded successfully';
+        };
+        reader.readAsText(file);
+    },
+
+    loadSample() {
+        this.input = `# Kiri Labs Documentation
 This is a sample of **Markdown** rendering. All processing happens locally in your browser.
 
-## Features
-1. **Formatting**: Bold, italics, and lists.
-2. **Code**: Syntax highlighting support.
-3. **Tables**: Easy data organization.
+## Code Syntax Example
 
-### Code Example
 \`\`\`javascript
-function greet(name) {
-console.log("Hello, " + name);
+function calculateHash(data) {
+  console.log("Generating secure hash for:", data);
+  return crypto.subtle.digest('SHA-256', new TextEncoder().encode(data));
 }
 \`\`\`
 
-> "Good documentation is essential for any project."
+## Typography & Elements
+> "The best tools get out of your way and let you focus on the work."
 
-| Feature | Support |
-| :--- | :--- |
-| GFM | Full |
-| Privacy | Local |`;
-this.convert();
-},
-convert() {
-if (!this.input.trim()) {
-this.rendered = '';
-this.statusMessage = 'Ready';
-return;
-}
-try {
-const rawHtml = marked.parse(this.input);
-this.rendered = DOMPurify.sanitize(rawHtml);
-this.statusMessage = 'Rendered GFM';
-} catch (e) {
-this.error = 'Render error';
-}
-},
-downloadHtml() {
-if (!this.rendered) return;
-this.downloadFile(this.rendered, 'preview.html', 'text/html');
-},
-onReset() {
-this.input = '';
-this.rendered = '';
-this.statusMessage = 'Ready';
-}
+* **Bold** and *Italic* text
+* ~~Strikethrough~~ content
+* Inline \`code blocks\` for variables
+
+### Tables
+
+| Feature | Support Level | Notes |
+| :--- | :---: | :--- |
+| GFM | **Full** | Supports tables, strikethrough, etc. |
+| XSS Protection | **Active** | Powered by DOMPurify |
+| Offline | **Yes** | 100% Client-side processing |
+
+### Lists
+1. First ordered item
+2. Second ordered item
+   * Unordered sub-list
+   * Another sub-item
+`;
+        this.convert();
+    },
+
+    convert() {
+        if (!this.input.trim()) {
+            this.rendered = '<div class="text-center text-muted opacity-50 mt-20"><i class="fas fa-file-signature text-4xl mb-4"></i><p class="text-sm font-bold uppercase tracking-widest">Awaiting Content</p></div>';
+            this.statusMessage = 'Ready';
+            return;
+        }
+        try {
+            const rawHtml = marked.parse(this.input);
+            this.rendered = DOMPurify.sanitize(rawHtml);
+            this.statusMessage = 'Rendered GFM';
+        } catch (e) {
+            this.error = 'Render error: ' + e.message;
+            this.statusMessage = 'Error rendering markdown';
+        }
+    },
+
+    downloadHtml() {
+        if (!this.rendered) return;
+        
+        const htmlTemplate = `<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Markdown Export</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.0/github-markdown-light.min.css">
+<style>
+  body { margin: 0; padding: 40px; background-color: #fff; }
+  .markdown-body { max-width: 900px; margin: 0 auto; }
+</style>
+</head>
+<body>
+<div class="markdown-body">
+${this.rendered}
+</div>
+</body>
+</html>`;
+        
+        this.downloadFile(htmlTemplate, 'kiri_document.html', 'text/html');
+    },
+
+    onReset() {
+        this.input = '';
+        this.convert();
+        this.error = '';
+        this.statusMessage = 'Ready';
+        if (this.$refs.fileInput) this.$refs.fileInput.value = '';
+    }
 }
 {% endblock %}
 
 {% block extra_js_tool %}
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
-<style>
-    #markdown-output h1 {
-        @apply text-3xl font-black mb-6 pb-4 border-b border-subtle;
-    }
-
-    #markdown-output h2 {
-        @apply text-xl font-bold mt-10 mb-4 text-kiri-green;
-    }
-
-    #markdown-output code {
-        @apply bg-subtle px-1.5 py-0.5 rounded text-sm font-mono text-kiri-green;
-    }
-
-    #markdown-output pre {
-        @apply bg-surface p-6 rounded-2xl border border-subtle overflow-x-auto my-6 shadow-xl;
-    }
-
-    #markdown-output ul {
-        @apply list-disc ml-6 space-y-2 my-4;
-    }
-
-    #markdown-output blockquote {
-        @apply border-l-4 border-kiri-green pl-6 py-2 italic text-body bg-kiri-green/5 rounded-r-xl my-6;
-    }
-
-    #markdown-output table {
-        @apply w-full border-collapse my-6 text-sm;
-    }
-
-    #markdown-output th {
-        @apply border-b border-subtle p-3 text-left font-black uppercase tracking-widest text-muted;
-    }
-
-    #markdown-output td {
-        @apply border-b border-subtle p-3;
-    }
-
-    .custom-scrollbar::-webkit-scrollbar {
-        width: 4px;
-    }
-
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-        background-color: var(--color-subtle);
-        border-radius: 9999px;
-    }
-</style>
 {% endblock %}

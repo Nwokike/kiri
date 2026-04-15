@@ -27,6 +27,9 @@ Deep dives and technical research papers natively background-synced from GitHub 
 ### Tools Hub
 30+ browser-based developer utilities. All processing runs locally in the browser.
 
+### Spotlight Search
+Press `Cmd+K` / `Ctrl+K` from anywhere in the app to open the unified Alpine.js Spotlight Search. It indexes all database Projects, GitHub-synced Publications, and in-memory Tools rapidly via a unified JSON endpoint.
+
 ### Playgrounds
 Client-side coding environments for Python (Pyodide), SQL (sql.js), and HTML/CSS/JS.
 

@@ -12,15 +12,15 @@
             <i class="fa-briefcase fas mobile-nav-icon"></i>
             <span class="mobile-nav-label">Projects</span>
         </a>
+        <a href="{% url 'publications:list' %}"
+            class="mobile-nav-item {% if 'publications' in request.path %}mobile-nav-item-active{% endif %}">
+            <i class="fa-book fas mobile-nav-icon"></i>
+            <span class="mobile-nav-label">Publications</span>
+        </a>
         <a href="{% url 'tools:index' %}"
             class="mobile-nav-item {% if 'tools' in request.path %}mobile-nav-item-active{% endif %}">
             <i class="fa-toolbox fas mobile-nav-icon"></i>
             <span class="mobile-nav-label">Tools</span>
-        </a>
-        <a href="{% url 'publications:list' %}"
-            class="mobile-nav-item {% if 'publications' in request.path %}mobile-nav-item-active{% endif %}">
-            <i class="fa-newspaper fas mobile-nav-icon"></i>
-            <span class="mobile-nav-label">Pubs</span>
         </a>
         <a href="{% url 'core:about' %}"
             class="mobile-nav-item {% if 'about' in request.path %}mobile-nav-item-active{% endif %}">

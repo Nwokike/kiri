@@ -56,7 +56,9 @@ def home(request):
 @login_not_required
 def about(request):
     """About page."""
-    return render(request, "core/about.html")
+    from projects.models import Project
+    active_projects = Project.objects.filter(status=Project.Status.ACTIVE).order_by('-is_featured', '-created_at')
+    return render(request, "core/about.html", {"projects": active_projects})
 
 
 @login_not_required

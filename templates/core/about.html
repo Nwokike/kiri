@@ -81,38 +81,33 @@ Kiri Research Labs builds lightweight software for edge intelligence. TinyML, SL
             </h2>
         </div>
         <div class="grid gap-4 sm:grid-cols-2">
-            <a href="https://imara.africa/" target="_blank" rel="noopener noreferrer" class="card card-hover flex flex-col group h-full p-5">
+            {% for project in projects %}
+            <a href="{{ project.primary_url }}" target="_blank" rel="noopener noreferrer" class="card card-hover flex flex-col group h-full p-5">
                 <div class="mb-4">
-                    <img src="{% static 'images/logos/imara.webp' %}" alt="Imara"
-                        class="filter group-hover:brightness-110 h-12 w-12 object-contain transition-all">
+                    {% if project.preview_image_url %}
+                    <img src="{{ project.preview_image_url }}" alt="{{ project.name }}"
+                        class="filter group-hover:brightness-110 h-12 w-12 object-contain transition-all rounded">
+                    {% else %}
+                    <div class="filter group-hover:brightness-110 h-12 w-12 bg-kiri-light/20 flex items-center justify-center rounded transition-all">
+                        <i class="fas fa-rocket text-xl text-kiri-green"></i>
+                    </div>
+                    {% endif %}
                 </div>
                 <h3 class="group-hover:text-kiri-green font-semibold mb-2 transition-colors text-heading">
-                    Imara
+                    {{ project.name }}
                 </h3>
                 <p class="flex-1 mb-4 text-xs text-muted leading-relaxed">
-                    Digital bodyguard protecting against online gender-based violence.
+                    {{ project.description|truncatewords:20 }}
                 </p>
                 <span class="flex font-semibold gap-1 items-center text-xs text-kiri-green">
                     Visit <i class="fas fa-external-link-alt"></i>
                 </span>
             </a>
-
-            <a href="https://igboarchives.com.ng/" target="_blank" rel="noopener noreferrer"
-                class="card card-hover flex flex-col group h-full p-5">
-                <div class="mb-4">
-                    <img src="{% static 'images/logos/igboarchives.webp' %}" alt="Igbo Archives"
-                        class="filter group-hover:brightness-110 h-12 w-12 object-contain transition-all">
-                </div>
-                <h3 class="group-hover:text-kiri-green font-semibold mb-2 transition-colors text-heading">
-                    Igbo Archives
-                </h3>
-                <p class="flex-1 mb-4 text-xs text-muted leading-relaxed">
-                    Modern archive preserving Igbo cultural heritage digitally.
-                </p>
-                <span class="flex font-semibold gap-1 items-center text-xs text-kiri-green">
-                    Visit <i class="fas fa-external-link-alt"></i>
-                </span>
-            </a>
+            {% empty %}
+            <div class="col-span-2 text-center py-8">
+                <p class="text-sm text-muted">No active platforms available at the moment.</p>
+            </div>
+            {% endfor %}
         </div>
     </section>
 

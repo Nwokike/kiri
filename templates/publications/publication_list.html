@@ -19,7 +19,7 @@
             <div class="p-5 flex flex-col h-full">
                 <div class="flex gap-2 flex-wrap mb-3">
                     {% if pub.topics %}
-                        {% for topic in pub.topics.split|slice:":2" %}
+                        {% for topic in pub.topics_list|slice:":2" %}
                             <span class="px-2 py-0.5 bg-success-subtle text-kiri-green dark:text-white rounded section-label font-bold tracking-normal lowercase">
                                 {{ topic }}
                             </span>

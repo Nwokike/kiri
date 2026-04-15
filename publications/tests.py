@@ -49,23 +49,23 @@ class PublicationViewsTest(TestCase):
 class MarkdownUtilsTest(TestCase):
     def test_image_link_rewrite(self):
         raw = "![alt](docs/img.png)"
-        html = process_markdown("owner", "repo", raw)
+        html = process_markdown("owner", "repo", "main", raw)
         self.assertIn("https://raw.githubusercontent.com/owner/repo/main/docs/img.png", html)
 
     def test_image_link_rewrite_root(self):
         # test image link at root without docs/
         raw = "![alt](image.png)"
-        html = process_markdown("owner", "repo", raw)
+        html = process_markdown("owner", "repo", "main", raw)
         self.assertIn("https://raw.githubusercontent.com/owner/repo/main/image.png", html)
 
     def test_document_link_rewrite(self):
         raw = "[setup](docs/setup.md)"
-        html = process_markdown("owner", "repo", raw)
+        html = process_markdown("owner", "repo", "main", raw)
         self.assertIn("https://github.com/owner/repo/blob/main/docs/setup.md", html)
 
     def test_absolute_link_not_rewritten(self):
         raw = "[google](https://google.com)"
-        html = process_markdown("owner", "repo", raw)
+        html = process_markdown("owner", "repo", "main", raw)
         self.assertIn("href=\"https://google.com\"", html)
         self.assertNotIn("blob/main", html)
 
@@ -76,6 +76,6 @@ class MarkdownUtilsTest(TestCase):
 
     def test_complex_code_blocks(self):
         raw = "```python\nprint('hello')\n```"
-        html = process_markdown("owner", "repo", raw)
+        html = process_markdown("owner", "repo", "main", raw)
         self.assertIn("codehilite", html)
         self.assertNotIn("```", html)

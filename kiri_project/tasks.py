@@ -163,7 +163,8 @@ def sync_publications():
                         readme_json = readme_resp.json()
                         raw_markdown = base64.b64decode(readme_json['content']).decode('utf-8')
                         
-                        html_content = process_markdown(owner_login, repo_name, raw_markdown)
+                        default_branch = repo_data.get('default_branch', 'main')
+                        html_content = process_markdown(owner_login, repo_name, default_branch, raw_markdown)
                         
                         # Clean title
                         title = repo_data.get('description') or repo_name.replace('-', ' ').title()

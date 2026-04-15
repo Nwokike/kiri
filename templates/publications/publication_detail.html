@@ -21,7 +21,7 @@
             <header class="mb-8 pb-6 border-b border-border-subtle">
                 <div class="flex-wrap flex gap-2 mb-4">
                     {% if publication.topics %}
-                        {% for topic in publication.topics.split|slice:":3" %}
+                        {% for topic in publication.topics_list|slice:":3" %}
                             <span class="bg-success-subtle font-bold lowercase px-2 py-0.5 rounded section-label text-kiri-green dark:text-white tracking-normal">
                                 {{ topic }}
                             </span>

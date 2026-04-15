@@ -23,3 +23,9 @@ class Publication(models.Model):
 
     def get_absolute_url(self):
         return reverse('publications:detail', kwargs={'slug': self.slug})
+
+    @property
+    def topics_list(self):
+        if not self.topics:
+            return []
+        return [t.strip() for t in self.topics.split(',')]

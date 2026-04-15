@@ -1,3 +1,35 @@
+{% load static %}
+<header class="page-header">
+    <div class="header-section">
+        <button id="sidebar-toggle" class="icon-btn-large md:mr-2" aria-label="Toggle Navigation" title="Toggle sidebar">
+            <i class="fa-bars fas text-lg"></i>
+        </button>
+        <a href="/" class="header-brand">
+            <img src="{% static 'images/logos/logo.webp' %}" alt="Kiri" class="h-10 md:h-12 w-auto">
+        </a>
+    </div>
+
+    <div class="flex-1 px-4 lg:px-8">
+        <!-- Spotlight Search Bar Trigger -->
+        <button id="search-modal-trigger" class="flex items-center text-sm w-full max-w-md bg-layer-2 hover:bg-layer-3 border border-border-subtle rounded-lg px-4 py-2 transition-colors mx-auto" aria-label="Search">
+            <i class="fas fa-search text-text-muted mr-3"></i>
+            <span class="text-text-muted flex-1 text-left hidden sm:inline">Search projects, tools, publications...</span>
+            <span class="text-text-muted flex-1 text-left sm:hidden">Search...</span>
+            <span class="hidden sm:inline bg-layer-3 text-text-muted px-2 py-0.5 rounded text-xs border border-border-subtle tracking-widest font-mono">⌘K</span>
+        </button>
+    </div>
+    <div class="header-actions">
+        <button id="theme-toggle" class="icon-btn" aria-label="Toggle Theme" title="Toggle theme">
+            <i class="fas fa-moon" id="theme-icon-light"></i>
+            <i class="fas fa-sun text-yellow-400" id="theme-icon-dark"></i>
+        </button>
+
+        {% if user.is_authenticated %}
+        <div class="profile-dropdown-container" id="profile-dropdown-container">
+            <button id="profile-dropdown-toggle" class="icon-btn ml-1" aria-haspopup="true" aria-expanded="false" title="Profile menu">
+                {% if user.avatar_url %}
+                <img src="{{ user.avatar_url }}" alt="{{ user.username }}" class="h-8 rounded-full w-8 border border-border-subtle object-cover">
+                {% else %}
                 <div class="avatar-fallback">
                     {{ user.username|slice:":2"|upper }}
                 </div>

@@ -1,0 +1,94 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block title %}{{ publication.title }} | Kiri Research Publications{% endblock %}
+{% block meta_description %}{{ publication.description }}{% endblock %}
+{% block og_title %}{{ publication.title }}{% endblock %}
+{% block og_description %}{{ publication.description }}{% endblock %}
+
+{% block content %}
+<div class="page-container flex justify-center">
+    
+    <article class="w-full max-w-4xl">
+        <!-- Breadcrumb -->
+        <nav class="text-xs text-muted mb-5">
+            <a href="{% url 'publications:list' %}" class="hover:text-kiri-green transition-colors">Publications</a>
+            <span class="mx-2">/</span>
+            <span class="text-body font-medium truncate inline-block align-bottom max-w-[200px] sm:max-w-xs">{{ publication.title }}</span>
+        </nav>
+
+        <div class="card mb-6 p-6 md:p-8 md:px-12">
+            <header class="mb-8 pb-6 border-b border-border-subtle">
+                <div class="flex-wrap flex gap-2 mb-4">
+                    {% if publication.topics %}
+                        {% for topic in publication.topics.split|slice:":3" %}
+                            <span class="bg-success-subtle font-bold lowercase px-2 py-0.5 rounded section-label text-kiri-green dark:text-white tracking-normal">
+                                {{ topic }}
+                            </span>
+                        {% endfor %}
+                    {% else %}
+                            <span class="bg-success-subtle font-bold lowercase px-2 py-0.5 rounded section-label text-kiri-green dark:text-white tracking-normal">
+                                Article
+                            </span>
+                    {% endif %}
+                </div>
+
+                <h1 class="text-3xl md:text-4xl font-bold text-heading mb-4 leading-tight">
+                    {{ publication.title }}
+                </h1>
+                
+                {% if publication.description %}
+                <p class="text-sm md:text-base text-body mb-6">{{ publication.description }}</p>
+                {% endif %}
+
+                <div class="flex flex-wrap items-center text-xs text-muted gap-4">
+                    <span class="flex items-center gap-1 font-medium">
+                        <i class="fas fa-calendar-alt"></i> Added {{ publication.published_at|date:"N j, Y" }}
+                    </span>
+                    <span class="flex items-center gap-1 font-medium hidden sm:flex">
+                        <i class="fas fa-sync text-[10px]"></i> Synced {{ publication.last_synced_at|timesince }} ago
+                    </span>
+                    <div class="flex-auto text-right">
+                        <a href="{{ publication.github_url }}" target="_blank" rel="noopener" class="btn-secondary !py-1 !px-3 shadow-none">
+                            <i class="fab fa-github"></i> View Source
+                        </a>
+                    </div>
+                </div>
+            </header>
+
+            <div class="html-content w-full">
+                {{ publication.html_content|safe }}
+            </div>
+        </div>
+    </article>
+
+    <!-- JSON-LD Article Schema for Premium SEO -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "Article",
+        "headline": "{{ publication.title|escapejs }}",
+        "description": "{{ publication.description|escapejs }}",
+        "author": {
+            "@type": "Organization",
+            "name": "Kiri Research Labs",
+            "url": "https://kiri.ng"
+        },
+        "publisher": {
+            "@type": "Organization",
+            "name": "Kiri Research Labs",
+            "logo": {
+                "@type": "ImageObject",
+                "url": "https://kiri.ng{% static 'img/logo.png' %}"
+            }
+        },
+        "datePublished": "{{ publication.published_at|date:'c' }}",
+        "dateModified": "{{ publication.last_synced_at|date:'c' }}",
+        "mainEntityOfPage": {
+            "@type": "WebPage",
+            "@id": "{{ request.build_absolute_uri }}"
+        }
+    }
+    </script>
+</div>
+{% endblock %}

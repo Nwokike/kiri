@@ -105,3 +105,89 @@ def prune_cache_table():
         )
         deleted = cursor.rowcount
     logger.info(f"Cache pruning complete. Removed {deleted} expired entries")
+
+
+@task()
+def sync_publications():
+    """
+    Fetches all repos with 'kiri-article' topic and creates/updates publications.
+    """
+    from projects.services import GitHubService
+    from publications.models import Publication
+    from publications.utils import process_markdown
+    from django.utils.text import slugify
+
+    logger.info("Starting Publications sync...")
+
+    headers = {
+        'Accept': 'application/vnd.github.v3+json',
+        'User-Agent': 'Kiri-Research-Labs',
+    }
+    github_token = os.environ.get('GITHUB_TOKEN', '')
+    if github_token:
+        headers['Authorization'] = f'token {github_token}'
+
+    # Fetch authenticated user's repos or specify fallback
+    try:
+        import requests
+        if github_token:
+            url = "https://api.github.com/user/repos?type=owner&per_page=100"
+        else:
+            logger.warning("No GITHUB_TOKEN, skipping private/authenticated fetch.")
+            return
+
+        page = 1
+        updated_count = 0
+
+        while True:
+            response = requests.get(f"{url}&page={page}", headers=headers, timeout=15)
+            if response.status_code != 200:
+                break
+            
+            repos = response.json()
+            if not repos:
+                break
+
+            for repo_data in repos:
+                topics = repo_data.get('topics', [])
+                if 'kiri-article' in topics:
+                    repo_name = repo_data['name']
+                    owner_login = repo_data['owner']['login']
+                    
+                    # Fetch README
+                    readme_url = f"https://api.github.com/repos/{owner_login}/{repo_name}/readme"
+                    readme_resp = requests.get(readme_url, headers=headers, timeout=10)
+                    
+                    if readme_resp.status_code == 200:
+                        import base64
+                        readme_json = readme_resp.json()
+                        raw_markdown = base64.b64decode(readme_json['content']).decode('utf-8')
+                        
+                        html_content = process_markdown(owner_login, repo_name, raw_markdown)
+                        
+                        # Clean title
+                        title = repo_data.get('description') or repo_name.replace('-', ' ').title()
+                        slug = slugify(repo_name)
+                        
+                        Publication.objects.update_or_create(
+                            repo_name=repo_name,
+                            defaults={
+                                'title': title,
+                                'slug': slug,
+                                'description': repo_data.get('description', ''),
+                                'html_content': html_content,
+                                'github_url': repo_data['html_url'],
+                                'topics': ",".join([t for t in topics if t != 'kiri-article']),
+                                'published_at': repo_data.get('pushed_at') or repo_data.get('created_at'),
+                            }
+                        )
+                        updated_count += 1
+
+            if len(repos) < 100:
+                break
+            page += 1
+
+        logger.info(f"Publications Sync Complete. Updated: {updated_count}")
+
+    except Exception as e:
+        logger.error(f"Error syncing publications: {e}")

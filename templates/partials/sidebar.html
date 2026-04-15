@@ -40,6 +40,11 @@
                 </div>
             </div>
 
+            <a href="{% url 'publications:list' %}" class="nav-link {% if 'publications' in request.path %}nav-link-active{% endif %}">
+                <i class="fa-newspaper fas sidebar-icon"></i>
+                <span class="nav-label nav-label-text">Publications</span>
+            </a>
+
             <div class="sidebar-section-header-top-bordered">
                 <span class="nav-label section-label transition-opacity duration-200">Platform</span>
             </div>

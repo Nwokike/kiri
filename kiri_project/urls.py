@@ -32,6 +32,7 @@ urlpatterns = [
     # Main Routes
     path("projects/", include("projects.urls", namespace="projects")),
     path("tools/", include("tools.urls", namespace="tools")),
+    path("publications/", include("publications.urls", namespace="publications")),
 
     # Core (Home, About, etc.) - Must be last
     path("", include("core.urls", namespace="core")),

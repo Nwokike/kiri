@@ -21,6 +21,9 @@ Kiri Research Labs builds software and AI for edge intelligence. TinyML, small l
 ### Projects
 Curated showcase of our work. Each project links to its GitHub repository and live URL when available.
 
+### Publications
+Deep dives and technical research papers natively background-synced from GitHub repositories tagged with `kiri-article`. Features server-side Markdown parsing and syntax highlighting.
+
 ### Tools Hub
 30+ browser-based developer utilities. All processing runs locally in the browser.
 

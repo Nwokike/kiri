@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     "users",
     "projects",
     "tools",
+    "publications",
 ]
 
 SITE_ID = 1

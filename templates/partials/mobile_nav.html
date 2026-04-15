@@ -17,6 +17,11 @@
             <i class="fa-toolbox fas mobile-nav-icon"></i>
             <span class="mobile-nav-label">Tools</span>
         </a>
+        <a href="{% url 'publications:list' %}"
+            class="mobile-nav-item {% if 'publications' in request.path %}mobile-nav-item-active{% endif %}">
+            <i class="fa-newspaper fas mobile-nav-icon"></i>
+            <span class="mobile-nav-label">Pubs</span>
+        </a>
         <a href="{% url 'core:about' %}"
             class="mobile-nav-item {% if 'about' in request.path %}mobile-nav-item-active{% endif %}">
             {% if user.is_authenticated and user.avatar_url %}

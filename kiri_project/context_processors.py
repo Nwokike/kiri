@@ -53,3 +53,23 @@ def active_projects(request):
         )
         cache.set(cache_key, projects, 300)
     return {'active_projects': projects}
+
+
+def kiri_platforms(request):
+    """
+    Inject kiri platforms (projects on kiri.ng subdomains).
+    Cached for 24 hours.
+    """
+    from django.core.cache import cache
+    
+    cache_key = 'kiri_platforms_active'
+    platforms = cache.get(cache_key)
+    if platforms is None:
+        from projects.models import Project
+        projects = list(
+            Project.objects.filter(status=Project.Status.ACTIVE, live_url__icontains='kiri.ng')
+            .values('name', 'live_url')
+        )
+        platforms = sorted([p for p in projects if p['live_url'] and 'kiri.ng' in p['live_url']], key=lambda x: x['name'])
+        cache.set(cache_key, platforms, 86400) # 24 hours
+    return {'kiri_platforms': platforms}

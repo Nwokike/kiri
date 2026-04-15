@@ -100,3 +100,58 @@ def silent_asset(request, filename):
     """Silently serve empty response for missing assets to keep logs clean."""
     content_type = "application/json" if filename.endswith(".json") else "application/javascript"
     return HttpResponse("", content_type=content_type)
+
+
+@login_not_required
+def global_search(request):
+    """
+    Unified JSON API endpoint for 'Spotlight' search.
+    Aggregates Projects, Publications, and Tools.
+    """
+    query = request.GET.get('q', '').strip()
+    if not query:
+        return JsonResponse({"results": []})
+        
+    results = []
+    
+    # 1. Projects
+    from projects.models import Project
+    projects = Project.objects.filter(status=Project.Status.ACTIVE, name__icontains=query)[:5]
+    for p in projects:
+        results.append({
+            "type": "Project",
+            "title": p.name,
+            "description": p.description[:100] + "..." if len(p.description) > 100 else p.description,
+            "url": p.get_absolute_url(),
+            "icon": "fa-diagram-project"
+        })
+        
+    # 2. Publications
+    from publications.models import Publication
+    pubs = Publication.objects.filter(title__icontains=query)[:5]
+    for pub in pubs:
+        results.append({
+            "type": "Publication",
+            "title": pub.title,
+            "description": pub.description[:100] + "..." if len(pub.description) > 100 else pub.description,
+            "url": pub.get_absolute_url(),
+            "icon": "fa-newspaper"
+        })
+        
+    # 3. Tools
+    try:
+        from tools.registry import TOOLS
+        from django.urls import reverse
+        for tool_id, tool_data in TOOLS.items():
+            if query.lower() in tool_data['name'].lower() or query.lower() in tool_data.get('description', '').lower():
+                results.append({
+                    "type": "Tool",
+                    "title": tool_data['name'],
+                    "description": tool_data.get('description', '')[:100] + "..." if len(tool_data.get('description', '')) > 100 else tool_data.get('description', ''),
+                    "url": reverse('tools:tool_detail', args=[tool_id]),
+                    "icon": tool_data.get('icon', 'fa-toolbox')
+                })
+    except ImportError:
+        pass
+        
+    return JsonResponse({"results": results[:15]})

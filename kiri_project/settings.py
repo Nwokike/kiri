@@ -81,6 +81,7 @@ TEMPLATES = [
                 "kiri_project.context_processors.kiri_settings",
                 "kiri_project.context_processors.ecosystem_platforms",
                 "kiri_project.context_processors.active_projects",
+                "kiri_project.context_processors.kiri_platforms",
             ],
         },
     },

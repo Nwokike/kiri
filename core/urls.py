@@ -11,4 +11,5 @@ urlpatterns = [
     path('terms/', views.terms, name='terms'),
     path('refund/', views.refund_policy, name='refund_policy'),
     path('health/', views.health, name='health'),
+    path('api/search/', views.global_search, name='global_search'),
 ]

@@ -55,14 +55,14 @@
                 <span class="nav-label nav-label-text">About</span>
             </a>
 
-            {% if ecosystem_platforms %}
+            {% if kiri_platforms %}
             <div class="sidebar-section-header-top-bordered">
-                <span class="nav-label section-label transition-opacity duration-200">Our Platforms</span>
+                <span class="nav-label section-label transition-opacity duration-200">Kiri Ecosystem</span>
             </div>
-            {% for platform in ecosystem_platforms %}
-            <a href="{{ platform.url }}" target="_blank" rel="noopener" class="nav-link">
-                <i class="{{ platform.icon_class }} text-center text-sm w-5"></i>
-                <span class="nav-label-text flex-1">{{ platform.name }}</span>
+            {% for platform in kiri_platforms %}
+            <a href="{{ platform.live_url }}" target="_blank" rel="noopener" class="nav-link">
+                <i class="fa-globe flex-shrink-0 fas text-center text-[11px] w-5"></i>
+                <span class="nav-label-text flex-1 truncate">{{ platform.name }}</span>
             </a>
             {% endfor %}
             {% endif %}

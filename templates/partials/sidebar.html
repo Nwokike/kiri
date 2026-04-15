@@ -41,7 +41,7 @@
             </div>
 
             <a href="{% url 'publications:list' %}" class="nav-link {% if 'publications' in request.path %}nav-link-active{% endif %}">
-                <i class="fa-newspaper fas sidebar-icon"></i>
+                <i class="fa-book fas sidebar-icon"></i>
                 <span class="nav-label nav-label-text">Publications</span>
             </a>
 
@@ -61,7 +61,7 @@
             </div>
             {% for platform in kiri_platforms %}
             <a href="{{ platform.live_url }}" target="_blank" rel="noopener" class="nav-link">
-                <i class="fa-globe flex-shrink-0 fas text-center text-[11px] w-5"></i>
+                <i class="fa-layer-group flex-shrink-0 fas text-center text-[11px] w-5"></i>
                 <span class="nav-label-text flex-1 truncate">{{ platform.name }}</span>
             </a>
             {% endfor %}

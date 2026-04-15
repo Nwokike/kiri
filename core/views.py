@@ -16,7 +16,7 @@ def home(request):
 
         # Featured projects (manually flagged), then by most recent
         featured_projects = list(
-            all_projects.filter(is_featured=True).order_by('-created_at')[:6]
+            all_projects.filter(is_featured=True).order_by('-created_at')[:8]
         )
 
         # Dynamic stats
@@ -41,12 +41,17 @@ def home(request):
 
         # Latest projects
         latest_projects = list(all_projects.order_by('-created_at')[:5])
+        
+        # Latest publications
+        from publications.models import Publication
+        latest_publications = list(Publication.objects.order_by('-published_at')[:4])
 
         context = {
             "featured_projects": featured_projects,
             "stats": stats,
             "categories": categories,
             "latest_projects": latest_projects,
+            "latest_publications": latest_publications,
         }
         cache.set('homepage_context', context, 300)
 
@@ -135,7 +140,7 @@ def global_search(request):
             "title": pub.title,
             "description": pub.description[:100] + "..." if len(pub.description) > 100 else pub.description,
             "url": pub.get_absolute_url(),
-            "icon": "fa-newspaper"
+            "icon": "fa-book"
         })
         
     # 3. Tools

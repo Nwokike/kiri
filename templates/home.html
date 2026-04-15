@@ -30,7 +30,7 @@ Lightweight software for edge intelligence. Open source projects, AI tools, and 
             {% if ecosystem_platforms %}
             <div class="sidebar-card">
                 <h3 class="sidebar-card-title">
-                    <i class="fas fa-globe text-kiri-green"></i> Our Platforms
+                    <i class="fas fa-layer-group text-kiri-green"></i> Our Platforms
                 </h3>
                 <div class="space-y-2">
                     {% for platform in ecosystem_platforms %}
@@ -55,6 +55,31 @@ Lightweight software for edge intelligence. Open source projects, AI tools, and 
             {% endif %}
 
             {% include "partials/home/trending_sidebar.html" %}
+            
+            {% if latest_publications %}
+            <div class="sidebar-card">
+                <h3 class="sidebar-card-title">
+                    <i class="fas fa-book text-green-500"></i> Latest Publications
+                </h3>
+                <div class="space-y-3">
+                    {% for pub in latest_publications %}
+                    <a href="{{ pub.get_absolute_url }}" class="sidebar-card-item">
+                        <div class="sidebar-card-icon-box">
+                            <i class="fas fa-file-alt sidebar-card-icon"></i>
+                        </div>
+                        <div class="sidebar-card-content">
+                            <p class="sidebar-card-content-title">
+                                {{ pub.title|truncatechars:40 }}
+                            </p>
+                            <p class="sidebar-card-content-desc uppercase">
+                                {{ pub.published_at|timesince }} ago
+                            </p>
+                        </div>
+                    </a>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
 
             {% include "partials/home/categories_sidebar.html" %}
 

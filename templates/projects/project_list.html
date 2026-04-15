@@ -15,81 +15,87 @@ Open source projects by Kiri Research Labs. Lightweight software for edge intell
 
 {% block content %}
 <div class="page-container">
-    <!-- Page Header -->
-    <div class="flex flex-col gap-4 justify-between mb-8 sm-flex-row sm:items-center">
+    
+    <header class="flex flex-col sm:flex-row justify-between sm:items-center gap-4 mb-8">
         <div>
-            <h1 class="font-bold text-2xl text-heading">Projects</h1>
+            <h1 class="text-2xl font-bold text-heading">Projects</h1>
             <p class="mt-1 text-sm text-body">Projects by Kiri Research Labs.</p>
         </div>
+        
         {% if user.is_staff %}
         <a href="{% url 'projects:create_manual' %}" class="btn-primary shrink-0 self-start sm:self-auto">
-            <i class="fa-plus fas"></i> Add Project
+            <i class="fas fa-plus"></i> Add Project
         </a>
         {% endif %}
-    </div>
+    </header>
 
-    <!-- Filters -->
-    <form method="get" class="flex-wrap flex gap-2 mb-6" id="filter-form">
+    <form method="get" id="filter-form" class="flex flex-wrap gap-2 mb-6">
+        {% if search_query %}
+            <input type="hidden" name="q" value="{{ search_query }}">
+        {% endif %}
+
         <select name="category" onchange="this.form.submit()" class="form-input !w-auto !py-1.5 !h-auto">
             <option value="">All Categories</option>
             {% for value, label in categories %}
             <option value="{{ value }}" {% if current_category == value %}selected{% endif %}>{{ label }}</option>
             {% endfor %}
         </select>
+
         <select name="status" onchange="this.form.submit()" class="form-input !w-auto !py-1.5 !h-auto">
             <option value="">All Statuses</option>
             {% for value, label in statuses %}
             <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>{{ label }}</option>
             {% endfor %}
         </select>
+
         {% if search_query or current_category or current_status %}
         <a href="{% url 'projects:list' %}" class="btn-secondary !py-1.5 !h-auto">Clear</a>
         {% endif %}
     </form>
 
-    <!-- Project Grid -->
     {% if projects %}
-    <div class="grid-cols-1 grid gap-4 lg:grid-cols-3 sm:grid-cols-2">
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         {% for project in projects %}
         <a href="{{ project.get_absolute_url }}" class="card card-hover block group overflow-hidden">
+            
             {% if project.preview_image_url %}
-            <div class="bg-subtle h-32 overflow-hidden">
-                <img src="{{ project.preview_image_url }}" alt="{{ project.name }}"
-                    class="h-full w-full object-cover" loading="lazy">
+            <div class="h-32 bg-subtle overflow-hidden">
+                <img src="{{ project.preview_image_url }}" alt="{{ project.name }}" class="w-full h-full object-cover" loading="lazy">
             </div>
             {% endif %}
+            
             <div class="p-5">
-                <!-- Badges -->
                 <div class="flex items-center gap-2 mb-3">
-                    <span
-                        class="bg-success-subtle font-bold lowercase px-2 py-0.5 rounded section-label text-kiri-green tracking-normal">
+                    <span class="px-2 py-0.5 bg-success-subtle rounded section-label text-kiri-green dark:text-white font-bold tracking-normal lowercase">
                         {{ project.get_category_display }}
                     </span>
+                    
                     {% if project.live_url %}
-                    <span class="flex font-bold gap-1 items-center text-[9px] text-kiri-green uppercase">
+                    <span class="flex items-center gap-1 text-[9px] text-kiri-green font-bold uppercase">
                         <i class="fas fa-circle text-[6px]"></i> Live
                     </span>
                     {% endif %}
+                    
                     {% if project.status == 'beta' %}
-                    <span class="flex font-bold gap-1 items-center text-[9px] text-kiri-gold uppercase">
+                    <span class="flex items-center gap-1 text-[9px] text-kiri-gold font-bold uppercase">
                         <i class="fas fa-flask"></i> Beta
                     </span>
                     {% endif %}
                 </div>
 
-                <!-- Title -->
-                <h2 class="group-hover:text-kiri-green font-semibold transition-colors line-clamp-1 text-heading">
+                <h2 class="text-heading font-semibold line-clamp-1 transition-colors group-hover:text-kiri-green">
                     {{ project.name }}
                 </h2>
+                <p class="mt-1.5 text-sm text-body line-clamp-2">
+                    {{ project.description|truncatewords:15 }}
+                </p>
 
-                <!-- Description -->
-                <p class="line-clamp-2 text-sm mt-1.5 text-body">{{ project.description|truncatewords:15 }}</p>
-
-                <!-- Meta -->
                 <div class="flex items-center justify-between mt-4 text-xs text-muted">
                     <div class="flex items-center gap-2">
                         {% if project.language %}
-                        <span><i class="fa-circle fas mr-1 text-[8px] text-kiri-green"></i>{{ project.language }}</span>
+                        <span>
+                            <i class="fas fa-circle mr-1 text-[8px] text-kiri-green"></i>{{ project.language }}
+                        </span>
                         {% endif %}
                         <span>{{ project.get_status_display }}</span>
                     </div>
@@ -100,31 +106,31 @@ Open source projects by Kiri Research Labs. Lightweight software for edge intell
         {% endfor %}
     </div>
 
-    <!-- Pagination -->
     {% if is_paginated %}
-    <div class="flex items-center justify-center gap-3 mt-10">
+    <div class="flex justify-center items-center gap-3 mt-10">
         {% if page_obj.has_previous %}
-        <a href="?page={{ page_obj.previous_page_number }}&category={{ current_category }}&status={{ current_status }}"
-            class="btn-secondary !px-3 !py-1.5 !text-sm">
-            <i class="fa-chevron-left fas"></i> Prev
+        <a href="?page={{ page_obj.previous_page_number }}&category={{ current_category }}&status={{ current_status }}&q={{ search_query }}" class="btn-secondary !px-3 !py-1.5 !text-sm">
+            <i class="fas fa-chevron-left"></i> Prev
         </a>
         {% endif %}
+        
         <span class="text-sm text-muted">Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}</span>
+        
         {% if page_obj.has_next %}
-        <a href="?page={{ page_obj.next_page_number }}&category={{ current_category }}&status={{ current_status }}"
-            class="btn-secondary !px-3 !py-1.5 !text-sm">
-            Next <i class="fa-chevron-right fas"></i>
+        <a href="?page={{ page_obj.next_page_number }}&category={{ current_category }}&status={{ current_status }}&q={{ search_query }}" class="btn-secondary !px-3 !py-1.5 !text-sm">
+            Next <i class="fas fa-chevron-right"></i>
         </a>
         {% endif %}
     </div>
     {% endif %}
+
     {% else %}
-    <!-- Empty State -->
-    <div class="text-center py-24">
-        <i class="fa-folder-open fas block mb-4 text-4xl text-muted"></i>
-        <h2 class="font-semibold text-lg text-body">No projects yet</h2>
+    <div class="py-24 text-center">
+        <i class="fas fa-folder-open block mb-4 text-4xl text-muted"></i>
+        <h2 class="text-lg font-semibold text-body">No projects yet</h2>
         <p class="mt-1 text-sm text-muted">Check back soon.</p>
     </div>
     {% endif %}
+
 </div>
 {% endblock %}

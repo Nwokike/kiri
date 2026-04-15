@@ -71,7 +71,7 @@ class MarkdownUtilsTest(TestCase):
 
     def test_empty_content(self):
         # ensure string is not broken if empty
-        html = process_markdown("owner", "repo", "")
+        html = process_markdown("owner", "repo", "main", "")
         self.assertEqual(html, "")
 
     def test_complex_code_blocks(self):

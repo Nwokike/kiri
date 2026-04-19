@@ -81,7 +81,19 @@
                     <a href="{% url 'projects:edit' project.slug %}" class="btn-secondary !py-1.5 !text-sm">
                         <i class="fas fa-edit"></i> Edit
                     </a>
+                    <form action="{% url 'projects:fb_post' project.slug %}" method="post" class="inline">
+                        {% csrf_token %}
+                        <button type="submit" class="btn-secondary text-[#1877f2] border-blue-100 hover:bg-blue-50 !py-1.5 !text-sm">
+                            <i class="fab fa-facebook"></i> Post to FB
+                        </button>
+                    </form>
                     {% endif %}
+                    <button 
+                        @click="window.dispatchEvent(new CustomEvent('open-share-modal', { detail: { title: '{{ project.name|escapejs }}', url: window.location.href } }))"
+                        class="btn-secondary !py-1.5 !text-sm"
+                    >
+                        <i class="fas fa-share-alt"></i> Share
+                    </button>
                 </div>
             </div>
         </div>
@@ -144,4 +156,5 @@
     }
     </script>
 </div>
-{% endblock %}
+{% include "partials/share_modal.html" %}
+{% endblock %}

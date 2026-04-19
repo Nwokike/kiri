@@ -48,6 +48,8 @@ INSTALLED_APPS = [
     "projects",
     "tools",
     "publications",
+    "huey.contrib.djhuey",
+    "axes",
 ]
 
 SITE_ID = 1
@@ -55,6 +57,7 @@ SITE_ID = 1
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    "axes.middleware.AxesMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -164,6 +167,7 @@ AUTH_USER_MODEL = "users.CustomUser"
 
 # ── Authentication (Django built-in) ──
 AUTHENTICATION_BACKENDS = [
+    "axes.backends.AxesStandaloneBackend",
     "django.contrib.auth.backends.ModelBackend",
 ]
 
@@ -171,7 +175,16 @@ LOGIN_URL = "/accounts/login/"
 LOGIN_REDIRECT_URL = "/"
 LOGOUT_REDIRECT_URL = "/"
 
-# ── Tasks Configuration ──
+# ── Tasks Configuration (Huey) ──
+from huey import SqliteHuey
+import os
+HUEY = SqliteHuey(
+    name='kiri-tasks',
+    filename=BASE_DIR / 'db.sqlite3',
+    results=True,
+    immediate=False
+)
+
 TASKS = {
     "default": {
         "BACKEND": "django.tasks.backends.immediate.ImmediateBackend",
@@ -255,3 +268,12 @@ PWA_APP_ICONS = [
     {'src': '/static/images/icons/icon-192x192.png', 'sizes': '192x192', 'type': 'image/png'},
     {'src': '/static/images/icons/icon-512x512.png', 'sizes': '512x512', 'type': 'image/png'}
 ]
+
+# ── Security (Axes) ──
+AXES_FAILURE_LIMIT = 5
+AXES_COOLOFF_TIME = 1  # Hour
+AXES_RESET_ON_SUCCESS = True
+AXES_LOCKOUT_PARAMETERS = ["username", "ip_address"]
+AXES_IP_WHITELIST = ['127.0.0.1']  # Always allow local for development
+
+

@@ -167,6 +167,7 @@ class Project(models.Model):
     # ── Save / Display ──
 
     def save(self, *args, **kwargs):
+        is_new = self.pk is None
         if not self.slug:
             base_slug = slugify(self.name)
             slug = base_slug
@@ -177,6 +178,17 @@ class Project(models.Model):
             self.slug = slug
         super().save(*args, **kwargs)
         cache.delete('homepage_context')
+        
+        # Auto-post to Facebook if new and credentials exist
+        if is_new:
+            from kiri_project.tasks import post_to_facebook
+            from django.db import transaction
+            try:
+                transaction.on_commit(lambda: post_to_facebook('project', self.id))
+            except Exception as e:
+                # We don't want to fail the save if FB posting fails
+                logger.error(f"Failed to queue initial FB post for project {self.name}: {e}")
+
 
     def delete(self, *args, **kwargs):
         super().delete(*args, **kwargs)

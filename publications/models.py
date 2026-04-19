@@ -29,3 +29,14 @@ class Publication(models.Model):
         if not self.topics:
             return []
         return [t.strip() for t in self.topics.split(',')]
+
+    @property
+    def preview_image_url(self):
+        """Return image URL from GitHub OG image."""
+        if self.github_url:
+            from projects.services import GitHubService
+            parsed = GitHubService.parse_repo_url(self.github_url)
+            if parsed:
+                owner, repo = parsed
+                return f"https://opengraph.githubassets.com/1/{owner}/{repo}"
+        return None

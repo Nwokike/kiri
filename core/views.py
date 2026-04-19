@@ -20,9 +20,10 @@ def home(request):
         )
 
         # Dynamic stats
+        from publications.models import Publication
         stats = {
             'total_projects': all_projects.count(),
-            'total_live': all_projects.exclude(live_url='').count(),
+            'total_publications': Publication.objects.count(),
         }
 
         # Dynamic tool count from registry

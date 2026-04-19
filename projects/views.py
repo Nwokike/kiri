@@ -1,3 +1,5 @@
+from django.shortcuts import redirect
+from django.views import View
 from django.views.generic import ListView, DetailView, CreateView, UpdateView
 from django.utils.decorators import method_decorator
 from django.contrib.auth.decorators import login_not_required
@@ -87,3 +89,16 @@ class ProjectUpdateView(StaffRequiredMixin, UpdateView):
             f"'{self.object.name}' updated successfully!",
         )
         return response
+
+class ProjectPostFacebookView(StaffRequiredMixin, View):
+    def post(self, request, slug, *args, **kwargs):
+        from kiri_project.tasks import post_to_facebook
+        from .models import Project
+        try:
+            project = Project.objects.get(slug=slug)
+            post_to_facebook('project', project.id)
+            messages.success(request, f"Facebook post task for '{project.name}' has been queued.")
+        except Project.DoesNotExist:
+            messages.error(request, "Project not found.")
+        return redirect('projects:detail', slug=slug)
+

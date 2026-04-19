@@ -36,7 +36,7 @@ class CoreTests(TestCase):
 class NativeTaskTests(TestCase):
     def test_task_registration(self):
         from kiri_project.tasks import sync_github_stats, cleanup_tmp_files, prune_cache_table
-        from django.tasks import Task
-        self.assertIsInstance(sync_github_stats, Task)
-        self.assertIsInstance(cleanup_tmp_files, Task)
-        self.assertIsInstance(prune_cache_table, Task)
+        from huey.api import TaskWrapper
+        self.assertIsInstance(sync_github_stats, TaskWrapper)
+        self.assertIsInstance(cleanup_tmp_files, TaskWrapper)
+        self.assertIsInstance(prune_cache_table, TaskWrapper)

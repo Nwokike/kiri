@@ -1,15 +1,17 @@
 import os
 import logging
 import time
-from datetime import timedelta
-from django.tasks import task
+import requests
+from huey.contrib.djhuey import db_task, db_periodic_task
+from huey import crontab
 from django.conf import settings
 from django.utils import timezone
+from django.utils.text import slugify
 
 logger = logging.getLogger(__name__)
 
 
-@task()
+@db_periodic_task(crontab(minute='0', hour='*'))
 def sync_github_stats():
     """
     Syncs stars, forks, and description from GitHub for all projects.
@@ -48,7 +50,7 @@ def sync_github_stats():
     logger.info(f"GitHub Sync Complete. Updated: {updated_count}, Errors: {errors}")
 
 
-@task()
+@db_periodic_task(crontab(minute='0', hour='1'))
 def cleanup_tmp_files():
     """
     Cleans up temporary files older than 1 hour.
@@ -93,7 +95,7 @@ def cleanup_tmp_files():
     logger.info(f"Cleanup Complete. Deleted {deleted_count} files. Errors: {errors}")
 
 
-@task()
+@db_periodic_task(crontab(minute='0', hour='3'))
 def prune_cache_table():
     """Prune expired entries from the database cache to prevent unbounded growth."""
     from django.db import connection
@@ -107,17 +109,15 @@ def prune_cache_table():
     logger.info(f"Cache pruning complete. Removed {deleted} expired entries")
 
 
-@task()
+@db_periodic_task(crontab(minute='30'))
 def sync_publications():
     """
-    Fetches all repos with 'kiri-article' topic and creates/updates publications.
+    Fetches all repositories from the 'kiri-labs' organization and syncs them as publications.
     """
-    from projects.services import GitHubService
     from publications.models import Publication
     from publications.utils import process_markdown
-    from django.utils.text import slugify
 
-    logger.info("Starting Publications sync...")
+    logger.info("Starting Publications sync for Organization: kiri-labs...")
 
     headers = {
         'Accept': 'application/vnd.github.v3+json',
@@ -127,68 +127,143 @@ def sync_publications():
     if github_token:
         headers['Authorization'] = f'token {github_token}'
 
-    # Fetch authenticated user's repos or specify fallback
     try:
-        import requests
-        if github_token:
-            url = "https://api.github.com/user/repos?type=owner&per_page=100"
-        else:
-            logger.warning("No GITHUB_TOKEN, skipping private/authenticated fetch.")
-            return
-
         page = 1
         updated_count = 0
+        synced_repos = []
 
         while True:
-            response = requests.get(f"{url}&page={page}", headers=headers, timeout=15)
+            # Fetch all repos (including private/internal if token allows)
+            url = f"https://api.github.com/orgs/kiri-labs/repos?per_page=100&page={page}&type=all"
+            response = requests.get(url, headers=headers, timeout=15)
+            
             if response.status_code != 200:
+                logger.error(f"GitHub API Error: {response.status_code} - {response.text}")
                 break
             
             repos = response.json()
-            if not repos:
+            if not repos or not isinstance(repos, list):
                 break
 
             for repo_data in repos:
-                topics = repo_data.get('topics', [])
-                if 'kiri-article' in topics:
-                    repo_name = repo_data['name']
-                    owner_login = repo_data['owner']['login']
-                    
-                    # Fetch README
-                    readme_url = f"https://api.github.com/repos/{owner_login}/{repo_name}/readme"
-                    readme_resp = requests.get(readme_url, headers=headers, timeout=10)
-                    
-                    if readme_resp.status_code == 200:
-                        import base64
-                        readme_json = readme_resp.json()
-                        raw_markdown = base64.b64decode(readme_json['content']).decode('utf-8')
-                        
-                        default_branch = repo_data.get('default_branch', 'main')
-                        html_content = process_markdown(owner_login, repo_name, default_branch, raw_markdown)
-                        
-                        # Clean title
-                        title = repo_data.get('description') or repo_name.replace('-', ' ').title()
-                        slug = slugify(repo_name)
-                        
-                        Publication.objects.update_or_create(
-                            repo_name=repo_name,
-                            defaults={
-                                'title': title,
-                                'slug': slug,
-                                'description': repo_data.get('description', ''),
-                                'html_content': html_content,
-                                'github_url': repo_data['html_url'],
-                                'topics': ",".join([t for t in topics if t != 'kiri-article']),
-                                'published_at': repo_data.get('pushed_at') or repo_data.get('created_at'),
-                            }
-                        )
-                        updated_count += 1
+                repo_name = repo_data['name']
+                owner_login = repo_data['owner']['login']
+                
+                # Fetch README content
+                readme_url = f"https://api.github.com/repos/{owner_login}/{repo_name}/readme"
+                readme_resp = requests.get(readme_url, headers=headers, timeout=10)
+                
+                html_content = ""
+                if readme_resp.status_code == 200:
+                    import base64
+                    readme_json = readme_resp.json()
+                    raw_markdown = base64.b64decode(readme_json['content']).decode('utf-8')
+                    default_branch = repo_data.get('default_branch', 'main')
+                    html_content = process_markdown(owner_login, repo_name, default_branch, raw_markdown)
+                
+                # Metadata extraction
+                title_str = repo_name.replace('-', ' ').title()
+                slug = slugify(repo_name)
+                description = repo_data.get('description', '') or "Research publication by Kiri Research Labs."
+                topics = ",".join(repo_data.get('topics', []))
+                published_at = repo_data.get('pushed_at') or repo_data.get('created_at')
+
+                pub, created = Publication.objects.update_or_create(
+                    repo_name=repo_name,
+                    defaults={
+                        'title': title_str,
+                        'slug': slug,
+                        'description': description,
+                        'html_content': html_content,
+                        'github_url': repo_data['html_url'],
+                        'topics': topics,
+                        'published_at': published_at,
+                        'last_synced_at': timezone.now()
+                    }
+                )
+
+                synced_repos.append(repo_name)
+                updated_count += 1
+                
+                if created:
+                    try:
+                        post_to_facebook('publication', pub.id)
+                    except Exception as fb_err:
+                        logger.error(f"Failed to queue FB post for {repo_name}: {fb_err}")
 
             if len(repos) < 100:
                 break
             page += 1
 
-        logger.info(f"Publications Sync Complete. Updated: {updated_count}")
+        # Pruning: Delete local publications that are no longer in the organization repos
+        deleted_count = 0
+        if synced_repos:
+            stale_entries = Publication.objects.exclude(repo_name__in=synced_repos)
+            deleted_count = stale_entries.count()
+            stale_entries.delete()
+
+        logger.info(f"Publications Sync Complete. Updated: {updated_count}. Deleted: {deleted_count}")
 
     except Exception as e:
-        logger.error(f"Error syncing publications: {e}")
+        logger.error(f"Critical error in publications sync: {e}")
+
+
+@db_task()
+def post_to_facebook(content_type, object_id):
+    """
+    Unified task to post a Publication or Project to Facebook.
+    Uses Bearer tokens and includes both platform and source URLs.
+    """
+    from django.urls import reverse
+    from publications.models import Publication
+    from projects.models import Project
+    
+    try:
+        if content_type == 'publication':
+            obj = Publication.objects.get(id=object_id)
+            source_url = obj.github_url
+            path = reverse('publications:detail', kwargs={'slug': obj.slug})
+        elif content_type == 'project':
+            obj = Project.objects.get(id=object_id)
+            source_url = obj.github_repo_url or obj.huggingface_url
+            path = reverse('projects:detail', kwargs={'slug': obj.slug})
+        else:
+            return
+
+        # Base site URL - using a fallback for local testing if not in settings
+        site_url = getattr(settings, 'SITE_URL', 'https://kiri.ng').rstrip('/')
+        full_platform_url = f"{site_url}{path}"
+        
+        page_id = os.environ.get('META_PAGE_ID')
+        access_token = os.environ.get('LONG_META_PAGE_TOKEN')
+        
+        if not page_id or not access_token:
+            logger.warning("Meta credentials missing. Skipping FB post.")
+            return
+
+        url = f"https://graph.facebook.com/v20.0/{page_id}/feed"
+        message = (
+            f"🚀 Newly Published: {obj.title}\n\n"
+            f"{obj.description}\n\n"
+            f"🔗 View on Kiri: {full_platform_url}\n"
+            f"📦 Source Code: {source_url}"
+        )
+        
+        headers = {
+            "Authorization": f"Bearer {access_token}"
+        }
+        payload = {"message": message}
+        
+        response = requests.post(url, headers=headers, data=payload, timeout=12)
+        
+        if response.status_code != 200:
+            logger.error(f"Facebook API failed: {response.status_code} - {response.text}")
+            response.raise_for_status()
+        
+        logger.info(f"Successfully posted {content_type} '{obj.title}' to Facebook.")
+        
+    except (Publication.DoesNotExist, Project.DoesNotExist):
+        logger.error(f"{content_type} {object_id} missing for FB post.")
+    except Exception as e:
+        logger.error(f"Facebook task error: {e}")
+

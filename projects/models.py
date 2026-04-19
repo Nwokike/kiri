@@ -1,7 +1,10 @@
+import logging
 from django.db import models
 from django.utils.text import slugify
 from django.core.cache import cache
 from .services import GitHubService
+
+logger = logging.getLogger(__name__)
 
 class Project(models.Model):
     """Project showcase for Kiri Research Labs."""
